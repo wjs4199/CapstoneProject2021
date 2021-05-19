@@ -63,12 +63,15 @@ class _HomePageState extends State<HomePage> {
 
   // Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
+    int _currentIndex = 0;
+
     return BottomNavigationBar(
       selectedItemColor: Colors.cyan,
       type: BottomNavigationBarType.fixed,
       // Tap actions for each tab
+      // setState로 _currentIndex값 변경
       onTap: (index) => {},
-      currentIndex: 0,
+      currentIndex: _currentIndex,
       items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
