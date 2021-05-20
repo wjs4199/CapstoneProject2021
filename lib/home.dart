@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'model/post.dart';
 import 'main.dart';
 
 class HomePage extends StatefulWidget {
@@ -10,6 +14,90 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  List<ListView> _buildListView(BuildContext context, List<Post> posts) {
+    if (posts == null || posts.isEmpty) {
+      return const <ListView>[];
+    }
+
+    final ThemeData theme = Theme.of(context);
+    final NumberFormat formatter = NumberFormat.simpleCurrency(
+        locale: Localizations.localeOf(context).toString());
+
+    // Set name for Firebase Storage
+    firebase_storage.FirebaseStorage storage =
+        firebase_storage.FirebaseStorage.instance;
+
+    // Download image url of each product based on id
+    Future<String> downloadURL(String id) async {
+      await Future.delayed(Duration(seconds: 2));
+      try {
+        return await storage
+            .ref()
+            .child('images')
+            .child('$id.png')
+            .getDownloadURL();
+      } on Exception {
+        return null;
+      }
+    }
+
+    return posts.map((post) {
+      return ListView(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              AspectRatio(
+               aspectRatio: 18 / 11,
+               child: FutureBuilder(
+                 future: downloadURL(post.id),
+                 builder: (context, snapshot) {
+                   if (snapshot.connectionState == ConnectionState.waiting) {
+                     return Center(child: CircularProgressIndicator());
+                   } else {
+                     if (snapshot.hasData) {
+                       return Image.network(snapshot.data.toString());
+                     } else if (snapshot.hasData == false) {
+                       return Image.asset('assets/logo.png');
+                     } else {
+                       return Center(child: CircularProgressIndicator());
+                     }
+                   }
+                 },
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          post.title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                        ),
+                        SizedBox(height: 5.0),
+                        Text(
+                          post.content,
+                          maxLines:1,
+                        ),
+                      ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    }).toList();
+  }
+
   int _selectedIndex = 0;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -23,20 +111,27 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: buildNavBar(context),
       body: Consumer<ApplicationState>(
         builder: (context, appState, _) => SafeArea(
-          child: Center(
-            child: Column(
+          child: Column(
+            /**child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               // 로그인한 유저 정보 불러오기 (FirebaseAuth 사용)
               children: [
                 Text('Name: ' + FirebaseAuth.instance.currentUser.displayName),
                 Text('Email: ' + FirebaseAuth.instance.currentUser.email),
                 Text('UID: ' + FirebaseAuth.instance.currentUser.uid),
+              ],*/
+              children: [
+                Expanded(
+                  child: ListView(
+                    //children: _buildListView(context, appState.posts),
+                  )
+                ),
               ],
             ),
           ),
         ),
-      ),
-    );
+      );
+    //);
   }
 
   // Builder Widget for AppBar
