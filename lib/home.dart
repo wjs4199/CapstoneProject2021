@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'main.dart';
 import 'product.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -12,9 +13,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Card> _buildGridCards(BuildContext context, List<Product> products) {
+  // Post -> Product, posts -> products로 바꿨어요!
+  List<ListView> _buildListView(BuildContext context, List<Product> products) {
     if (products == null || products.isEmpty) {
-      return const <Card>[];
+      return const <ListView>[];
     }
 
     final ThemeData theme = Theme.of(context);
@@ -26,100 +28,81 @@ class _HomePageState extends State<HomePage> {
         firebase_storage.FirebaseStorage.instance;
 
     // Download image url of each product based on id
-    //이미지에 url이 있나봄
     Future<String> downloadURL(String id) async {
       await Future.delayed(Duration(seconds: 2));
       try {
         return await storage
-            .ref() //스토리지 참조
+            .ref()
             .child('images')
-            .child('$id.png') //차일드로 가져오고
-            .getDownloadURL(); //url 다운로드
+            .child('$id.png')
+            .getDownloadURL();
       } on Exception {
         return null;
       }
     }
 
     return products.map((product) {
-      return Card(
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                AspectRatio(
-                  aspectRatio: 18 / 11,
-                  // asynchronously load images
-                  child: FutureBuilder(
-                    future: downloadURL(product.id), //먼저 이미지를 다운받은 후에 띄워야하기 떄문에
-                    //future을 사용하는 듯
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
+      return ListView(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              AspectRatio(
+                aspectRatio: 18 / 11,
+                child: FutureBuilder(
+                  // Product 요소에 맞게 바꿨어요
+                  future: downloadURL(product.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else {
+                      if (snapshot.hasData) {
+                        return Image.network(snapshot.data.toString());
+                      } else if (snapshot.hasData == false) {
+                        return Image.asset('assets/logo.png');
                       } else {
-                        if (snapshot.hasData) {
-                          return Image.network(snapshot.data.toString());
-                        } else if (snapshot.hasData == false) {
-                          return Image.asset('assets/logo.png');
-                        } else {
-                          return Center(child: CircularProgressIndicator());
-                          //원형방식으로 로딩중을 표시하고 싶을 떄 쓰는 위젯
-                        }
+                        return Center(child: CircularProgressIndicator());
                       }
-                    },
-                  ),
+                    }
+                  },
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          product.name,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                          maxLines: 1,
-                        ),
-                        SizedBox(height: 8.0),
-                        Text(
-                          formatter.format(product.price),
-                          style: theme.textTheme.subtitle2,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: TextButton(
-                child: Text('more'),
-                onPressed: () {
-                  //Navigator.pushNamed(
-                  //context,
-                  /* – When navigating to the detail page, use the doc id
-                    * value for subpage index */
-                  //'/detail/' + product.id,
-                  //);
-                },
               ),
-            ),
-          ],
-        ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        // Product 요소에 맞게 바꿨어요
+                        product.name,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                      ),
+                      SizedBox(height: 5.0),
+                      Text(
+                        // Product 요소에 맞게 바꿨어요
+                        product.description,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       );
     }).toList();
   }
 
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
-
   int _selectedIndex = 0;
+
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -130,9 +113,11 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: buildNavBar(context),
       body: Consumer<ApplicationState>(
         builder: (context, appState, _) => SafeArea(
-          child: Center(
-            child: Column(
+          child: Column(
+            /**child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+
+
               children: [
                 Expanded(
                   child: GridView.count(
@@ -147,18 +132,18 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () {
                       Navigator.pushNamed(context, '/add');
                     },
-                    child: Icon(Icons.add)),
-
-                // 로그인한 유저 정보 불러오기 (FirebaseAuth 사용)
-                /*Text('Name: ' + FirebaseAuth.instance.currentUser.displayName),
-                Text('Email: ' + FirebaseAuth.instance.currentUser.email),
-                Text('UID: ' + FirebaseAuth.instance.currentUser.uid),*/
-              ],
-            ),
+                    child: Icon(Icons.add)),*/
+            children: [
+              Expanded(
+                  child: ListView(
+                      //children: _buildListView(context, appState.posts),
+                      )),
+            ],
           ),
         ),
       ),
     );
+    //);
   }
 
   // Builder Widget for AppBar
@@ -203,10 +188,8 @@ class _HomePageState extends State<HomePage> {
       type: BottomNavigationBarType.fixed,
       // Tap actions for each tab
       // setState로 _currentIndex값 변경
-
       onTap: _onItemTapped,
       currentIndex: _selectedIndex,
-
       items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
@@ -260,7 +243,6 @@ class _HomePageState extends State<HomePage> {
             ),
             onTap: () {
               // - Each menu should be navigated by Named Routes
-
               Navigator.pushNamed(context, '/home');
             },
           ),
