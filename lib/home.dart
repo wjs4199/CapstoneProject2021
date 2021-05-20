@@ -10,10 +10,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+<<<<<<< HEAD
   int _selectedIndex = 0;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
+=======
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+>>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,11 +45,16 @@ class _HomePageState extends State<HomePage> {
 
   // Builder Widget for AppBar
   AppBar buildAppBar(BuildContext context) {
+<<<<<<< HEAD
 
     return AppBar(
       title: Center(
         child: Text('Give'),
       ),
+=======
+    return AppBar(
+      title: Text('Give'),
+>>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
       backgroundColor: Colors.cyan,
       leading: IconButton(
         icon: Icon(
@@ -69,20 +78,29 @@ class _HomePageState extends State<HomePage> {
 
   // Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
+<<<<<<< HEAD
 
     void _onItemTapped(int index) {
       setState(() {
         _selectedIndex = index;
       });
     }
+=======
+    int _currentIndex = 0;
+>>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
 
     return BottomNavigationBar(
       selectedItemColor: Colors.cyan,
       type: BottomNavigationBarType.fixed,
       // Tap actions for each tab
       // setState로 _currentIndex값 변경
+<<<<<<< HEAD
       onTap: _onItemTapped,
       currentIndex: _selectedIndex,
+=======
+      onTap: (index) => {},
+      currentIndex: _currentIndex,
+>>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
       items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
@@ -136,7 +154,10 @@ class _HomePageState extends State<HomePage> {
             ),
             onTap: () {
               // - Each menu should be navigated by Named Routes
+<<<<<<< HEAD
               Navigator.pushNamed(context,'/home');
+=======
+>>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
             },
           ),
           ListTile(
@@ -144,17 +165,25 @@ class _HomePageState extends State<HomePage> {
             leading: Icon(
               Icons.search,
             ),
+<<<<<<< HEAD
             onTap: () {
             },
+=======
+            onTap: () {},
+>>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
           ),
           ListTile(
             title: Text('My Page'),
             leading: Icon(
               Icons.person,
             ),
+<<<<<<< HEAD
             onTap: () {
               Navigator.pushNamed(context,'/mypage');
             },
+=======
+            onTap: () {},
+>>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
           ),
           ListTile(
             title: Text('Settings'),
