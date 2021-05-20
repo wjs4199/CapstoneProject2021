@@ -7,11 +7,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
     version: "2.6.1"
-=======
-    version: "2.5.0"
->>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
   boolean_selector:
     dependency: transitive
     description:
@@ -125,11 +121,7 @@ packages:
     source: hosted
     version: "1.1.3"
   firebase_core:
-<<<<<<< HEAD
-    dependency: "direct main"
-=======
     dependency: transitive
->>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
     description:
       name: firebase_core
       url: "https://pub.dartlang.org"
@@ -385,11 +377,7 @@ packages:
       name: source_span
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
     version: "1.8.1"
-=======
-    version: "1.8.0"
->>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
   stack_trace:
     dependency: transitive
     description:
@@ -424,11 +412,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
     version: "0.3.0"
-=======
-    version: "0.2.19"
->>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
   typed_data:
     dependency: transitive
     description:
@@ -449,11 +433,7 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
-    version: "2.1.0"
-=======
-    version: "2.0.5"
->>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
+    version: "2.1.1"
   xdg_directories:
     dependency: transitive
     description:
@@ -462,9 +442,5 @@ packages:
     source: hosted
     version: "0.2.0"
 sdks:
-<<<<<<< HEAD
   dart: ">=2.13.0 <3.0.0"
-=======
-  dart: ">=2.12.0 <3.0.0"
->>>>>>> 64486a4df0fb9ad6428d8f6d2488fcf60ac660ef
   flutter: ">=1.20.0"
