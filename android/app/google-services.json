@@ -14,8 +14,12 @@
       },
       "oauth_client": [
         {
-          "client_id": "704436127190-oa1pieb5c0b03j6grr21mfd21790cvis.apps.googleusercontent.com",
-          "client_type": 3
+          "client_id": "704436127190-j19cqkirueje3sfp7e1dq6km0ef9h3gn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.giveandtake",
+            "certificate_hash": "e69657af2aa53652deb7ae04e22162d34b334407"
+          }
         }
       ],
       "api_key": [

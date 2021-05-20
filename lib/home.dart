@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
-
-import 'model/post.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'main.dart';
+import 'product.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class HomePage extends StatefulWidget {
   @override
@@ -14,9 +13,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
-  List<ListView> _buildListView(BuildContext context, List<Post> posts) {
-    if (posts == null || posts.isEmpty) {
+  // Post -> Product, posts -> products로 바꿨어요!
+  List<ListView> _buildListView(BuildContext context, List<Product> products) {
+    if (products == null || products.isEmpty) {
       return const <ListView>[];
     }
 
@@ -42,29 +41,30 @@ class _HomePageState extends State<HomePage> {
       }
     }
 
-    return posts.map((post) {
+    return products.map((product) {
       return ListView(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               AspectRatio(
-               aspectRatio: 18 / 11,
-               child: FutureBuilder(
-                 future: downloadURL(post.id),
-                 builder: (context, snapshot) {
-                   if (snapshot.connectionState == ConnectionState.waiting) {
-                     return Center(child: CircularProgressIndicator());
-                   } else {
-                     if (snapshot.hasData) {
-                       return Image.network(snapshot.data.toString());
-                     } else if (snapshot.hasData == false) {
-                       return Image.asset('assets/logo.png');
-                     } else {
-                       return Center(child: CircularProgressIndicator());
-                     }
-                   }
-                 },
+                aspectRatio: 18 / 11,
+                child: FutureBuilder(
+                  // Product 요소에 맞게 바꿨어요
+                  future: downloadURL(product.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else {
+                      if (snapshot.hasData) {
+                        return Image.network(snapshot.data.toString());
+                      } else if (snapshot.hasData == false) {
+                        return Image.asset('assets/logo.png');
+                      } else {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                    }
+                  },
                 ),
               ),
               Expanded(
@@ -73,21 +73,23 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          post.title,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
+                    children: <Widget>[
+                      Text(
+                        // Product 요소에 맞게 바꿨어요
+                        product.name,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
                         ),
-                        SizedBox(height: 5.0),
-                        Text(
-                          post.content,
-                          maxLines:1,
-                        ),
-                      ],
+                        maxLines: 1,
+                      ),
+                      SizedBox(height: 5.0),
+                      Text(
+                        // Product 요소에 맞게 바꿨어요
+                        product.description,
+                        maxLines: 1,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -114,29 +116,38 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             /**child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              // 로그인한 유저 정보 불러오기 (FirebaseAuth 사용)
-              children: [
-                Text('Name: ' + FirebaseAuth.instance.currentUser.displayName),
-                Text('Email: ' + FirebaseAuth.instance.currentUser.email),
-                Text('UID: ' + FirebaseAuth.instance.currentUser.uid),
-              ],*/
+
+
               children: [
                 Expanded(
-                  child: ListView(
-                    //children: _buildListView(context, appState.posts),
-                  )
+                  child: GridView.count(
+                    crossAxisCount: 2,
+                    padding: EdgeInsets.all(16.0),
+                    childAspectRatio: 8.0 / 9.0,
+                    children: _buildGridCards(context, appState.giveProducts),
+                  ),
                 ),
-              ],
-            ),
+
+                FloatingActionButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/add');
+                    },
+                    child: Icon(Icons.add)),*/
+            children: [
+              Expanded(
+                  child: ListView(
+                      //children: _buildListView(context, appState.posts),
+                      )),
+            ],
           ),
         ),
-      );
+      ),
+    );
     //);
   }
 
   // Builder Widget for AppBar
   AppBar buildAppBar(BuildContext context) {
-
     return AppBar(
       title: Text('Give'),
       backgroundColor: Colors.cyan,
@@ -154,7 +165,9 @@ class _HomePageState extends State<HomePage> {
             Icons.search,
             semanticLabel: 'search',
           ),
-          onPressed: () {},
+          onPressed: () {
+            //
+          },
         ),
       ],
     );
@@ -162,12 +175,12 @@ class _HomePageState extends State<HomePage> {
 
   // Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
-
     void _onItemTapped(int index) {
       setState(() {
         _selectedIndex = index;
       });
     }
+
     int _currentIndex = 0;
 
     return BottomNavigationBar(
@@ -230,7 +243,7 @@ class _HomePageState extends State<HomePage> {
             ),
             onTap: () {
               // - Each menu should be navigated by Named Routes
-              Navigator.pushNamed(context,'/home');
+              Navigator.pushNamed(context, '/home');
             },
           ),
           ListTile(
@@ -238,8 +251,7 @@ class _HomePageState extends State<HomePage> {
             leading: Icon(
               Icons.search,
             ),
-            onTap: () {
-            },
+            onTap: () {},
           ),
           ListTile(
             title: Text('My Page'),
@@ -247,7 +259,7 @@ class _HomePageState extends State<HomePage> {
               Icons.person,
             ),
             onTap: () {
-              Navigator.pushNamed(context,'/mypage');
+              Navigator.pushNamed(context, '/mypage');
             },
           ),
           ListTile(
