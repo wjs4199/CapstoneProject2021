@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'main.dart';
 import 'product.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'add.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,29 +13,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Post -> Product, posts -> products로 바꿨어요!
   List<ListView> _buildListView(BuildContext context, List<Product> products) {
     if (products == null || products.isEmpty) {
       return const <ListView>[];
     }
 
     final ThemeData theme = Theme.of(context);
-    final NumberFormat formatter = NumberFormat.simpleCurrency(
-        locale: Localizations.localeOf(context).toString());
+    //final NumberFormat formatter = NumberFormat.simpleCurrency(
+    //locale: Localizations.localeOf(context).toString());
 
     // Set name for Firebase Storage
     firebase_storage.FirebaseStorage storage =
         firebase_storage.FirebaseStorage.instance;
 
     // Download image url of each product based on id
+    //이미지에 url이 있나봄
     Future<String> downloadURL(String id) async {
       await Future.delayed(Duration(seconds: 2));
       try {
         return await storage
-            .ref()
+            .ref() //스토리지 참조
             .child('images')
-            .child('$id.png')
-            .getDownloadURL();
+            .child('$id.png') //차일드로 가져오고
+            .getDownloadURL(); //url 다운로드
       } on Exception {
         return null;
       }
@@ -43,57 +43,50 @@ class _HomePageState extends State<HomePage> {
 
     return products.map((product) {
       return ListView(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              AspectRatio(
-                aspectRatio: 18 / 11,
-                child: FutureBuilder(
-                  // Product 요소에 맞게 바꿨어요
-                  future: downloadURL(product.id),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else {
-                      if (snapshot.hasData) {
-                        return Image.network(snapshot.data.toString());
-                      } else if (snapshot.hasData == false) {
-                        return Image.asset('assets/logo.png');
-                      } else {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                    }
-                  },
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        // Product 요소에 맞게 바꿨어요
-                        product.name,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+          InkWell(
+            onTap: () {
+              print("디테일 페이지로 넘어감!");
+              Navigator.pushNamed(
+                context,
+                /* – When navigating to the detail page, use the doc id
+                    * value for subpage index */
+                '/detail/' + product.id,
+              );
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          // Product 요소에 맞게 바꿨어요
+                          product.title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
                         ),
-                        maxLines: 1,
-                      ),
-                      SizedBox(height: 5.0),
-                      Text(
-                        // Product 요소에 맞게 바꿨어요
-                        product.description,
-                        maxLines: 1,
-                      ),
-                    ],
+                        SizedBox(height: 5.0),
+                        Text(
+                          // Product 요소에 맞게 바꿨어요
+                          product.content,
+                          maxLines: 1,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       );
@@ -101,7 +94,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   int _selectedIndex = 0;
-
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -114,34 +106,36 @@ class _HomePageState extends State<HomePage> {
       body: Consumer<ApplicationState>(
         builder: (context, appState, _) => SafeArea(
           child: Column(
-            /**child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-
-
-              children: [
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    padding: EdgeInsets.all(16.0),
-                    childAspectRatio: 8.0 / 9.0,
-                    children: _buildGridCards(context, appState.giveProducts),
-                  ),
-                ),
-
-                FloatingActionButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/add');
-                    },
-                    child: Icon(Icons.add)),*/
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Expanded(
-                  child: ListView(
-                      //children: _buildListView(context, appState.posts),
-                      )),
+                child: ListView(
+                  children: _buildListView(context, appState.giveProducts),
+                ),
+              ),
+              /*Expanded(
+                child: GridView.count(
+                  crossAxisCount: 1,
+                  padding: EdgeInsets.all(16.0),
+                  childAspectRatio: 8.0 / 9.0,
+                  children: _buildGridCards(context, appState.giveProducts),
+                ),
+              ),*/
+              /*FloatingActionButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/giveadd');
+                  },
+                  child: Icon(Icons.add)),*/
             ],
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/giveadd');
+          },
+          child: Icon(Icons.add)),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
     //);
   }
@@ -166,7 +160,7 @@ class _HomePageState extends State<HomePage> {
             semanticLabel: 'search',
           ),
           onPressed: () {
-            //
+            Navigator.pushNamed(context, '/take');
           },
         ),
       ],
