@@ -123,53 +123,55 @@ class _DetailPageState extends State<DetailPage> {
         title: Text('Detail'),
         centerTitle: true,
         actions: <Widget>[
-          IconButton(
-              icon: Icon(
-                Icons.create,
-                semanticLabel: 'edit',
-              ),
-              onPressed:
-                  () {} /*(FirebaseAuth.instance.currentUser.uid == product.uid)
-                  ? () => Navigator.pushNamed(
-                        context,
-                        '/edit/' + productId,
-                      )
-                  : null*/
-              ),
-          IconButton(
-              icon: Icon(
-                Icons.delete,
-                semanticLabel: 'delete',
-              ),
-              onPressed: (FirebaseAuth.instance.currentUser.uid == product.uid)
-                  ? () => showDialog(
-                      context: context,
-                      builder: (BuildContext context) => CupertinoAlertDialog(
-                            title: Text("Deleting Item"),
-                            content: Text(
-                                "Are you sure that you want to delete this item?"),
-                            actions: <Widget>[
-                              CupertinoDialogAction(
-                                isDefaultAction: true,
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: Text("No"),
-                              ),
-                              CupertinoDialogAction(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  deleteProduct()
-                                      .then((value) => appState.init())
-                                      .catchError((error) => null)
-                                      .whenComplete(
-                                          () => Navigator.pop(context));
-                                },
-                                child: Text("Yes"),
-                              ),
-                            ],
-                          ))
-                  : null),
+          if (FirebaseAuth.instance.currentUser.uid == product.uid)
+            IconButton(
+                icon: Icon(
+                  Icons.create,
+                  semanticLabel: 'edit',
+                ),
+                onPressed:
+                    (FirebaseAuth.instance.currentUser.uid == product.uid)
+                        ? () => Navigator.pushNamed(
+                              context,
+                              '/edit/' + productId + '/' + detailGiveOrTake,
+                            )
+                        : null),
+          if (FirebaseAuth.instance.currentUser.uid == product.uid)
+            IconButton(
+                icon: Icon(
+                  Icons.delete,
+                  semanticLabel: 'delete',
+                ),
+                onPressed: (FirebaseAuth.instance.currentUser.uid ==
+                        product.uid)
+                    ? () => showDialog(
+                        context: context,
+                        builder: (BuildContext context) => CupertinoAlertDialog(
+                              title: Text("Deleting Item"),
+                              content: Text(
+                                  "Are you sure that you want to delete this item?"),
+                              actions: <Widget>[
+                                CupertinoDialogAction(
+                                  isDefaultAction: true,
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text("No"),
+                                ),
+                                CupertinoDialogAction(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    deleteProduct()
+                                        .then((value) => appState.init())
+                                        .catchError((error) => null)
+                                        .whenComplete(
+                                            () => Navigator.pop(context));
+                                  },
+                                  child: Text("Yes"),
+                                ),
+                              ],
+                            ))
+                    : null)
         ],
       ),
       body: SafeArea(
@@ -285,32 +287,6 @@ class _DetailPageState extends State<DetailPage> {
                         style: TextStyle(
                           fontSize: 16,
                           color: Color(0xff3792cb),
-                        ),
-                      ),
-                      SizedBox(height: 96.0),
-                      Text(
-                        'creator: ' + product.uid,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      Text(
-                        DateFormat('yyyy.MM.dd HH:mm:ss')
-                                .format(product.created.toDate()) +
-                            ' Created',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      Text(
-                        DateFormat('yyyy.MM.dd HH:mm:ss')
-                                .format(product.modified.toDate()) +
-                            ' Modified',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
                         ),
                       ),
                     ],
