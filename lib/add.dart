@@ -10,12 +10,12 @@ import 'dart:io';
 
 import 'main.dart';
 
-class AddPage extends StatefulWidget {
+class giveAddPage extends StatefulWidget {
   @override
-  _AddPageState createState() => _AddPageState();
+  _giveAddPageState createState() => _giveAddPageState();
 }
 
-class _AddPageState extends State<AddPage> {
+class _giveAddPageState extends State<giveAddPage> {
   // Image picker
   File _image;
   final picker = ImagePicker();
@@ -33,13 +33,13 @@ class _AddPageState extends State<AddPage> {
   }
 
   // Input form related
-  final _formKey = GlobalKey<FormState>(debugLabel: '_AddPageState');
-  final _nameController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _descController = TextEditingController();
+  final _formKey = GlobalKey<FormState>(debugLabel: '_giveAddPageState');
+  final _titleController = TextEditingController();
+  final _contentController = TextEditingController();
+  final _categoryController = TextEditingController();
 
   // Firestore
-  CollectionReference product =
+  CollectionReference giveProduct =
       FirebaseFirestore.instance.collection('giveProducts');
 
   // Storage
@@ -47,11 +47,11 @@ class _AddPageState extends State<AddPage> {
       firebase_storage.FirebaseStorage.instance;
 
   // Add product in Firestore
-  Future<void> addProduct(String name, int price, String description) {
-    return product.add({
-      'name': name,
-      'price': price,
-      'description': description,
+  Future<void> addGiveProduct(String title, String content, String category) {
+    return giveProduct.add({
+      'title': title,
+      'content': content,
+      'category': category,
       'uid': FirebaseAuth.instance.currentUser.uid,
       'created': FieldValue.serverTimestamp(),
       'modified': FieldValue.serverTimestamp(),
@@ -93,10 +93,10 @@ class _AddPageState extends State<AddPage> {
               ),
               onPressed: () {
                 if (_formKey.currentState.validate()) {
-                  addProduct(
-                    _nameController.text,
-                    int.tryParse(_priceController.text),
-                    _descController.text,
+                  addGiveProduct(
+                    _titleController.text,
+                    _contentController.text,
+                    _categoryController.text,
                   );
                   Navigator.pop(context);
                 }
@@ -154,9 +154,9 @@ class _AddPageState extends State<AddPage> {
                               children: [
                                 Expanded(
                                   child: TextFormField(
-                                    controller: _nameController,
+                                    controller: _categoryController,
                                     decoration: const InputDecoration(
-                                      hintText: 'Product Name',
+                                      hintText: 'Category',
                                     ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
@@ -172,20 +172,13 @@ class _AddPageState extends State<AddPage> {
                               children: [
                                 Expanded(
                                   child: TextFormField(
-                                    controller: _priceController,
-                                    keyboardType: TextInputType.number,
-                                    // inputFormatters: [
-                                    //   FilteringTextInputFormatter.digitsOnly
-                                    // ],
+                                    controller: _titleController,
                                     decoration: const InputDecoration(
-                                      hintText: 'Price',
+                                      hintText: 'Title',
                                     ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return 'Enter your message to continue';
-                                      } else if (!(int.tryParse(value)
-                                          is int)) {
-                                        return 'Enter integer only';
                                       }
                                       return null;
                                     },
@@ -197,9 +190,9 @@ class _AddPageState extends State<AddPage> {
                               children: [
                                 Expanded(
                                   child: TextFormField(
-                                    controller: _descController,
+                                    controller: _contentController,
                                     decoration: const InputDecoration(
-                                      hintText: 'Description',
+                                      hintText: 'Content',
                                     ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
@@ -214,54 +207,224 @@ class _AddPageState extends State<AddPage> {
                           ],
                         ),
                       ),
-                      // Form(
-                      //   key: _priceKey,
-                      //   child: Row(
-                      //     children: [
-                      //       Expanded(
-                      //         child: TextFormField(
-                      //           controller: _priceController,
-                      //           keyboardType: TextInputType.number,
-                      //           // inputFormatters: [
-                      //           //   FilteringTextInputFormatter.digitsOnly
-                      //           // ],
-                      //           decoration: const InputDecoration(
-                      //             hintText: 'Price',
-                      //           ),
-                      //           validator: (value) {
-                      //             if (value == null || value.isEmpty) {
-                      //               return 'Enter your message to continue';
-                      //             } else if (!(int.tryParse(value) is int)) {
-                      //               return 'Enter integer only';
-                      //             }
-                      //             return null;
-                      //           },
-                      //         ),
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
-                      // Form(
-                      //   key: _descKey,
-                      //   child: Row(
-                      //     children: [
-                      //       Expanded(
-                      //         child: TextFormField(
-                      //           controller: _descController,
-                      //           decoration: const InputDecoration(
-                      //             hintText: 'Description',
-                      //           ),
-                      //           validator: (value) {
-                      //             if (value == null || value.isEmpty) {
-                      //               return 'Enter your message to continue';
-                      //             }
-                      //             return null;
-                      //           },
-                      //         ),
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Container(),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class takeAddPage extends StatefulWidget {
+  @override
+  _takeAddPageState createState() => _takeAddPageState();
+}
+
+class _takeAddPageState extends State<takeAddPage> {
+  // Image picker
+  File _image;
+  final picker = ImagePicker();
+
+  Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+
+  // Input form related
+  final _formKey = GlobalKey<FormState>(debugLabel: '_takeAddPageState');
+  final _titleController = TextEditingController();
+  final _contentController = TextEditingController();
+  final _categoryController = TextEditingController();
+
+  // Firestore
+  CollectionReference takeProduct =
+      FirebaseFirestore.instance.collection('takeProducts');
+
+  // Storage
+  firebase_storage.FirebaseStorage storage =
+      firebase_storage.FirebaseStorage.instance;
+
+  // Add product in Firestore
+  Future<void> addTakeProduct(String title, String content, String category) {
+    return takeProduct.add({
+      'title': title,
+      'content': content,
+      'category': category,
+      'uid': FirebaseAuth.instance.currentUser.uid,
+      'created': FieldValue.serverTimestamp(),
+      'modified': FieldValue.serverTimestamp(),
+    }).then((value) {
+      if (_image != null) uploadFile(_image, value.id);
+    }).catchError((error) => print("Error: $error"));
+  }
+
+  // Upload photo to storage
+  Future<void> uploadFile(File photo, String id) async {
+    try {
+      await storage.ref('images/' + id + '.png').putFile(photo);
+    } on Exception {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.grey,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            semanticLabel: 'back',
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text('Add'),
+        centerTitle: true,
+        actions: <Widget>[
+          IconButton(
+              icon: Icon(
+                Icons.save,
+                semanticLabel: 'save',
+              ),
+              onPressed: () {
+                if (_formKey.currentState.validate()) {
+                  if (_titleController.text != null &&
+                      _contentController.text != null &&
+                      _categoryController.text != null) {
+                    addTakeProduct(
+                      _titleController.text,
+                      _contentController.text,
+                      _categoryController.text,
+                    );
+                  }
+                  Navigator.pop(context);
+                }
+              }),
+        ],
+      ),
+      body: SafeArea(
+        child: ListView(
+          children: [
+            Container(
+              width: MediaQuery.of(context).size.width,
+              // height: MediaQuery.of(context).size.height / 2,
+              child: _image == null
+                  ? Image.asset(
+                      'assets/logo.png',
+                    )
+                  : Image.file(
+                      _image,
+                      fit: BoxFit.fitWidth,
+                    ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  flex: 9,
+                  child: Container(),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.photo_camera,
+                      semanticLabel: 'pick_photo',
+                    ),
+                    onPressed: getImage,
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Container(),
+                ),
+                Expanded(
+                  flex: 8,
+                  child: Column(
+                    children: [
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            //카테고리 부분 나중에 dropdown selector로 만들면 좋을 듯
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _categoryController,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Category',
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Enter your message to continue';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _titleController,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Title',
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Enter your message to continue';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _contentController,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Content',
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Enter your message to continue';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

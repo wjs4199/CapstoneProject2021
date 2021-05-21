@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'main.dart';
+import 'product.dart';
+import 'add.dart';
 
 class TakePage extends StatefulWidget {
   @override
@@ -7,9 +13,87 @@ class TakePage extends StatefulWidget {
 }
 
 class TakePageState extends State<TakePage> {
+  List<ListView> _buildListView(BuildContext context, List<Product> products) {
+    if (products == null || products.isEmpty) {
+      return const <ListView>[];
+    }
+
+    final ThemeData theme = Theme.of(context);
+    //final NumberFormat formatter = NumberFormat.simpleCurrency(
+    //locale: Localizations.localeOf(context).toString());
+
+    // Set name for Firebase Storage
+    firebase_storage.FirebaseStorage storage =
+        firebase_storage.FirebaseStorage.instance;
+
+    // Download image url of each product based on id
+    //이미지에 url이 있나봄
+    Future<String> downloadURL(String id) async {
+      await Future.delayed(Duration(seconds: 2));
+      try {
+        return await storage
+            .ref() //스토리지 참조
+            .child('images')
+            .child('$id.png') //차일드로 가져오고
+            .getDownloadURL(); //url 다운로드
+      } on Exception {
+        return null;
+      }
+    }
+
+    return products.map((product) {
+      return ListView(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        children: [
+          InkWell(
+            onTap: () {
+              print("디테일 페이지로 넘어감!");
+              Navigator.pushNamed(
+                context,
+                /* – When navigating to the detail page, use the doc id
+                    * value for subpage index */
+                '/detail/' + product.id,
+              );
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          // Product 요소에 맞게 바꿨어요
+                          product.title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                        ),
+                        SizedBox(height: 5.0),
+                        Text(
+                          // Product 요소에 맞게 바꿨어요
+                          product.content,
+                          maxLines: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }).toList();
+  }
 
   int _selectedIndex = 0;
-
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -19,7 +103,28 @@ class TakePageState extends State<TakePage> {
       appBar: buildAppBar(context),
       drawer: buildDrawer(context),
       bottomNavigationBar: buildNavBar(context),
+      body: Consumer<ApplicationState>(
+        builder: (context, appState, _) => SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: ListView(
+                  children: _buildListView(context, appState.takeProducts),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/takeadd');
+          },
+          child: Icon(Icons.add)),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
+    //);
   }
 
   // Builder Widget for AppBar
@@ -43,7 +148,10 @@ class TakePageState extends State<TakePage> {
             Icons.search,
             semanticLabel: 'search',
           ),
-          onPressed: () {},
+          onPressed: () {
+            //AddPage().giveOrTakeChange('give');
+            //Navigator.pushNamed(context, '/add');
+          },
         ),
       ],
     );
@@ -51,7 +159,6 @@ class TakePageState extends State<TakePage> {
 
   // Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
-
     void _onItemTapped(int index) {
       setState(() {
         _selectedIndex = index;
@@ -118,7 +225,7 @@ class TakePageState extends State<TakePage> {
             ),
             onTap: () {
               // - Each menu should be navigated by Named Routes
-              Navigator.pushNamed(context,'/home');
+              Navigator.pushNamed(context, '/home');
             },
           ),
           ListTile(
@@ -126,9 +233,7 @@ class TakePageState extends State<TakePage> {
             leading: Icon(
               Icons.search,
             ),
-            onTap: () {
-
-            },
+            onTap: () {},
           ),
           ListTile(
             title: Text('My Page'),
@@ -136,7 +241,7 @@ class TakePageState extends State<TakePage> {
               Icons.person,
             ),
             onTap: () {
-              Navigator.pushNamed(context,'/mypage');
+              Navigator.pushNamed(context, '/mypage');
             },
           ),
           ListTile(

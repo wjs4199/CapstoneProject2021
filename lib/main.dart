@@ -43,19 +43,19 @@ class Application extends StatelessWidget {
               '/take': (context) => TakePage(),
               '/chat': (context) => ChatPage(),
               '/mypage': (context) => ProfilePage(),
-              '/add': (context) => AddPage(),
+              '/giveadd': (context) => giveAddPage(),
+              '/takeadd': (context) => takeAddPage(),
             },
 
             // 동적 경로할당 위해 추후 사용
-            // onGenerateRoute: (RouteSettings settings) {
-            //   final List<String> pathElements = settings.name.split('/');
-            //   if (pathElements[1] == 'detail') {
-            //     return MaterialPageRoute(
-            //       builder: (_) => DetailPage(itemId: pathElements[2]),
-
-            //   }
-            //   return null;
-            // },
+            /*onGenerateRoute: (RouteSettings settings) {
+               final List<String> pathElements = settings.name.split('/');
+               if (pathElements[1] == 'detail') {
+                 return MaterialPageRoute(
+                   builder: (_) => DetailPage(itemId: pathElements[2]),
+               }
+               return null;
+             },*/
           );
         } else {
           return CircularProgressIndicator();
@@ -66,17 +66,15 @@ class Application extends StatelessWidget {
 }
 
 class ApplicationState extends ChangeNotifier {
-  List<Product> _giveProducts = [];
-
   ApplicationState() {
     init();
   }
 
-  Future<void> init() async {
-    //await Firebase.initializeApp();
-    //예슬이가 추가한 부분 오류떠서 고친 듯!
-    //if (Firebase.initializeApp() == null) CircularProgressIndicator();
+  List<Product> _giveProducts = [];
+  List<Product> _takeProducts = [];
 
+  //collection 'giveProducts' 파이어베이스에서 불러오기
+  Future<void> init() async {
     // FirebaseFirestore.instance
     FirebaseFirestore.instance
         .collection('giveProducts')
@@ -85,14 +83,48 @@ class ApplicationState extends ChangeNotifier {
         .listen((snapshot) {
       _giveProducts = [];
       snapshot.docs.forEach((document) {
+        //A non null string must be provided to a text widget
+        //밑에는 위의 오류 때문에 넣은 부분
+        String content = document.data()['content'];
+        if (content == null) {
+          content = "글 읽기 실패";
+        }
+
         _giveProducts.add(Product(
           id: document.id,
-          name: document.data()['name'],
-          price: document.data()['price'],
-          description: document.data()['description'],
+          title: document.data()['title'],
+          content: content,
+          category: document.data()['category'],
           created: document.data()['created'],
           modified: document.data()['modified'],
           uid: document.data()['uid'],
+          //like: document.data()['like'],
+          //mark: document.data()['mark'],
+          //comments: document.data()['comments'],
+        ));
+      });
+      notifyListeners();
+    });
+
+    //collection 'takeProducts' 파이어베이스에서 불러오기
+    FirebaseFirestore.instance
+        .collection('takeProducts')
+        //.orderBy('price', descending: isDesc)
+        .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
+        .listen((snapshot) {
+      _takeProducts = [];
+      snapshot.docs.forEach((document) {
+        _takeProducts.add(Product(
+          id: document.id,
+          title: document.data()['title'],
+          content: document.data()['content'],
+          category: document.data()['category'],
+          created: document.data()['created'],
+          modified: document.data()['modified'],
+          uid: document.data()['uid'],
+          like: document.data()['like'],
+          mark: document.data()['mark'],
+          comments: document.data()['comments'],
         ));
       });
       notifyListeners();
@@ -100,5 +132,7 @@ class ApplicationState extends ChangeNotifier {
   }
 
   List<Product> get giveProducts => _giveProducts;
-//products 업데이트 완료
+  //giveProducts 업데이트 완료
+  List<Product> get takeProducts => _takeProducts;
+  //takeProducts 업데이트 완료
 }
