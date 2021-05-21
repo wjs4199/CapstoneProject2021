@@ -4,14 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
 
 import 'product.dart';
 import 'main.dart';
 
 class DetailPage extends StatefulWidget {
-  /* When navigating to the detail page, use the product id value as
-  * an index. */
   final String productId;
   final String detailGiveOrTake;
 
@@ -68,22 +65,20 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     // Get Likes
-    CollectionReference Likes;
+    CollectionReference likes;
     if (detailGiveOrTake == 'giveProducts') {
-      Likes = FirebaseFirestore.instance
+      likes = FirebaseFirestore.instance
           .collection('giveProducts/' + productId + '/like');
     } else {
-      Likes = FirebaseFirestore.instance
+      likes = FirebaseFirestore.instance
           .collection('takeProducts/' + productId + '/like');
     }
 
     // Add a like
     Future<void> addLike() {
-      return Likes.add({'uid': userId})
-          .then((value) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('LIKED!'),
-                duration: Duration(seconds: 1),
-              )))
+      return likes
+          .add({'uid': userId})
+          .then((value) => print('LIKED!'))
           .catchError((error) => print('Failed to add a like: $error'));
     }
 
@@ -232,7 +227,7 @@ class _DetailPageState extends State<DetailPage> {
                           Expanded(
                             flex: 2,
                             child: StreamBuilder<QuerySnapshot>(
-                              stream: Likes.snapshots(),
+                              stream: likes.snapshots(),
                               builder: (BuildContext context,
                                   AsyncSnapshot<QuerySnapshot> snapshot) {
                                 if (snapshot.hasError) {
@@ -254,12 +249,7 @@ class _DetailPageState extends State<DetailPage> {
                                         semanticLabel: 'like',
                                       ),
                                       onPressed: () => (isLiked(snapshot))
-                                          ? ScaffoldMessenger.of(context)
-                                              .showSnackBar(SnackBar(
-                                              content: Text(
-                                                  'You can only like once!'),
-                                              duration: Duration(seconds: 1),
-                                            ))
+                                          ? print('You can only like once!')
                                           : addLike(),
                                     ),
                                     Text(count.toString())

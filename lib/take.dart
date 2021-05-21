@@ -85,6 +85,32 @@ class TakePageState extends State<TakePage> {
                     ),
                   ),
                 ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                  Container(
+                    width: 100,
+                    height: 100,
+                    // asynchronously load images
+                    child: FutureBuilder(
+                      future: downloadURL(product.id),
+                      builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else {
+                        if (snapshot.hasData) {
+                          return Image.network(snapshot.data.toString());
+                        } else if (snapshot.hasData == false) {
+                            return Image.asset('assets/logo.png');
+                      } else {
+                        return Center(child: CircularProgressIndicator());
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                  ],
+                ),
               ],
             ),
           ),
