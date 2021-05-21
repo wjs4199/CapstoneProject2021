@@ -20,6 +20,9 @@ class _giveAddPageState extends State<giveAddPage> {
   File _image;
   final picker = ImagePicker();
 
+  final _valueList = ['product', 'time', 'talent'];
+  var _selectedValue = 'product';
+
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
@@ -36,11 +39,10 @@ class _giveAddPageState extends State<giveAddPage> {
   final _formKey = GlobalKey<FormState>(debugLabel: '_giveAddPageState');
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  final _categoryController = TextEditingController();
 
   // Firestore
   CollectionReference giveProduct =
-      FirebaseFirestore.instance.collection('giveProducts');
+  FirebaseFirestore.instance.collection('giveProducts');
 
   // Storage
   firebase_storage.FirebaseStorage storage =
@@ -96,7 +98,7 @@ class _giveAddPageState extends State<giveAddPage> {
                   addGiveProduct(
                     _titleController.text,
                     _contentController.text,
-                    _categoryController.text,
+                    _selectedValue,
                   );
                   Navigator.pop(context);
                 }
@@ -111,12 +113,12 @@ class _giveAddPageState extends State<giveAddPage> {
               // height: MediaQuery.of(context).size.height / 2,
               child: _image == null
                   ? Image.asset(
-                      'assets/logo.png',
-                    )
+                'assets/logo.png',
+              )
                   : Image.file(
-                      _image,
-                      fit: BoxFit.fitWidth,
-                    ),
+                _image,
+                fit: BoxFit.fitWidth,
+              ),
             ),
             Row(
               children: [
@@ -152,20 +154,22 @@ class _giveAddPageState extends State<giveAddPage> {
                           children: [
                             Row(
                               children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _categoryController,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Category',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Enter your message to continue';
-                                      }
-                                      return null;
+                                DropdownButton(
+                                  value: _selectedValue,
+                                  items: _valueList.map(
+                                        (value) {
+                                      return DropdownMenuItem (
+                                        value: value,
+                                        child: Text(value),
+                                      );
                                     },
-                                  ),
-                                ),
+                                  ).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedValue = value;
+                                    });
+                                  },
+                                )
                               ],
                             ),
                             Row(
@@ -253,7 +257,7 @@ class _takeAddPageState extends State<takeAddPage> {
 
   // Firestore
   CollectionReference takeProduct =
-      FirebaseFirestore.instance.collection('takeProducts');
+  FirebaseFirestore.instance.collection('takeProducts');
 
   // Storage
   firebase_storage.FirebaseStorage storage =
@@ -282,6 +286,10 @@ class _takeAddPageState extends State<takeAddPage> {
     }
   }
 
+  //dropdown버튼에 들어가는 항목들
+  final _valueList = ['product', 'time', 'talent'];
+  var _selectedValue = 'product';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -307,12 +315,11 @@ class _takeAddPageState extends State<takeAddPage> {
               onPressed: () {
                 if (_formKey.currentState.validate()) {
                   if (_titleController.text != null &&
-                      _contentController.text != null &&
-                      _categoryController.text != null) {
+                      _contentController.text != null) {
                     addTakeProduct(
                       _titleController.text,
                       _contentController.text,
-                      _categoryController.text,
+                      _selectedValue,
                     );
                   }
                   Navigator.pop(context);
@@ -328,12 +335,12 @@ class _takeAddPageState extends State<takeAddPage> {
               // height: MediaQuery.of(context).size.height / 2,
               child: _image == null
                   ? Image.asset(
-                      'assets/logo.png',
-                    )
+                'assets/logo.png',
+              )
                   : Image.file(
-                      _image,
-                      fit: BoxFit.fitWidth,
-                    ),
+                _image,
+                fit: BoxFit.fitWidth,
+              ),
             ),
             Row(
               children: [
@@ -368,23 +375,23 @@ class _takeAddPageState extends State<takeAddPage> {
                         child: Column(
                           children: [
                             //카테고리 부분 나중에 dropdown selector로 만들면 좋을 듯
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _categoryController,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Category',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Enter your message to continue';
-                                      }
-                                      return null;
+                            Center(
+                                child: DropdownButton(
+                                  value: _selectedValue,
+                                  items: _valueList.map(
+                                        (value) {
+                                      return DropdownMenuItem (
+                                        value: value,
+                                        child: Text(value),
+                                      );
                                     },
-                                  ),
-                                ),
-                              ],
+                                  ).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedValue = value;
+                                    });
+                                  },
+                                )
                             ),
                             Row(
                               children: [
