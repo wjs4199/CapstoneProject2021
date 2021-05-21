@@ -18,16 +18,11 @@ class _HomePageState extends State<HomePage> {
       return const <ListView>[];
     }
 
-    final ThemeData theme = Theme.of(context);
-    //final NumberFormat formatter = NumberFormat.simpleCurrency(
-    //locale: Localizations.localeOf(context).toString());
-
     // Set name for Firebase Storage
     firebase_storage.FirebaseStorage storage =
         firebase_storage.FirebaseStorage.instance;
 
     // Download image url of each product based on id
-    //이미지에 url이 있나봄
     Future<String> downloadURL(String id) async {
       await Future.delayed(Duration(seconds: 2));
       try {
@@ -50,10 +45,7 @@ class _HomePageState extends State<HomePage> {
             onTap: () {
               print("디테일 페이지로 넘어감!");
               Navigator.pushNamed(
-                  context,
-                  /* – When navigating to the detail page, use the doc id
-                    * value for subpage index */
-                  '/detail/' + product.id + '/giveProducts');
+                  context, '/detail/' + product.id + '/giveProducts');
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -94,21 +86,22 @@ class _HomePageState extends State<HomePage> {
                       child: FutureBuilder(
                         future: downloadURL(product.id),
                         builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
-                        } else {
-                        if (snapshot.hasData) {
-                          return Image.network(snapshot.data.toString());
-                        } else if (snapshot.hasData == false) {
-                          return Image.asset('assets/logo.png');
-                        } else {
-                          return Center(child: CircularProgressIndicator());
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          } else {
+                            if (snapshot.hasData) {
+                              return Image.network(snapshot.data.toString());
+                            } else if (snapshot.hasData == false) {
+                              return Image.asset('assets/logo.png');
+                            } else {
+                              return Center(child: CircularProgressIndicator());
+                            }
                           }
-                        }
                         },
                       ),
                     ),
-                    ],
+                  ],
                 ),
               ],
             ),

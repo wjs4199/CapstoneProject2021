@@ -4,14 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
 
 import 'product.dart';
 import 'main.dart';
 
 class DetailPage extends StatefulWidget {
-  /* When navigating to the detail page, use the product id value as
-  * an index. */
   final String productId;
   final String detailGiveOrTake;
 
@@ -68,22 +65,20 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     // Get Likes
-    CollectionReference Likes;
+    CollectionReference likes;
     if (detailGiveOrTake == 'giveProducts') {
-      Likes = FirebaseFirestore.instance
+      likes = FirebaseFirestore.instance
           .collection('giveProducts/' + productId + '/like');
     } else {
-      Likes = FirebaseFirestore.instance
+      likes = FirebaseFirestore.instance
           .collection('takeProducts/' + productId + '/like');
     }
 
     // Add a like
     Future<void> addLike() {
-      return Likes.add({'uid': userId})
-          .then((value) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('LIKED!'),
-                duration: Duration(seconds: 1),
-              )))
+      return likes
+          .add({'uid': userId})
+          .then((value) => print('LIKED!'))
           .catchError((error) => print('Failed to add a like: $error'));
     }
 
@@ -123,53 +118,55 @@ class _DetailPageState extends State<DetailPage> {
         title: Text('Detail'),
         centerTitle: true,
         actions: <Widget>[
-          IconButton(
-              icon: Icon(
-                Icons.create,
-                semanticLabel: 'edit',
-              ),
-              onPressed:
-                  () {} /*(FirebaseAuth.instance.currentUser.uid == product.uid)
-                  ? () => Navigator.pushNamed(
-                        context,
-                        '/edit/' + productId,
-                      )
-                  : null*/
-              ),
-          IconButton(
-              icon: Icon(
-                Icons.delete,
-                semanticLabel: 'delete',
-              ),
-              onPressed: (FirebaseAuth.instance.currentUser.uid == product.uid)
-                  ? () => showDialog(
-                      context: context,
-                      builder: (BuildContext context) => CupertinoAlertDialog(
-                            title: Text("Deleting Item"),
-                            content: Text(
-                                "Are you sure that you want to delete this item?"),
-                            actions: <Widget>[
-                              CupertinoDialogAction(
-                                isDefaultAction: true,
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: Text("No"),
-                              ),
-                              CupertinoDialogAction(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  deleteProduct()
-                                      .then((value) => appState.init())
-                                      .catchError((error) => null)
-                                      .whenComplete(
-                                          () => Navigator.pop(context));
-                                },
-                                child: Text("Yes"),
-                              ),
-                            ],
-                          ))
-                  : null),
+          if (FirebaseAuth.instance.currentUser.uid == product.uid)
+            IconButton(
+                icon: Icon(
+                  Icons.create,
+                  semanticLabel: 'edit',
+                ),
+                onPressed:
+                    (FirebaseAuth.instance.currentUser.uid == product.uid)
+                        ? () => Navigator.pushNamed(
+                              context,
+                              '/edit/' + productId + '/' + detailGiveOrTake,
+                            )
+                        : null),
+          if (FirebaseAuth.instance.currentUser.uid == product.uid)
+            IconButton(
+                icon: Icon(
+                  Icons.delete,
+                  semanticLabel: 'delete',
+                ),
+                onPressed: (FirebaseAuth.instance.currentUser.uid ==
+                        product.uid)
+                    ? () => showDialog(
+                        context: context,
+                        builder: (BuildContext context) => CupertinoAlertDialog(
+                              title: Text("Deleting Item"),
+                              content: Text(
+                                  "Are you sure that you want to delete this item?"),
+                              actions: <Widget>[
+                                CupertinoDialogAction(
+                                  isDefaultAction: true,
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text("No"),
+                                ),
+                                CupertinoDialogAction(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    deleteProduct()
+                                        .then((value) => appState.init())
+                                        .catchError((error) => null)
+                                        .whenComplete(
+                                            () => Navigator.pop(context));
+                                  },
+                                  child: Text("Yes"),
+                                ),
+                              ],
+                            ))
+                    : null)
         ],
       ),
       body: SafeArea(
@@ -230,7 +227,7 @@ class _DetailPageState extends State<DetailPage> {
                           Expanded(
                             flex: 2,
                             child: StreamBuilder<QuerySnapshot>(
-                              stream: Likes.snapshots(),
+                              stream: likes.snapshots(),
                               builder: (BuildContext context,
                                   AsyncSnapshot<QuerySnapshot> snapshot) {
                                 if (snapshot.hasError) {
@@ -252,12 +249,7 @@ class _DetailPageState extends State<DetailPage> {
                                         semanticLabel: 'like',
                                       ),
                                       onPressed: () => (isLiked(snapshot))
-                                          ? ScaffoldMessenger.of(context)
-                                              .showSnackBar(SnackBar(
-                                              content: Text(
-                                                  'You can only like once!'),
-                                              duration: Duration(seconds: 1),
-                                            ))
+                                          ? print('You can only like once!')
                                           : addLike(),
                                     ),
                                     Text(count.toString())
@@ -285,32 +277,6 @@ class _DetailPageState extends State<DetailPage> {
                         style: TextStyle(
                           fontSize: 16,
                           color: Color(0xff3792cb),
-                        ),
-                      ),
-                      SizedBox(height: 96.0),
-                      Text(
-                        'creator: ' + product.uid,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      Text(
-                        DateFormat('yyyy.MM.dd HH:mm:ss')
-                                .format(product.created.toDate()) +
-                            ' Created',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      Text(
-                        DateFormat('yyyy.MM.dd HH:mm:ss')
-                                .format(product.modified.toDate()) +
-                            ' Modified',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
                         ),
                       ),
                     ],

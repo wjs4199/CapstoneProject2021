@@ -7,13 +7,13 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 import 'home.dart';
 import 'login.dart';
-import 'home.dart';
-import 'login.dart';
+import 'detail.dart';
 import 'take.dart';
 import 'chat.dart';
 import 'mypage.dart';
 import 'product.dart';
 import 'add.dart';
+import 'edit.dart';
 
 void main() {
   runApp(
@@ -48,14 +48,38 @@ class Application extends StatelessWidget {
             },
 
             // 동적 경로할당 위해 추후 사용
-            /*onGenerateRoute: (RouteSettings settings) {
-               final List<String> pathElements = settings.name.split('/');
-               if (pathElements[1] == 'detail') {
-                 return MaterialPageRoute(
-                   builder: (_) => DetailPage(itemId: pathElements[2]),
-               }
-               return null;
-             },*/
+            // pathElements[3]에 어떤 collection이름이 들어가느냐에 따라
+            // 해당 collection과 연결된 페이지의 상품에만 접근하는 경로가 생성된다
+            onGenerateRoute: (RouteSettings settings) {
+              final List<String> pathElements = settings.name.split('/');
+              if (pathElements[1] == 'detail' &&
+                  pathElements[3] == 'giveProducts') {
+                return MaterialPageRoute(
+                    builder: (_) => DetailPage(
+                        productId: pathElements[2],
+                        detailGiveOrTake: 'giveProducts'));
+              } else if (pathElements[1] == 'detail' &&
+                  pathElements[3] == 'takeProducts') {
+                return MaterialPageRoute(
+                    builder: (_) => DetailPage(
+                        productId: pathElements[2],
+                        detailGiveOrTake: 'takeProducts'));
+              }
+              if (pathElements[1] == 'edit' &&
+                  pathElements[3] == 'giveProducts') {
+                return MaterialPageRoute(
+                    builder: (_) => EditPage(
+                        productId: pathElements[2],
+                        editGiveOrTake: 'giveProducts'));
+              } else if (pathElements[1] == 'edit' &&
+                  pathElements[3] == 'takeProducts') {
+                return MaterialPageRoute(
+                    builder: (_) => EditPage(
+                        productId: pathElements[2],
+                        editGiveOrTake: 'takeProducts'));
+              }
+              return null;
+            },
           );
         } else {
           return CircularProgressIndicator();
