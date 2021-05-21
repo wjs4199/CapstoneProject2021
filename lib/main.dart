@@ -3,23 +3,20 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 import 'home.dart';
 import 'login.dart';
 import 'home.dart';
 import 'login.dart';
 import 'take.dart';
-import 'model/post.dart';
-
 import 'chat.dart';
 import 'mypage.dart';
 import 'product.dart';
 import 'add.dart';
 
 void main() {
-
   runApp(
-
     ChangeNotifierProvider(
       create: (context) => ApplicationState(),
       builder: (context, _) => Application(),
@@ -35,7 +32,7 @@ class Application extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return MaterialApp(
-            title: 'giveandtake',
+            title: 'Give_N_Take',
             home: HomePage(),
             initialRoute: '/login',
 
@@ -46,19 +43,19 @@ class Application extends StatelessWidget {
               '/take': (context) => TakePage(),
               '/chat': (context) => ChatPage(),
               '/mypage': (context) => ProfilePage(),
-              '/add': (context) => AddPage(),
+              '/giveadd': (context) => giveAddPage(),
+              '/takeadd': (context) => takeAddPage(),
             },
 
             // 동적 경로할당 위해 추후 사용
-            // onGenerateRoute: (RouteSettings settings) {
-            //   final List<String> pathElements = settings.name.split('/');
-            //   if (pathElements[1] == 'detail') {
-            //     return MaterialPageRoute(
-            //       builder: (_) => DetailPage(itemId: pathElements[2]),
-
-            //   }
-            //   return null;
-            // },
+            /*onGenerateRoute: (RouteSettings settings) {
+               final List<String> pathElements = settings.name.split('/');
+               if (pathElements[1] == 'detail') {
+                 return MaterialPageRoute(
+                   builder: (_) => DetailPage(itemId: pathElements[2]),
+               }
+               return null;
+             },*/
           );
         } else {
           return CircularProgressIndicator();
@@ -68,34 +65,74 @@ class Application extends StatelessWidget {
   }
 }
 
-
 class ApplicationState extends ChangeNotifier {
-  List<Post> _posts = [];
-
   ApplicationState() {
     init();
   }
 
-  Future<void> init() async {
+  List<Product> _giveProducts = [];
+  List<Product> _takeProducts = [];
 
+  //collection 'giveProducts' 파이어베이스에서 불러오기
+  Future<void> init() async {
+    // FirebaseFirestore.instance
     FirebaseFirestore.instance
-        .collection('post')
+        .collection('giveProducts')
+        //.orderBy('price', descending: isDesc)
         .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
         .listen((snapshot) {
-      _posts = [];
+      _giveProducts = [];
       snapshot.docs.forEach((document) {
-        _posts.add(Post(
+        //A non null string must be provided to a text widget
+        //밑에는 위의 오류 때문에 넣은 부분
+        String content = document.data()['content'];
+        if (content == null) {
+          content = "글 읽기 실패";
+        }
+
+        _giveProducts.add(Product(
+          id: document.id,
+          title: document.data()['title'],
+          content: content,
+          category: document.data()['category'],
+          created: document.data()['created'],
+          modified: document.data()['modified'],
+          uid: document.data()['uid'],
+          //like: document.data()['like'],
+          //mark: document.data()['mark'],
+          //comments: document.data()['comments'],
+        ));
+      });
+      notifyListeners();
+    });
+
+    //collection 'takeProducts' 파이어베이스에서 불러오기
+    FirebaseFirestore.instance
+        .collection('takeProducts')
+        //.orderBy('price', descending: isDesc)
+        .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
+        .listen((snapshot) {
+      _takeProducts = [];
+      snapshot.docs.forEach((document) {
+        _takeProducts.add(Product(
           id: document.id,
           title: document.data()['title'],
           content: document.data()['content'],
-          time: document.data()['time'],
           category: document.data()['category'],
+          created: document.data()['created'],
+          modified: document.data()['modified'],
           uid: document.data()['uid'],
+          like: document.data()['like'],
+          mark: document.data()['mark'],
+          comments: document.data()['comments'],
         ));
       });
       notifyListeners();
     });
   }
-  List<Post> get posts => _posts;
-//products 업데이트 완료
+
+  List<Product> get giveProducts => _giveProducts;
+  //giveProducts 업데이트 완료
+  List<Product> get takeProducts => _takeProducts;
+  //takeProducts 업데이트 완료
 }

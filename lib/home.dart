@@ -50,11 +50,10 @@ class _HomePageState extends State<HomePage> {
             onTap: () {
               print("디테일 페이지로 넘어감!");
               Navigator.pushNamed(
-                context,
-                /* – When navigating to the detail page, use the doc id
+                  context,
+                  /* – When navigating to the detail page, use the doc id
                     * value for subpage index */
-                '/detail/' + product.id,
-              );
+                  '/detail/' + product.id + '/giveProducts');
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -113,19 +112,6 @@ class _HomePageState extends State<HomePage> {
                   children: _buildListView(context, appState.giveProducts),
                 ),
               ),
-              /*Expanded(
-                child: GridView.count(
-                  crossAxisCount: 1,
-                  padding: EdgeInsets.all(16.0),
-                  childAspectRatio: 8.0 / 9.0,
-                  children: _buildGridCards(context, appState.giveProducts),
-                ),
-              ),*/
-              /*FloatingActionButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/giveadd');
-                  },
-                  child: Icon(Icons.add)),*/
             ],
           ),
         ),
