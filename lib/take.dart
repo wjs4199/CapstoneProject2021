@@ -53,7 +53,7 @@ class TakePageState extends State<TakePage> {
                 context,
                 /* – When navigating to the detail page, use the doc id
                     * value for subpage index */
-                '/detail/' + product.id,
+                '/detail/' + product.id + '/takeProducts',
               );
             },
             child: Row(
