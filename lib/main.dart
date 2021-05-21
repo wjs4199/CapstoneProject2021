@@ -13,6 +13,7 @@ import 'chat.dart';
 import 'mypage.dart';
 import 'product.dart';
 import 'add.dart';
+import 'edit.dart';
 
 void main() {
   runApp(
@@ -63,6 +64,19 @@ class Application extends StatelessWidget {
                     builder: (_) => DetailPage(
                         productId: pathElements[2],
                         detailGiveOrTake: 'takeProducts'));
+              }
+              if (pathElements[1] == 'edit' &&
+                  pathElements[3] == 'giveProducts') {
+                return MaterialPageRoute(
+                    builder: (_) => EditPage(
+                        productId: pathElements[2],
+                        editGiveOrTake: 'giveProducts'));
+              } else if (pathElements[1] == 'edit' &&
+                  pathElements[3] == 'takeProducts') {
+                return MaterialPageRoute(
+                    builder: (_) => EditPage(
+                        productId: pathElements[2],
+                        editGiveOrTake: 'takeProducts'));
               }
               return null;
             },
