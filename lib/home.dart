@@ -114,6 +114,10 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  bool _filterOfProduct = false;
+  bool _filterOfTime = false;
+  bool _filterOfTalent = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,6 +130,49 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  IconButton(
+                      padding: EdgeInsets.all(0),
+                      alignment: Alignment.centerRight,
+                      icon: (_filterOfProduct
+                          ? Icon(Icons.wallet_giftcard,
+                              size: 30, color: Colors.blue)
+                          : Icon(Icons.wallet_giftcard,
+                              size: 30, color: Colors.grey)),
+                      onPressed: () {
+                        _chooseFilter("Product");
+                        if (_filterOfProduct) appState.orderByFilter("product");
+                      }),
+                  IconButton(
+                      padding: EdgeInsets.all(0),
+                      alignment: Alignment.centerRight,
+                      icon: (_filterOfTime
+                          ? Icon(Icons.timer, size: 30, color: Colors.blue)
+                          : Icon(Icons.timer, size: 30, color: Colors.grey)),
+                      onPressed: () {
+                        _chooseFilter("Time");
+                      }),
+                  IconButton(
+                      padding: EdgeInsets.all(0),
+                      alignment: Alignment.centerRight,
+                      icon: (_filterOfTalent
+                          ? Icon(
+                              Icons.lightbulb,
+                              size: 30,
+                              color: Colors.blue,
+                            )
+                          : Icon(
+                              Icons.lightbulb,
+                              size: 30,
+                              color: Colors.grey,
+                            )),
+                      onPressed: () {
+                        _chooseFilter("Talent");
+                      }),
+                ]),
+              ),
               Expanded(
                 child: ListView(
                   children: _buildListView(context, appState.giveProducts),
@@ -143,6 +190,36 @@ class _HomePageState extends State<HomePage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
     //);
+  }
+
+  void _chooseFilter(String fitering) {
+    setState(() {
+      if (fitering == 'Product') {
+        if (_filterOfProduct) {
+          _filterOfProduct = false;
+          print("_filterOfProduct = false");
+        } else {
+          _filterOfProduct = true;
+          print("_filterOfProduct = true");
+        }
+      } else if (fitering == 'Time') {
+        if (_filterOfTime) {
+          _filterOfTime = false;
+          print("_filterOfTime = false");
+        } else {
+          _filterOfTime = true;
+          print("_filterOfTime = true");
+        }
+      } else {
+        if (_filterOfTalent) {
+          _filterOfTalent = false;
+          print("_filterOfTalent = false");
+        } else {
+          _filterOfTalent = true;
+          print("_filterOfTalent = true");
+        }
+      }
+    });
   }
 
   // Builder Widget for AppBar
