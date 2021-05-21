@@ -90,6 +90,13 @@ class Application extends StatelessWidget {
 }
 
 class ApplicationState extends ChangeNotifier {
+  final String orderBy = 'modified';
+
+  void orderByFilter(String filtering) {
+    String orderBy = filtering;
+    init();
+  }
+
   ApplicationState() {
     init();
   }
@@ -102,7 +109,7 @@ class ApplicationState extends ChangeNotifier {
     // FirebaseFirestore.instance
     FirebaseFirestore.instance
         .collection('giveProducts')
-        //.orderBy('price', descending: isDesc)
+        .orderBy(orderBy, descending: true)
         .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
         .listen((snapshot) {
       _giveProducts = [];
@@ -133,7 +140,7 @@ class ApplicationState extends ChangeNotifier {
     //collection 'takeProducts' 파이어베이스에서 불러오기
     FirebaseFirestore.instance
         .collection('takeProducts')
-        //.orderBy('price', descending: isDesc)
+        .orderBy(orderBy, descending: true)
         .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
         .listen((snapshot) {
       _takeProducts = [];
