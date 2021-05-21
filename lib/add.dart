@@ -253,7 +253,7 @@ class _takeAddPageState extends State<takeAddPage> {
   final _formKey = GlobalKey<FormState>(debugLabel: '_takeAddPageState');
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  final _categoryController = TextEditingController();
+
 
   // Firestore
   CollectionReference takeProduct =
@@ -375,23 +375,25 @@ class _takeAddPageState extends State<takeAddPage> {
                         child: Column(
                           children: [
                             //카테고리 부분 나중에 dropdown selector로 만들면 좋을 듯
-                            Center(
-                                child: DropdownButton(
-                                  value: _selectedValue,
-                                  items: _valueList.map(
-                                        (value) {
-                                      return DropdownMenuItem (
-                                        value: value,
-                                        child: Text(value),
-                                      );
+                            Row(
+                                children: [
+                                  DropdownButton(
+                                    value: _selectedValue,
+                                    items: _valueList.map(
+                                          (value) {
+                                        return DropdownMenuItem (
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      },
+                                    ).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedValue = value;
+                                      });
                                     },
-                                  ).toList(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedValue = value;
-                                    });
-                                  },
-                                )
+                                  )
+                                ],
                             ),
                             Row(
                               children: [

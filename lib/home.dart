@@ -13,6 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   List<ListView> _buildListView(BuildContext context, List<Product> products) {
     if (products == null || products.isEmpty) {
       return const <ListView>[];
@@ -43,7 +44,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           InkWell(
             onTap: () {
-              print("디테일 페이지로 넘어감!");
+              //print("디테일 페이지로 넘어감!");
               Navigator.pushNamed(
                   context, '/detail/' + product.id + '/giveProducts');
             },
@@ -142,8 +143,8 @@ class _HomePageState extends State<HomePage> {
                           : Icon(Icons.wallet_giftcard,
                               size: 30, color: Colors.grey)),
                       onPressed: () {
-                        _chooseFilter("Product");
-                        if (_filterOfProduct) appState.orderByFilter("product");
+                        _chooseFilter('product');
+                        if (_filterOfProduct) appState.orderByFilter('product');
                       }),
                   IconButton(
                       padding: EdgeInsets.all(0),
@@ -152,7 +153,9 @@ class _HomePageState extends State<HomePage> {
                           ? Icon(Icons.timer, size: 30, color: Colors.blue)
                           : Icon(Icons.timer, size: 30, color: Colors.grey)),
                       onPressed: () {
-                        _chooseFilter("Time");
+                        _chooseFilter('time');
+                        if (_filterOfProduct) appState.orderByFilter('time');
+
                       }),
                   IconButton(
                       padding: EdgeInsets.all(0),
@@ -169,7 +172,8 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.grey,
                             )),
                       onPressed: () {
-                        _chooseFilter("Talent");
+                        _chooseFilter('talent');
+                        if (_filterOfProduct) appState.orderByFilter('talent');
                       }),
                 ]),
               ),

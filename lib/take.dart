@@ -48,7 +48,7 @@ class TakePageState extends State<TakePage> {
         children: [
           InkWell(
             onTap: () {
-              print("디테일 페이지로 넘어감!");
+              //print("디테일 페이지로 넘어감!");
               Navigator.pushNamed(
                 context,
                 /* – When navigating to the detail page, use the doc id
@@ -122,6 +122,10 @@ class TakePageState extends State<TakePage> {
   int _selectedIndex = 0;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  bool _filterOfProduct = false;
+  bool _filterOfTime = false;
+  bool _filterOfTalent = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,6 +138,52 @@ class TakePageState extends State<TakePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  IconButton(
+                      padding: EdgeInsets.all(0),
+                      alignment: Alignment.centerRight,
+                      icon: (_filterOfProduct
+                          ? Icon(Icons.wallet_giftcard,
+                          size: 30, color: Colors.blue)
+                          : Icon(Icons.wallet_giftcard,
+                          size: 30, color: Colors.grey)),
+                      onPressed: () {
+                        _chooseFilter('product');
+                        if (_filterOfProduct) appState.orderByFilter('product');
+                      }),
+                  IconButton(
+                      padding: EdgeInsets.all(0),
+                      alignment: Alignment.centerRight,
+                      icon: (_filterOfTime
+                          ? Icon(Icons.timer, size: 30, color: Colors.blue)
+                          : Icon(Icons.timer, size: 30, color: Colors.grey)),
+                      onPressed: () {
+                        _chooseFilter('time');
+                        if (_filterOfProduct) appState.orderByFilter('time');
+
+                      }),
+                  IconButton(
+                      padding: EdgeInsets.all(0),
+                      alignment: Alignment.centerRight,
+                      icon: (_filterOfTalent
+                          ? Icon(
+                        Icons.lightbulb,
+                        size: 30,
+                        color: Colors.blue,
+                      )
+                          : Icon(
+                        Icons.lightbulb,
+                        size: 30,
+                        color: Colors.grey,
+                      )),
+                      onPressed: () {
+                        _chooseFilter('talent');
+                        if (_filterOfProduct) appState.orderByFilter('talent');
+                      }),
+                ]),
+              ),
               Expanded(
                 child: ListView(
                   children: _buildListView(context, appState.takeProducts),
@@ -151,6 +201,36 @@ class TakePageState extends State<TakePage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
     //);
+  }
+
+  void _chooseFilter(String fitering) {
+    setState(() {
+      if (fitering == 'Product') {
+        if (_filterOfProduct) {
+          _filterOfProduct = false;
+          print("_filterOfProduct = false");
+        } else {
+          _filterOfProduct = true;
+          print("_filterOfProduct = true");
+        }
+      } else if (fitering == 'Time') {
+        if (_filterOfTime) {
+          _filterOfTime = false;
+          print("_filterOfTime = false");
+        } else {
+          _filterOfTime = true;
+          print("_filterOfTime = true");
+        }
+      } else {
+        if (_filterOfTalent) {
+          _filterOfTalent = false;
+          print("_filterOfTalent = false");
+        } else {
+          _filterOfTalent = true;
+          print("_filterOfTalent = true");
+        }
+      }
+    });
   }
 
   // Builder Widget for AppBar
