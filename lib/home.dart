@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giveandtake/take.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -118,8 +119,20 @@ class _HomePageState extends State<HomePage> {
   bool _filterOfTime = false;
   bool _filterOfTalent = false;
 
+  //bool _debugLocked = false;
+
   @override
   Widget build(BuildContext context) {
+    //하단네비바 탭하여 페이지 이동하는 부분
+    if (_selectedIndex != 0) {
+      if (_selectedIndex == 1) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/take');
+        });
+      } else if (_selectedIndex == 2) {
+      } else if (_selectedIndex == 3) {}
+    }
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: buildAppBar(context),
@@ -143,7 +156,12 @@ class _HomePageState extends State<HomePage> {
                               size: 30, color: Colors.grey)),
                       onPressed: () {
                         _chooseFilter("Product");
-                        if (_filterOfProduct) appState.orderByFilter("product");
+                        if (_filterOfProduct) {
+                          appState.orderByFilter('Product');
+                          print("product filtering!");
+                        } else if (!_filterOfProduct &&
+                            !_filterOfTime &&
+                            !_filterOfTalent) appState.orderByFilter('All');
                       }),
                   IconButton(
                       padding: EdgeInsets.all(0),
@@ -153,6 +171,12 @@ class _HomePageState extends State<HomePage> {
                           : Icon(Icons.timer, size: 30, color: Colors.grey)),
                       onPressed: () {
                         _chooseFilter("Time");
+                        if (_filterOfTime) {
+                          print("time filtering!");
+                          appState.orderByFilter('Time');
+                        } else if (!_filterOfProduct &&
+                            !_filterOfTime &&
+                            !_filterOfTalent) appState.orderByFilter('All');
                       }),
                   IconButton(
                       padding: EdgeInsets.all(0),
@@ -170,6 +194,12 @@ class _HomePageState extends State<HomePage> {
                             )),
                       onPressed: () {
                         _chooseFilter("Talent");
+                        if (_filterOfTalent) {
+                          print("talent filtering!");
+                          appState.orderByFilter('Talent');
+                        } else if (!_filterOfProduct &&
+                            !_filterOfTime &&
+                            !_filterOfTalent) appState.orderByFilter('All');
                       }),
                 ]),
               ),
@@ -195,29 +225,14 @@ class _HomePageState extends State<HomePage> {
   void _chooseFilter(String fitering) {
     setState(() {
       if (fitering == 'Product') {
-        if (_filterOfProduct) {
-          _filterOfProduct = false;
-          print("_filterOfProduct = false");
-        } else {
-          _filterOfProduct = true;
-          print("_filterOfProduct = true");
-        }
+        _filterOfProduct = _filterOfProduct ? false : true;
+        if (_filterOfProduct) _filterOfTime = _filterOfTalent = false;
       } else if (fitering == 'Time') {
-        if (_filterOfTime) {
-          _filterOfTime = false;
-          print("_filterOfTime = false");
-        } else {
-          _filterOfTime = true;
-          print("_filterOfTime = true");
-        }
+        _filterOfTime = _filterOfTime ? false : true;
+        if (_filterOfTime) _filterOfProduct = _filterOfTalent = false;
       } else {
-        if (_filterOfTalent) {
-          _filterOfTalent = false;
-          print("_filterOfTalent = false");
-        } else {
-          _filterOfTalent = true;
-          print("_filterOfTalent = true");
-        }
+        _filterOfTalent = _filterOfTalent ? false : true;
+        if (_filterOfTalent) _filterOfProduct = _filterOfTime = false;
       }
     });
   }
@@ -242,7 +257,7 @@ class _HomePageState extends State<HomePage> {
             semanticLabel: 'search',
           ),
           onPressed: () {
-            Navigator.pushNamed(context, '/take');
+            //Navigator.pushNamed(context, '/take');
           },
         ),
       ],

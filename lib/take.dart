@@ -9,25 +9,20 @@ import 'add.dart';
 
 class TakePage extends StatefulWidget {
   @override
-  TakePageState createState() => TakePageState();
+  _TakePageState createState() => _TakePageState();
 }
 
-class TakePageState extends State<TakePage> {
+class _TakePageState extends State<TakePage> {
   List<ListView> _buildListView(BuildContext context, List<Product> products) {
     if (products == null || products.isEmpty) {
       return const <ListView>[];
     }
-
-    final ThemeData theme = Theme.of(context);
-    //final NumberFormat formatter = NumberFormat.simpleCurrency(
-    //locale: Localizations.localeOf(context).toString());
 
     // Set name for Firebase Storage
     firebase_storage.FirebaseStorage storage =
         firebase_storage.FirebaseStorage.instance;
 
     // Download image url of each product based on id
-    //이미지에 url이 있나봄
     Future<String> downloadURL(String id) async {
       await Future.delayed(Duration(seconds: 2));
       try {
@@ -51,8 +46,6 @@ class TakePageState extends State<TakePage> {
               print("디테일 페이지로 넘어감!");
               Navigator.pushNamed(
                 context,
-                /* – When navigating to the detail page, use the doc id
-                    * value for subpage index */
                 '/detail/' + product.id + '/takeProducts',
               );
             },
@@ -88,27 +81,28 @@ class TakePageState extends State<TakePage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                  Container(
-                    width: 100,
-                    height: 100,
-                    // asynchronously load images
-                    child: FutureBuilder(
-                      future: downloadURL(product.id),
-                      builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      } else {
-                        if (snapshot.hasData) {
-                          return Image.network(snapshot.data.toString());
-                        } else if (snapshot.hasData == false) {
-                            return Image.asset('assets/logo.png');
-                      } else {
-                        return Center(child: CircularProgressIndicator());
+                    Container(
+                      width: 100,
+                      height: 100,
+                      // asynchronously load images
+                      child: FutureBuilder(
+                        future: downloadURL(product.id),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          } else {
+                            if (snapshot.hasData) {
+                              return Image.network(snapshot.data.toString());
+                            } else if (snapshot.hasData == false) {
+                              return Image.asset('assets/logo.png');
+                            } else {
+                              return Center(child: CircularProgressIndicator());
+                            }
                           }
-                        }
-                      },
+                        },
+                      ),
                     ),
-                  ),
                   ],
                 ),
               ],
@@ -119,11 +113,25 @@ class TakePageState extends State<TakePage> {
     }).toList();
   }
 
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  bool _filterOfProduct = false;
+  bool _filterOfTime = false;
+  bool _filterOfTalent = false;
 
   @override
   Widget build(BuildContext context) {
+    //하단네비바 탭하여 페이지 이동하는 부분
+    if (_selectedIndex != 1) {
+      if (_selectedIndex == 0) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/home');
+        });
+      } else if (_selectedIndex == 2) {
+      } else if (_selectedIndex == 3) {}
+    }
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: buildAppBar(context),
@@ -134,6 +142,63 @@ class TakePageState extends State<TakePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  IconButton(
+                      padding: EdgeInsets.all(0),
+                      alignment: Alignment.centerRight,
+                      icon: (_filterOfProduct
+                          ? Icon(Icons.wallet_giftcard,
+                              size: 30, color: Colors.blue)
+                          : Icon(Icons.wallet_giftcard,
+                              size: 30, color: Colors.grey)),
+                      onPressed: () {
+                        _chooseFilter("Product");
+                        if (_filterOfProduct)
+                          appState.orderByFilter('Product');
+                        else if (!_filterOfProduct &&
+                            !_filterOfTime &&
+                            !_filterOfTalent) appState.orderByFilter('All');
+                      }),
+                  IconButton(
+                      padding: EdgeInsets.all(0),
+                      alignment: Alignment.centerRight,
+                      icon: (_filterOfTime
+                          ? Icon(Icons.timer, size: 30, color: Colors.blue)
+                          : Icon(Icons.timer, size: 30, color: Colors.grey)),
+                      onPressed: () {
+                        _chooseFilter("Time");
+                        if (_filterOfTime)
+                          appState.orderByFilter('Time');
+                        else if (!_filterOfProduct &&
+                            !_filterOfTime &&
+                            !_filterOfTalent) appState.orderByFilter('All');
+                      }),
+                  IconButton(
+                      padding: EdgeInsets.all(0),
+                      alignment: Alignment.centerRight,
+                      icon: (_filterOfTalent
+                          ? Icon(
+                              Icons.lightbulb,
+                              size: 30,
+                              color: Colors.blue,
+                            )
+                          : Icon(
+                              Icons.lightbulb,
+                              size: 30,
+                              color: Colors.grey,
+                            )),
+                      onPressed: () {
+                        _chooseFilter("Talent");
+                        if (_filterOfTalent)
+                          appState.orderByFilter('Talent');
+                        else if (!_filterOfProduct &&
+                            !_filterOfTime &&
+                            !_filterOfTalent) appState.orderByFilter('All');
+                      }),
+                ]),
+              ),
               Expanded(
                 child: ListView(
                   children: _buildListView(context, appState.takeProducts),
@@ -151,6 +216,21 @@ class TakePageState extends State<TakePage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
     //);
+  }
+
+  void _chooseFilter(String fitering) {
+    setState(() {
+      if (fitering == 'Product') {
+        _filterOfProduct = _filterOfProduct ? false : true;
+        if (_filterOfProduct) _filterOfTime = _filterOfTalent = false;
+      } else if (fitering == 'Time') {
+        _filterOfTime = _filterOfTime ? false : true;
+        if (_filterOfTime) _filterOfProduct = _filterOfTalent = false;
+      } else {
+        _filterOfTalent = _filterOfTalent ? false : true;
+        if (_filterOfTalent) _filterOfProduct = _filterOfTime = false;
+      }
+    });
   }
 
   // Builder Widget for AppBar
@@ -174,10 +254,7 @@ class TakePageState extends State<TakePage> {
             Icons.search,
             semanticLabel: 'search',
           ),
-          onPressed: () {
-            //AddPage().giveOrTakeChange('give');
-            //Navigator.pushNamed(context, '/add');
-          },
+          onPressed: () {},
         ),
       ],
     );
@@ -250,8 +327,9 @@ class TakePageState extends State<TakePage> {
               Icons.home,
             ),
             onTap: () {
-              // - Each menu should be navigated by Named Routes
-              Navigator.pushNamed(context, '/home');
+              Future.delayed(const Duration(milliseconds: 200), () {
+                Navigator.of(context).pushReplacementNamed('/take');
+              });
             },
           ),
           ListTile(
