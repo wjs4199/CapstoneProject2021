@@ -14,9 +14,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<ListView> _buildListView(BuildContext context, List<Product> products) {
+  List<Card> _buildListElement(BuildContext context, List<Product> products) {
     if (products == null || products.isEmpty) {
-      return const <ListView>[];
+      return const <Card>[];
     }
 
     // Set name for Firebase Storage
@@ -38,75 +38,52 @@ class _HomePageState extends State<HomePage> {
     }
 
     return products.map((product) {
-      return ListView(
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        children: [
-          InkWell(
-            onTap: () {
-              Navigator.pushNamed(
-                  context, '/detail/' + product.id + '/giveProducts');
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          // Product 요소에 맞게 바꿨어요
-                          product.title,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                        ),
-                        SizedBox(height: 5.0),
-                        Text(
-                          // Product 요소에 맞게 바꿨어요
-                          product.content,
-                          maxLines: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Container(
-                      width: 100,
-                      height: 100,
-                      // asynchronously load images
-                      child: FutureBuilder(
-                        future: downloadURL(product.id),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
-                          } else {
-                            if (snapshot.hasData) {
-                              return Image.network(snapshot.data.toString());
-                            } else if (snapshot.hasData == false) {
-                              return Image.asset('assets/logo.png');
-                            } else {
-                              return Center(child: CircularProgressIndicator());
-                            }
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+      return Card(
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            Navigator.pushNamed(
+                context, '/detail/' + product.id + '/giveProducts');
+          },
+          child: ListTile(
+            title: Text(
+              // Product 요소에 맞게 바꿨어요
+              product.title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 1,
+            ),
+            subtitle: Text(
+              // Product 요소에 맞게 바꿨어요
+              product.content,
+              maxLines: 3,
+            ),
+            trailing: Container(
+              width: 90,
+              height: 90,
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              alignment: Alignment.center,
+              child: FutureBuilder(
+                future: downloadURL(product.id),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else {
+                    if (snapshot.hasData) {
+                      return Image.network(snapshot.data.toString());
+                    } else if (snapshot.hasData == false) {
+                      return Container();
+                    } else {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                  }
+                },
+              ),
             ),
           ),
-        ],
+        ),
       );
     }).toList();
   }
@@ -120,8 +97,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
       key: _scaffoldKey,
       appBar: buildAppBar(context),
@@ -140,9 +115,9 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.centerRight,
                       icon: (_filterOfProduct
                           ? Icon(Icons.wallet_giftcard,
-                          size: 30, color: Colors.blue)
+                              size: 30, color: Colors.blue)
                           : Icon(Icons.wallet_giftcard,
-                          size: 30, color: Colors.grey)),
+                              size: 30, color: Colors.grey)),
                       onPressed: () {
                         _chooseFilter("Product");
                         if (_filterOfProduct) {
@@ -172,15 +147,15 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.centerRight,
                       icon: (_filterOfTalent
                           ? Icon(
-                        Icons.lightbulb,
-                        size: 30,
-                        color: Colors.blue,
-                      )
+                              Icons.lightbulb,
+                              size: 30,
+                              color: Colors.blue,
+                            )
                           : Icon(
-                        Icons.lightbulb,
-                        size: 30,
-                        color: Colors.grey,
-                      )),
+                              Icons.lightbulb,
+                              size: 30,
+                              color: Colors.grey,
+                            )),
                       onPressed: () {
                         _chooseFilter("Talent");
                         if (_filterOfTalent) {
@@ -194,7 +169,9 @@ class _HomePageState extends State<HomePage> {
               ),
               Expanded(
                 child: ListView(
-                  children: _buildListView(context, appState.giveProducts),
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  children: _buildListElement(context, appState.giveProducts),
                 ),
               ),
             ],
