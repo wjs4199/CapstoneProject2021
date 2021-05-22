@@ -56,11 +56,13 @@ class _HomePageState extends State<HomePage> {
                 fontWeight: FontWeight.bold,
               ),
               maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             subtitle: Text(
               // Product 요소에 맞게 바꿨어요
               product.content,
-              maxLines: 3,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             trailing: Container(
               width: 90,
