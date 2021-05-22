@@ -9,10 +9,10 @@ import 'add.dart';
 
 class TakePage extends StatefulWidget {
   @override
-  _TakePageState createState() => _TakePageState();
+  TakePageState createState() => TakePageState();
 }
 
-class _TakePageState extends State<TakePage> {
+class TakePageState extends State<TakePage> {
   List<ListView> _buildListView(BuildContext context, List<Product> products) {
     if (products == null || products.isEmpty) {
       return const <ListView>[];

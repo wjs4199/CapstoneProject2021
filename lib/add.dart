@@ -20,6 +20,9 @@ class _giveAddPageState extends State<giveAddPage> {
   File _image;
   final picker = ImagePicker();
 
+  final _valueList = ['product', 'time', 'talent'];
+  var _selectedValue = 'product';
+
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
@@ -46,8 +49,15 @@ class _giveAddPageState extends State<giveAddPage> {
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
 
+  var user = FirebaseAuth.instance.currentUser;
+  var name;
+
   // Add product in Firestore
   Future<void> addGiveProduct(String title, String content, String category) {
+    if (user != null) {
+      name = user.displayName;
+    }
+
     return giveProduct.add({
       'title': title,
       'content': content,
@@ -55,6 +65,7 @@ class _giveAddPageState extends State<giveAddPage> {
       'uid': FirebaseAuth.instance.currentUser.uid,
       'created': FieldValue.serverTimestamp(),
       'modified': FieldValue.serverTimestamp(),
+      'userName': name,
     }).then((value) {
       if (_image != null) uploadFile(_image, value.id);
     }).catchError((error) => print("Error: $error"));
@@ -99,7 +110,7 @@ class _giveAddPageState extends State<giveAddPage> {
                   addGiveProduct(
                     _titleController.text,
                     _contentController.text,
-                    _categoryController.text,
+                    _selectedFilter,
                   );
                   Navigator.pop(context);
                 }
@@ -170,7 +181,7 @@ class _giveAddPageState extends State<giveAddPage> {
                                       if (value != _selectedFilter)
                                         _selectedFilter = value;
                                       setState(() {
-                                        _categoryController.text = value;
+                                        _selectedFilter = value;
                                       });
                                     },
                                   ),
@@ -258,7 +269,6 @@ class _takeAddPageState extends State<takeAddPage> {
   final _formKey = GlobalKey<FormState>(debugLabel: '_takeAddPageState');
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  final _categoryController = TextEditingController();
 
   // Firestore
   CollectionReference takeProduct =
@@ -268,8 +278,15 @@ class _takeAddPageState extends State<takeAddPage> {
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
 
+  var user = FirebaseAuth.instance.currentUser;
+  var name;
+
   // Add product in Firestore
   Future<void> addTakeProduct(String title, String content, String category) {
+    if (user != null) {
+      name = user.displayName;
+    }
+
     return takeProduct.add({
       'title': title,
       'content': content,
@@ -277,6 +294,7 @@ class _takeAddPageState extends State<takeAddPage> {
       'uid': FirebaseAuth.instance.currentUser.uid,
       'created': FieldValue.serverTimestamp(),
       'modified': FieldValue.serverTimestamp(),
+      'userName': name,
     }).then((value) {
       if (_image != null) uploadFile(_image, value.id);
     }).catchError((error) => print("Error: $error"));
@@ -291,6 +309,7 @@ class _takeAddPageState extends State<takeAddPage> {
     }
   }
 
+  //dropdown버튼에 들어가는 항목들
   final _filter = ['Product', 'Time', 'Talent'];
   var _selectedFilter = 'Product';
 
@@ -319,12 +338,11 @@ class _takeAddPageState extends State<takeAddPage> {
               onPressed: () {
                 if (_formKey.currentState.validate()) {
                   if (_titleController.text != null &&
-                      _contentController.text != null &&
-                      _categoryController.text != null) {
+                      _contentController.text != null) {
                     addTakeProduct(
                       _titleController.text,
                       _contentController.text,
-                      _categoryController.text,
+                      _selectedFilter,
                     );
                   }
                   Navigator.pop(context);
@@ -397,7 +415,7 @@ class _takeAddPageState extends State<takeAddPage> {
                                       if (value != _selectedFilter)
                                         _selectedFilter = value;
                                       setState(() {
-                                        _categoryController.text = value;
+                                        _selectedFilter = value;
                                       });
                                     },
                                   ),

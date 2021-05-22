@@ -44,7 +44,6 @@ class _HomePageState extends State<HomePage> {
         children: [
           InkWell(
             onTap: () {
-              print("디테일 페이지로 넘어감!");
               Navigator.pushNamed(
                   context, '/detail/' + product.id + '/giveProducts');
             },
@@ -118,8 +117,6 @@ class _HomePageState extends State<HomePage> {
   bool _filterOfProduct = false;
   bool _filterOfTime = false;
   bool _filterOfTalent = false;
-
-  //bool _debugLocked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -257,7 +254,7 @@ class _HomePageState extends State<HomePage> {
             semanticLabel: 'search',
           ),
           onPressed: () {
-            //Navigator.pushNamed(context, '/take');
+            Navigator.pushNamed(context, '/take');
           },
         ),
       ],
