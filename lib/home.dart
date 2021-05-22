@@ -148,9 +148,9 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.centerRight,
                       icon: (_filterOfProduct
                           ? Icon(Icons.wallet_giftcard,
-                              size: 30, color: Colors.blue)
+                          size: 30, color: Colors.blue)
                           : Icon(Icons.wallet_giftcard,
-                              size: 30, color: Colors.grey)),
+                          size: 30, color: Colors.grey)),
                       onPressed: () {
                         _chooseFilter("Product");
                         if (_filterOfProduct) {
@@ -180,15 +180,15 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.centerRight,
                       icon: (_filterOfTalent
                           ? Icon(
-                              Icons.lightbulb,
-                              size: 30,
-                              color: Colors.blue,
-                            )
+                        Icons.lightbulb,
+                        size: 30,
+                        color: Colors.blue,
+                      )
                           : Icon(
-                              Icons.lightbulb,
-                              size: 30,
-                              color: Colors.grey,
-                            )),
+                        Icons.lightbulb,
+                        size: 30,
+                        color: Colors.grey,
+                      )),
                       onPressed: () {
                         _chooseFilter("Talent");
                         if (_filterOfTalent) {
@@ -237,7 +237,9 @@ class _HomePageState extends State<HomePage> {
   // Builder Widget for AppBar
   AppBar buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('Give'),
+      title: Center(
+        child: Text('Give'),
+      ),
       backgroundColor: Colors.cyan,
       leading: IconButton(
         icon: Icon(
