@@ -69,6 +69,9 @@ class _giveAddPageState extends State<giveAddPage> {
     }
   }
 
+  final _filter = ['Product', 'Time', 'Talent'];
+  var _selectedFilter = 'Product';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,16 +156,22 @@ class _giveAddPageState extends State<giveAddPage> {
                             Row(
                               children: [
                                 Expanded(
-                                  child: TextFormField(
-                                    controller: _categoryController,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Category',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Enter your message to continue';
-                                      }
-                                      return null;
+                                  child: DropdownButton<String>(
+                                    value: _selectedFilter,
+                                    items: _filter.map(
+                                      (value) {
+                                        return DropdownMenuItem(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      },
+                                    ).toList(),
+                                    onChanged: (value) {
+                                      if (value != _selectedFilter)
+                                        _selectedFilter = value;
+                                      setState(() {
+                                        _categoryController.text = value;
+                                      });
                                     },
                                   ),
                                 ),
@@ -282,6 +291,9 @@ class _takeAddPageState extends State<takeAddPage> {
     }
   }
 
+  final _filter = ['Product', 'Time', 'Talent'];
+  var _selectedFilter = 'Product';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -371,16 +383,22 @@ class _takeAddPageState extends State<takeAddPage> {
                             Row(
                               children: [
                                 Expanded(
-                                  child: TextFormField(
-                                    controller: _categoryController,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Category',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Enter your message to continue';
-                                      }
-                                      return null;
+                                  child: DropdownButton<String>(
+                                    value: _selectedFilter,
+                                    items: _filter.map(
+                                      (value) {
+                                        return DropdownMenuItem(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      },
+                                    ).toList(),
+                                    onChanged: (value) {
+                                      if (value != _selectedFilter)
+                                        _selectedFilter = value;
+                                      setState(() {
+                                        _categoryController.text = value;
+                                      });
                                     },
                                   ),
                                 ),

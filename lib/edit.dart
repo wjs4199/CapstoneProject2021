@@ -109,6 +109,9 @@ class _EditPageState extends State<EditPage> {
       }).catchError((error) => print("Error: $error"));
     }
 
+    final _filter = ['Product', 'Time', 'Talent'];
+    var _selectedFilter = 'Product';
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey,
@@ -207,17 +210,22 @@ class _EditPageState extends State<EditPage> {
                             Row(
                               children: [
                                 Expanded(
-                                  child: TextFormField(
-                                    controller: _categoryController,
-                                    decoration: InputDecoration(
-                                      hintText: product.category,
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        _categoryController.text =
-                                            product.category;
-                                      }
-                                      return null;
+                                  child: DropdownButton<String>(
+                                    value: _selectedFilter,
+                                    items: _filter.map(
+                                      (value) {
+                                        return DropdownMenuItem(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      },
+                                    ).toList(),
+                                    onChanged: (value) {
+                                      if (value != _selectedFilter)
+                                        _selectedFilter = value;
+                                      setState(() {
+                                        _categoryController.text = value;
+                                      });
                                     },
                                   ),
                                 ),
