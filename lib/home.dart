@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giveandtake/take.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,7 +14,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   List<ListView> _buildListView(BuildContext context, List<Product> products) {
     if (products == null || products.isEmpty) {
       return const <ListView>[];
@@ -44,7 +44,6 @@ class _HomePageState extends State<HomePage> {
         children: [
           InkWell(
             onTap: () {
-              //print("디테일 페이지로 넘어감!");
               Navigator.pushNamed(
                   context, '/detail/' + product.id + '/giveProducts');
             },
@@ -121,6 +120,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    //하단네비바 탭하여 페이지 이동하는 부분
+    if (_selectedIndex != 0) {
+      if (_selectedIndex == 1) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/take');
+        });
+      } else if (_selectedIndex == 2) {
+      } else if (_selectedIndex == 3) {}
+    }
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: buildAppBar(context),
@@ -139,12 +148,17 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.centerRight,
                       icon: (_filterOfProduct
                           ? Icon(Icons.wallet_giftcard,
-                              size: 30, color: Colors.blue)
+                          size: 30, color: Colors.blue)
                           : Icon(Icons.wallet_giftcard,
-                              size: 30, color: Colors.grey)),
+                          size: 30, color: Colors.grey)),
                       onPressed: () {
-                        _chooseFilter('product');
-                        if (_filterOfProduct) appState.orderByFilter('product');
+                        _chooseFilter("Product");
+                        if (_filterOfProduct) {
+                          appState.orderByFilter('Product');
+                          print("product filtering!");
+                        } else if (!_filterOfProduct &&
+                            !_filterOfTime &&
+                            !_filterOfTalent) appState.orderByFilter('All');
                       }),
                   IconButton(
                       padding: EdgeInsets.all(0),
@@ -153,27 +167,36 @@ class _HomePageState extends State<HomePage> {
                           ? Icon(Icons.timer, size: 30, color: Colors.blue)
                           : Icon(Icons.timer, size: 30, color: Colors.grey)),
                       onPressed: () {
-                        _chooseFilter('time');
-                        if (_filterOfProduct) appState.orderByFilter('time');
-
+                        _chooseFilter("Time");
+                        if (_filterOfTime) {
+                          print("time filtering!");
+                          appState.orderByFilter('Time');
+                        } else if (!_filterOfProduct &&
+                            !_filterOfTime &&
+                            !_filterOfTalent) appState.orderByFilter('All');
                       }),
                   IconButton(
                       padding: EdgeInsets.all(0),
                       alignment: Alignment.centerRight,
                       icon: (_filterOfTalent
                           ? Icon(
-                              Icons.lightbulb,
-                              size: 30,
-                              color: Colors.blue,
-                            )
+                        Icons.lightbulb,
+                        size: 30,
+                        color: Colors.blue,
+                      )
                           : Icon(
-                              Icons.lightbulb,
-                              size: 30,
-                              color: Colors.grey,
-                            )),
+                        Icons.lightbulb,
+                        size: 30,
+                        color: Colors.grey,
+                      )),
                       onPressed: () {
-                        _chooseFilter('talent');
-                        if (_filterOfProduct) appState.orderByFilter('talent');
+                        _chooseFilter("Talent");
+                        if (_filterOfTalent) {
+                          print("talent filtering!");
+                          appState.orderByFilter('Talent');
+                        } else if (!_filterOfProduct &&
+                            !_filterOfTime &&
+                            !_filterOfTalent) appState.orderByFilter('All');
                       }),
                 ]),
               ),
@@ -199,29 +222,14 @@ class _HomePageState extends State<HomePage> {
   void _chooseFilter(String fitering) {
     setState(() {
       if (fitering == 'Product') {
-        if (_filterOfProduct) {
-          _filterOfProduct = false;
-          print("_filterOfProduct = false");
-        } else {
-          _filterOfProduct = true;
-          print("_filterOfProduct = true");
-        }
+        _filterOfProduct = _filterOfProduct ? false : true;
+        if (_filterOfProduct) _filterOfTime = _filterOfTalent = false;
       } else if (fitering == 'Time') {
-        if (_filterOfTime) {
-          _filterOfTime = false;
-          print("_filterOfTime = false");
-        } else {
-          _filterOfTime = true;
-          print("_filterOfTime = true");
-        }
+        _filterOfTime = _filterOfTime ? false : true;
+        if (_filterOfTime) _filterOfProduct = _filterOfTalent = false;
       } else {
-        if (_filterOfTalent) {
-          _filterOfTalent = false;
-          print("_filterOfTalent = false");
-        } else {
-          _filterOfTalent = true;
-          print("_filterOfTalent = true");
-        }
+        _filterOfTalent = _filterOfTalent ? false : true;
+        if (_filterOfTalent) _filterOfProduct = _filterOfTime = false;
       }
     });
   }
@@ -229,7 +237,9 @@ class _HomePageState extends State<HomePage> {
   // Builder Widget for AppBar
   AppBar buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('Give'),
+      title: Center(
+        child: Text('Give'),
+      ),
       backgroundColor: Colors.cyan,
       leading: IconButton(
         icon: Icon(
