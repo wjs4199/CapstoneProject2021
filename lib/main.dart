@@ -90,14 +90,16 @@ class Application extends StatelessWidget {
 }
 
 class ApplicationState extends ChangeNotifier {
-  final String orderBy = 'modified';
+  String orderBy = 'All';
 
   void orderByFilter(String filtering) {
-    String orderBy = filtering;
+    orderBy = filtering;
+    print("filtering ->  " + orderBy);
     init();
   }
 
   ApplicationState() {
+    orderBy = 'All';
     init();
   }
 
@@ -107,65 +109,113 @@ class ApplicationState extends ChangeNotifier {
   //collection 'giveProducts' 파이어베이스에서 불러오기
   Future<void> init() async {
     // FirebaseFirestore.instance
-    FirebaseFirestore.instance
-        .collection('giveProducts')
-        .orderBy(orderBy, descending: true)
-        .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
-        .listen((snapshot) {
-      _giveProducts = [];
-      snapshot.docs.forEach((document) {
-        //A non null string must be provided to a text widget
-        //밑에는 위의 오류 때문에 넣은 부분
-        String content = document.data()['content'];
-        if (content == null) {
-          content = "글 읽기 실패";
-        }
-
-        _giveProducts.add(Product(
-          id: document.id,
-          title: document.data()['title'],
-          content: content,
-          category: document.data()['category'],
-          created: document.data()['created'],
-          modified: document.data()['modified'],
-          userName: document.data()['userName'],
-          uid: document.data()['uid'],
-          //like: document.data()['like'],
-          //mark: document.data()['mark'],
-          //comments: document.data()['comments'],
-        ));
+    if (orderBy != 'All') {
+      FirebaseFirestore.instance
+          .collection('giveProducts')
+          .where('category', isEqualTo: orderBy)
+          .orderBy('modified', descending: true)
+          .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
+          .listen((snapshot) {
+        _giveProducts = [];
+        snapshot.docs.forEach((document) {
+          _giveProducts.add(Product(
+            id: document.id,
+            title: document.data()['title'],
+            content: document.data()['content'],
+            category: document.data()['category'],
+            created: document.data()['created'],
+            modified: document.data()['modified'],
+            uid: document.data()['uid'],
+            //like: document.data()['like'],
+            //mark: document.data()['mark'],
+            //comments: document.data()['comments'],
+          ));
+        });
+        notifyListeners();
       });
-      notifyListeners();
-    });
 
-    //collection 'takeProducts' 파이어베이스에서 불러오기
-    FirebaseFirestore.instance
-        .collection('takeProducts')
-        .orderBy(orderBy, descending: true)
-        .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
-        .listen((snapshot) {
-      _takeProducts = [];
-      snapshot.docs.forEach((document) {
-        _takeProducts.add(Product(
-          id: document.id,
-          title: document.data()['title'],
-          content: document.data()['content'],
-          category: document.data()['category'],
-          created: document.data()['created'],
-          modified: document.data()['modified'],
-          userName: document.data()['userName'],
-          uid: document.data()['uid'],
-          like: document.data()['like'],
-          mark: document.data()['mark'],
-          comments: document.data()['comments'],
-        ));
+      //collection 'takeProducts' 파이어베이스에서 불러오기
+      FirebaseFirestore.instance
+          .collection('takeProducts')
+          .where('category', isEqualTo: orderBy)
+          .orderBy('modified', descending: true)
+          .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
+          .listen((snapshot) {
+        _takeProducts = [];
+        snapshot.docs.forEach((document) {
+          _takeProducts.add(Product(
+            id: document.id,
+            title: document.data()['title'],
+            content: document.data()['content'],
+            category: document.data()['category'],
+            created: document.data()['created'],
+            modified: document.data()['modified'],
+            uid: document.data()['uid'],
+            like: document.data()['like'],
+            mark: document.data()['mark'],
+            comments: document.data()['comments'],
+          ));
+        });
+        notifyListeners();
       });
-      notifyListeners();
-    });
+    } else {
+      FirebaseFirestore.instance
+          .collection('giveProducts')
+          .orderBy('modified', descending: true)
+          .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
+          .listen((snapshot) {
+        _giveProducts = [];
+        snapshot.docs.forEach((document) {
+          //A non null string must be provided to a text widget
+          //밑에는 위의 오류 때문에 넣은 부분
+          String content = document.data()['content'];
+          if (content == null) {
+            content = "글 읽기 실패";
+          }
+          _giveProducts.add(Product(
+            id: document.id,
+            title: document.data()['title'],
+            content: content,
+            category: document.data()['category'],
+            created: document.data()['created'],
+            modified: document.data()['modified'],
+            uid: document.data()['uid'],
+            //like: document.data()['like'],
+            //mark: document.data()['mark'],
+            //comments: document.data()['comments'],
+          ));
+        });
+        notifyListeners();
+      });
+
+      //collection 'takeProducts' 파이어베이스에서 불러오기
+      FirebaseFirestore.instance
+          .collection('takeProducts')
+          .orderBy('modified', descending: true)
+          .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
+          .listen((snapshot) {
+        _takeProducts = [];
+        snapshot.docs.forEach((document) {
+          _takeProducts.add(Product(
+            id: document.id,
+            title: document.data()['title'],
+            content: document.data()['content'],
+            category: document.data()['category'],
+            created: document.data()['created'],
+            modified: document.data()['modified'],
+            uid: document.data()['uid'],
+            //like: document.data()['like'],
+            // mark: document.data()['mark'],
+            //comments: document.data()['comments'],
+          ));
+        });
+        notifyListeners();
+      });
+    }
   }
 
   List<Product> get giveProducts => _giveProducts;
   //giveProducts 업데이트 완료
   List<Product> get takeProducts => _takeProducts;
-  //takeProducts 업데이트 완료
+//takeProducts 업데이트 완료
 }

@@ -23,8 +23,6 @@ class _giveAddPageState extends State<giveAddPage> {
   final _valueList = ['product', 'time', 'talent'];
   var _selectedValue = 'product';
 
-
-
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
@@ -41,10 +39,11 @@ class _giveAddPageState extends State<giveAddPage> {
   final _formKey = GlobalKey<FormState>(debugLabel: '_giveAddPageState');
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
+  final _categoryController = TextEditingController();
 
   // Firestore
   CollectionReference giveProduct =
-  FirebaseFirestore.instance.collection('giveProducts');
+      FirebaseFirestore.instance.collection('giveProducts');
 
   // Storage
   firebase_storage.FirebaseStorage storage =
@@ -55,7 +54,7 @@ class _giveAddPageState extends State<giveAddPage> {
 
   // Add product in Firestore
   Future<void> addGiveProduct(String title, String content, String category) {
-    if(user != null) {
+    if (user != null) {
       name = user.displayName;
     }
 
@@ -67,7 +66,6 @@ class _giveAddPageState extends State<giveAddPage> {
       'created': FieldValue.serverTimestamp(),
       'modified': FieldValue.serverTimestamp(),
       'userName': name,
-
     }).then((value) {
       if (_image != null) uploadFile(_image, value.id);
     }).catchError((error) => print("Error: $error"));
@@ -81,6 +79,9 @@ class _giveAddPageState extends State<giveAddPage> {
       return null;
     }
   }
+
+  final _filter = ['Product', 'Time', 'Talent'];
+  var _selectedFilter = 'Product';
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +110,7 @@ class _giveAddPageState extends State<giveAddPage> {
                   addGiveProduct(
                     _titleController.text,
                     _contentController.text,
-                    _selectedValue,
+                    _selectedFilter,
                   );
                   Navigator.pop(context);
                 }
@@ -124,12 +125,12 @@ class _giveAddPageState extends State<giveAddPage> {
               // height: MediaQuery.of(context).size.height / 2,
               child: _image == null
                   ? Image.asset(
-                'assets/logo.png',
-              )
+                      'assets/logo.png',
+                    )
                   : Image.file(
-                _image,
-                fit: BoxFit.fitWidth,
-              ),
+                      _image,
+                      fit: BoxFit.fitWidth,
+                    ),
             ),
             Row(
               children: [
@@ -165,22 +166,26 @@ class _giveAddPageState extends State<giveAddPage> {
                           children: [
                             Row(
                               children: [
-                                DropdownButton(
-                                  value: _selectedValue,
-                                  items: _valueList.map(
-                                        (value) {
-                                      return DropdownMenuItem (
-                                        value: value,
-                                        child: Text(value),
-                                      );
+                                Expanded(
+                                  child: DropdownButton<String>(
+                                    value: _selectedFilter,
+                                    items: _filter.map(
+                                      (value) {
+                                        return DropdownMenuItem(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      },
+                                    ).toList(),
+                                    onChanged: (value) {
+                                      if (value != _selectedFilter)
+                                        _selectedFilter = value;
+                                      setState(() {
+                                        _selectedFilter = value;
+                                      });
                                     },
-                                  ).toList(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedValue = value;
-                                    });
-                                  },
-                                )
+                                  ),
+                                ),
                               ],
                             ),
                             Row(
@@ -265,10 +270,9 @@ class _takeAddPageState extends State<takeAddPage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
-
   // Firestore
   CollectionReference takeProduct =
-  FirebaseFirestore.instance.collection('takeProducts');
+      FirebaseFirestore.instance.collection('takeProducts');
 
   // Storage
   firebase_storage.FirebaseStorage storage =
@@ -279,8 +283,7 @@ class _takeAddPageState extends State<takeAddPage> {
 
   // Add product in Firestore
   Future<void> addTakeProduct(String title, String content, String category) {
-
-    if(user != null) {
+    if (user != null) {
       name = user.displayName;
     }
 
@@ -297,7 +300,6 @@ class _takeAddPageState extends State<takeAddPage> {
     }).catchError((error) => print("Error: $error"));
   }
 
-
   // Upload photo to storage
   Future<void> uploadFile(File photo, String id) async {
     try {
@@ -308,8 +310,8 @@ class _takeAddPageState extends State<takeAddPage> {
   }
 
   //dropdown버튼에 들어가는 항목들
-  final _valueList = ['product', 'time', 'talent'];
-  var _selectedValue = 'product';
+  final _filter = ['Product', 'Time', 'Talent'];
+  var _selectedFilter = 'Product';
 
   @override
   Widget build(BuildContext context) {
@@ -340,7 +342,7 @@ class _takeAddPageState extends State<takeAddPage> {
                     addTakeProduct(
                       _titleController.text,
                       _contentController.text,
-                      _selectedValue,
+                      _selectedFilter,
                     );
                   }
                   Navigator.pop(context);
@@ -356,12 +358,12 @@ class _takeAddPageState extends State<takeAddPage> {
               // height: MediaQuery.of(context).size.height / 2,
               child: _image == null
                   ? Image.asset(
-                'assets/logo.png',
-              )
+                      'assets/logo.png',
+                    )
                   : Image.file(
-                _image,
-                fit: BoxFit.fitWidth,
-              ),
+                      _image,
+                      fit: BoxFit.fitWidth,
+                    ),
             ),
             Row(
               children: [
@@ -397,24 +399,28 @@ class _takeAddPageState extends State<takeAddPage> {
                           children: [
                             //카테고리 부분 나중에 dropdown selector로 만들면 좋을 듯
                             Row(
-                                children: [
-                                  DropdownButton(
-                                    value: _selectedValue,
-                                    items: _valueList.map(
-                                          (value) {
-                                        return DropdownMenuItem (
+                              children: [
+                                Expanded(
+                                  child: DropdownButton<String>(
+                                    value: _selectedFilter,
+                                    items: _filter.map(
+                                      (value) {
+                                        return DropdownMenuItem(
                                           value: value,
                                           child: Text(value),
                                         );
                                       },
                                     ).toList(),
                                     onChanged: (value) {
+                                      if (value != _selectedFilter)
+                                        _selectedFilter = value;
                                       setState(() {
-                                        _selectedValue = value;
+                                        _selectedFilter = value;
                                       });
                                     },
-                                  )
-                                ],
+                                  ),
+                                ),
+                              ],
                             ),
                             Row(
                               children: [
@@ -458,7 +464,6 @@ class _takeAddPageState extends State<takeAddPage> {
                     ],
                   ),
                 ),
-
                 Expanded(
                   flex: 1,
                   child: Container(),
