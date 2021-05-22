@@ -54,6 +54,7 @@ class _LoginPageState extends State<LoginPage> {
                     // Display User Info with SnackBar
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('Welcome, ' + value.user.displayName + '!'),
+                      behavior: SnackBarBehavior.fixed,
                       duration: Duration(seconds: 1),
                     ));
                     Navigator.pop(context);

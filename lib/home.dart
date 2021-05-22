@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:giveandtake/take.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +11,9 @@ class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
+
+String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
+String highResUrl = photoUrl.replaceAll('s96-c', 's400-c');
 
 class _HomePageState extends State<HomePage> {
   List<Card> _buildListElement(BuildContext context, List<Product> products) {
@@ -89,6 +91,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _filterOfProduct = false;
@@ -104,88 +113,120 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: buildNavBar(context),
       body: Consumer<ApplicationState>(
         builder: (context, appState, _) => SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: EdgeInsets.all(8),
-                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  IconButton(
-                      padding: EdgeInsets.all(0),
-                      alignment: Alignment.centerRight,
-                      icon: (_filterOfProduct
-                          ? Icon(Icons.wallet_giftcard,
-                              size: 30, color: Colors.blue)
-                          : Icon(Icons.wallet_giftcard,
-                              size: 30, color: Colors.grey)),
-                      onPressed: () {
-                        _chooseFilter("Product");
-                        if (_filterOfProduct) {
-                          appState.orderByFilter('Product');
-                          print("product filtering!");
-                        } else if (!_filterOfProduct &&
-                            !_filterOfTime &&
-                            !_filterOfTalent) appState.orderByFilter('All');
-                      }),
-                  IconButton(
-                      padding: EdgeInsets.all(0),
-                      alignment: Alignment.centerRight,
-                      icon: (_filterOfTime
-                          ? Icon(Icons.timer, size: 30, color: Colors.blue)
-                          : Icon(Icons.timer, size: 30, color: Colors.grey)),
-                      onPressed: () {
-                        _chooseFilter("Time");
-                        if (_filterOfTime) {
-                          print("time filtering!");
-                          appState.orderByFilter('Time');
-                        } else if (!_filterOfProduct &&
-                            !_filterOfTime &&
-                            !_filterOfTalent) appState.orderByFilter('All');
-                      }),
-                  IconButton(
-                      padding: EdgeInsets.all(0),
-                      alignment: Alignment.centerRight,
-                      icon: (_filterOfTalent
-                          ? Icon(
-                              Icons.lightbulb,
-                              size: 30,
-                              color: Colors.blue,
-                            )
-                          : Icon(
-                              Icons.lightbulb,
-                              size: 30,
-                              color: Colors.grey,
-                            )),
-                      onPressed: () {
-                        _chooseFilter("Talent");
-                        if (_filterOfTalent) {
-                          print("talent filtering!");
-                          appState.orderByFilter('Talent');
-                        } else if (!_filterOfProduct &&
-                            !_filterOfTime &&
-                            !_filterOfTalent) appState.orderByFilter('All');
-                      }),
-                ]),
-              ),
-              Expanded(
-                child: ListView(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  children: _buildListElement(context, appState.giveProducts),
-                ),
-              ),
-            ],
-          ),
+          child: getBody(context, appState),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/giveadd');
-          },
-          child: Icon(Icons.add)),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: buildFAB(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
     //);
+  }
+
+  Widget getBody(BuildContext context, ApplicationState appState) {
+    // If 'Give' NavButton is pressed
+    if (_selectedIndex == 0)
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            child: _buildFilterRow(context, appState),
+          ),
+          Expanded(
+            child: ListView(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              children: _buildListElement(context, appState.giveProducts),
+            ),
+          ),
+        ],
+      );
+    // If 'Take' NavButton is pressed
+    else if (_selectedIndex == 1)
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            child: _buildFilterRow(context, appState),
+          ),
+          Expanded(
+            child: ListView(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              children: _buildListElement(context, appState.takeProducts),
+            ),
+          ),
+        ],
+      );
+    // If 'Chat' NavButton is pressed
+    else if (_selectedIndex == 2)
+      return Text('Chat');
+    // If 'MyPage' NavButton is pressed
+    else if (_selectedIndex == 3)
+      return Row(
+        children: [
+          Expanded(
+            flex: 1,
+            child: Container(),
+          ),
+          Expanded(
+            flex: 8,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 30,
+                ),
+                Container(
+                  width: 100,
+                  height: 100,
+                  child: FirebaseAuth.instance.currentUser.isAnonymous
+                      ? Image.asset('assets/logo.png', fit: BoxFit.fitWidth)
+                      : Image.network(highResUrl, fit: BoxFit.fitWidth),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Text(FirebaseAuth.instance.currentUser.displayName),
+                Divider(
+                  color: Colors.black26,
+                  height: 30,
+                  thickness: 1,
+                ),
+                Text(FirebaseAuth.instance.currentUser.isAnonymous
+                    ? 'Anonymous'
+                    : FirebaseAuth.instance.currentUser.email),
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Container(),
+          ),
+        ],
+      );
+    return Text('Navigation out of reach');
+  }
+
+  FloatingActionButton buildFAB() {
+    if (_selectedIndex == 0)
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/giveadd');
+        },
+        backgroundColor: Colors.cyan,
+        child: Icon(Icons.add),
+      );
+    else if (_selectedIndex == 1)
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/takeadd');
+        },
+        backgroundColor: Colors.cyan,
+        child: Icon(Icons.add),
+      );
+    return null;
   }
 
   void _chooseFilter(String fitering) {
@@ -203,30 +244,85 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _changeScreen() {
-    //하단네비바 탭하여 페이지 이동하는 부분
-    if (_selectedIndex != 0) {
-      if (_selectedIndex == 1) {
-        Future.delayed(const Duration(milliseconds: 200), () {
-          Navigator.of(context).pushReplacementNamed('/take');
-        });
-      } else if (_selectedIndex == 2) {
-        Future.delayed(const Duration(milliseconds: 200), () {
-          Navigator.of(context).pushReplacementNamed('/chat');
-        });
-      } else if (_selectedIndex == 3) {
-        Future.delayed(const Duration(milliseconds: 200), () {
-          Navigator.of(context).pushReplacementNamed('/mypage');
-        });
-      }
-    }
+  // void _changeScreen() {
+  //   //하단네비바 탭하여 페이지 이동하는 부분
+  //   if (_selectedIndex != 0) {
+  //     if (_selectedIndex == 1) {
+  //       Future.delayed(const Duration(milliseconds: 200), () {
+  //         Navigator.of(context).pushReplacementNamed('/take');
+  //       });
+  //     } else if (_selectedIndex == 2) {
+  //       Future.delayed(const Duration(milliseconds: 200), () {
+  //         Navigator.of(context).pushReplacementNamed('/chat');
+  //       });
+  //     } else if (_selectedIndex == 3) {
+  //       Future.delayed(const Duration(milliseconds: 200), () {
+  //         Navigator.of(context).pushReplacementNamed('/mypage');
+  //       });
+  //     }
+  //   }
+  // }
+
+  Row _buildFilterRow(BuildContext context, ApplicationState appState) {
+    return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+      IconButton(
+          padding: EdgeInsets.all(0),
+          alignment: Alignment.centerRight,
+          icon: (_filterOfProduct
+              ? Icon(Icons.wallet_giftcard, size: 30, color: Colors.blue)
+              : Icon(Icons.wallet_giftcard, size: 30, color: Colors.grey)),
+          onPressed: () {
+            _chooseFilter("Product");
+            if (_filterOfProduct) {
+              appState.orderByFilter('Product');
+              print("product filtering!");
+            } else if (!_filterOfProduct && !_filterOfTime && !_filterOfTalent)
+              appState.orderByFilter('All');
+          }),
+      IconButton(
+          padding: EdgeInsets.all(0),
+          alignment: Alignment.centerRight,
+          icon: (_filterOfTime
+              ? Icon(Icons.timer, size: 30, color: Colors.blue)
+              : Icon(Icons.timer, size: 30, color: Colors.grey)),
+          onPressed: () {
+            _chooseFilter("Time");
+            if (_filterOfTime) {
+              print("time filtering!");
+              appState.orderByFilter('Time');
+            } else if (!_filterOfProduct && !_filterOfTime && !_filterOfTalent)
+              appState.orderByFilter('All');
+          }),
+      IconButton(
+          padding: EdgeInsets.all(0),
+          alignment: Alignment.centerRight,
+          icon: (_filterOfTalent
+              ? Icon(
+                  Icons.lightbulb,
+                  size: 30,
+                  color: Colors.blue,
+                )
+              : Icon(
+                  Icons.lightbulb,
+                  size: 30,
+                  color: Colors.grey,
+                )),
+          onPressed: () {
+            _chooseFilter("Talent");
+            if (_filterOfTalent) {
+              print("talent filtering!");
+              appState.orderByFilter('Talent');
+            } else if (!_filterOfProduct && !_filterOfTime && !_filterOfTalent)
+              appState.orderByFilter('All');
+          }),
+    ]);
   }
 
   // Builder Widget for AppBar
   AppBar buildAppBar(BuildContext context) {
     return AppBar(
       title: Center(
-        child: Text('Give'),
+        child: Text('Give & Take'),
       ),
       backgroundColor: Colors.cyan,
       leading: IconButton(
@@ -253,15 +349,6 @@ class _HomePageState extends State<HomePage> {
 
   // Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
-    void _onItemTapped(int index) {
-      setState(() {
-        _selectedIndex = index;
-        _changeScreen();
-      });
-    }
-
-    int _currentIndex = 0;
-
     return BottomNavigationBar(
       selectedItemColor: Colors.cyan,
       type: BottomNavigationBarType.fixed,

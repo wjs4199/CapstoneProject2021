@@ -8,9 +8,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'home.dart';
 import 'login.dart';
 import 'detail.dart';
-import 'take.dart';
 import 'chat.dart';
-import 'mypage.dart';
 import 'product.dart';
 import 'add.dart';
 import 'edit.dart';
@@ -40,9 +38,7 @@ class Application extends StatelessWidget {
             routes: {
               '/login': (context) => LoginPage(),
               '/home': (context) => HomePage(),
-              '/take': (context) => TakePage(),
               '/chat': (context) => ChatPage(),
-              '/mypage': (context) => ProfilePage(),
               '/giveadd': (context) => giveAddPage(),
               '/takeadd': (context) => takeAddPage(),
             },
