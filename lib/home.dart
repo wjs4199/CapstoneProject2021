@@ -90,19 +90,41 @@ class _HomePageState extends State<HomePage> {
     }).toList();
   }
 
+  // Drawer 관련 Key
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // Filtering Buttons 관련 booleans (리팩토링 가능할듯)
+  bool _filterOfProduct = false;
+  bool _filterOfTime = false;
+  bool _filterOfTalent = false;
+
+  /* ----------------- BottomNavigationBar, PageView 관련 ----------------- */
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      //using this page controller you can make beautiful animation effects
+      _pageController.animateToPage(index,
+          duration: Duration(milliseconds: 500), curve: Curves.easeOut);
     });
   }
 
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  PageController _pageController;
 
-  bool _filterOfProduct = false;
-  bool _filterOfTime = false;
-  bool _filterOfTalent = false;
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  /* -------------------------------------------------------------------- */
 
   @override
   Widget build(BuildContext context) {
@@ -110,22 +132,33 @@ class _HomePageState extends State<HomePage> {
       key: _scaffoldKey,
       appBar: buildAppBar(context),
       drawer: buildDrawer(context),
-      bottomNavigationBar: buildNavBar(context),
       body: Consumer<ApplicationState>(
         builder: (context, appState, _) => SafeArea(
-          child: getBody(context, appState),
+          child: SizedBox.expand(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() => _selectedIndex = index);
+              },
+              // NavBar Index 별 상응 위젯 출력
+              children: _buildWidgetOptions(context, appState),
+            ),
+          ),
         ),
       ),
+      bottomNavigationBar: buildNavBar(context),
       floatingActionButton: buildFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
     //);
   }
 
-  Widget getBody(BuildContext context, ApplicationState appState) {
-    // If 'Give' NavButton is pressed
-    if (_selectedIndex == 0)
-      return Column(
+  // Index 별 위젯 반환: (순서: 0-Give, 1-Take, 2-Chat, 3-MyPage)
+  List<Widget> _buildWidgetOptions(
+      BuildContext context, ApplicationState appState) {
+    List<Widget> _widgetOptions = <Widget>[
+      // 0(Give):
+      Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
@@ -140,10 +173,9 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
-      );
-    // If 'Take' NavButton is pressed
-    else if (_selectedIndex == 1)
-      return Column(
+      ),
+      // 1(Take):
+      Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
@@ -158,13 +190,13 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
-      );
-    // If 'Chat' NavButton is pressed
-    else if (_selectedIndex == 2)
-      return Text('Chat');
-    // If 'MyPage' NavButton is pressed
-    else if (_selectedIndex == 3)
-      return Row(
+      ),
+      // 2(Chat):
+      Center(
+        child: Text('Chat(To be implemented)'),
+      ),
+      // 3(MyPage):
+      Row(
         children: [
           Expanded(
             flex: 1,
@@ -205,8 +237,9 @@ class _HomePageState extends State<HomePage> {
             child: Container(),
           ),
         ],
-      );
-    return Text('Navigation out of reach');
+      )
+    ];
+    return _widgetOptions;
   }
 
   FloatingActionButton buildFAB() {
@@ -244,6 +277,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // NavBar 구현하여 필요없음
   // void _changeScreen() {
   //   //하단네비바 탭하여 페이지 이동하는 부분
   //   if (_selectedIndex != 0) {
@@ -263,6 +297,7 @@ class _HomePageState extends State<HomePage> {
   //   }
   // }
 
+  // Filtering Code 복잡해 함수로 빼놓음
   Row _buildFilterRow(BuildContext context, ApplicationState appState) {
     return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
       IconButton(
@@ -350,12 +385,10 @@ class _HomePageState extends State<HomePage> {
   // Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
     return BottomNavigationBar(
-      selectedItemColor: Colors.cyan,
-      type: BottomNavigationBarType.fixed,
-      // Tap actions for each tab
-      // setState로 _currentIndex값 변경
-      onTap: _onItemTapped,
       currentIndex: _selectedIndex,
+      selectedItemColor: Colors.cyan,
+      onTap: _onItemTapped,
+      type: BottomNavigationBarType.fixed,
       items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
