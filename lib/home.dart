@@ -229,12 +229,12 @@ class _HomePageState extends State<HomePage> {
     return null;
   }
 
-  void _chooseFilter(String fitering) {
+  void _chooseFilter(String filtering) {
     setState(() {
-      if (fitering == 'Product') {
+      if (filtering == 'Product') {
         _filterOfProduct = _filterOfProduct ? false : true;
         if (_filterOfProduct) _filterOfTime = _filterOfTalent = false;
-      } else if (fitering == 'Time') {
+      } else if (filtering == 'Time') {
         _filterOfTime = _filterOfTime ? false : true;
         if (_filterOfTime) _filterOfProduct = _filterOfTalent = false;
       } else {
@@ -269,7 +269,7 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.all(0),
           alignment: Alignment.centerRight,
           icon: (_filterOfProduct
-              ? Icon(Icons.wallet_giftcard, size: 30, color: Colors.blue)
+              ? Icon(Icons.wallet_giftcard, size: 30, color: Colors.cyan)
               : Icon(Icons.wallet_giftcard, size: 30, color: Colors.grey)),
           onPressed: () {
             _chooseFilter("Product");
@@ -283,7 +283,7 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.all(0),
           alignment: Alignment.centerRight,
           icon: (_filterOfTime
-              ? Icon(Icons.timer, size: 30, color: Colors.blue)
+              ? Icon(Icons.timer, size: 30, color: Colors.cyan)
               : Icon(Icons.timer, size: 30, color: Colors.grey)),
           onPressed: () {
             _chooseFilter("Time");
@@ -300,7 +300,7 @@ class _HomePageState extends State<HomePage> {
               ? Icon(
                   Icons.lightbulb,
                   size: 30,
-                  color: Colors.blue,
+                  color: Colors.cyan,
                 )
               : Icon(
                   Icons.lightbulb,
