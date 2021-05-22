@@ -23,6 +23,8 @@ class _giveAddPageState extends State<giveAddPage> {
   final _valueList = ['product', 'time', 'talent'];
   var _selectedValue = 'product';
 
+
+
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
@@ -48,8 +50,15 @@ class _giveAddPageState extends State<giveAddPage> {
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
 
+  var user = FirebaseAuth.instance.currentUser;
+  var name;
+
   // Add product in Firestore
   Future<void> addGiveProduct(String title, String content, String category) {
+    if(user != null) {
+      name = user.displayName;
+    }
+
     return giveProduct.add({
       'title': title,
       'content': content,
@@ -57,6 +66,8 @@ class _giveAddPageState extends State<giveAddPage> {
       'uid': FirebaseAuth.instance.currentUser.uid,
       'created': FieldValue.serverTimestamp(),
       'modified': FieldValue.serverTimestamp(),
+      'userName': name,
+
     }).then((value) {
       if (_image != null) uploadFile(_image, value.id);
     }).catchError((error) => print("Error: $error"));
@@ -263,8 +274,16 @@ class _takeAddPageState extends State<takeAddPage> {
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
 
+  var user = FirebaseAuth.instance.currentUser;
+  var name;
+
   // Add product in Firestore
   Future<void> addTakeProduct(String title, String content, String category) {
+
+    if(user != null) {
+      name = user.displayName;
+    }
+
     return takeProduct.add({
       'title': title,
       'content': content,
@@ -272,10 +291,12 @@ class _takeAddPageState extends State<takeAddPage> {
       'uid': FirebaseAuth.instance.currentUser.uid,
       'created': FieldValue.serverTimestamp(),
       'modified': FieldValue.serverTimestamp(),
+      'userName': name,
     }).then((value) {
       if (_image != null) uploadFile(_image, value.id);
     }).catchError((error) => print("Error: $error"));
   }
+
 
   // Upload photo to storage
   Future<void> uploadFile(File photo, String id) async {
@@ -437,6 +458,7 @@ class _takeAddPageState extends State<takeAddPage> {
                     ],
                   ),
                 ),
+
                 Expanded(
                   flex: 1,
                   child: Container(),

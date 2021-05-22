@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 import 'product.dart';
 import 'main.dart';
@@ -33,6 +34,9 @@ class _DetailPageState extends State<DetailPage> {
     for (int i = 0; i < Products.length; i++) {
       if (Products[i].id == productId) {
         product = Products[i];
+        print(product.userName);
+        print(product.uid);
+
         productFound = true;
       }
     }
@@ -180,7 +184,7 @@ class _DetailPageState extends State<DetailPage> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Column(
                       children: [
-                        SizedBox(height: 96),
+                        SizedBox(height: 50),
                         Center(child: CircularProgressIndicator()),
                         SizedBox(height: 48),
                       ],
@@ -260,6 +264,8 @@ class _DetailPageState extends State<DetailPage> {
                           ),
                         ],
                       ),
+                      Divider(thickness: 1.0),
+
                       SizedBox(height: 8.0),
                       Text(
                         product.title,
@@ -270,6 +276,24 @@ class _DetailPageState extends State<DetailPage> {
                         ),
                       ),
                       SizedBox(height: 16.0),
+                      Divider(thickness: 1.0),
+                      Row(
+                        children: [
+                          Text(product.userName.toString() + "                      ",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xff296d98),
+                            ),
+                          ),
+                          Text(DateFormat('yyyy.MM.dd HH:mm')
+                              .format(product.modified.toDate()),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xff296d98),
+                            ),
+                          ),
+                        ],
+                      ),
                       Divider(thickness: 1.0),
                       SizedBox(height: 16.0),
                       Text(

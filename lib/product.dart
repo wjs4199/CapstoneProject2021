@@ -8,6 +8,7 @@ class Product {
     @required this.content,
     @required this.created,
     @required this.modified,
+    @required this.userName,
     @required this.uid,
     @required this.id,
     @required this.like,
@@ -20,6 +21,7 @@ class Product {
   final String content;
   final Timestamp created;
   final Timestamp modified;
+  final String userName;
   final String uid;
   final String id;
   final int like;
