@@ -126,9 +126,10 @@ class ApplicationState extends ChangeNotifier {
             created: document.data()['created'],
             modified: document.data()['modified'],
             uid: document.data()['uid'],
-            //like: document.data()['like'],
-            //mark: document.data()['mark'],
-            //comments: document.data()['comments'],
+            userName: document.data()['userName'],
+            like: document.data()['like'],
+            mark: document.data()['mark'],
+            comments: document.data()['comments'],
           ));
         });
         notifyListeners();
@@ -150,6 +151,7 @@ class ApplicationState extends ChangeNotifier {
             category: document.data()['category'],
             created: document.data()['created'],
             modified: document.data()['modified'],
+            userName: document.data()['userName'],
             uid: document.data()['uid'],
             like: document.data()['like'],
             mark: document.data()['mark'],
@@ -179,10 +181,11 @@ class ApplicationState extends ChangeNotifier {
             category: document.data()['category'],
             created: document.data()['created'],
             modified: document.data()['modified'],
+            userName: document.data()['userName'],
             uid: document.data()['uid'],
-            //like: document.data()['like'],
-            //mark: document.data()['mark'],
-            //comments: document.data()['comments'],
+            like: document.data()['like'],
+            mark: document.data()['mark'],
+            comments: document.data()['comments'],
           ));
         });
         notifyListeners();
@@ -203,10 +206,11 @@ class ApplicationState extends ChangeNotifier {
             category: document.data()['category'],
             created: document.data()['created'],
             modified: document.data()['modified'],
+            userName: document.data()['userName'],
             uid: document.data()['uid'],
-            //like: document.data()['like'],
-            // mark: document.data()['mark'],
-            //comments: document.data()['comments'],
+            like: document.data()['like'],
+            mark: document.data()['mark'],
+            comments: document.data()['comments'],
           ));
         });
         notifyListeners();

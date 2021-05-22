@@ -86,6 +86,20 @@ class _DetailPageState extends State<DetailPage> {
           .catchError((error) => print('Failed to add a like: $error'));
     }
 
+    /*// Delete like
+    Future<void> deleteLike() async {
+      try {
+        return await FirebaseFirestore.instance
+            .collection(detailGiveOrTake)
+            .doc(productId)
+            .snapshots()
+            .['likes']
+            .delete();
+      } on Exception {
+        return null;
+      }
+    }*/
+
     // Delete item
     Future<void> deleteProduct() async {
       try {
@@ -215,7 +229,7 @@ class _DetailPageState extends State<DetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 48.0),
+                      SizedBox(height: 8.0),
                       Row(
                         children: [
                           Expanded(
@@ -247,8 +261,8 @@ class _DetailPageState extends State<DetailPage> {
                                     IconButton(
                                       icon: Icon(
                                         (count != 0)
-                                            ? Icons.thumb_up
-                                            : Icons.thumb_up_alt_outlined,
+                                            ? Icons.favorite
+                                            : Icons.favorite_outlined,
                                         color: Colors.red,
                                         semanticLabel: 'like',
                                       ),
@@ -265,7 +279,6 @@ class _DetailPageState extends State<DetailPage> {
                         ],
                       ),
                       Divider(thickness: 1.0),
-
                       SizedBox(height: 8.0),
                       Text(
                         product.title,
@@ -275,18 +288,21 @@ class _DetailPageState extends State<DetailPage> {
                           color: Color(0xff296d98),
                         ),
                       ),
-                      SizedBox(height: 16.0),
+                      SizedBox(height: 8.0),
                       Divider(thickness: 1.0),
                       Row(
                         children: [
-                          Text(product.userName.toString() + "                      ",
+                          Text(
+                            product.userName.toString() +
+                                "                            ",
                             style: TextStyle(
                               fontSize: 14,
                               color: Color(0xff296d98),
                             ),
                           ),
-                          Text(DateFormat('yyyy.MM.dd HH:mm')
-                              .format(product.modified.toDate()),
+                          Text(
+                            DateFormat('yyyy.MM.dd HH:mm')
+                                .format(product.modified.toDate()),
                             style: TextStyle(
                               fontSize: 14,
                               color: Color(0xff296d98),
@@ -295,7 +311,7 @@ class _DetailPageState extends State<DetailPage> {
                         ],
                       ),
                       Divider(thickness: 1.0),
-                      SizedBox(height: 16.0),
+                      SizedBox(height: 8.0),
                       Text(
                         product.content ?? product.content,
                         style: TextStyle(
