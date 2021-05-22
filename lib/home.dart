@@ -15,10 +15,23 @@ class HomePage extends StatefulWidget {
 String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
 String highResUrl = photoUrl.replaceAll('s96-c', 's400-c');
 
+// Header 타일(임시)
+class HeaderTile extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Container(
+        child: Image.network(
+            "https://t1.daumcdn.net/thumb/R720x0/?fname=https://t1.daumcdn.net/brunch/service/user/1YN0/image/ak-gRe29XA2HXzvSBowU7Tl7LFE.png"),
+      ),
+    );
+  }
+}
+
 class _HomePageState extends State<HomePage> {
-  List<Card> _buildListElement(BuildContext context, List<Product> products) {
+  List<Widget> _buildListElement(BuildContext context, List<Product> products) {
     if (products == null || products.isEmpty) {
-      return const <Card>[];
+      return const <Widget>[];
     }
 
     // Set name for Firebase Storage
@@ -44,8 +57,12 @@ class _HomePageState extends State<HomePage> {
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
-            Navigator.pushNamed(
-                context, '/detail/' + product.id + '/giveProducts');
+            if (_selectedIndex == 0)
+              Navigator.pushNamed(
+                  context, '/detail/' + product.id + '/giveProducts');
+            else if (_selectedIndex == 1)
+              Navigator.pushNamed(
+                  context, '/detail/' + product.id + '/takeProducts');
           },
           child: ListTile(
             title: Text(
@@ -376,9 +393,7 @@ class _HomePageState extends State<HomePage> {
             Icons.search,
             semanticLabel: 'search',
           ),
-          onPressed: () {
-            Navigator.pushNamed(context, '/take');
-          },
+          onPressed: () {},
         ),
       ],
     );
