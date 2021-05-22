@@ -20,6 +20,50 @@ class ProfilePageState extends State<ProfilePage> {
       appBar: buildAppBar(context),
       drawer: buildDrawer(context),
       bottomNavigationBar: buildNavBar(context),
+      body: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: Container(),
+            ),
+            Expanded(
+              flex: 8,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Container(
+                    width: 100,
+                    height: 100,
+                    child: FirebaseAuth.instance.currentUser.isAnonymous
+                        ? Image.asset('assets/logo.png', fit: BoxFit.fitWidth)
+                        : Image.network(highResUrl, fit: BoxFit.fitWidth),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Text(FirebaseAuth.instance.currentUser.displayName),
+                  Divider(
+                    color: Colors.black26,
+                    height: 30,
+                    thickness: 1,
+                  ),
+                  Text(FirebaseAuth.instance.currentUser.isAnonymous
+                      ? 'Anonymous'
+                      : FirebaseAuth.instance.currentUser.email),
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Container(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
