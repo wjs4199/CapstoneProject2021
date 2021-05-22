@@ -11,6 +11,7 @@ class TakePage extends StatefulWidget {
   @override
   TakePageState createState() => TakePageState();
 }
+int _selectedIndex = 0;
 
 class TakePageState extends State<TakePage> {
   List<ListView> _buildListView(BuildContext context, List<Product> products) {
@@ -113,7 +114,7 @@ class TakePageState extends State<TakePage> {
     }).toList();
   }
 
-  int _selectedIndex = 1;
+
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _filterOfProduct = false;
@@ -122,15 +123,7 @@ class TakePageState extends State<TakePage> {
 
   @override
   Widget build(BuildContext context) {
-    //하단네비바 탭하여 페이지 이동하는 부분
-    if (_selectedIndex != 1) {
-      if (_selectedIndex == 0) {
-        Future.delayed(const Duration(milliseconds: 200), () {
-          Navigator.of(context).pushReplacementNamed('/home');
-        });
-      } else if (_selectedIndex == 2) {
-      } else if (_selectedIndex == 3) {}
-    }
+
 
     return Scaffold(
       key: _scaffoldKey,
@@ -260,11 +253,36 @@ class TakePageState extends State<TakePage> {
     );
   }
 
+  void _changeScreen() {
+    //하단네비바 탭하여 페이지 이동하는 부분
+    if (_selectedIndex != 0) {
+      if (_selectedIndex == 1) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/take');
+        });
+      } else if (_selectedIndex == 2) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/chat');
+        });
+      } else if (_selectedIndex == 3) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/mypage');
+        });
+      }
+    } else {
+      Future.delayed(const Duration(milliseconds: 200), () {
+        Navigator.of(context).pushReplacementNamed('/home');
+      });
+    }
+  }
+
   // Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
     void _onItemTapped(int index) {
       setState(() {
         _selectedIndex = index;
+        _changeScreen();
+
       });
     }
 

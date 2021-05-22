@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
   ProfilePageState createState() => ProfilePageState();
 }
 
+String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
+String highResUrl = photoUrl.replaceAll('s96-c', 's400-c');
+
 class ProfilePageState extends State<ProfilePage> {
-  int _selectedIndex = 0;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-
+  int _selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,10 +44,42 @@ class ProfilePageState extends State<ProfilePage> {
             Icons.exit_to_app,
             semanticLabel: 'exit',
           ),
-          onPressed: () {},
+          onPressed: () async {
+            await FirebaseAuth.instance.signOut();
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Signed out successfully.'),
+              duration: Duration(seconds: 1),
+            ));
+            Navigator.popAndPushNamed(context, '/login');
+            print('signed out');
+          },
         ),
       ],
     );
+  }
+
+  void _changeScreen() {
+    //하단네비바 탭하여 페이지 이동하는 부분
+    if (_selectedIndex != 0) {
+      if (_selectedIndex == 1) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/take');
+        });
+      } else if (_selectedIndex == 2) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/chat');
+        });
+      } else if (_selectedIndex == 3) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/mypage');
+        });
+      }
+    }
+    else {
+      Future.delayed(const Duration(milliseconds: 200), () {
+        Navigator.of(context).pushReplacementNamed('/home');
+      });
+    }
   }
 
   // Builder Widget for Bottom Navigation Bar
@@ -53,6 +87,7 @@ class ProfilePageState extends State<ProfilePage> {
     void _onItemTapped(int index) {
       setState(() {
         _selectedIndex = index;
+        _changeScreen();
       });
     }
 

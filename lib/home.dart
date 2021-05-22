@@ -120,15 +120,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    //하단네비바 탭하여 페이지 이동하는 부분
-    if (_selectedIndex != 0) {
-      if (_selectedIndex == 1) {
-        Future.delayed(const Duration(milliseconds: 200), () {
-          Navigator.of(context).pushReplacementNamed('/take');
-        });
-      } else if (_selectedIndex == 2) {
-      } else if (_selectedIndex == 3) {}
-    }
+
 
     return Scaffold(
       key: _scaffoldKey,
@@ -234,6 +226,25 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _changeScreen() {
+    //하단네비바 탭하여 페이지 이동하는 부분
+    if (_selectedIndex != 0) {
+      if (_selectedIndex == 1) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/take');
+        });
+      } else if (_selectedIndex == 2) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/chat');
+        });
+      } else if (_selectedIndex == 3) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/mypage');
+        });
+      }
+    }
+  }
+
   // Builder Widget for AppBar
   AppBar buildAppBar(BuildContext context) {
     return AppBar(
@@ -268,6 +279,7 @@ class _HomePageState extends State<HomePage> {
     void _onItemTapped(int index) {
       setState(() {
         _selectedIndex = index;
+        _changeScreen();
       });
     }
 

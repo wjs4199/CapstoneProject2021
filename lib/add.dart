@@ -39,7 +39,6 @@ class _giveAddPageState extends State<giveAddPage> {
   final _formKey = GlobalKey<FormState>(debugLabel: '_giveAddPageState');
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  final _categoryController = TextEditingController();
 
   // Firestore
   CollectionReference giveProduct =
