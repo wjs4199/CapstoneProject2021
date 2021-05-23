@@ -20,9 +20,6 @@ class _giveAddPageState extends State<giveAddPage> {
   File _image;
   final picker = ImagePicker();
 
-  final _valueList = ['product', 'time', 'talent'];
-  var _selectedValue = 'product';
-
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
