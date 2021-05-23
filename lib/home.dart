@@ -148,9 +148,9 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.centerRight,
                       icon: (_filterOfProduct
                           ? Icon(Icons.wallet_giftcard,
-                          size: 30, color: Colors.blue)
+                              size: 30, color: Colors.blue)
                           : Icon(Icons.wallet_giftcard,
-                          size: 30, color: Colors.grey)),
+                              size: 30, color: Colors.grey)),
                       onPressed: () {
                         _chooseFilter("Product");
                         if (_filterOfProduct) {
@@ -180,15 +180,15 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.centerRight,
                       icon: (_filterOfTalent
                           ? Icon(
-                        Icons.lightbulb,
-                        size: 30,
-                        color: Colors.blue,
-                      )
+                              Icons.lightbulb,
+                              size: 30,
+                              color: Colors.blue,
+                            )
                           : Icon(
-                        Icons.lightbulb,
-                        size: 30,
-                        color: Colors.grey,
-                      )),
+                              Icons.lightbulb,
+                              size: 30,
+                              color: Colors.grey,
+                            )),
                       onPressed: () {
                         _chooseFilter("Talent");
                         if (_filterOfTalent) {
@@ -227,9 +227,11 @@ class _HomePageState extends State<HomePage> {
       } else if (fitering == 'Time') {
         _filterOfTime = _filterOfTime ? false : true;
         if (_filterOfTime) _filterOfProduct = _filterOfTalent = false;
-      } else {
+      } else if (fitering == 'Talent') {
         _filterOfTalent = _filterOfTalent ? false : true;
         if (_filterOfTalent) _filterOfProduct = _filterOfTime = false;
+      } else {
+        //appState.orderByFilter('All');
       }
     });
   }
