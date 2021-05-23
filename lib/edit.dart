@@ -40,9 +40,6 @@ class _EditPageState extends State<EditPage> {
   final _formKey = GlobalKey<FormState>(debugLabel: '_AddPageState');
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  final _categoryController = TextEditingController();
-
-  // Firestore
 
   // Storage
   firebase_storage.FirebaseStorage storage =
@@ -69,6 +66,10 @@ class _EditPageState extends State<EditPage> {
       return null;
     }
   }
+
+  // List of DropdownButton for filtering //
+  final _filter = ['Product', 'Time', 'Talent'];
+  var _selectedFilter = 'Product';
 
   Scaffold _buildScaffold(BuildContext context, ApplicationState appState) {
     String productId = this.widget.productId;
@@ -109,8 +110,15 @@ class _EditPageState extends State<EditPage> {
       }).catchError((error) => print("Error: $error"));
     }
 
-    final _filter = ['Product', 'Time', 'Talent'];
-    var _selectedFilter = 'Product';
+    //원래 바로 밑에 return Scaffold 안에 dorpdownUpdate(value)함수 있는 자리에
+    // setState를 바로 넣어서 돌리니까 edit 페이지에서 드롭다운 버튼이 value값에 따라 변하질 않았는데
+    // setState를 밖에다가 함수로 만들어서 넣으니까 잘 돌아간다...(왜인지 정확히 모르겠음,,)
+    void dorpdownUpdate(value) {
+      if (value != _selectedFilter) _selectedFilter = value;
+      setState(() {
+        _selectedFilter = value;
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -131,7 +139,7 @@ class _EditPageState extends State<EditPage> {
             onPressed: () {
               if (_formKey.currentState.validate()) {
                 editProduct(
-                  _categoryController.text,
+                  _selectedFilter,
                   _titleController.text,
                   _contentController.text,
                 );
@@ -221,11 +229,7 @@ class _EditPageState extends State<EditPage> {
                                       },
                                     ).toList(),
                                     onChanged: (value) {
-                                      if (value != _selectedFilter)
-                                        _selectedFilter = value;
-                                      setState(() {
-                                        _categoryController.text = value;
-                                      });
+                                      dorpdownUpdate(value);
                                     },
                                   ),
                                 ),
