@@ -5,8 +5,9 @@ class ChatPage extends StatefulWidget {
   ChatPageState createState() => ChatPageState();
 }
 
+int _selectedIndex = 0;
+
 class ChatPageState extends State<ChatPage> {
-  int _selectedIndex = 0;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -47,12 +48,36 @@ class ChatPageState extends State<ChatPage> {
     );
   }
 
+  void _changeScreen() {
+    //하단네비바 탭하여 페이지 이동하는 부분
+    if (_selectedIndex != 0) {
+      if (_selectedIndex == 1) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/take');
+        });
+      } else if (_selectedIndex == 2) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/chat');
+        });
+      } else if (_selectedIndex == 3) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Navigator.of(context).pushReplacementNamed('/mypage');
+        });
+      }
+    }else {
+      Future.delayed(const Duration(milliseconds: 200), () {
+        Navigator.of(context).pushReplacementNamed('/home');
+      });
+    }
+  }
+
   // Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
 
     void _onItemTapped(int index) {
       setState(() {
         _selectedIndex = index;
+        _changeScreen();
       });
     }
 

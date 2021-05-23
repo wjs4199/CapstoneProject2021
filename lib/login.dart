@@ -52,10 +52,11 @@ class _LoginPageState extends State<LoginPage> {
                   signInWithGoogle().then((value) {
                     print('User: ' + value.user.displayName);
                     // Display User Info with SnackBar
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('Welcome, ' + value.user.displayName + '!'),
-                      duration: Duration(seconds: 1),
-                    ));
+                    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    //   content: Text('Welcome, ' + value.user.displayName + '!'),
+                    //   behavior: SnackBarBehavior.fixed,
+                    //   duration: Duration(seconds: 1),
+                    // ));
                     Navigator.pop(context);
                   }).catchError((error) {
                     showDialog(
