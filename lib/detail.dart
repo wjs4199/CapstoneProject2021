@@ -123,7 +123,7 @@ class _DetailPageState extends State<DetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.cyan,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,

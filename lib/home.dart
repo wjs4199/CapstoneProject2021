@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
 
     // Download image url of each product based on id
     Future<String> downloadURL(String id) async {
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(Duration(seconds: 1));
       try {
         return await storage
             .ref() //스토리지 참조
