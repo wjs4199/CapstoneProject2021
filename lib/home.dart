@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:url_launcher/url_launcher.dart';
+
 import 'main.dart';
 import 'product.dart';
 import 'add.dart';
@@ -11,104 +13,98 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
-String highResUrl = photoUrl.replaceAll('s96-c', 's400-c');
-
-// Header 타일(임시)
+// Header 타일 - 공지사항용 타일
 class HeaderTile extends StatelessWidget {
+  // url_launcher api 함수
+  void _launchURL(url) async =>
+      await canLaunch(url) ? await launch(url) : throw 'Could not launch $url';
+
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Container(
-        child: Image.network(
-            "https://t1.daumcdn.net/thumb/R720x0/?fname=https://t1.daumcdn.net/brunch/service/user/1YN0/image/ak-gRe29XA2HXzvSBowU7Tl7LFE.png"),
+        child: GestureDetector(
+          onTap: () => _launchURL('https://flutter.dev'),
+          child: Image.network(
+              "https://t1.daumcdn.net/thumb/R720x0/?fname=https://t1.daumcdn.net/brunch/service/user/1YN0/image/ak-gRe29XA2HXzvSBowU7Tl7LFE.png"),
+        ),
+      ),
+    );
+  }
+}
+
+// PostTile - 각 게시글 표시해주는 타일, Listview.builder(separated) 사용해 자동 생성
+class PostTile extends StatelessWidget {
+  PostTile(this._product, this._giveOrTake);
+
+  final Product _product;
+  final int _giveOrTake;
+
+  // Set name for Firebase Storage
+  firebase_storage.FirebaseStorage storage =
+      firebase_storage.FirebaseStorage.instance;
+
+  // Download image url of each product based on id
+  Future<String> downloadURL(String id) async {
+    await Future.delayed(Duration(seconds: 1));
+    try {
+      return await storage
+          .ref() //스토리지 참조
+          .child('images')
+          .child('$id.png') //차일드로 가져오고
+          .getDownloadURL(); //url 다운로드
+    } on Exception {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      // leading: Icon(Icons.person),
+      title: Text(_product.title),
+      subtitle: Text(
+        _product.content,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      onTap: () {
+        if (_giveOrTake == 0)
+          Navigator.pushNamed(
+              context, '/detail/' + _product.id + '/giveProducts');
+        else
+          Navigator.pushNamed(
+              context, '/detail/' + _product.id + '/takeProducts');
+      },
+      trailing: Container(
+        width: 90,
+        height: 90,
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        alignment: Alignment.center,
+        child: FutureBuilder(
+          future: downloadURL(_product.id),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else {
+              if (snapshot.hasData) {
+                return Image.network(snapshot.data.toString());
+              } else if (snapshot.hasData == false) {
+                return Container();
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            }
+          },
+        ),
       ),
     );
   }
 }
 
 class _HomePageState extends State<HomePage> {
+  // ToggleButtons - 각 버튼용 bool list
   List<bool> _selections = List.generate(3, (_) => false);
-
-  List<Widget> _buildListElement(BuildContext context, List<Product> products) {
-    if (products == null || products.isEmpty) {
-      return const <Widget>[];
-    }
-
-    // Set name for Firebase Storage
-    firebase_storage.FirebaseStorage storage =
-        firebase_storage.FirebaseStorage.instance;
-
-    // Download image url of each product based on id
-    Future<String> downloadURL(String id) async {
-      await Future.delayed(Duration(seconds: 1));
-      try {
-        return await storage
-            .ref() //스토리지 참조
-            .child('images')
-            .child('$id.png') //차일드로 가져오고
-            .getDownloadURL(); //url 다운로드
-      } on Exception {
-        return null;
-      }
-    }
-
-    return products.map((product) {
-      return Card(
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            if (_selectedIndex == 0)
-              Navigator.pushNamed(
-                  context, '/detail/' + product.id + '/giveProducts');
-            else if (_selectedIndex == 1)
-              Navigator.pushNamed(
-                  context, '/detail/' + product.id + '/takeProducts');
-          },
-          child: ListTile(
-            title: Text(
-              // Product 요소에 맞게 바꿨어요
-              product.title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Text(
-              // Product 요소에 맞게 바꿨어요
-              product.content,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: Container(
-              width: 90,
-              height: 90,
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              alignment: Alignment.center,
-              child: FutureBuilder(
-                future: downloadURL(product.id),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else {
-                    if (snapshot.hasData) {
-                      return Image.network(snapshot.data.toString());
-                    } else if (snapshot.hasData == false) {
-                      return Container();
-                    } else {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                  }
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-    }).toList();
-  }
 
   // Drawer 관련 Key
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -140,6 +136,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   /* -------------------------------------------------------------------- */
+
+  // For profile photo resizing
+  String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
+  // String highResUrl = photoUrl.replaceAll('s96-c', 's400-c');
 
   @override
   Widget build(BuildContext context) {
@@ -176,15 +176,38 @@ class _HomePageState extends State<HomePage> {
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: EdgeInsets.all(8),
-            child: _buildToggleButtonBar(context, appState),
-          ),
           Expanded(
+            /* 기존 method
             child: ListView(
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
               children: _buildListElement(context, appState.giveProducts),
+            ), */
+
+            // New method (listview builder 사용)
+            child: ListView.separated(
+              padding: const EdgeInsets.all(8),
+              // HeaderTile 포함 length + 1
+              itemCount: appState.giveProducts.length + 2,
+              itemBuilder: (BuildContext context, int index) {
+                if (index == 0) return HeaderTile();
+                if (index == 1)
+                  return Container(
+                    child: _buildToggleButtonBar(context, appState),
+                  );
+                // HeaderTile 고려 index - 1
+                return PostTile(
+                    appState.giveProducts[index - 2], _selectedIndex);
+              },
+              separatorBuilder: (context, index) {
+                if (index == 0 || index == 1) return SizedBox.shrink();
+                return const Divider(
+                  height: 20,
+                  thickness: 1,
+                  indent: 10,
+                  endIndent: 10,
+                );
+              },
             ),
           ),
         ],
@@ -198,10 +221,29 @@ class _HomePageState extends State<HomePage> {
             child: _buildToggleButtonBar(context, appState),
           ),
           Expanded(
+            /* 기존 method
             child: ListView(
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
               children: _buildListElement(context, appState.takeProducts),
+            ), */
+            // New method (listview builder 사용)
+
+            // New method
+            child: ListView.separated(
+              padding: const EdgeInsets.all(8),
+              itemCount: appState.takeProducts.length,
+              itemBuilder: (BuildContext context, int index) {
+                return PostTile(appState.takeProducts[index], _selectedIndex);
+              },
+              separatorBuilder: (context, index) {
+                return const Divider(
+                  height: 20,
+                  thickness: 1,
+                  indent: 10,
+                  endIndent: 10,
+                );
+              },
             ),
           ),
         ],
@@ -230,7 +272,8 @@ class _HomePageState extends State<HomePage> {
                   height: 100,
                   child: FirebaseAuth.instance.currentUser.isAnonymous
                       ? Image.asset('assets/logo.png', fit: BoxFit.fitWidth)
-                      : Image.network(highResUrl, fit: BoxFit.fitWidth),
+                      : Image.network(photoUrl.replaceAll('s96-c', 's400-c'),
+                          fit: BoxFit.fitWidth),
                 ),
                 SizedBox(
                   height: 20,
