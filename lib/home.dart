@@ -168,7 +168,7 @@ class _HomePageState extends State<HomePage> {
     //);
   }
 
-  // Index 별 위젯 반환: (순서: 0-Give, 1-Take, 2-Chat, 3-MyPage)
+  // Index 별 위젯 반환: (순서: 0-Give, 1-Take, 2-Chart, 3-MyPage)
   List<Widget> _buildWidgetOptions(
       BuildContext context, ApplicationState appState) {
     List<Widget> _widgetOptions = <Widget>[
@@ -248,9 +248,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      // 2(Chat):
+      // 2(Chart):
       Center(
-        child: Text('Chat(To be implemented)'),
+        child: Text('Chart(To be implemented)'),
       ),
       // 3(MyPage):
       Row(
@@ -361,13 +361,16 @@ class _HomePageState extends State<HomePage> {
           },
           children: [
             Icon(
-              Icons.wallet_giftcard,
+              Icons.shopping_bag,
+              size: 20,
             ),
             Icon(
-              Icons.timer,
+              Icons.access_time,
+              size: 20,
             ),
             Icon(
-              Icons.lightbulb,
+              Icons.school,
+              size: 20,
             ),
           ],
         ),
@@ -471,19 +474,19 @@ class _HomePageState extends State<HomePage> {
       type: BottomNavigationBarType.fixed,
       items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
+          icon: Icon(Icons.redo),
           label: 'Give',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.card_giftcard),
+          icon: Icon(Icons.undo),
           label: 'Take',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.messenger),
-          label: 'Chat',
+          icon: Icon(Icons.bar_chart),
+          label: 'Chart',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person),
+          icon: Icon(Icons.account_circle),
           label: 'MyPage',
         )
       ],
@@ -535,7 +538,7 @@ class _HomePageState extends State<HomePage> {
           ListTile(
             title: Text('My Page'),
             leading: Icon(
-              Icons.person,
+              Icons.account_circle,
             ),
             onTap: () {
               Navigator.pushNamed(context, '/mypage');
