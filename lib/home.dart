@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'main.dart';
@@ -29,6 +28,8 @@ class HeaderTile extends StatelessWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<bool> _selections = List.generate(3, (_) => false);
+
   List<Widget> _buildListElement(BuildContext context, List<Product> products) {
     if (products == null || products.isEmpty) {
       return const <Widget>[];
@@ -112,11 +113,6 @@ class _HomePageState extends State<HomePage> {
   // Drawer 관련 Key
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Filtering Buttons 관련 booleans (리팩토링 가능할듯)
-  bool _filterOfProduct = false;
-  bool _filterOfTime = false;
-  bool _filterOfTalent = false;
-
   /* ----------------- BottomNavigationBar, PageView 관련 ----------------- */
   int _selectedIndex = 0;
 
@@ -182,7 +178,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           Container(
             padding: EdgeInsets.all(8),
-            child: _buildFilterRow(context, appState),
+            child: _buildToggleButtonBar(context, appState),
           ),
           Expanded(
             child: ListView(
@@ -199,7 +195,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           Container(
             padding: EdgeInsets.all(8),
-            child: _buildFilterRow(context, appState),
+            child: _buildToggleButtonBar(context, appState),
           ),
           Expanded(
             child: ListView(
@@ -281,95 +277,119 @@ class _HomePageState extends State<HomePage> {
     return null;
   }
 
-  void _chooseFilter(String filtering) {
-    setState(() {
-      if (filtering == 'Product') {
-        _filterOfProduct = _filterOfProduct ? false : true;
-        if (_filterOfProduct) _filterOfTime = _filterOfTalent = false;
-      } else if (filtering == 'Time') {
-        _filterOfTime = _filterOfTime ? false : true;
-        if (_filterOfTime) _filterOfProduct = _filterOfTalent = false;
-      } else {
-        _filterOfTalent = _filterOfTalent ? false : true;
-        if (_filterOfTalent) _filterOfProduct = _filterOfTime = false;
-      }
-    });
-  }
+  // 필터링 기능을 토글버튼화하여 버튼바로 생성
+  ButtonBar _buildToggleButtonBar(
+      BuildContext context, ApplicationState appState) {
+    return ButtonBar(
+      alignment: MainAxisAlignment.end,
+      children: <Widget>[
+        ToggleButtons(
+          color: Colors.black.withOpacity(0.60),
+          constraints: BoxConstraints(
+            minWidth: 30,
+            minHeight: 30,
+          ),
+          selectedBorderColor: Colors.cyan,
+          selectedColor: Colors.cyan,
+          borderRadius: BorderRadius.circular(4.0),
+          isSelected: _selections,
+          onPressed: (int index) {
+            setState(() {
+              for (int buttonIndex = 0;
+                  buttonIndex < _selections.length;
+                  buttonIndex++) {
+                if (buttonIndex == index) {
+                  _selections[buttonIndex] = !_selections[buttonIndex];
+                } else {
+                  _selections[buttonIndex] = false;
+                }
+              }
+              if (_selections[index] == true) {
+                if (index == 0)
+                  appState.orderByFilter('Product');
+                else if (index == 1)
+                  appState.orderByFilter('Time');
+                else
+                  appState.orderByFilter('Talent');
+              } else {
+                appState.orderByFilter('All');
+              }
+            });
+          },
+          children: [
+            Icon(
+              Icons.wallet_giftcard,
+            ),
+            Icon(
+              Icons.timer,
+            ),
+            Icon(
+              Icons.lightbulb,
+            ),
+          ],
+        ),
+      ],
+    );
 
-  // NavBar 구현하여 필요없음
-  // void _changeScreen() {
-  //   //하단네비바 탭하여 페이지 이동하는 부분
-  //   if (_selectedIndex != 0) {
-  //     if (_selectedIndex == 1) {
-  //       Future.delayed(const Duration(milliseconds: 200), () {
-  //         Navigator.of(context).pushReplacementNamed('/take');
-  //       });
-  //     } else if (_selectedIndex == 2) {
-  //       Future.delayed(const Duration(milliseconds: 200), () {
-  //         Navigator.of(context).pushReplacementNamed('/chat');
-  //       });
-  //     } else if (_selectedIndex == 3) {
-  //       Future.delayed(const Duration(milliseconds: 200), () {
-  //         Navigator.of(context).pushReplacementNamed('/mypage');
-  //       });
-  //     }
-  //   }
-  // }
-
-  // Filtering Code 복잡해 함수로 빼놓음
-  Row _buildFilterRow(BuildContext context, ApplicationState appState) {
-    return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-      IconButton(
-          padding: EdgeInsets.all(0),
-          alignment: Alignment.centerRight,
-          icon: (_filterOfProduct
-              ? Icon(Icons.wallet_giftcard, size: 30, color: Colors.cyan)
-              : Icon(Icons.wallet_giftcard, size: 30, color: Colors.grey)),
-          onPressed: () {
-            _chooseFilter("Product");
-            if (_filterOfProduct) {
-              appState.orderByFilter('Product');
-              print("product filtering!");
-            } else if (!_filterOfProduct && !_filterOfTime && !_filterOfTalent)
-              appState.orderByFilter('All');
-          }),
-      IconButton(
-          padding: EdgeInsets.all(0),
-          alignment: Alignment.centerRight,
-          icon: (_filterOfTime
-              ? Icon(Icons.timer, size: 30, color: Colors.cyan)
-              : Icon(Icons.timer, size: 30, color: Colors.grey)),
-          onPressed: () {
-            _chooseFilter("Time");
-            if (_filterOfTime) {
-              print("time filtering!");
-              appState.orderByFilter('Time');
-            } else if (!_filterOfProduct && !_filterOfTime && !_filterOfTalent)
-              appState.orderByFilter('All');
-          }),
-      IconButton(
-          padding: EdgeInsets.all(0),
-          alignment: Alignment.centerRight,
-          icon: (_filterOfTalent
-              ? Icon(
-                  Icons.lightbulb,
-                  size: 30,
-                  color: Colors.cyan,
-                )
-              : Icon(
-                  Icons.lightbulb,
-                  size: 30,
-                  color: Colors.grey,
-                )),
-          onPressed: () {
-            _chooseFilter("Talent");
-            if (_filterOfTalent) {
-              print("talent filtering!");
-              appState.orderByFilter('Talent');
-            } else if (!_filterOfProduct && !_filterOfTime && !_filterOfTalent)
-              appState.orderByFilter('All');
-          }),
-    ]);
+    // 기존 (복잡)
+    // Row(
+    //   mainAxisAlignment: MainAxisAlignment.end,
+    //   children: [
+    //     IconButton(
+    //         padding: EdgeInsets.all(0),
+    //         alignment: Alignment.centerRight,
+    //         icon: (_filterOfProduct
+    //             ? Icon(Icons.wallet_giftcard, size: 30, color: Colors.cyan)
+    //             : Icon(Icons.wallet_giftcard, size: 30, color: Colors.grey)),
+    //         onPressed: () {
+    //           _chooseFilter("Product");
+    //           if (_filterOfProduct) {
+    //             appState.orderByFilter('Product');
+    //             print("product filtering!");
+    //           } else if (!_filterOfProduct &&
+    //               !_filterOfTime &&
+    //               !_filterOfTalent) appState.orderByFilter('All');
+    //         }),
+    //     IconButton(
+    //         padding: EdgeInsets.all(0),
+    //         alignment: Alignment.centerRight,
+    //         icon: (_filterOfTime
+    //             ? Icon(Icons.timer, size: 30, color: Colors.cyan)
+    //             : Icon(Icons.timer, size: 30, color: Colors.grey)),
+    //         onPressed: () {
+    //           _chooseFilter("Time");
+    //           if (_filterOfTime) {
+    //             print("time filtering!");
+    //             appState.orderByFilter('Time');
+    //           } else if (!_filterOfProduct &&
+    //               !_filterOfTime &&
+    //               !_filterOfTalent) appState.orderByFilter('All');
+    //         }),
+    //     IconButton(
+    //         padding: EdgeInsets.all(0),
+    //         alignment: Alignment.centerRight,
+    //         icon: (_filterOfTalent
+    //             ? Icon(
+    //                 Icons.lightbulb,
+    //                 size: 30,
+    //                 color: Colors.cyan,
+    //               )
+    //             : Icon(
+    //                 Icons.lightbulb,
+    //                 size: 30,
+    //                 color: Colors.grey,
+    //               )),
+    //         onPressed: () {
+    //           _chooseFilter("Talent");
+    //           if (_filterOfTalent) {
+    //             print("talent filtering!");
+    //             appState.orderByFilter('Talent');
+    //           } else if (!_filterOfProduct &&
+    //               !_filterOfTime &&
+    //               !_filterOfTalent) appState.orderByFilter('All');
+    //         }),
+    //   ],
+    // );
   }
 
   // Builder Widget for AppBar
