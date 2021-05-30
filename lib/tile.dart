@@ -7,6 +7,7 @@ class _ArticleDescription extends StatelessWidget {
     this.subtitle,
     this.author,
     this.publishDate,
+    this.category,
     this.likes,
   }) : super(key: key);
 
@@ -14,6 +15,7 @@ class _ArticleDescription extends StatelessWidget {
   final String subtitle;
   final String author;
   final String publishDate;
+  final String category;
   final int likes;
 
   @override
@@ -54,7 +56,7 @@ class _ArticleDescription extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               Text(
-                author,
+                '$category | $author',
                 style: const TextStyle(
                   fontSize: 12.0,
                   color: Colors.black87,
@@ -85,6 +87,7 @@ class CustomListItem extends StatelessWidget {
     this.subtitle,
     this.author,
     this.publishDate,
+    this.category,
     this.likes,
   }) : super(key: key);
 
@@ -93,6 +96,7 @@ class CustomListItem extends StatelessWidget {
   final String subtitle;
   final String author;
   final String publishDate;
+  final String category;
   final int likes;
 
   @override
@@ -112,6 +116,7 @@ class CustomListItem extends StatelessWidget {
                   subtitle: subtitle,
                   author: author,
                   publishDate: publishDate,
+                  category: category,
                   likes: likes,
                 ),
               ),

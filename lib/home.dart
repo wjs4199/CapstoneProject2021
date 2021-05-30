@@ -86,6 +86,7 @@ class PostTile extends StatelessWidget {
         subtitle: _product.content,
         author: _product.userName,
         publishDate: formattedDate,
+        category: _product.category,
         likes: _product.likes,
         thumbnail: FutureBuilder(
           future: downloadURL(_product.id),
@@ -243,7 +244,7 @@ class _HomePageState extends State<HomePage> {
             // New method (listview builder 사용)
             child: ListView.separated(
               padding: const EdgeInsets.all(8),
-              // HeaderTile 포함 length + 1
+              // HeaderTile, ToggleButton 포함 length + 2
               itemCount: appState.giveProducts.length + 2,
               itemBuilder: (BuildContext context, int index) {
                 if (index == 0) return HeaderTile();
@@ -251,7 +252,7 @@ class _HomePageState extends State<HomePage> {
                   return Container(
                     child: _buildToggleButtonBar(context, appState),
                   );
-                // HeaderTile 고려 index - 1
+                // HeaderTile, ToggleButton 고려 index - 2
                 return PostTile(
                     appState.giveProducts[index - 2], _selectedIndex);
               },

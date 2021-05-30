@@ -184,7 +184,7 @@ class ApplicationState extends ChangeNotifier {
             mark: document.data()['mark'],
             comments: document.data()['comments'],
 
-            /// 여기까지 틀림(아래에 반복되는 코드 전부 포함)
+            /// 여기까지 틀림(반복되는 코드 전부 포함)
           ));
         });
         notifyListeners();
