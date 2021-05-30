@@ -262,7 +262,7 @@ class _DetailPageState extends State<DetailPage> {
                                       icon: Icon(
                                         (count != 0)
                                             ? Icons.favorite
-                                            : Icons.favorite_outlined,
+                                            : Icons.favorite_outline,
                                         color: Colors.red,
                                         semanticLabel: 'like',
                                       ),

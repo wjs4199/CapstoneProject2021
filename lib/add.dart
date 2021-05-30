@@ -83,7 +83,7 @@ class _giveAddPageState extends State<giveAddPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.cyan,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,

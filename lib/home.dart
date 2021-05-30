@@ -3,19 +3,21 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
 import 'main.dart';
 import 'product.dart';
 import 'add.dart';
+import 'tile.dart';
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-// Header 타일 - 공지사항용 타일
+/// Header 타일 - 공지사항용 타일
 class HeaderTile extends StatelessWidget {
-  // url_launcher api 함수
+  /// url_launcher api 함수
   void _launchURL(url) async =>
       await canLaunch(url) ? await launch(url) : throw 'Could not launch $url';
 
@@ -33,18 +35,18 @@ class HeaderTile extends StatelessWidget {
   }
 }
 
-// PostTile - 각 게시글 표시해주는 타일, Listview.builder(separated) 사용해 자동 생성
+/// PostTile - 각 게시글 표시해주는 타일, Listview.builder(separated) 사용해 자동 생성
 class PostTile extends StatelessWidget {
   PostTile(this._product, this._giveOrTake);
 
   final Product _product;
   final int _giveOrTake;
 
-  // Set name for Firebase Storage
-  firebase_storage.FirebaseStorage storage =
+  /// Set name for Firebase Storage
+  final firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
 
-  // Download image url of each product based on id
+  /// Download image url of each product based on id
   Future<String> downloadURL(String id) async {
     await Future.delayed(Duration(seconds: 1));
     try {
@@ -60,14 +62,11 @@ class PostTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      // leading: Icon(Icons.person),
-      title: Text(_product.title),
-      subtitle: Text(
-        _product.content,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      ),
+    /// Firebase TimeStamp => DateFormat 변환
+    String formattedDate =
+        DateFormat('MMM d, HH:mm').format(_product.created.toDate());
+
+    return InkWell(
       onTap: () {
         if (_giveOrTake == 0)
           Navigator.pushNamed(
@@ -76,19 +75,30 @@ class PostTile extends StatelessWidget {
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/takeProducts');
       },
-      trailing: Container(
-        width: 90,
-        height: 90,
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        alignment: Alignment.center,
-        child: FutureBuilder(
+
+      /// Custom Tile 구조로 생성 (tile.dart 구조 참조)
+      child: CustomListItem(
+        // leading: CircleAvatar(
+        //   backgroundImage: NetworkImage(highResUrl),
+        //   backgroundColor: Colors.transparent,
+        // ),
+        title: _product.title,
+        subtitle: _product.content,
+        author: _product.userName,
+        publishDate: formattedDate,
+        likes: _product.likes,
+        thumbnail: FutureBuilder(
           future: downloadURL(_product.id),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
             } else {
               if (snapshot.hasData) {
-                return Image.network(snapshot.data.toString());
+                return ClipRRect(
+                  borderRadius: new BorderRadius.circular(8.0),
+                  child: Image.network(snapshot.data.toString(),
+                      fit: BoxFit.fitWidth),
+                );
               } else if (snapshot.hasData == false) {
                 return Container();
               } else {
@@ -99,17 +109,63 @@ class PostTile extends StatelessWidget {
         ),
       ),
     );
+
+    // return ListTile(
+    //   // leading: CircleAvatar(
+    //   //   backgroundImage: NetworkImage(highResUrl),
+    //   //   backgroundColor: Colors.transparent,
+    //   // ),
+    //   title: Text(_product.title),
+    //   subtitle: Text(
+    //     _product.content,
+    //     maxLines: 2,
+    //     overflow: TextOverflow.ellipsis,
+    //   ),
+    //   onTap: () {
+    //     if (_giveOrTake == 0)
+    //       Navigator.pushNamed(
+    //           context, '/detail/' + _product.id + '/giveProducts');
+    //     else
+    //       Navigator.pushNamed(
+    //           context, '/detail/' + _product.id + '/takeProducts');
+    //   },
+    //   trailing: Container(
+    //     width: 100,
+    //     height: 100,
+    //     alignment: Alignment.centerRight,
+    //     child: FutureBuilder(
+    //       future: downloadURL(_product.id),
+    //       builder: (context, snapshot) {
+    //         if (snapshot.connectionState == ConnectionState.waiting) {
+    //           return Center(child: CircularProgressIndicator());
+    //         } else {
+    //           if (snapshot.hasData) {
+    //             return ClipRRect(
+    //               borderRadius: new BorderRadius.circular(8.0),
+    //               child: Image.network(snapshot.data.toString(),
+    //                   fit: BoxFit.fitWidth),
+    //             );
+    //           } else if (snapshot.hasData == false) {
+    //             return Container();
+    //           } else {
+    //             return Center(child: CircularProgressIndicator());
+    //           }
+    //         }
+    //       },
+    //     ),
+    //   ),
+    // );
   }
 }
 
 class _HomePageState extends State<HomePage> {
-  // ToggleButtons - 각 버튼용 bool list
+  /// ToggleButtons - 각 버튼용 bool list
   List<bool> _selections = List.generate(3, (_) => false);
 
-  // Drawer 관련 Key
+  /// Drawer 관련 Key
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  /* ----------------- BottomNavigationBar, PageView 관련 ----------------- */
+  ///* ----------------- BottomNavigationBar, PageView 관련 ----------------- *///
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -135,9 +191,9 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  /* -------------------------------------------------------------------- */
+  ///* -------------------------------------------------------------------- *///
 
-  // For profile photo resizing
+  /// For profile photo resizing
   String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
   // String highResUrl = photoUrl.replaceAll('s96-c', 's400-c');
 
@@ -168,11 +224,11 @@ class _HomePageState extends State<HomePage> {
     //);
   }
 
-  // Index 별 위젯 반환: (순서: 0-Give, 1-Take, 2-Chart, 3-MyPage)
+  /// Index 별 위젯 반환: (순서: 0-Give, 1-Take, 2-Chart, 3-MyPage)
   List<Widget> _buildWidgetOptions(
       BuildContext context, ApplicationState appState) {
     List<Widget> _widgetOptions = <Widget>[
-      // 0(Give):
+      /// 0(Give):
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -212,7 +268,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      // 1(Take):
+
+      /// 1(Take):
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -248,11 +305,13 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      // 2(Chart):
+
+      /// 2(Chart):
       Center(
         child: Text('Chart(To be implemented)'),
       ),
-      // 3(MyPage):
+
+      /// 3(MyPage):
       Row(
         children: [
           Expanded(
@@ -286,7 +345,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 Text(FirebaseAuth.instance.currentUser.isAnonymous
                     ? 'Anonymous'
-                    : FirebaseAuth.instance.currentUser.email),
+                    : FirebaseAuth.instance.currentUser.uid),
               ],
             ),
           ),
@@ -320,7 +379,7 @@ class _HomePageState extends State<HomePage> {
     return null;
   }
 
-  // 필터링 기능을 토글버튼화하여 버튼바로 생성
+  /// 필터링 기능을 토글버튼화하여 버튼바로 생성
   ButtonBar _buildToggleButtonBar(
       BuildContext context, ApplicationState appState) {
     return ButtonBar(
@@ -377,7 +436,7 @@ class _HomePageState extends State<HomePage> {
       ],
     );
 
-    // 기존 (복잡)
+    /// 기존 (복잡)
     // Row(
     //   mainAxisAlignment: MainAxisAlignment.end,
     //   children: [
@@ -438,7 +497,7 @@ class _HomePageState extends State<HomePage> {
     // );
   }
 
-  // Builder Widget for AppBar
+  /// Builder Widget for AppBar
   AppBar buildAppBar(BuildContext context) {
     return AppBar(
       title: Center(
@@ -456,8 +515,8 @@ class _HomePageState extends State<HomePage> {
       actions: <Widget>[
         IconButton(
           icon: Icon(
-            Icons.search,
-            semanticLabel: 'search',
+            Icons.location_on,
+            semanticLabel: 'location',
           ),
           onPressed: () {},
         ),
@@ -465,7 +524,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Builder Widget for Bottom Navigation Bar
+  /// Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
@@ -493,7 +552,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Builder Widget for Drawer
+  /// Builder Widget for Drawer
   Drawer buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -529,9 +588,9 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           ListTile(
-            title: Text('Search'),
+            title: Text('Map'),
             leading: Icon(
-              Icons.search,
+              Icons.map,
             ),
             onTap: () {},
           ),
