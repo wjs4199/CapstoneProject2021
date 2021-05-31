@@ -19,7 +19,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   image_picker: ^0.7.4
   url_launcher: ^5.4.0
-  fl_chart: ^0.36.1
+  fl_chart: ^0.36.1 # 새로운 api 사용(1) flutter chart
+  flutter_sticky_header: ^0.6.0 # 새로운 api 사용(2) flutter sticky header
 
 
 dev_dependencies:

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 import 'main.dart';
 import 'product.dart';
@@ -156,17 +158,25 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: buildAppBar(context),
+      // appBar: buildAppBar(context),
       drawer: buildDrawer(context),
       body: Consumer<ApplicationState>(
-        builder: (context, appState, _) => SizedBox.expand(
-          child: PageView(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() => _selectedIndex = index);
-            },
-            // NavBar Index 별 상응 위젯 출력
-            children: _buildWidgetOptions(context, appState),
+        builder: (context, appState, _) => Container(
+          color: Colors.cyan,
+          child: SafeArea(
+            child: Container(
+              color: Colors.white,
+              child: SizedBox.expand(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() => _selectedIndex = index);
+                  },
+                  // NavBar Index 별 상응 위젯 출력
+                  children: _buildWidgetOptions(context, appState),
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -182,107 +192,218 @@ class _HomePageState extends State<HomePage> {
       BuildContext context, ApplicationState appState) {
     List<Widget> _widgetOptions = <Widget>[
       /// 0(Give):
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          HeaderTile(),
-          Container(
-            padding: EdgeInsets.fromLTRB(12, 4, 4, 4),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Give | 나눔 게시판',
-                    style: TextStyle(
-                      fontFamily: 'NanumSquareRoundR',
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                _buildToggleButtonBar(context, appState),
-              ],
-            ),
-          ),
-          Expanded(
-            /// New method (listview builder 사용)
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              itemCount: appState.giveProducts.length,
-              itemBuilder: (BuildContext context, int index) {
-                return PostTile(appState.giveProducts[index], _selectedIndex);
-              },
-              separatorBuilder: (context, index) {
-                // if (index == 0) return SizedBox.shrink();
-                return const Divider(
-                  height: 20,
-                  thickness: 1,
-                  indent: 8,
-                  endIndent: 8,
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-
-      /// 1(Take):
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: EdgeInsets.fromLTRB(12, 12, 4, 4),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Take | 나눔, 도움 요청 게시판',
-                    style: TextStyle(
-                      fontFamily: 'NanumSquareRoundR',
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                _buildToggleButtonBar(context, appState),
-              ],
-            ),
-          ),
-          Expanded(
-            /// New method (listview builder 사용)
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              itemCount: appState.takeProducts.length,
-              itemBuilder: (BuildContext context, int index) {
-                return PostTile(appState.takeProducts[index], _selectedIndex);
-              },
-              separatorBuilder: (context, index) {
-                return const Divider(
-                  height: 20,
-                  thickness: 1,
-                  indent: 10,
-                  endIndent: 10,
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-
-      /// 2(Chart) 작업중, Silver 사용 실험중:
       CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            // title: Text(
-            //   'Give & Take',
-            //   style: TextStyle(
-            //     fontSize: 18,
-            //     fontFamily: 'NanumSquareRoundR',
-            //     fontWeight: FontWeight.bold,
-            //   ),
-            // ),
+            title: Text(
+              'Home | Give',
+              style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'NanumSquareRoundR',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            backgroundColor: Colors.cyan,
+            pinned: false,
+            snap: false,
+            floating: true,
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.location_on,
+                  semanticLabel: 'location',
+                ),
+                onPressed: () {},
+              ),
+            ],
+          ),
+          SliverStickyHeader(
+            header: Container(
+              alignment: Alignment.centerLeft,
+              height: 40,
+              color: Colors.cyan.shade50,
+              padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
+              child: Text(
+                'Notice | 공지사항',
+                style: TextStyle(
+                  fontFamily: 'NanumSquareRoundR',
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(
+                [HeaderTile()],
+              ),
+            ),
+          ),
+          SliverStickyHeader(
+            header: Container(
+              height: 40,
+              color: Colors.cyan.shade50,
+              padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Give | 나눔 게시판',
+                      style: TextStyle(
+                        fontFamily: 'NanumSquareRoundR',
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  _buildToggleButtons(context, appState),
+                ],
+              ),
+            ),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      SizedBox(height: 5),
+                      PostTile(appState.giveProducts[index], _selectedIndex),
+                      SizedBox(height: 5),
+                      Divider(
+                        height: 1,
+                        indent: 12,
+                        endIndent: 12,
+                      ),
+                    ],
+                  );
+                },
+                childCount: appState.giveProducts.length,
+              ),
+            ),
+          ),
+        ],
+      ),
+
+      // Column(
+      //   mainAxisAlignment: MainAxisAlignment.center,
+      //   children: [
+      //     HeaderTile(),
+      //     Container(
+      //       padding: EdgeInsets.fromLTRB(12, 4, 4, 4),
+      //       child: Row(
+      //         children: [
+      //           Expanded(
+      //             child: Text(
+      //               'Give | 나눔 게시판',
+      //               style: TextStyle(
+      //                 fontFamily: 'NanumSquareRoundR',
+      //                 fontSize: 16.0,
+      //                 fontWeight: FontWeight.bold,
+      //                 color: Colors.black87,
+      //               ),
+      //             ),
+      //           ),
+      //           _buildToggleButtonBar(context, appState),
+      //         ],
+      //       ),
+      //     ),
+      //     Expanded(
+      //       /// New method (listview builder 사용)
+      //       child: ListView.separated(
+      //         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      //         itemCount: appState.giveProducts.length,
+      //         itemBuilder: (BuildContext context, int index) {
+      //           return PostTile(appState.giveProducts[index], _selectedIndex);
+      //         },
+      //         separatorBuilder: (context, index) {
+      //           // if (index == 0) return SizedBox.shrink();
+      //           return const Divider(
+      //             height: 20,
+      //             thickness: 1,
+      //             indent: 8,
+      //             endIndent: 8,
+      //           );
+      //         },
+      //       ),
+      //     ),
+      //   ],
+      // ),
+
+      /// 1(Take):
+      CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text(
+              'Take',
+              style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'NanumSquareRoundR',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            backgroundColor: Colors.cyan,
+            pinned: false,
+            snap: false,
+            floating: true,
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.location_on,
+                  semanticLabel: 'location',
+                ),
+                onPressed: () {},
+              ),
+            ],
+          ),
+          SliverStickyHeader(
+            header: Container(
+              height: 40,
+              color: Colors.cyan.shade50,
+              padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Take | 나눔, 도움 요청 게시판',
+                      style: TextStyle(
+                        fontFamily: 'NanumSquareRoundR',
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  _buildToggleButtons(context, appState),
+                ],
+              ),
+            ),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      SizedBox(height: 5),
+                      PostTile(appState.takeProducts[index], _selectedIndex),
+                      SizedBox(height: 5),
+                      Divider(
+                        height: 1,
+                        indent: 12,
+                        endIndent: 12,
+                      ),
+                    ],
+                  );
+                },
+                childCount: appState.takeProducts.length,
+              ),
+            ),
+          ),
+        ],
+      ),
+
+      /// 2(Chart) 작업중, Sliver 사용 실험중:
+      CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
             backgroundColor: Colors.cyan,
             pinned: true,
             snap: false,
@@ -296,10 +417,10 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {},
               ),
             ],
-            expandedHeight: 140.0,
+            expandedHeight: 160.0,
             flexibleSpace: const FlexibleSpaceBar(
               title: Text(
-                'Chart Analysis',
+                'Chart Analysis (작업중)',
                 style: TextStyle(
                   fontSize: 18,
                   fontFamily: 'NanumSquareRoundR',
@@ -320,92 +441,132 @@ class _HomePageState extends State<HomePage> {
       ),
 
       /// 3(MyPage):
-      Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          SizedBox(height: 20.0),
-          CircleAvatar(
-            radius: 50.0,
-            backgroundImage:
-                NetworkImage(photoUrl.replaceAll('s96-c', 's400-c')),
-          ),
-          SizedBox(height: 10.0),
-          Text(
-            FirebaseAuth.instance.currentUser.displayName,
-            style: TextStyle(
-              fontFamily: 'NanumBarunGothic',
-              fontSize: 20.0,
-              color: Colors.black87,
-              // fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            'HANDONG GLOBAL UNIVERSITY',
-            style: TextStyle(
-              fontFamily: 'Source Sans Pro',
-              fontSize: 12.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.cyan,
-              letterSpacing: 2.5,
-            ),
-          ),
-          Text(
-            FirebaseAuth.instance.currentUser.email,
-            style: TextStyle(
-              fontFamily: 'Source Sans Pro',
-              fontSize: 12.0,
-              color: Colors.black54,
-              letterSpacing: 1.5,
-            ),
-          ),
-          Text(
-            FirebaseAuth.instance.currentUser.uid,
-            style: TextStyle(
-              fontFamily: 'Source Sans Pro',
-              fontSize: 12.0,
-              color: Colors.black54,
-              letterSpacing: 1.5,
-            ),
-          ),
-          SizedBox(
-            height: 20.0,
-            width: 200.0,
-            child: Divider(
-              color: Colors.cyan.shade200,
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
-            child: ListTile(
-              leading: Icon(
-                Icons.phone,
-                color: Colors.cyan,
-              ),
-              title: Text(
-                '+82 10 9865 7165',
-                style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.cyan.shade900,
-                    fontFamily: 'Source Sans Pro'),
+
+      CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text(
+              'My Page',
+              style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'NanumSquareRoundR',
+                fontWeight: FontWeight.bold,
               ),
             ),
+            backgroundColor: Colors.cyan,
+            pinned: true,
+            snap: false,
+            floating: true,
+            // expandedHeight: 140.0,
+            // flexibleSpace: const FlexibleSpaceBar(
+            //   background: FlutterLogo(),
+            // ),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.location_on,
+                  semanticLabel: 'location',
+                ),
+                onPressed: () {},
+              ),
+            ],
           ),
-          Card(
-            margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
-            child: ListTile(
-              leading: Icon(
-                Icons.location_on,
-                color: Colors.cyan,
-              ),
-              title: Text(
-                'Pohang ... ~',
-                style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.cyan.shade900,
-                    fontFamily: 'Source Sans Pro'),
-              ),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 20.0),
+                    CircleAvatar(
+                      radius: 50.0,
+                      backgroundImage:
+                          NetworkImage(photoUrl.replaceAll('s96-c', 's400-c')),
+                    ),
+                    SizedBox(height: 10.0),
+                    Text(
+                      FirebaseAuth.instance.currentUser.displayName,
+                      style: TextStyle(
+                        fontFamily: 'NanumBarunGothic',
+                        fontSize: 20.0,
+                        color: Colors.black87,
+                        // fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'HANDONG GLOBAL UNIVERSITY',
+                      style: TextStyle(
+                        fontFamily: 'Source Sans Pro',
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.cyan,
+                        letterSpacing: 2.5,
+                      ),
+                    ),
+                    Text(
+                      FirebaseAuth.instance.currentUser.email,
+                      style: TextStyle(
+                        fontFamily: 'Source Sans Pro',
+                        fontSize: 12.0,
+                        color: Colors.black54,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    Text(
+                      FirebaseAuth.instance.currentUser.uid,
+                      style: TextStyle(
+                        fontFamily: 'Source Sans Pro',
+                        fontSize: 12.0,
+                        color: Colors.black54,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20.0,
+                      width: 200.0,
+                      child: Divider(
+                        color: Colors.cyan.shade200,
+                      ),
+                    ),
+                    Card(
+                      margin: EdgeInsets.symmetric(
+                          vertical: 10.0, horizontal: 25.0),
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.phone,
+                          color: Colors.cyan,
+                        ),
+                        title: Text(
+                          '+82 10 9865 7165',
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              color: Colors.cyan.shade900,
+                              fontFamily: 'Source Sans Pro'),
+                        ),
+                      ),
+                    ),
+                    Card(
+                      margin: EdgeInsets.symmetric(
+                          vertical: 10.0, horizontal: 25.0),
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.location_on,
+                          color: Colors.cyan,
+                        ),
+                        title: Text(
+                          'Pohang ... ~',
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              color: Colors.cyan.shade900,
+                              fontFamily: 'Source Sans Pro'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
+          )
         ],
       ),
     ];
@@ -433,96 +594,91 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// 필터링 기능을 토글버튼화하여 버튼바로 생성
-  ButtonBar _buildToggleButtonBar(
+  ToggleButtons _buildToggleButtons(
       BuildContext context, ApplicationState appState) {
-    return ButtonBar(
-      alignment: MainAxisAlignment.end,
-      children: <Widget>[
-        ToggleButtons(
-          color: Colors.black.withOpacity(0.60),
-          constraints: BoxConstraints(
-            minWidth: 30,
-            minHeight: 30,
-          ),
-          selectedBorderColor: Colors.cyan,
-          selectedColor: Colors.cyan,
-          borderRadius: BorderRadius.circular(4.0),
-          isSelected: _selections,
-          onPressed: (int index) {
-            setState(() {
-              for (int buttonIndex = 0;
-                  buttonIndex < _selections.length;
-                  buttonIndex++) {
-                if (buttonIndex == index) {
-                  _selections[buttonIndex] = !_selections[buttonIndex];
-                } else {
-                  _selections[buttonIndex] = false;
-                }
-              }
-              if (_selections[index] == true) {
-                if (index == 0)
-                  appState.orderByFilter('Product');
-                else if (index == 1)
-                  appState.orderByFilter('Time');
-                else
-                  appState.orderByFilter('Talent');
-              } else {
-                appState.orderByFilter('All');
-              }
-            });
-          },
-          children: [
-            Icon(
-              Icons.shopping_bag,
-              size: 20,
-            ),
-            Icon(
-              Icons.access_time,
-              size: 20,
-            ),
-            Icon(
-              Icons.school,
-              size: 20,
-            ),
-          ],
+    return ToggleButtons(
+      color: Colors.black.withOpacity(0.60),
+      constraints: BoxConstraints(
+        minWidth: 30,
+        minHeight: 30,
+      ),
+      selectedBorderColor: Colors.cyan,
+      selectedColor: Colors.cyan,
+      borderRadius: BorderRadius.circular(4.0),
+      isSelected: _selections,
+      onPressed: (int index) {
+        setState(() {
+          for (int buttonIndex = 0;
+              buttonIndex < _selections.length;
+              buttonIndex++) {
+            if (buttonIndex == index) {
+              _selections[buttonIndex] = !_selections[buttonIndex];
+            } else {
+              _selections[buttonIndex] = false;
+            }
+          }
+          if (_selections[index] == true) {
+            if (index == 0)
+              appState.orderByFilter('Product');
+            else if (index == 1)
+              appState.orderByFilter('Time');
+            else
+              appState.orderByFilter('Talent');
+          } else {
+            appState.orderByFilter('All');
+          }
+        });
+      },
+      children: [
+        Icon(
+          Icons.shopping_bag,
+          size: 20,
+        ),
+        Icon(
+          Icons.access_time,
+          size: 20,
+        ),
+        Icon(
+          Icons.school,
+          size: 20,
         ),
       ],
     );
   }
 
-  /// Builder Widget for AppBar
-  AppBar buildAppBar(BuildContext context) {
-    return AppBar(
-      title: Center(
-        child: Text(
-          'Give & Take',
-          style: TextStyle(
-            fontSize: 18,
-            fontFamily: 'NanumSquareRoundR',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      backgroundColor: Colors.cyan,
-      leading: IconButton(
-        icon: Icon(
-          Icons.menu_rounded,
-          semanticLabel: 'menu',
-        ),
-        onPressed: () =>
-            _scaffoldKey.currentState.openDrawer(), // Open drawer on pressed
-      ),
-      actions: <Widget>[
-        IconButton(
-          icon: Icon(
-            Icons.location_on,
-            semanticLabel: 'location',
-          ),
-          onPressed: () {},
-        ),
-      ],
-    );
-  }
+  // /// Builder Widget for AppBar
+  // AppBar buildAppBar(BuildContext context) {
+  //   return AppBar(
+  //     title: Center(
+  //       child: Text(
+  //         'Give & Take',
+  //         style: TextStyle(
+  //           fontSize: 18,
+  //           fontFamily: 'NanumSquareRoundR',
+  //           fontWeight: FontWeight.bold,
+  //         ),
+  //       ),
+  //     ),
+  //     backgroundColor: Colors.cyan,
+  //     leading: IconButton(
+  //       icon: Icon(
+  //         Icons.menu_rounded,
+  //         semanticLabel: 'menu',
+  //       ),
+  //       onPressed: () =>
+  //           _scaffoldKey.currentState.openDrawer(), // Open drawer on pressed
+  //     ),
+  //     actions: <Widget>[
+  //       IconButton(
+  //         icon: Icon(
+  //           Icons.location_on,
+  //           semanticLabel: 'location',
+  //         ),
+  //         onPressed: () {},
+  //       ),
+  //     ],
+  //   );
+  // }
 
   /// Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
