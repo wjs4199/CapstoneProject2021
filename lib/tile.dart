@@ -33,6 +33,7 @@ class _ArticleDescription extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
+                  fontFamily: 'NanumSquareRoundR',
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -42,6 +43,7 @@ class _ArticleDescription extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
+                  fontFamily: 'NanumSquareRoundR',
                   fontSize: 12.0,
                   color: Colors.black54,
                 ),
@@ -58,6 +60,7 @@ class _ArticleDescription extends StatelessWidget {
               Text(
                 '$category | $author',
                 style: const TextStyle(
+                  fontFamily: 'NanumSquareRoundR',
                   fontSize: 12.0,
                   color: Colors.black87,
                 ),
@@ -67,6 +70,7 @@ class _ArticleDescription extends StatelessWidget {
                 // '$publishDate - ♥️: $likes',
                 publishDate,
                 style: const TextStyle(
+                  fontFamily: 'NanumSquareRoundR',
                   fontSize: 12.0,
                   color: Colors.black54,
                 ),
@@ -109,20 +113,17 @@ class CustomListItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
-                child: _ArticleDescription(
-                  title: title,
-                  subtitle: subtitle,
-                  author: author,
-                  publishDate: publishDate,
-                  category: category,
-                  likes: likes,
-                ),
+              child: _ArticleDescription(
+                title: title,
+                subtitle: subtitle,
+                author: author,
+                publishDate: publishDate,
+                category: category,
+                likes: likes,
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(right: 10.0),
+              padding: const EdgeInsets.only(left: 10.0),
               child: AspectRatio(
                 aspectRatio: 1.0,
                 child: thumbnail,

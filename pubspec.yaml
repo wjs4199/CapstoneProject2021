@@ -44,10 +44,6 @@ flutter:
       fonts:
         - asset: fonts/NanumBarunGothic.ttf
 
-    - family: NanumSquareRoundB
-      fonts:
-        - asset: fonts/NanumSquareRoundB.ttf
-
     - family: NanumSquareRoundR
       fonts:
         - asset: fonts/NanumSquareRoundR.ttf

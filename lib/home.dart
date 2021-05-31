@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 
 import 'main.dart';
 import 'product.dart';
-import 'add.dart';
 import 'tile.dart';
 
 class HomePage extends StatefulWidget {
@@ -187,36 +186,41 @@ class _HomePageState extends State<HomePage> {
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          HeaderTile(),
+          Container(
+            padding: EdgeInsets.fromLTRB(12, 12, 4, 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Give | 나눔 게시판',
+                    style: TextStyle(
+                      fontFamily: 'NanumSquareRoundR',
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                _buildToggleButtonBar(context, appState),
+              ],
+            ),
+          ),
           Expanded(
-            /* 기존 method
-            child: ListView(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              children: _buildListElement(context, appState.giveProducts),
-            ), */
-
-            // New method (listview builder 사용)
+            /// New method (listview builder 사용)
             child: ListView.separated(
-              padding: const EdgeInsets.all(8),
-              // HeaderTile, ToggleButton 포함 length + 2
-              itemCount: appState.giveProducts.length + 2,
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              itemCount: appState.giveProducts.length,
               itemBuilder: (BuildContext context, int index) {
-                if (index == 0) return HeaderTile();
-                if (index == 1)
-                  return Container(
-                    child: _buildToggleButtonBar(context, appState),
-                  );
-                // HeaderTile, ToggleButton 고려 index - 2
-                return PostTile(
-                    appState.giveProducts[index - 2], _selectedIndex);
+                return PostTile(appState.giveProducts[index], _selectedIndex);
               },
               separatorBuilder: (context, index) {
-                if (index == 0 || index == 1) return SizedBox.shrink();
+                // if (index == 0) return SizedBox.shrink();
                 return const Divider(
                   height: 20,
                   thickness: 1,
-                  indent: 10,
-                  endIndent: 10,
+                  indent: 8,
+                  endIndent: 8,
                 );
               },
             ),
@@ -229,21 +233,28 @@ class _HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(8),
-            child: _buildToggleButtonBar(context, appState),
+            padding: EdgeInsets.fromLTRB(12, 12, 4, 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Take | 나눔, 도움 요청 게시판',
+                    style: TextStyle(
+                      fontFamily: 'NanumSquareRoundR',
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                _buildToggleButtonBar(context, appState),
+              ],
+            ),
           ),
           Expanded(
-            /* 기존 method
-            child: ListView(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              children: _buildListElement(context, appState.takeProducts),
-            ), */
-            // New method (listview builder 사용)
-
-            // New method
+            /// New method (listview builder 사용)
             child: ListView.separated(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               itemCount: appState.takeProducts.length,
               itemBuilder: (BuildContext context, int index) {
                 return PostTile(appState.takeProducts[index], _selectedIndex);
@@ -355,49 +366,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      // Row(
-      //   children: [
-      //     // Expanded(
-      //     //   flex: 1,
-      //     //   child: Container(),
-      //     // ),
-      //     Expanded(
-      //       // flex: 8,
-      //       child: Column(
-      //         crossAxisAlignment: CrossAxisAlignment.start,
-      //         children: [
-      //           SizedBox(
-      //             height: 30,
-      //           ),
-      //           Container(
-      //             width: 100,
-      //             height: 100,
-      //             child: FirebaseAuth.instance.currentUser.isAnonymous
-      //                 ? Image.asset('assets/logo.png', fit: BoxFit.fitWidth)
-      //                 : Image.network(photoUrl.replaceAll('s96-c', 's400-c'),
-      //                     fit: BoxFit.fitWidth),
-      //           ),
-      //           SizedBox(
-      //             height: 20,
-      //           ),
-      //           Text(FirebaseAuth.instance.currentUser.displayName),
-      //           Divider(
-      //             color: Colors.black26,
-      //             height: 30,
-      //             thickness: 1,
-      //           ),
-      //           Text(FirebaseAuth.instance.currentUser.isAnonymous
-      //               ? 'Anonymous'
-      //               : FirebaseAuth.instance.currentUser.uid),
-      //         ],
-      //       ),
-      //     ),
-      //     Expanded(
-      //       flex: 1,
-      //       child: Container(),
-      //     ),
-      //   ],
-      // )
     ];
     return _widgetOptions;
   }
