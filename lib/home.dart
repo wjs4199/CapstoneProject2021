@@ -193,20 +193,44 @@ class _HomePageState extends State<HomePage> {
     List<Widget> _widgetOptions = <Widget>[
       /// 0(Give):
       CustomScrollView(
+        physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics()),
         slivers: <Widget>[
           SliverAppBar(
-            title: Text(
-              'Home | Give',
-              style: TextStyle(
-                fontSize: 18,
-                fontFamily: 'NanumSquareRoundR',
-                fontWeight: FontWeight.bold,
-              ),
-            ),
             backgroundColor: Colors.cyan,
+            // stretch: true,
             pinned: false,
             snap: false,
-            floating: true,
+            floating: false,
+            expandedHeight: 120.0,
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                'Home | Give',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontFamily: 'NanumSquareRoundR',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              background: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  FlutterLogo(),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(0.0, 0.5),
+                        end: Alignment.center,
+                        colors: <Color>[
+                          Color(0x60000000),
+                          Color(0x00000000),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             actions: <Widget>[
               IconButton(
                 icon: Icon(
