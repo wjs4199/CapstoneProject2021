@@ -188,7 +188,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           HeaderTile(),
           Container(
-            padding: EdgeInsets.fromLTRB(12, 12, 4, 4),
+            padding: EdgeInsets.fromLTRB(12, 4, 4, 4),
             child: Row(
               children: [
                 Expanded(
