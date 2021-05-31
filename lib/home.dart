@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'main.dart';
 import 'product.dart';
 import 'tile.dart';
+import 'chart.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -158,16 +159,14 @@ class _HomePageState extends State<HomePage> {
       appBar: buildAppBar(context),
       drawer: buildDrawer(context),
       body: Consumer<ApplicationState>(
-        builder: (context, appState, _) => SafeArea(
-          child: SizedBox.expand(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() => _selectedIndex = index);
-              },
-              // NavBar Index 별 상응 위젯 출력
-              children: _buildWidgetOptions(context, appState),
-            ),
+        builder: (context, appState, _) => SizedBox.expand(
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() => _selectedIndex = index);
+            },
+            // NavBar Index 별 상응 위젯 출력
+            children: _buildWidgetOptions(context, appState),
           ),
         ),
       ),
@@ -272,9 +271,52 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
 
-      /// 2(Chart):
-      Center(
-        child: Text('Chart(To be implemented)'),
+      /// 2(Chart) 작업중, Silver 사용 실험중:
+      CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            // title: Text(
+            //   'Give & Take',
+            //   style: TextStyle(
+            //     fontSize: 18,
+            //     fontFamily: 'NanumSquareRoundR',
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
+            backgroundColor: Colors.cyan,
+            pinned: true,
+            snap: false,
+            floating: true,
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.location_on,
+                  semanticLabel: 'location',
+                ),
+                onPressed: () {},
+              ),
+            ],
+            expandedHeight: 140.0,
+            flexibleSpace: const FlexibleSpaceBar(
+              title: Text(
+                'Chart Analysis',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontFamily: 'NanumSquareRoundR',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              background: FlutterLogo(),
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                PieChart1(),
+              ],
+            ),
+          )
+        ],
       ),
 
       /// 3(MyPage):
@@ -452,7 +494,14 @@ class _HomePageState extends State<HomePage> {
   AppBar buildAppBar(BuildContext context) {
     return AppBar(
       title: Center(
-        child: Text('Give & Take'),
+        child: Text(
+          'Give & Take',
+          style: TextStyle(
+            fontSize: 18,
+            fontFamily: 'NanumSquareRoundR',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       backgroundColor: Colors.cyan,
       leading: IconButton(
@@ -482,6 +531,10 @@ class _HomePageState extends State<HomePage> {
       selectedItemColor: Colors.cyan,
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
+      selectedLabelStyle: TextStyle(
+          fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
+      unselectedLabelStyle: TextStyle(
+          fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
       items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.redo),

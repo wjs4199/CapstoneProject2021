@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'home.dart';
 import 'login.dart';
 import 'detail.dart';
-import 'chat.dart';
+import 'chart.dart';
 import 'product.dart';
 import 'add.dart';
 import 'edit.dart';
@@ -36,7 +36,6 @@ class Application extends StatelessWidget {
             routes: {
               '/login': (context) => LoginPage(),
               '/home': (context) => HomePage(),
-              '/chat': (context) => ChatPage(),
               '/giveadd': (context) => giveAddPage(),
               '/takeadd': (context) => takeAddPage(),
             },

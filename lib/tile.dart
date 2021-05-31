@@ -135,5 +135,3 @@ class CustomListItem extends StatelessWidget {
     );
   }
 }
-
-// }
