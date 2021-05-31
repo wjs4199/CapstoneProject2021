@@ -110,52 +110,6 @@ class PostTile extends StatelessWidget {
         ),
       ),
     );
-
-    // return ListTile(
-    //   // leading: CircleAvatar(
-    //   //   backgroundImage: NetworkImage(highResUrl),
-    //   //   backgroundColor: Colors.transparent,
-    //   // ),
-    //   title: Text(_product.title),
-    //   subtitle: Text(
-    //     _product.content,
-    //     maxLines: 2,
-    //     overflow: TextOverflow.ellipsis,
-    //   ),
-    //   onTap: () {
-    //     if (_giveOrTake == 0)
-    //       Navigator.pushNamed(
-    //           context, '/detail/' + _product.id + '/giveProducts');
-    //     else
-    //       Navigator.pushNamed(
-    //           context, '/detail/' + _product.id + '/takeProducts');
-    //   },
-    //   trailing: Container(
-    //     width: 100,
-    //     height: 100,
-    //     alignment: Alignment.centerRight,
-    //     child: FutureBuilder(
-    //       future: downloadURL(_product.id),
-    //       builder: (context, snapshot) {
-    //         if (snapshot.connectionState == ConnectionState.waiting) {
-    //           return Center(child: CircularProgressIndicator());
-    //         } else {
-    //           if (snapshot.hasData) {
-    //             return ClipRRect(
-    //               borderRadius: new BorderRadius.circular(8.0),
-    //               child: Image.network(snapshot.data.toString(),
-    //                   fit: BoxFit.fitWidth),
-    //             );
-    //           } else if (snapshot.hasData == false) {
-    //             return Container();
-    //           } else {
-    //             return Center(child: CircularProgressIndicator());
-    //           }
-    //         }
-    //       },
-    //     ),
-    //   ),
-    // );
   }
 }
 
@@ -313,49 +267,137 @@ class _HomePageState extends State<HomePage> {
       ),
 
       /// 3(MyPage):
-      Row(
+      Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 1,
-            child: Container(),
+          SizedBox(height: 20.0),
+          CircleAvatar(
+            radius: 50.0,
+            backgroundImage:
+                NetworkImage(photoUrl.replaceAll('s96-c', 's400-c')),
           ),
-          Expanded(
-            flex: 8,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 30,
-                ),
-                Container(
-                  width: 100,
-                  height: 100,
-                  child: FirebaseAuth.instance.currentUser.isAnonymous
-                      ? Image.asset('assets/logo.png', fit: BoxFit.fitWidth)
-                      : Image.network(photoUrl.replaceAll('s96-c', 's400-c'),
-                          fit: BoxFit.fitWidth),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Text(FirebaseAuth.instance.currentUser.displayName),
-                Divider(
-                  color: Colors.black26,
-                  height: 30,
-                  thickness: 1,
-                ),
-                Text(FirebaseAuth.instance.currentUser.isAnonymous
-                    ? 'Anonymous'
-                    : FirebaseAuth.instance.currentUser.uid),
-              ],
+          SizedBox(height: 10.0),
+          Text(
+            FirebaseAuth.instance.currentUser.displayName,
+            style: TextStyle(
+              fontFamily: 'NanumBarunGothic',
+              fontSize: 20.0,
+              color: Colors.black87,
+              // fontWeight: FontWeight.bold,
             ),
           ),
-          Expanded(
-            flex: 1,
-            child: Container(),
+          Text(
+            'HANDONG GLOBAL UNIVERSITY',
+            style: TextStyle(
+              fontFamily: 'Source Sans Pro',
+              fontSize: 12.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.cyan,
+              letterSpacing: 2.5,
+            ),
+          ),
+          Text(
+            FirebaseAuth.instance.currentUser.email,
+            style: TextStyle(
+              fontFamily: 'Source Sans Pro',
+              fontSize: 12.0,
+              color: Colors.black54,
+              letterSpacing: 1.5,
+            ),
+          ),
+          Text(
+            FirebaseAuth.instance.currentUser.uid,
+            style: TextStyle(
+              fontFamily: 'Source Sans Pro',
+              fontSize: 12.0,
+              color: Colors.black54,
+              letterSpacing: 1.5,
+            ),
+          ),
+          SizedBox(
+            height: 20.0,
+            width: 200.0,
+            child: Divider(
+              color: Colors.cyan.shade200,
+            ),
+          ),
+          Card(
+            margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
+            child: ListTile(
+              leading: Icon(
+                Icons.phone,
+                color: Colors.cyan,
+              ),
+              title: Text(
+                '+82 10 9865 7165',
+                style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.cyan.shade900,
+                    fontFamily: 'Source Sans Pro'),
+              ),
+            ),
+          ),
+          Card(
+            margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
+            child: ListTile(
+              leading: Icon(
+                Icons.location_on,
+                color: Colors.cyan,
+              ),
+              title: Text(
+                'Pohang ... ~',
+                style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.cyan.shade900,
+                    fontFamily: 'Source Sans Pro'),
+              ),
+            ),
           ),
         ],
-      )
+      ),
+      // Row(
+      //   children: [
+      //     // Expanded(
+      //     //   flex: 1,
+      //     //   child: Container(),
+      //     // ),
+      //     Expanded(
+      //       // flex: 8,
+      //       child: Column(
+      //         crossAxisAlignment: CrossAxisAlignment.start,
+      //         children: [
+      //           SizedBox(
+      //             height: 30,
+      //           ),
+      //           Container(
+      //             width: 100,
+      //             height: 100,
+      //             child: FirebaseAuth.instance.currentUser.isAnonymous
+      //                 ? Image.asset('assets/logo.png', fit: BoxFit.fitWidth)
+      //                 : Image.network(photoUrl.replaceAll('s96-c', 's400-c'),
+      //                     fit: BoxFit.fitWidth),
+      //           ),
+      //           SizedBox(
+      //             height: 20,
+      //           ),
+      //           Text(FirebaseAuth.instance.currentUser.displayName),
+      //           Divider(
+      //             color: Colors.black26,
+      //             height: 30,
+      //             thickness: 1,
+      //           ),
+      //           Text(FirebaseAuth.instance.currentUser.isAnonymous
+      //               ? 'Anonymous'
+      //               : FirebaseAuth.instance.currentUser.uid),
+      //         ],
+      //       ),
+      //     ),
+      //     Expanded(
+      //       flex: 1,
+      //       child: Container(),
+      //     ),
+      //   ],
+      // )
     ];
     return _widgetOptions;
   }
@@ -436,66 +478,6 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
     );
-
-    /// 기존 (복잡)
-    // Row(
-    //   mainAxisAlignment: MainAxisAlignment.end,
-    //   children: [
-    //     IconButton(
-    //         padding: EdgeInsets.all(0),
-    //         alignment: Alignment.centerRight,
-    //         icon: (_filterOfProduct
-    //             ? Icon(Icons.wallet_giftcard, size: 30, color: Colors.cyan)
-    //             : Icon(Icons.wallet_giftcard, size: 30, color: Colors.grey)),
-    //         onPressed: () {
-    //           _chooseFilter("Product");
-    //           if (_filterOfProduct) {
-    //             appState.orderByFilter('Product');
-    //             print("product filtering!");
-    //           } else if (!_filterOfProduct &&
-    //               !_filterOfTime &&
-    //               !_filterOfTalent) appState.orderByFilter('All');
-    //         }),
-    //     IconButton(
-    //         padding: EdgeInsets.all(0),
-    //         alignment: Alignment.centerRight,
-    //         icon: (_filterOfTime
-    //             ? Icon(Icons.timer, size: 30, color: Colors.cyan)
-    //             : Icon(Icons.timer, size: 30, color: Colors.grey)),
-    //         onPressed: () {
-    //           _chooseFilter("Time");
-    //           if (_filterOfTime) {
-    //             print("time filtering!");
-    //             appState.orderByFilter('Time');
-    //           } else if (!_filterOfProduct &&
-    //               !_filterOfTime &&
-    //               !_filterOfTalent) appState.orderByFilter('All');
-    //         }),
-    //     IconButton(
-    //         padding: EdgeInsets.all(0),
-    //         alignment: Alignment.centerRight,
-    //         icon: (_filterOfTalent
-    //             ? Icon(
-    //                 Icons.lightbulb,
-    //                 size: 30,
-    //                 color: Colors.cyan,
-    //               )
-    //             : Icon(
-    //                 Icons.lightbulb,
-    //                 size: 30,
-    //                 color: Colors.grey,
-    //               )),
-    //         onPressed: () {
-    //           _chooseFilter("Talent");
-    //           if (_filterOfTalent) {
-    //             print("talent filtering!");
-    //             appState.orderByFilter('Talent');
-    //           } else if (!_filterOfProduct &&
-    //               !_filterOfTime &&
-    //               !_filterOfTalent) appState.orderByFilter('All');
-    //         }),
-    //   ],
-    // );
   }
 
   /// Builder Widget for AppBar
