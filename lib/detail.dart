@@ -20,20 +20,27 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  Scaffold _buildScaffold(BuildContext context, ApplicationState appState) {
+  //firebase에서 저장된 comments가져오기
+  List<Comment> _commentsList = [];
+  List<Comment> get commentsList => _commentsList;
+
+  Scaffold _buildScaffold() {
     String productId = this.widget.productId;
     String detailGiveOrTake = this.widget.detailGiveOrTake;
 
-    List<Product> Products = detailGiveOrTake == 'giveProducts'
-        ? appState.giveProducts
-        : appState.takeProducts;
+    List<Product> products = detailGiveOrTake == 'giveProducts'
+        ? context.watch<ApplicationState>().giveProducts
+        : context.watch<ApplicationState>().takeProducts;
     Product product;
     String userId = FirebaseAuth.instance.currentUser.uid;
+    String userName;
     bool productFound = false;
 
-    for (int i = 0; i < Products.length; i++) {
-      if (Products[i].id == productId) {
-        product = Products[i];
+    for (int i = 0; i < products.length; i++) {
+      if (products[i].id == productId) {
+        product = products[i];
+        userName = product.userName;
+
         print(product.userName);
         print(product.uid);
 
@@ -41,8 +48,12 @@ class _DetailPageState extends State<DetailPage> {
       }
     }
 
-    if (Products == null ||
-        Products.isEmpty ||
+    //product uid에 해당하는 commentContext 가져오기
+    context.watch<ApplicationState>().detailPageUid(productId);
+    // List<Comment> commentContext =context.watch<ApplicationState>().commentContext;
+
+    if (products == null ||
+        products.isEmpty ||
         productFound == false ||
         product.modified == null) {
       return Scaffold(
@@ -78,6 +89,11 @@ class _DetailPageState extends State<DetailPage> {
           .collection('takeProducts/' + productId + '/like');
     }
 
+    // Collection 참조 ->  comments
+    CollectionReference comments;
+    comments = FirebaseFirestore.instance
+        .collection('comments/' + productId + '/commentList');
+
     // Add a like
     Future<void> addLike() {
       return likes
@@ -85,20 +101,30 @@ class _DetailPageState extends State<DetailPage> {
           .then((value) => print('LIKED!'))
           .catchError((error) => print('Failed to add a like: $error'));
     }
-
     /*// Delete like
-    Future<void> deleteLike() async {
-      try {
-        return await FirebaseFirestore.instance
-            .collection(detailGiveOrTake)
-            .doc(productId)
-            .snapshots()
-            .['likes']
-            .delete();
-      } on Exception {
-        return null;
-      }
-    }*/
+      Future<void> deleteLike() async {
+        try {
+          return await FirebaseFirestore.instance
+              .collection(detailGiveOrTake)
+              .doc(productId)
+              .snapshots()
+              .['likes']
+              .delete();
+        } on Exception {
+          return null;
+        }
+      }*/
+
+    Future<void> addComments(String comment) {
+      return comments
+          .add({
+            'userName': userName,
+            'comment': comment,
+            'time': FieldValue.serverTimestamp(),
+          })
+          .then((value) => print('add comment!'))
+          .catchError((error) => print('Failed to add a comment: $error'));
+    }
 
     // Delete item
     Future<void> deleteProduct() async {
@@ -119,6 +145,17 @@ class _DetailPageState extends State<DetailPage> {
         if (document['uid'] == userId) liked = true;
       });
       return liked;
+    }
+
+    List<Comment> getComments(AsyncSnapshot<QuerySnapshot> snapshot) {
+      snapshot.data.docs.forEach((document) {
+        _commentsList = [];
+        _commentsList.add(Comment(
+            userName: document['userName'],
+            comment: document['comment'],
+            time: document['time']));
+      });
+      return commentsList;
     }
 
     return Scaffold(
@@ -171,17 +208,20 @@ class _DetailPageState extends State<DetailPage> {
                                   },
                                   child: Text("No"),
                                 ),
-                                CupertinoDialogAction(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    deleteProduct()
-                                        .then((value) => appState.init())
-                                        .catchError((error) => null)
-                                        .whenComplete(
-                                            () => Navigator.pop(context));
-                                  },
-                                  child: Text("Yes"),
-                                ),
+                                Consumer<ApplicationState>(
+                                  builder: (context, appState, _) =>
+                                      CupertinoDialogAction(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      deleteProduct()
+                                          .then((value) => appState.init())
+                                          .catchError((error) => null)
+                                          .whenComplete(
+                                              () => Navigator.pop(context));
+                                    },
+                                    child: Text("Yes"),
+                                  ),
+                                )
                               ],
                             ))
                     : null)
@@ -227,107 +267,109 @@ class _DetailPageState extends State<DetailPage> {
                 Expanded(
                   flex: 8,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 8.0),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 8,
-                            child: Text(
-                              product.category,
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Color(0xff3792cb),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 8.0),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 8,
+                              child: Text(
+                                product.category,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Color(0xff3792cb),
+                                ),
                               ),
                             ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: StreamBuilder<QuerySnapshot>(
-                              stream: likes.snapshots(),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                                if (snapshot.hasError) {
-                                  return Text('Error!');
-                                }
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Text('Loading');
-                                }
-                                int count = snapshot.data.size;
-                                return Row(
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        (count != 0)
-                                            ? Icons.favorite
-                                            : Icons.favorite_outlined,
-                                        color: Colors.red,
-                                        semanticLabel: 'like',
+                            Expanded(
+                              flex: 2,
+                              child: StreamBuilder<QuerySnapshot>(
+                                stream: likes.snapshots(),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                                  if (snapshot.hasError) {
+                                    return Text('Error!');
+                                  }
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Text('Loading');
+                                  }
+                                  int count = snapshot.data.size;
+                                  return Row(
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(
+                                          (count != 0)
+                                              ? Icons.favorite
+                                              : Icons.favorite_outlined,
+                                          color: Colors.red,
+                                          semanticLabel: 'like',
+                                        ),
+                                        onPressed: () => (isLiked(snapshot))
+                                            ? print('You can only like once!')
+                                            : addLike(),
                                       ),
-                                      onPressed: () => (isLiked(snapshot))
-                                          ? print('You can only like once!')
-                                          : addLike(),
-                                    ),
-                                    Text(count.toString())
-                                  ],
-                                );
-                              },
+                                      Text(count.toString())
+                                    ],
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      Divider(thickness: 1.0),
-                      SizedBox(height: 8.0),
-                      Text(
-                        product.title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Color(0xff296d98),
+                          ],
                         ),
-                      ),
-                      SizedBox(height: 8.0),
-                      Divider(thickness: 1.0),
-                      Row(
-                        children: [
-                          Text(
-                            product.userName.toString() +
-                                "                            ",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xff296d98),
-                            ),
+                        Divider(thickness: 1.0),
+                        SizedBox(height: 8.0),
+                        Text(
+                          product.title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Color(0xff296d98),
                           ),
-                          Text(
-                            DateFormat('yyyy.MM.dd HH:mm')
-                                .format(product.modified.toDate()),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xff296d98),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(thickness: 1.0),
-                      SizedBox(height: 8.0),
-                      Text(
-                        product.content ?? product.content,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xff3792cb),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Container(),
+                        SizedBox(height: 8.0),
+                        Divider(thickness: 1.0),
+                        Row(
+                          children: [
+                            Text(
+                              product.userName.toString() +
+                                  "                            ",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color(0xff296d98),
+                              ),
+                            ),
+                            Text(
+                              DateFormat('yyyy.MM.dd HH:mm')
+                                  .format(product.modified.toDate()),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color(0xff296d98),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Divider(thickness: 1.0),
+                        SizedBox(height: 8.0),
+                        Text(
+                          product.content ?? product.content,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Color(0xff3792cb),
+                          ),
+                        ),
+                      ]),
                 ),
               ],
             ),
+            Container(
+                padding: const EdgeInsets.all(8.0),
+                child: CommentBook(
+                  addComments: (String comment) => addComments(comment),
+                  //comments: commentContext,
+                  productId: productId,
+                ))
           ],
         ),
       ),
@@ -336,8 +378,106 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ApplicationState>(
-      builder: (context, appState, _) => _buildScaffold(context, appState),
-    );
+    return _buildScaffold();
+  }
+}
+
+/*class Comment {
+  Comment({this.userName, this.comment, this.time});
+  final String userName;
+  final String comment;
+  Timestamp time;
+}
+*/
+class CommentBook extends StatefulWidget {
+  CommentBook(
+      {this.addComments,
+      //this.comments,
+      this.productId}); //, required this.dates
+  final Future<void> Function(String message) addComments;
+  //final List<Comment> comments;
+  final String productId;
+
+  @override
+  _CommentBookState createState() => _CommentBookState();
+}
+
+class _CommentBookState extends State<CommentBook> {
+  final _commentFormKey = GlobalKey<FormState>(debugLabel: '_CommentState');
+  final _commentController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    List<Comment> comments = context.watch<ApplicationState>().commentContext;
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Form(
+        key: _commentFormKey,
+        child: Row(
+          children: [
+            Expanded(
+                child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextFormField(
+                controller: _commentController,
+                decoration: const InputDecoration(
+                  hintText: 'Leave a comment',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Enter your message to continue';
+                  }
+                  return null;
+                },
+              ),
+            )),
+            SizedBox(width: 5),
+            IconButton(
+              icon: const Icon(Icons.send),
+              color: Colors.blueAccent,
+              onPressed: () async {
+                setState(() {
+                  if (_commentFormKey.currentState.validate()) {
+                    widget.addComments(_commentController.text);
+                    _commentController.clear();
+                    context
+                        .watch<ApplicationState>()
+                        .detailPageUid(widget.productId);
+                    print("clear!");
+                  }
+                });
+              },
+            ),
+          ],
+        ),
+      ),
+      SizedBox(height: 8),
+      for (var eachComment in comments)
+        Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+          Container(
+            margin: const EdgeInsets.only(right: 16.0),
+            child: CircleAvatar(child: Text(eachComment.userName)),
+          ),
+          Container(
+              padding: EdgeInsets.all(3.0),
+              width: 340,
+              child: RichText(
+                  text: TextSpan(
+                      style: DefaultTextStyle.of(context).style,
+                      children: <TextSpan>[
+                    TextSpan(text: eachComment.comment + '\n'),
+                    TextSpan(
+                        text: DateFormat('yyyy.MM.dd HH:mm')
+                            .format(eachComment.time.toDate())),
+                  ]))),
+          if (FirebaseAuth.instance.currentUser.displayName ==
+              eachComment.userName)
+            IconButton(
+                onPressed: () {
+                  print("this comment deleted!");
+                },
+                icon: Icon(Icons.delete_outline)),
+        ])
+    ]);
   }
 }
