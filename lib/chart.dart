@@ -3,12 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'indicator.dart';
 
-class PieChart1 extends StatefulWidget {
+import 'product.dart';
+
+class CustomPieChart extends StatefulWidget {
+  CustomPieChart(this._products);
+
+  final List<Product> _products;
+
   @override
-  State<StatefulWidget> createState() => PieChartState();
+  State<StatefulWidget> createState() => PieChartState(_products);
 }
 
 class PieChartState extends State {
+  PieChartState(this.products);
+  final List<Product> products;
+
   int touchedIndex = -1;
 
   @override
@@ -92,6 +101,20 @@ class PieChartState extends State {
   }
 
   List<PieChartSectionData> showingSections() {
+    double productCount = 0;
+    double timeCount = 0;
+    double talentCount = 0;
+
+    for (int i = 0; i < products.length; i++) {
+      if (products[i].category == 'Product')
+        productCount++;
+      else if (products[i].category == 'Time')
+        timeCount++;
+      else if (products[i].category == 'Talent') talentCount++;
+    }
+
+    double total = productCount + timeCount + talentCount;
+
     return List.generate(3, (i) {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 25.0 : 16.0;
@@ -100,8 +123,8 @@ class PieChartState extends State {
         case 0:
           return PieChartSectionData(
             color: const Color(0xff0293ee),
-            value: 40,
-            title: '40%',
+            value: productCount,
+            title: (productCount / total * 100).round().toString() + '%',
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize,
@@ -111,8 +134,8 @@ class PieChartState extends State {
         case 1:
           return PieChartSectionData(
             color: const Color(0xfff8b250),
-            value: 30,
-            title: '30%',
+            value: timeCount,
+            title: (timeCount / total * 100).round().toString() + '%',
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize,
@@ -122,8 +145,8 @@ class PieChartState extends State {
         case 2:
           return PieChartSectionData(
             color: const Color(0xff13d38e),
-            value: 30,
-            title: '30%',
+            value: talentCount,
+            title: (talentCount / total * 100).round().toString() + '%',
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize,

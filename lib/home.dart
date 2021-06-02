@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:url_launcher/url_launcher.dart';
@@ -359,18 +358,40 @@ class _HomePageState extends State<HomePage> {
       CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            title: Text(
-              'Take',
-              style: TextStyle(
-                fontSize: 18,
-                fontFamily: 'NanumSquareRoundR',
-                fontWeight: FontWeight.bold,
-              ),
-            ),
             backgroundColor: Colors.cyan,
+            // stretch: true,
             pinned: false,
             snap: false,
-            floating: true,
+            floating: false,
+            expandedHeight: 120.0,
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                'Take',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontFamily: 'NanumSquareRoundR',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              background: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  FlutterLogo(),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(0.0, 0.5),
+                        end: Alignment.center,
+                        colors: <Color>[
+                          Color(0x60000000),
+                          Color(0x00000000),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             actions: <Widget>[
               IconButton(
                 icon: Icon(
@@ -430,10 +451,22 @@ class _HomePageState extends State<HomePage> {
       CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
+            title: Text(
+              'Chart Analysis',
+              style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'NanumSquareRoundR',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             backgroundColor: Colors.cyan,
             pinned: true,
             snap: false,
             floating: true,
+            // expandedHeight: 140.0,
+            // flexibleSpace: const FlexibleSpaceBar(
+            //   background: FlutterLogo(),
+            // ),
             actions: <Widget>[
               IconButton(
                 icon: Icon(
@@ -443,23 +476,34 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {},
               ),
             ],
-            expandedHeight: 160.0,
-            flexibleSpace: const FlexibleSpaceBar(
-              title: Text(
-                'Chart Analysis (작업중)',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontFamily: 'NanumSquareRoundR',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              background: FlutterLogo(),
-            ),
           ),
           SliverList(
             delegate: SliverChildListDelegate(
               [
-                PieChart1(),
+                Padding(
+                  padding: const EdgeInsets.only(left: 18, top: 9),
+                  child: Text(
+                    'Analysis on Give Board:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'NanumSquareRoundR',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                CustomPieChart(appState.giveProducts),
+                Padding(
+                  padding: const EdgeInsets.only(left: 18, top: 9),
+                  child: Text(
+                    'Analysis on Take Board:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'NanumSquareRoundR',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                CustomPieChart(appState.takeProducts),
               ],
             ),
           )
@@ -580,7 +624,7 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.cyan,
                         ),
                         title: Text(
-                          'Pohang ... ~',
+                          'Pohang, Replublic of Korea',
                           style: TextStyle(
                               fontSize: 20.0,
                               color: Colors.cyan.shade900,
