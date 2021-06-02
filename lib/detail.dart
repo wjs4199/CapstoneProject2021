@@ -56,6 +56,7 @@ class _DetailPageState extends State<DetailPage> {
         products.isEmpty ||
         productFound == false ||
         product.modified == null) {
+      print("로딩중");
       return Scaffold(
         body: CircularProgressIndicator(),
       );
@@ -147,7 +148,7 @@ class _DetailPageState extends State<DetailPage> {
       return liked;
     }
 
-    List<Comment> getComments(AsyncSnapshot<QuerySnapshot> snapshot) {
+    /*List<Comment> getComments(AsyncSnapshot<QuerySnapshot> snapshot) {
       snapshot.data.docs.forEach((document) {
         _commentsList = [];
         _commentsList.add(Comment(
@@ -156,7 +157,7 @@ class _DetailPageState extends State<DetailPage> {
             time: document['time']));
       });
       return commentsList;
-    }
+    }*/
 
     return Scaffold(
       appBar: AppBar(
@@ -230,32 +231,34 @@ class _DetailPageState extends State<DetailPage> {
       body: SafeArea(
         child: ListView(
           children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              child: FutureBuilder(
-                future: downloadURL(productId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Column(
-                      children: [
-                        SizedBox(height: 50),
-                        Center(child: CircularProgressIndicator()),
-                        SizedBox(height: 48),
-                      ],
-                    );
-                  } else {
-                    if (snapshot.hasData) {
-                      return Image.network(snapshot.data.toString(),
-                          fit: BoxFit.fitWidth);
-                    } else if (snapshot.hasData == false) {
-                      return Image.asset('assets/logo.png');
-                    } else {
-                      return Container(
-                        child: Text('Snapshot Error!'),
+            Consumer<ApplicationState>(
+              builder: (context, appState, _) => Container(
+                width: MediaQuery.of(context).size.width,
+                child: FutureBuilder(
+                  future: downloadURL(productId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Column(
+                        children: [
+                          SizedBox(height: 50),
+                          Center(child: CircularProgressIndicator()),
+                          SizedBox(height: 48),
+                        ],
                       );
+                    } else {
+                      if (snapshot.hasData) {
+                        return Image.network(snapshot.data.toString(),
+                            fit: BoxFit.fitWidth);
+                      } else if (snapshot.hasData == false) {
+                        return Image.asset('assets/logo.png');
+                      } else {
+                        return Container(
+                          child: Text('Snapshot Error!'),
+                        );
+                      }
                     }
-                  }
-                },
+                  },
+                ),
               ),
             ),
             Row(
@@ -282,40 +285,42 @@ class _DetailPageState extends State<DetailPage> {
                                 ),
                               ),
                             ),
-                            Expanded(
-                              flex: 2,
-                              child: StreamBuilder<QuerySnapshot>(
-                                stream: likes.snapshots(),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                                  if (snapshot.hasError) {
-                                    return Text('Error!');
-                                  }
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return Text('Loading');
-                                  }
-                                  int count = snapshot.data.size;
-                                  return Row(
-                                    children: [
-                                      IconButton(
-                                        icon: Icon(
-                                          (count != 0)
-                                              ? Icons.favorite
-                                              : Icons.favorite_outlined,
-                                          color: Colors.red,
-                                          semanticLabel: 'like',
+                            Consumer<ApplicationState>(
+                              builder: (context, appState, _) => Expanded(
+                                flex: 2,
+                                child: StreamBuilder<QuerySnapshot>(
+                                  stream: likes.snapshots(),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    if (snapshot.hasError) {
+                                      return Text('Error!');
+                                    }
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return Text('Loading');
+                                    }
+                                    int count = snapshot.data.size;
+                                    return Row(
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(
+                                            (count != 0)
+                                                ? Icons.favorite
+                                                : Icons.favorite_outlined,
+                                            color: Colors.red,
+                                            semanticLabel: 'like',
+                                          ),
+                                          onPressed: () => (isLiked(snapshot))
+                                              ? print('You can only like once!')
+                                              : addLike(),
                                         ),
-                                        onPressed: () => (isLiked(snapshot))
-                                            ? print('You can only like once!')
-                                            : addLike(),
-                                      ),
-                                      Text(count.toString())
-                                    ],
-                                  );
-                                },
+                                        Text(count.toString())
+                                      ],
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
+                            )
                           ],
                         ),
                         Divider(thickness: 1.0),
@@ -417,7 +422,7 @@ class _CommentBookState extends State<CommentBook> {
           children: [
             Expanded(
                 child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(20.0),
               child: TextFormField(
                 controller: _commentController,
                 decoration: const InputDecoration(
@@ -453,31 +458,38 @@ class _CommentBookState extends State<CommentBook> {
       ),
       SizedBox(height: 8),
       for (var eachComment in comments)
-        Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-          Container(
-            margin: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(child: Text(eachComment.userName)),
-          ),
-          Container(
-              padding: EdgeInsets.all(3.0),
-              width: 340,
-              child: RichText(
-                  text: TextSpan(
-                      style: DefaultTextStyle.of(context).style,
-                      children: <TextSpan>[
-                    TextSpan(text: eachComment.comment + '\n'),
-                    TextSpan(
-                        text: DateFormat('yyyy.MM.dd HH:mm')
-                            .format(eachComment.time.toDate())),
-                  ]))),
-          if (FirebaseAuth.instance.currentUser.displayName ==
-              eachComment.userName)
-            IconButton(
-                onPressed: () {
-                  print("this comment deleted!");
-                },
-                icon: Icon(Icons.delete_outline)),
-        ])
+        Padding(
+            padding: const EdgeInsets.fromLTRB(20.0, 10, 15.0, 10),
+            child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+              Container(
+                margin: const EdgeInsets.only(right: 16.0),
+                child: CircleAvatar(
+                  child: Text(eachComment.userName),
+                  radius: 25,
+                  //backgroundColor: Colors.
+                ),
+              ),
+              Container(
+                  padding: EdgeInsets.all(3.0),
+                  width: 240,
+                  child: RichText(
+                      text: TextSpan(
+                          style: DefaultTextStyle.of(context).style,
+                          children: <TextSpan>[
+                        TextSpan(text: eachComment.comment + '\n'),
+                        TextSpan(
+                            text: DateFormat('yyyy.MM.dd HH:mm')
+                                .format(eachComment.time.toDate())),
+                      ]))),
+              if (FirebaseAuth.instance.currentUser.displayName ==
+                  eachComment.userName)
+                IconButton(
+                    onPressed: () {
+                      print("this comment deleted!");
+                    },
+                    icon: Icon(Icons.delete_outline)),
+              Divider(thickness: 1.0),
+            ]))
     ]);
   }
 }
