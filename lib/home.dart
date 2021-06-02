@@ -1,123 +1,128 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+
 import 'main.dart';
 import 'product.dart';
-import 'add.dart';
+import 'tile.dart';
+import 'chart.dart';
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
-String highResUrl = photoUrl.replaceAll('s96-c', 's400-c');
-
-// Header 타일(임시)
+/// Header 타일 - 공지사항용 타일
 class HeaderTile extends StatelessWidget {
+  /// url_launcher api 함수
+  void _launchURL(url) async =>
+      await canLaunch(url) ? await launch(url) : throw 'Could not launch $url';
+
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Container(
-        child: Image.network(
-            "https://t1.daumcdn.net/thumb/R720x0/?fname=https://t1.daumcdn.net/brunch/service/user/1YN0/image/ak-gRe29XA2HXzvSBowU7Tl7LFE.png"),
+        child: GestureDetector(
+          onTap: () => _launchURL('https://flutter.dev'),
+          child: Image.network(
+              "https://t1.daumcdn.net/thumb/R720x0/?fname=https://t1.daumcdn.net/brunch/service/user/1YN0/image/ak-gRe29XA2HXzvSBowU7Tl7LFE.png"),
+        ),
+      ),
+    );
+  }
+}
+
+/// PostTile - 각 게시글 표시해주는 타일, Listview.builder(separated) 사용해 자동 생성
+class PostTile extends StatelessWidget {
+  PostTile(this._product, this._giveOrTake);
+
+  final Product _product;
+  final int _giveOrTake;
+
+  /// Set name for Firebase Storage
+  final firebase_storage.FirebaseStorage storage =
+      firebase_storage.FirebaseStorage.instance;
+
+  /// Download image url of each product based on id
+  Future<String> downloadURL(String id) async {
+    await Future.delayed(Duration(seconds: 1));
+    try {
+      return await storage
+          .ref() //스토리지 참조
+          .child('images')
+          .child('$id.png') //차일드로 가져오고
+          .getDownloadURL(); //url 다운로드
+    } on Exception {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    /// Firebase TimeStamp => DateFormat 변환
+    String formattedDate =
+        DateFormat('MMM d, HH:mm').format(_product.created.toDate());
+
+    return InkWell(
+      onTap: () {
+        if (_giveOrTake == 0)
+          Navigator.pushNamed(
+              context, '/detail/' + _product.id + '/giveProducts');
+        else
+          Navigator.pushNamed(
+              context, '/detail/' + _product.id + '/takeProducts');
+      },
+
+      /// Custom Tile 구조로 생성 (tile.dart 구조 참조)
+      child: CustomListItem(
+        // leading: CircleAvatar(
+        //   backgroundImage: NetworkImage(highResUrl),
+        //   backgroundColor: Colors.transparent,
+        // ),
+        title: _product.title,
+        subtitle: _product.content,
+        author: _product.userName,
+        publishDate: formattedDate,
+        category: _product.category,
+        likes: _product.likes,
+        thumbnail: FutureBuilder(
+          future: downloadURL(_product.id),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else {
+              if (snapshot.hasData) {
+                return ClipRRect(
+                  borderRadius: new BorderRadius.circular(8.0),
+                  child: Image.network(snapshot.data.toString(),
+                      fit: BoxFit.fitWidth),
+                );
+              } else if (snapshot.hasData == false) {
+                return Container();
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            }
+          },
+        ),
       ),
     );
   }
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Widget> _buildListElement(BuildContext context, List<Product> products) {
-    if (products == null || products.isEmpty) {
-      return const <Widget>[];
-    }
+  /// ToggleButtons - 각 버튼용 bool list
+  List<bool> _selections = List.generate(3, (_) => false);
 
-    // Set name for Firebase Storage
-    firebase_storage.FirebaseStorage storage =
-        firebase_storage.FirebaseStorage.instance;
-
-    // Download image url of each product based on id
-    Future<String> downloadURL(String id) async {
-      await Future.delayed(Duration(seconds: 2));
-      try {
-        return await storage
-            .ref() //스토리지 참조
-            .child('images')
-            .child('$id.png') //차일드로 가져오고
-            .getDownloadURL(); //url 다운로드
-      } on Exception {
-        return null;
-      }
-    }
-
-    return products.map((product) {
-      return Card(
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            if (_selectedIndex == 0)
-              Navigator.pushNamed(
-                  context, '/detail/' + product.id + '/giveProducts');
-            else if (_selectedIndex == 1)
-              Navigator.pushNamed(
-                  context, '/detail/' + product.id + '/takeProducts');
-          },
-          child: ListTile(
-            title: Text(
-              // Product 요소에 맞게 바꿨어요
-              product.title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Text(
-              // Product 요소에 맞게 바꿨어요
-              product.content,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: Container(
-              width: 90,
-              height: 90,
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              alignment: Alignment.center,
-              child: FutureBuilder(
-                future: downloadURL(product.id),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else {
-                    if (snapshot.hasData) {
-                      return Image.network(snapshot.data.toString());
-                    } else if (snapshot.hasData == false) {
-                      return Container();
-                    } else {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                  }
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-    }).toList();
-  }
-
-  // Drawer 관련 Key
+  /// Drawer 관련 Key
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Filtering Buttons 관련 booleans (리팩토링 가능할듯)
-  bool _filterOfProduct = false;
-  bool _filterOfTime = false;
-  bool _filterOfTalent = false;
-
-  /* ----------------- BottomNavigationBar, PageView 관련 ----------------- */
+  ///* ----------------- BottomNavigationBar, PageView 관련 ----------------- *///
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -143,24 +148,34 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  /* -------------------------------------------------------------------- */
+  ///* -------------------------------------------------------------------- *///
+
+  /// For profile photo resizing
+  String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
+  // String highResUrl = photoUrl.replaceAll('s96-c', 's400-c');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: buildAppBar(context),
+      // appBar: buildAppBar(context),
       drawer: buildDrawer(context),
       body: Consumer<ApplicationState>(
-        builder: (context, appState, _) => SafeArea(
-          child: SizedBox.expand(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() => _selectedIndex = index);
-              },
-              // NavBar Index 별 상응 위젯 출력
-              children: _buildWidgetOptions(context, appState),
+        builder: (context, appState, _) => Container(
+          color: Colors.cyan,
+          child: SafeArea(
+            child: Container(
+              color: Colors.white,
+              child: SizedBox.expand(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() => _selectedIndex = index);
+                  },
+                  // NavBar Index 별 상응 위젯 출력
+                  children: _buildWidgetOptions(context, appState),
+                ),
+              ),
             ),
           ),
         ),
@@ -172,91 +187,412 @@ class _HomePageState extends State<HomePage> {
     //);
   }
 
-  // Index 별 위젯 반환: (순서: 0-Give, 1-Take, 2-Chat, 3-MyPage)
+  /// Index 별 위젯 반환: (순서: 0-Give, 1-Take, 2-Chart, 3-MyPage)
   List<Widget> _buildWidgetOptions(
       BuildContext context, ApplicationState appState) {
     List<Widget> _widgetOptions = <Widget>[
-      // 0(Give):
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: EdgeInsets.all(8),
-            child: _buildFilterRow(context, appState),
+      /// 0(Give):
+      CustomScrollView(
+        physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics()),
+        slivers: <Widget>[
+          SliverAppBar(
+            backgroundColor: Colors.cyan,
+            // stretch: true,
+            pinned: false,
+            snap: false,
+            floating: false,
+            expandedHeight: 120.0,
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                'Home | Give',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontFamily: 'NanumSquareRoundR',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              background: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  FlutterLogo(),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(0.0, 0.5),
+                        end: Alignment.center,
+                        colors: <Color>[
+                          Color(0x60000000),
+                          Color(0x00000000),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.location_on,
+                  semanticLabel: 'location',
+                ),
+                onPressed: () {},
+              ),
+            ],
           ),
-          Expanded(
-            child: ListView(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              children: _buildListElement(context, appState.giveProducts),
+          SliverStickyHeader(
+            header: Container(
+              alignment: Alignment.centerLeft,
+              height: 40,
+              color: Colors.cyan.shade50,
+              padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
+              child: Text(
+                'Notice | 공지사항',
+                style: TextStyle(
+                  fontFamily: 'NanumSquareRoundR',
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(
+                [HeaderTile()],
+              ),
+            ),
+          ),
+          SliverStickyHeader(
+            header: Container(
+              height: 40,
+              color: Colors.cyan.shade50,
+              padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Give | 나눔 게시판',
+                      style: TextStyle(
+                        fontFamily: 'NanumSquareRoundR',
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  _buildToggleButtons(context, appState),
+                ],
+              ),
+            ),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      SizedBox(height: 5),
+                      PostTile(appState.giveProducts[index], _selectedIndex),
+                      SizedBox(height: 5),
+                      Divider(
+                        height: 1,
+                        indent: 12,
+                        endIndent: 12,
+                      ),
+                    ],
+                  );
+                },
+                childCount: appState.giveProducts.length,
+              ),
             ),
           ),
         ],
       ),
-      // 1(Take):
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: EdgeInsets.all(8),
-            child: _buildFilterRow(context, appState),
+
+      // Column(
+      //   mainAxisAlignment: MainAxisAlignment.center,
+      //   children: [
+      //     HeaderTile(),
+      //     Container(
+      //       padding: EdgeInsets.fromLTRB(12, 4, 4, 4),
+      //       child: Row(
+      //         children: [
+      //           Expanded(
+      //             child: Text(
+      //               'Give | 나눔 게시판',
+      //               style: TextStyle(
+      //                 fontFamily: 'NanumSquareRoundR',
+      //                 fontSize: 16.0,
+      //                 fontWeight: FontWeight.bold,
+      //                 color: Colors.black87,
+      //               ),
+      //             ),
+      //           ),
+      //           _buildToggleButtonBar(context, appState),
+      //         ],
+      //       ),
+      //     ),
+      //     Expanded(
+      //       /// New method (listview builder 사용)
+      //       child: ListView.separated(
+      //         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      //         itemCount: appState.giveProducts.length,
+      //         itemBuilder: (BuildContext context, int index) {
+      //           return PostTile(appState.giveProducts[index], _selectedIndex);
+      //         },
+      //         separatorBuilder: (context, index) {
+      //           // if (index == 0) return SizedBox.shrink();
+      //           return const Divider(
+      //             height: 20,
+      //             thickness: 1,
+      //             indent: 8,
+      //             endIndent: 8,
+      //           );
+      //         },
+      //       ),
+      //     ),
+      //   ],
+      // ),
+
+      /// 1(Take):
+      CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text(
+              'Take',
+              style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'NanumSquareRoundR',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            backgroundColor: Colors.cyan,
+            pinned: false,
+            snap: false,
+            floating: true,
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.location_on,
+                  semanticLabel: 'location',
+                ),
+                onPressed: () {},
+              ),
+            ],
           ),
-          Expanded(
-            child: ListView(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              children: _buildListElement(context, appState.takeProducts),
+          SliverStickyHeader(
+            header: Container(
+              height: 40,
+              color: Colors.cyan.shade50,
+              padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Take | 나눔, 도움 요청 게시판',
+                      style: TextStyle(
+                        fontFamily: 'NanumSquareRoundR',
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  _buildToggleButtons(context, appState),
+                ],
+              ),
+            ),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      SizedBox(height: 5),
+                      PostTile(appState.takeProducts[index], _selectedIndex),
+                      SizedBox(height: 5),
+                      Divider(
+                        height: 1,
+                        indent: 12,
+                        endIndent: 12,
+                      ),
+                    ],
+                  );
+                },
+                childCount: appState.takeProducts.length,
+              ),
             ),
           ),
         ],
       ),
-      // 2(Chat):
-      Center(
-        child: Text('Chat(To be implemented)'),
-      ),
-      // 3(MyPage):
-      Row(
-        children: [
-          Expanded(
-            flex: 1,
-            child: Container(),
+
+      /// 2(Chart) 작업중, Sliver 사용 실험중:
+      CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            backgroundColor: Colors.cyan,
+            pinned: true,
+            snap: false,
+            floating: true,
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.location_on,
+                  semanticLabel: 'location',
+                ),
+                onPressed: () {},
+              ),
+            ],
+            expandedHeight: 160.0,
+            flexibleSpace: const FlexibleSpaceBar(
+              title: Text(
+                'Chart Analysis (작업중)',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontFamily: 'NanumSquareRoundR',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              background: FlutterLogo(),
+            ),
           ),
-          Expanded(
-            flex: 8,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 30,
-                ),
-                Container(
-                  width: 100,
-                  height: 100,
-                  child: FirebaseAuth.instance.currentUser.isAnonymous
-                      ? Image.asset('assets/logo.png', fit: BoxFit.fitWidth)
-                      : Image.network(highResUrl, fit: BoxFit.fitWidth),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Text(FirebaseAuth.instance.currentUser.displayName),
-                Divider(
-                  color: Colors.black26,
-                  height: 30,
-                  thickness: 1,
-                ),
-                Text(FirebaseAuth.instance.currentUser.isAnonymous
-                    ? 'Anonymous'
-                    : FirebaseAuth.instance.currentUser.email),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                PieChart1(),
               ],
             ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(),
-          ),
+          )
         ],
-      )
+      ),
+
+      /// 3(MyPage):
+
+      CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text(
+              'My Page',
+              style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'NanumSquareRoundR',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            backgroundColor: Colors.cyan,
+            pinned: true,
+            snap: false,
+            floating: true,
+            // expandedHeight: 140.0,
+            // flexibleSpace: const FlexibleSpaceBar(
+            //   background: FlutterLogo(),
+            // ),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.location_on,
+                  semanticLabel: 'location',
+                ),
+                onPressed: () {},
+              ),
+            ],
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 20.0),
+                    CircleAvatar(
+                      radius: 50.0,
+                      backgroundImage:
+                          NetworkImage(photoUrl.replaceAll('s96-c', 's400-c')),
+                    ),
+                    SizedBox(height: 10.0),
+                    Text(
+                      FirebaseAuth.instance.currentUser.displayName,
+                      style: TextStyle(
+                        fontFamily: 'NanumBarunGothic',
+                        fontSize: 20.0,
+                        color: Colors.black87,
+                        // fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'HANDONG GLOBAL UNIVERSITY',
+                      style: TextStyle(
+                        fontFamily: 'Source Sans Pro',
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.cyan,
+                        letterSpacing: 2.5,
+                      ),
+                    ),
+                    Text(
+                      FirebaseAuth.instance.currentUser.email,
+                      style: TextStyle(
+                        fontFamily: 'Source Sans Pro',
+                        fontSize: 12.0,
+                        color: Colors.black54,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    Text(
+                      FirebaseAuth.instance.currentUser.uid,
+                      style: TextStyle(
+                        fontFamily: 'Source Sans Pro',
+                        fontSize: 12.0,
+                        color: Colors.black54,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20.0,
+                      width: 200.0,
+                      child: Divider(
+                        color: Colors.cyan.shade200,
+                      ),
+                    ),
+                    Card(
+                      margin: EdgeInsets.symmetric(
+                          vertical: 10.0, horizontal: 25.0),
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.phone,
+                          color: Colors.cyan,
+                        ),
+                        title: Text(
+                          '+82 10 9865 7165',
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              color: Colors.cyan.shade900,
+                              fontFamily: 'Source Sans Pro'),
+                        ),
+                      ),
+                    ),
+                    Card(
+                      margin: EdgeInsets.symmetric(
+                          vertical: 10.0, horizontal: 25.0),
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.location_on,
+                          color: Colors.cyan,
+                        ),
+                        title: Text(
+                          'Pohang ... ~',
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              color: Colors.cyan.shade900,
+                              fontFamily: 'Source Sans Pro'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
     ];
     return _widgetOptions;
   }
@@ -281,153 +617,126 @@ class _HomePageState extends State<HomePage> {
     return null;
   }
 
-  void _chooseFilter(String filtering) {
-    setState(() {
-      if (filtering == 'Product') {
-        _filterOfProduct = _filterOfProduct ? false : true;
-        if (_filterOfProduct) _filterOfTime = _filterOfTalent = false;
-      } else if (filtering == 'Time') {
-        _filterOfTime = _filterOfTime ? false : true;
-        if (_filterOfTime) _filterOfProduct = _filterOfTalent = false;
-      } else {
-        _filterOfTalent = _filterOfTalent ? false : true;
-        if (_filterOfTalent) _filterOfProduct = _filterOfTime = false;
-      }
-    });
-  }
-
-  // NavBar 구현하여 필요없음
-  // void _changeScreen() {
-  //   //하단네비바 탭하여 페이지 이동하는 부분
-  //   if (_selectedIndex != 0) {
-  //     if (_selectedIndex == 1) {
-  //       Future.delayed(const Duration(milliseconds: 200), () {
-  //         Navigator.of(context).pushReplacementNamed('/take');
-  //       });
-  //     } else if (_selectedIndex == 2) {
-  //       Future.delayed(const Duration(milliseconds: 200), () {
-  //         Navigator.of(context).pushReplacementNamed('/chat');
-  //       });
-  //     } else if (_selectedIndex == 3) {
-  //       Future.delayed(const Duration(milliseconds: 200), () {
-  //         Navigator.of(context).pushReplacementNamed('/mypage');
-  //       });
-  //     }
-  //   }
-  // }
-
-  // Filtering Code 복잡해 함수로 빼놓음
-  Row _buildFilterRow(BuildContext context, ApplicationState appState) {
-    return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-      IconButton(
-          padding: EdgeInsets.all(0),
-          alignment: Alignment.centerRight,
-          icon: (_filterOfProduct
-              ? Icon(Icons.wallet_giftcard, size: 30, color: Colors.cyan)
-              : Icon(Icons.wallet_giftcard, size: 30, color: Colors.grey)),
-          onPressed: () {
-            _chooseFilter("Product");
-            if (_filterOfProduct) {
+  /// 필터링 기능을 토글버튼화하여 버튼바로 생성
+  ToggleButtons _buildToggleButtons(
+      BuildContext context, ApplicationState appState) {
+    return ToggleButtons(
+      color: Colors.black.withOpacity(0.60),
+      constraints: BoxConstraints(
+        minWidth: 30,
+        minHeight: 30,
+      ),
+      selectedBorderColor: Colors.cyan,
+      selectedColor: Colors.cyan,
+      borderRadius: BorderRadius.circular(4.0),
+      isSelected: _selections,
+      onPressed: (int index) {
+        setState(() {
+          for (int buttonIndex = 0;
+              buttonIndex < _selections.length;
+              buttonIndex++) {
+            if (buttonIndex == index) {
+              _selections[buttonIndex] = !_selections[buttonIndex];
+            } else {
+              _selections[buttonIndex] = false;
+            }
+          }
+          if (_selections[index] == true) {
+            if (index == 0)
               appState.orderByFilter('Product');
-              print("product filtering!");
-            } else if (!_filterOfProduct && !_filterOfTime && !_filterOfTalent)
-              appState.orderByFilter('All');
-          }),
-      IconButton(
-          padding: EdgeInsets.all(0),
-          alignment: Alignment.centerRight,
-          icon: (_filterOfTime
-              ? Icon(Icons.timer, size: 30, color: Colors.cyan)
-              : Icon(Icons.timer, size: 30, color: Colors.grey)),
-          onPressed: () {
-            _chooseFilter("Time");
-            if (_filterOfTime) {
-              print("time filtering!");
+            else if (index == 1)
               appState.orderByFilter('Time');
-            } else if (!_filterOfProduct && !_filterOfTime && !_filterOfTalent)
-              appState.orderByFilter('All');
-          }),
-      IconButton(
-          padding: EdgeInsets.all(0),
-          alignment: Alignment.centerRight,
-          icon: (_filterOfTalent
-              ? Icon(
-                  Icons.lightbulb,
-                  size: 30,
-                  color: Colors.cyan,
-                )
-              : Icon(
-                  Icons.lightbulb,
-                  size: 30,
-                  color: Colors.grey,
-                )),
-          onPressed: () {
-            _chooseFilter("Talent");
-            if (_filterOfTalent) {
-              print("talent filtering!");
+            else
               appState.orderByFilter('Talent');
-            } else if (!_filterOfProduct && !_filterOfTime && !_filterOfTalent)
-              appState.orderByFilter('All');
-          }),
-    ]);
-  }
-
-  // Builder Widget for AppBar
-  AppBar buildAppBar(BuildContext context) {
-    return AppBar(
-      title: Center(
-        child: Text('Give & Take'),
-      ),
-      backgroundColor: Colors.cyan,
-      leading: IconButton(
-        icon: Icon(
-          Icons.menu_rounded,
-          semanticLabel: 'menu',
+          } else {
+            appState.orderByFilter('All');
+          }
+        });
+      },
+      children: [
+        Icon(
+          Icons.shopping_bag,
+          size: 20,
         ),
-        onPressed: () =>
-            _scaffoldKey.currentState.openDrawer(), // Open drawer on pressed
-      ),
-      actions: <Widget>[
-        IconButton(
-          icon: Icon(
-            Icons.search,
-            semanticLabel: 'search',
-          ),
-          onPressed: () {},
+        Icon(
+          Icons.access_time,
+          size: 20,
+        ),
+        Icon(
+          Icons.school,
+          size: 20,
         ),
       ],
     );
   }
 
-  // Builder Widget for Bottom Navigation Bar
+  // /// Builder Widget for AppBar
+  // AppBar buildAppBar(BuildContext context) {
+  //   return AppBar(
+  //     title: Center(
+  //       child: Text(
+  //         'Give & Take',
+  //         style: TextStyle(
+  //           fontSize: 18,
+  //           fontFamily: 'NanumSquareRoundR',
+  //           fontWeight: FontWeight.bold,
+  //         ),
+  //       ),
+  //     ),
+  //     backgroundColor: Colors.cyan,
+  //     leading: IconButton(
+  //       icon: Icon(
+  //         Icons.menu_rounded,
+  //         semanticLabel: 'menu',
+  //       ),
+  //       onPressed: () =>
+  //           _scaffoldKey.currentState.openDrawer(), // Open drawer on pressed
+  //     ),
+  //     actions: <Widget>[
+  //       IconButton(
+  //         icon: Icon(
+  //           Icons.location_on,
+  //           semanticLabel: 'location',
+  //         ),
+  //         onPressed: () {},
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  /// Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
       selectedItemColor: Colors.cyan,
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
+      selectedLabelStyle: TextStyle(
+          fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
+      unselectedLabelStyle: TextStyle(
+          fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
       items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
+          icon: Icon(Icons.redo),
           label: 'Give',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.card_giftcard),
+          icon: Icon(Icons.undo),
           label: 'Take',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.messenger),
-          label: 'Chat',
+          icon: Icon(Icons.bar_chart),
+          label: 'Chart',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person),
+          icon: Icon(Icons.account_circle),
           label: 'MyPage',
         )
       ],
     );
   }
 
-  // Builder Widget for Drawer
+  /// Builder Widget for Drawer
   Drawer buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -463,16 +772,16 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           ListTile(
-            title: Text('Search'),
+            title: Text('Map'),
             leading: Icon(
-              Icons.search,
+              Icons.map,
             ),
             onTap: () {},
           ),
           ListTile(
             title: Text('My Page'),
             leading: Icon(
-              Icons.person,
+              Icons.account_circle,
             ),
             onTap: () {
               Navigator.pushNamed(context, '/mypage');

@@ -1,14 +1,12 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 import 'home.dart';
 import 'login.dart';
 import 'detail.dart';
-import 'chat.dart';
+import 'chart.dart';
 import 'product.dart';
 import 'add.dart';
 import 'edit.dart';
@@ -38,7 +36,6 @@ class Application extends StatelessWidget {
             routes: {
               '/login': (context) => LoginPage(),
               '/home': (context) => HomePage(),
-              '/chat': (context) => ChatPage(),
               '/giveadd': (context) => giveAddPage(),
               '/takeadd': (context) => takeAddPage(),
             },
@@ -88,9 +85,11 @@ class Application extends StatelessWidget {
 class ApplicationState extends ChangeNotifier {
   String orderBy;
   String uid;
+  String detailGiveOrTake;
 
-  void detailPageUid(String uid) {
+  void detailPageUid(String uid, String detailGiveOrTake) {
     this.uid = uid;
+    this.detailGiveOrTake = detailGiveOrTake;
     print("detail page uid -> " + uid);
     init();
   }
@@ -110,6 +109,8 @@ class ApplicationState extends ChangeNotifier {
   List<Product> _giveProducts = [];
   List<Product> _takeProducts = [];
   List<Comment> _commentContext = [];
+  List<Like> _likeList = [];
+  int likeCount = 0;
 
   Stream<QuerySnapshot> currentStream;
 
@@ -134,7 +135,7 @@ class ApplicationState extends ChangeNotifier {
             modified: document.data()['modified'],
             userName: document.data()['userName'],
             uid: document.data()['uid'],
-            like: document.data()['like'],
+            likes: document.data()['like'],
             mark: document.data()['mark'],
             comments: document.data()['comments'],
           ));
@@ -160,7 +161,7 @@ class ApplicationState extends ChangeNotifier {
             modified: document.data()['modified'],
             userName: document.data()['userName'],
             uid: document.data()['uid'],
-            like: document.data()['like'],
+            likes: document.data()['like'],
             mark: document.data()['mark'],
             comments: document.data()['comments'],
           ));
@@ -190,9 +191,15 @@ class ApplicationState extends ChangeNotifier {
             modified: document.data()['modified'],
             userName: document.data()['userName'],
             uid: document.data()['uid'],
-            like: document.data()['like'],
+
+            /// 아래 부분 로직이 맞지 않음(좋아요, 댓글은 서브컬렉션(혹은 새로운 컬랙션)으로 만들것이기 때문에 그 구조에 맞춰서 정보 넣어야 함.
+            /// 아래 코드는 collection -> document -> attribute 를 가져오는 코드임
+
+            likes: document.data()['like'],
             mark: document.data()['mark'],
             comments: document.data()['comments'],
+
+            /// 여기까지 틀림(반복되는 코드 전부 포함)
           ));
         });
         notifyListeners();
@@ -215,7 +222,7 @@ class ApplicationState extends ChangeNotifier {
             modified: document.data()['modified'],
             userName: document.data()['userName'],
             uid: document.data()['uid'],
-            like: document.data()['like'],
+            likes: document.data()['like'],
             mark: document.data()['mark'],
             comments: document.data()['comments'],
           ));
@@ -240,12 +247,27 @@ class ApplicationState extends ChangeNotifier {
         });
         notifyListeners();
       });
+
+      FirebaseFirestore.instance
+          .collection(detailGiveOrTake + '/' + uid + '/likes')
+          .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
+          .listen((snapshot) {
+        _likeList = [];
+        snapshot.docs.forEach((document) {
+          _likeList.add(Like(
+            uid: document.data()['uid'],
+          ));
+        });
+        likeCount = _likeList.length;
+        notifyListeners();
+      });
     }
   }
 
   List<Product> get giveProducts => _giveProducts;
   List<Product> get takeProducts => _takeProducts;
   List<Comment> get commentContext => _commentContext;
+  List<Like> get likeList => _likeList;
 }
 
 /*class DetailState extends ChangeNotifier {

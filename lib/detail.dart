@@ -49,7 +49,9 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     //product uid에 해당하는 commentContext 가져오기
-    context.watch<ApplicationState>().detailPageUid(productId);
+    context
+        .watch<ApplicationState>()
+        .detailPageUid(productId, detailGiveOrTake);
     // List<Comment> commentContext =context.watch<ApplicationState>().commentContext;
 
     if (products == null ||
@@ -158,10 +160,14 @@ class _DetailPageState extends State<DetailPage> {
       });
       return commentsList;
     }*/
+    context
+        .watch<ApplicationState>()
+        .detailPageUid(widget.productId, widget.detailGiveOrTake);
+    List<Like> likeList = context.watch<ApplicationState>().likeList;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.cyan,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
@@ -263,12 +269,8 @@ class _DetailPageState extends State<DetailPage> {
             ),
             Row(
               children: [
+                SizedBox(width: 12),
                 Expanded(
-                  flex: 1,
-                  child: Container(),
-                ),
-                Expanded(
-                  flex: 8,
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -285,42 +287,40 @@ class _DetailPageState extends State<DetailPage> {
                                 ),
                               ),
                             ),
-                            Consumer<ApplicationState>(
-                              builder: (context, appState, _) => Expanded(
-                                flex: 2,
-                                child: StreamBuilder<QuerySnapshot>(
-                                  stream: likes.snapshots(),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<QuerySnapshot> snapshot) {
-                                    if (snapshot.hasError) {
-                                      return Text('Error!');
-                                    }
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return Text('Loading');
-                                    }
-                                    int count = snapshot.data.size;
-                                    return Row(
-                                      children: [
-                                        IconButton(
-                                          icon: Icon(
-                                            (count != 0)
-                                                ? Icons.favorite
-                                                : Icons.favorite_outlined,
-                                            color: Colors.red,
-                                            semanticLabel: 'like',
-                                          ),
-                                          onPressed: () => (isLiked(snapshot))
-                                              ? print('You can only like once!')
-                                              : addLike(),
+                            Expanded(
+                              flex: 2,
+                              child: StreamBuilder<QuerySnapshot>(
+                                stream: likes.snapshots(),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                                  if (snapshot.hasError) {
+                                    return Text('Error!');
+                                  }
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Text('Loading');
+                                  }
+                                  int count = snapshot.data.size;
+                                  return Row(
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(
+                                          (count != 0)
+                                              ? Icons.favorite
+                                              : Icons.favorite_outlined,
+                                          color: Colors.red,
+                                          semanticLabel: 'like',
                                         ),
-                                        Text(count.toString())
-                                      ],
-                                    );
-                                  },
-                                ),
+                                        onPressed: () => (isLiked(snapshot))
+                                            ? print('You can only like once!')
+                                            : addLike(),
+                                      ),
+                                      Text(count.toString())
+                                    ],
+                                  );
+                                },
                               ),
-                            )
+                            ),
                           ],
                         ),
                         Divider(thickness: 1.0),
@@ -336,6 +336,7 @@ class _DetailPageState extends State<DetailPage> {
                         SizedBox(height: 8.0),
                         Divider(thickness: 1.0),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               product.userName.toString() +
@@ -364,15 +365,17 @@ class _DetailPageState extends State<DetailPage> {
                             color: Color(0xff3792cb),
                           ),
                         ),
+                        Divider(thickness: 1.0),
                       ]),
                 ),
+                SizedBox(width: 12),
               ],
             ),
             Container(
                 padding: const EdgeInsets.all(8.0),
                 child: CommentBook(
                   addComments: (String comment) => addComments(comment),
-                  //comments: commentContext,
+                  detailGiveOrTake: detailGiveOrTake,
                   productId: productId,
                 ))
           ],
@@ -397,11 +400,12 @@ class _DetailPageState extends State<DetailPage> {
 class CommentBook extends StatefulWidget {
   CommentBook(
       {this.addComments,
-      //this.comments,
+      this.detailGiveOrTake,
       this.productId}); //, required this.dates
   final Future<void> Function(String message) addComments;
   //final List<Comment> comments;
   final String productId;
+  final String detailGiveOrTake;
 
   @override
   _CommentBookState createState() => _CommentBookState();
@@ -422,7 +426,7 @@ class _CommentBookState extends State<CommentBook> {
           children: [
             Expanded(
                 child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
               child: TextFormField(
                 controller: _commentController,
                 decoration: const InputDecoration(
@@ -436,18 +440,18 @@ class _CommentBookState extends State<CommentBook> {
                 },
               ),
             )),
-            SizedBox(width: 5),
+            SizedBox(width: 3),
             IconButton(
               icon: const Icon(Icons.send),
+              iconSize: 38,
               color: Colors.blueAccent,
               onPressed: () async {
                 setState(() {
                   if (_commentFormKey.currentState.validate()) {
                     widget.addComments(_commentController.text);
                     _commentController.clear();
-                    context
-                        .watch<ApplicationState>()
-                        .detailPageUid(widget.productId);
+                    context.watch<ApplicationState>().detailPageUid(
+                        widget.productId, widget.detailGiveOrTake);
                     print("clear!");
                   }
                 });
@@ -458,38 +462,122 @@ class _CommentBookState extends State<CommentBook> {
       ),
       SizedBox(height: 8),
       for (var eachComment in comments)
-        Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 10, 15.0, 10),
-            child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-              Container(
-                margin: const EdgeInsets.only(right: 16.0),
-                child: CircleAvatar(
-                  child: Text(eachComment.userName),
-                  radius: 25,
-                  //backgroundColor: Colors.
-                ),
-              ),
-              Container(
-                  padding: EdgeInsets.all(3.0),
-                  width: 240,
-                  child: RichText(
-                      text: TextSpan(
-                          style: DefaultTextStyle.of(context).style,
-                          children: <TextSpan>[
-                        TextSpan(text: eachComment.comment + '\n'),
-                        TextSpan(
-                            text: DateFormat('yyyy.MM.dd HH:mm')
-                                .format(eachComment.time.toDate())),
-                      ]))),
-              if (FirebaseAuth.instance.currentUser.displayName ==
-                  eachComment.userName)
-                IconButton(
-                    onPressed: () {
-                      print("this comment deleted!");
-                    },
-                    icon: Icon(Icons.delete_outline)),
-              Divider(thickness: 1.0),
-            ]))
+        Column(children: [
+          Padding(
+              padding: const EdgeInsets.fromLTRB(10.0, 5, 0.0, 15),
+              child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                Container(
+                    margin: const EdgeInsets.only(right: 16.0),
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          child: Text(eachComment.userName),
+                          radius: 25,
+                          //backgroundColor: Colors.
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          DateFormat('MM.dd HH:mm')
+                              .format(eachComment.time.toDate()),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    )),
+                Container(
+                    padding: EdgeInsets.all(3.0),
+                    width: 200,
+                    child: RichText(
+                        text: TextSpan(
+                            style: DefaultTextStyle.of(context).style,
+                            children: <TextSpan>[
+                          TextSpan(text: eachComment.comment + '\n'),
+                        ]))),
+                Expanded(
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                      _buildCommentToggleButtons(
+                          context, context.watch<ApplicationState>()),
+                      SizedBox(height: 20),
+                    ]))
+
+                /*
+                  if (FirebaseAuth.instance.currentUser.displayName ==
+                    eachComment.userName)
+                  IconButton(
+                      onPressed: () {
+                        print("this comment deleted!");
+                      },
+                      icon: Icon(Icons.delete_outline)),*/
+              ])),
+          Divider(thickness: 1.0),
+        ])
     ]);
+  }
+
+  List<bool> _selections = List.generate(3, (_) => false);
+
+  ToggleButtons _buildCommentToggleButtons(
+      BuildContext context, ApplicationState appState) {
+    return ToggleButtons(
+      color: Colors.black.withOpacity(0.60),
+      constraints: BoxConstraints(
+        minWidth: 25,
+        minHeight: 25,
+      ),
+      selectedBorderColor: Colors.cyan,
+      selectedColor: Colors.cyan,
+      borderRadius: BorderRadius.circular(4.0),
+      isSelected: _selections,
+      onPressed: (int index) {
+        setState(() {
+          /*----------------------
+          if (index == 1) {
+            _selections[1] = !_selections[1];
+            //나중에는 애타처럼 시간 옆에 손가락 뜨도록 만들기
+            /*덧글좋아요 컬랙션에 추가*/
+          } else {
+            _selections[1] = false;
+          }
+
+            else if(index == 0){
+              //채팅으로 이동
+            }
+            else if(index == 2){
+              //더보기 -> 삭제, 수정 기능
+            }
+            -----------------------*/
+        }
+            /*if (_selections[index] == true) {
+            if (index == 0)
+             //
+            else if (index == 1)
+              //
+            else
+              //
+          } else {
+            //
+          }*/
+            );
+      },
+      children: [
+        Icon(
+          Icons.chat,
+          size: 15,
+        ),
+        Icon(
+          Icons.thumb_up,
+          size: 15,
+        ),
+        Icon(
+          Icons.more_horiz,
+          size: 15,
+        ),
+      ],
+    );
   }
 }

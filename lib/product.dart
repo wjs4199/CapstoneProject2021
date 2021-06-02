@@ -11,7 +11,7 @@ class Product {
     @required this.userName,
     @required this.uid,
     @required this.id,
-    @required this.like,
+    @required this.likes,
     @required this.mark,
     @required this.comments,
   });
@@ -24,7 +24,7 @@ class Product {
   final String userName;
   final String uid;
   final String id;
-  final int like;
+  final int likes;
   final bool mark;
   final int comments;
 }
@@ -39,4 +39,12 @@ class Comment {
   final String userName;
   final String comment;
   final Timestamp time;
+}
+
+class Like {
+  Like({
+    @required this.uid,
+  });
+
+  final String uid;
 }
