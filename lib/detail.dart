@@ -48,12 +48,6 @@ class _DetailPageState extends State<DetailPage> {
       }
     }
 
-    //product uid에 해당하는 commentContext 가져오기
-    context
-        .watch<ApplicationState>()
-        .detailPageUid(productId, detailGiveOrTake);
-    // List<Comment> commentContext =context.watch<ApplicationState>().commentContext;
-
     if (products == null ||
         products.isEmpty ||
         productFound == false ||
@@ -160,10 +154,10 @@ class _DetailPageState extends State<DetailPage> {
       });
       return commentsList;
     }*/
-    context
-        .watch<ApplicationState>()
-        .detailPageUid(widget.productId, widget.detailGiveOrTake);
-    List<Like> likeList = context.watch<ApplicationState>().likeList;
+    // context
+    //     .watch<ApplicationState>()
+    //     .detailPageUid(widget.productId, widget.detailGiveOrTake);
+    // List<Like> likeList = context.watch<ApplicationState>().likeList;
 
     return Scaffold(
       appBar: AppBar(
