@@ -28,7 +28,7 @@ apply plugin: 'com.google.gms.google-services'  // new
 
 android {
     compileSdkVersion 30
-
+    buildToolsVersion '29.0.0'
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
