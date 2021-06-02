@@ -237,7 +237,9 @@ class _HomePageState extends State<HomePage> {
                   Icons.location_on,
                   semanticLabel: 'location',
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, '/map');
+                },
               ),
             ],
           ),
@@ -776,7 +778,9 @@ class _HomePageState extends State<HomePage> {
             leading: Icon(
               Icons.map,
             ),
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, '/map');
+            },
           ),
           ListTile(
             title: Text('My Page'),

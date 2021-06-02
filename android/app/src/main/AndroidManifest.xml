@@ -3,6 +3,11 @@
    <application
         android:label="giveandtake"
         android:icon="@mipmap/ic_launcher">
+
+        <meta-data android:name="com.google.android.geo.API_KEY"
+           android:value="AIzaSyBqfwc93kegyK9GwlB1yDLLs_rJP7-8OOc"/>
+
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

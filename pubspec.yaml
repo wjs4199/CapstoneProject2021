@@ -21,11 +21,16 @@ dependencies:
   url_launcher: ^5.4.0
   fl_chart: ^0.36.1 # 새로운 api 사용(1) flutter chart
   flutter_sticky_header: ^0.6.0 # 새로운 api 사용(2) flutter sticky header
+  google_maps_flutter: ^2.0.1
+  http: ^0.13.1
+  json_serializable: ^4.1.0
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  pedantic: ^1.11.0
+  build_runner: ^1.10.0
 
 flutter:
   uses-material-design: true
