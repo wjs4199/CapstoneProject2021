@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'home.dart';
 import 'login.dart';
+import 'map.dart';
 
 class Application extends StatefulWidget {
   @override
@@ -19,6 +20,7 @@ class _ApplicationState extends State<Application> {
       routes: {
         '/login': (context) => LoginPage(),
         '/home': (context) => HomePage(),
+        '/map': (context) => MapPage(),
       },
     );
   }

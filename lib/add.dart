@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 
 class giveAddPage extends StatefulWidget {
@@ -77,158 +78,161 @@ class _giveAddPageState extends State<giveAddPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.cyan,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            semanticLabel: 'back',
+    return Consumer<ApplicationState>(
+      builder: (context, appState, _) => Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.cyan,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              semanticLabel: 'back',
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text('Add'),
-        centerTitle: true,
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(
-                Icons.save,
-                semanticLabel: 'save',
-              ),
-              onPressed: () {
-                if (_formKey.currentState.validate()) {
-                  addGiveProduct(
-                    _titleController.text,
-                    _contentController.text,
-                    _selectedFilter,
-                  );
-                  Navigator.pop(context);
-                }
-              }),
-        ],
-      ),
-      body: SafeArea(
-        child: ListView(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              // height: MediaQuery.of(context).size.height / 2,
-              child: _image == null
-                  ? Image.asset(
-                      'assets/logo.png',
-                    )
-                  : Image.file(
-                      _image,
-                      fit: BoxFit.fitWidth,
-                    ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  flex: 9,
-                  child: Container(),
+          title: Text('Add'),
+          centerTitle: true,
+          actions: <Widget>[
+            IconButton(
+                icon: Icon(
+                  Icons.save,
+                  semanticLabel: 'save',
                 ),
-                Expanded(
-                  flex: 1,
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.photo_camera,
-                      semanticLabel: 'pick_photo',
-                    ),
-                    onPressed: getImage,
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Container(),
-                ),
-                Expanded(
-                  flex: 8,
-                  child: Column(
-                    children: [
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: DropdownButton<String>(
-                                    value: _selectedFilter,
-                                    items: _filter.map(
-                                      (value) {
-                                        return DropdownMenuItem(
-                                          value: value,
-                                          child: Text(value),
-                                        );
-                                      },
-                                    ).toList(),
-                                    onChanged: (value) {
-                                      if (value != _selectedFilter)
-                                        _selectedFilter = value;
-                                      setState(() {
-                                        _selectedFilter = value;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _titleController,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Title',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Enter your message to continue';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _contentController,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Content',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Enter your message to continue';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Container(),
-                ),
-              ],
-            ),
+                onPressed: () {
+                  if (_formKey.currentState.validate()) {
+                    addGiveProduct(
+                      _titleController.text,
+                      _contentController.text,
+                      _selectedFilter,
+                    );
+                    Navigator.pop(context);
+                    appState.orderByFilter('All');
+                  }
+                }),
           ],
+        ),
+        body: SafeArea(
+          child: ListView(
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width,
+                // height: MediaQuery.of(context).size.height / 2,
+                child: _image == null
+                    ? Image.asset(
+                        'assets/logo.png',
+                      )
+                    : Image.file(
+                        _image,
+                        fit: BoxFit.fitWidth,
+                      ),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 9,
+                    child: Container(),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.photo_camera,
+                        semanticLabel: 'pick_photo',
+                      ),
+                      onPressed: getImage,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Container(),
+                  ),
+                  Expanded(
+                    flex: 8,
+                    child: Column(
+                      children: [
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: DropdownButton<String>(
+                                      value: _selectedFilter,
+                                      items: _filter.map(
+                                        (value) {
+                                          return DropdownMenuItem(
+                                            value: value,
+                                            child: Text(value),
+                                          );
+                                        },
+                                      ).toList(),
+                                      onChanged: (value) {
+                                        if (value != _selectedFilter)
+                                          _selectedFilter = value;
+                                        setState(() {
+                                          _selectedFilter = value;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _titleController,
+                                      decoration: const InputDecoration(
+                                        hintText: 'Title',
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Enter your message to continue';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _contentController,
+                                      decoration: const InputDecoration(
+                                        hintText: 'Content',
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Enter your message to continue';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Container(),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -307,162 +311,165 @@ class _takeAddPageState extends State<takeAddPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.grey,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            semanticLabel: 'back',
+    return Consumer<ApplicationState>(
+      builder: (context, appState, _) => Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.grey,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              semanticLabel: 'back',
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text('Add'),
-        centerTitle: true,
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(
-                Icons.save,
-                semanticLabel: 'save',
-              ),
-              onPressed: () {
-                if (_formKey.currentState.validate()) {
-                  if (_titleController.text != null &&
-                      _contentController.text != null) {
-                    addTakeProduct(
-                      _titleController.text,
-                      _contentController.text,
-                      _selectedFilter,
-                    );
+          title: Text('Add'),
+          centerTitle: true,
+          actions: <Widget>[
+            IconButton(
+                icon: Icon(
+                  Icons.save,
+                  semanticLabel: 'save',
+                ),
+                onPressed: () {
+                  if (_formKey.currentState.validate()) {
+                    if (_titleController.text != null &&
+                        _contentController.text != null) {
+                      addTakeProduct(
+                        _titleController.text,
+                        _contentController.text,
+                        _selectedFilter,
+                      );
+                    }
+                    Navigator.pop(context);
+                    appState.orderByFilter('All');
                   }
-                  Navigator.pop(context);
-                }
-              }),
-        ],
-      ),
-      body: SafeArea(
-        child: ListView(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              // height: MediaQuery.of(context).size.height / 2,
-              child: _image == null
-                  ? Image.asset(
-                      'assets/logo.png',
-                    )
-                  : Image.file(
-                      _image,
-                      fit: BoxFit.fitWidth,
-                    ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  flex: 9,
-                  child: Container(),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.photo_camera,
-                      semanticLabel: 'pick_photo',
-                    ),
-                    onPressed: getImage,
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Container(),
-                ),
-                Expanded(
-                  flex: 8,
-                  child: Column(
-                    children: [
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            //카테고리 부분 나중에 dropdown selector로 만들면 좋을 듯
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: DropdownButton<String>(
-                                    value: _selectedFilter,
-                                    items: _filter.map(
-                                      (value) {
-                                        return DropdownMenuItem(
-                                          value: value,
-                                          child: Text(value),
-                                        );
-                                      },
-                                    ).toList(),
-                                    onChanged: (value) {
-                                      if (value != _selectedFilter)
-                                        _selectedFilter = value;
-                                      setState(() {
-                                        _selectedFilter = value;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _titleController,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Title',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Enter your message to continue';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _contentController,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Content',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Enter your message to continue';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Container(),
-                ),
-              ],
-            ),
+                }),
           ],
+        ),
+        body: SafeArea(
+          child: ListView(
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width,
+                // height: MediaQuery.of(context).size.height / 2,
+                child: _image == null
+                    ? Image.asset(
+                        'assets/logo.png',
+                      )
+                    : Image.file(
+                        _image,
+                        fit: BoxFit.fitWidth,
+                      ),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 9,
+                    child: Container(),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.photo_camera,
+                        semanticLabel: 'pick_photo',
+                      ),
+                      onPressed: getImage,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Container(),
+                  ),
+                  Expanded(
+                    flex: 8,
+                    child: Column(
+                      children: [
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              //카테고리 부분 나중에 dropdown selector로 만들면 좋을 듯
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: DropdownButton<String>(
+                                      value: _selectedFilter,
+                                      items: _filter.map(
+                                        (value) {
+                                          return DropdownMenuItem(
+                                            value: value,
+                                            child: Text(value),
+                                          );
+                                        },
+                                      ).toList(),
+                                      onChanged: (value) {
+                                        if (value != _selectedFilter)
+                                          _selectedFilter = value;
+                                        setState(() {
+                                          _selectedFilter = value;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _titleController,
+                                      decoration: const InputDecoration(
+                                        hintText: 'Title',
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Enter your message to continue';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _contentController,
+                                      decoration: const InputDecoration(
+                                        hintText: 'Content',
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Enter your message to continue';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Container(),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

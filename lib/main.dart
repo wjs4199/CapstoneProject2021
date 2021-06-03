@@ -7,6 +7,7 @@ import 'home.dart';
 import 'login.dart';
 import 'detail.dart';
 import 'chart.dart';
+import 'map.dart';
 import 'product.dart';
 import 'add.dart';
 import 'edit.dart';
@@ -38,6 +39,7 @@ class Application extends StatelessWidget {
               '/home': (context) => HomePage(),
               '/giveadd': (context) => giveAddPage(),
               '/takeadd': (context) => takeAddPage(),
+              '/map': (context) => MapPage(),
             },
 
             // 동적 경로할당
