@@ -21,7 +21,7 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   //firebase에서 저장된 comments가져오기
-  List<Comment> _commentsList = [];
+  final List<Comment> _commentsList = [];
   List<Comment> get commentsList => _commentsList;
 
   Scaffold _buildScaffold() {
@@ -49,9 +49,7 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     //product uid에 해당하는 commentContext 가져오기
-    context
-        .watch<ApplicationState>()
-        .detailPageUid(productId, detailGiveOrTake);
+    //context.watch<ApplicationState>().detailPageUid(productId, detailGiveOrTake);
     // List<Comment> commentContext =context.watch<ApplicationState>().commentContext;
 
     if (products == null ||
