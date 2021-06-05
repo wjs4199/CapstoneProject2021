@@ -251,7 +251,7 @@ class ApplicationState extends ChangeNotifier {
       });
 
       FirebaseFirestore.instance
-          .collection(detailGiveOrTake + '/' + uid + '/likes')
+          .collection(detailGiveOrTake + '/' + uid + '/like')
           .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
           .listen((snapshot) {
         _likeList = [];
@@ -271,43 +271,3 @@ class ApplicationState extends ChangeNotifier {
   List<Comment> get commentContext => _commentContext;
   List<Like> get likeList => _likeList;
 }
-
-/*class DetailState extends ChangeNotifier {
-  String productId;
-
-  void likedForDetail(String productId) {
-    this.productId = productId;
-    print("productId for liked->  " + productId);
-    init();
-  }
-
-  ApplicationState() {
-    productId = 'null';
-    init();
-  }
-
-  List<Product> _giveProducts = [];
-
-  Future<void> init() async {
-    if (uid != "null") {
-      FirebaseFirestore.instance
-          .collection('comments/' + uid + '/commentList')
-          .orderBy('time', descending: true)
-          .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
-          .listen((snapshot) {
-        _commentContext = [];
-        snapshot.docs.forEach((document) {
-          _commentContext.add(Comment(
-            userName: document.data()['userName'],
-            comment: document.data()['comment'],
-            time: document.data()['time'],
-          ));
-        });
-        notifyListeners();
-      });
-    }
-  }
-  }
-
-  List<Product> get giveProducts => _giveProducts;
-}*/
