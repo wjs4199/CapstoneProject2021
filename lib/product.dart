@@ -28,3 +28,23 @@ class Product {
   final bool mark;
   final int comments;
 }
+
+class Comment {
+  Comment({
+    @required this.userName,
+    @required this.comment,
+    @required this.time,
+  });
+
+  final String userName;
+  final String comment;
+  final Timestamp time;
+}
+
+class Like {
+  Like({
+    @required this.uid,
+  });
+
+  final String uid;
+}

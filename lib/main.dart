@@ -42,11 +42,10 @@ class Application extends StatelessWidget {
               '/map': (context) => MapPage(),
             },
 
-            // 동적 경로할당 위해 추후 사용
-            // pathElements[3]에 어떤 collection이름이 들어가느냐에 따라
-            // 해당 collection과 연결된 페이지의 상품에만 접근하는 경로가 생성된다
+            // 동적 경로할당
             onGenerateRoute: (RouteSettings settings) {
               final List<String> pathElements = settings.name.split('/');
+              //detail 페이지로 이동시키는 동적 경로할당
               if (pathElements[1] == 'detail' &&
                   pathElements[3] == 'giveProducts') {
                 return MaterialPageRoute(
@@ -60,6 +59,7 @@ class Application extends StatelessWidget {
                         productId: pathElements[2],
                         detailGiveOrTake: 'takeProducts'));
               }
+              //edit 페이지로 이동시키는 동적 경로할당
               if (pathElements[1] == 'edit' &&
                   pathElements[3] == 'giveProducts') {
                 return MaterialPageRoute(
@@ -85,20 +85,36 @@ class Application extends StatelessWidget {
 }
 
 class ApplicationState extends ChangeNotifier {
-  String orderBy = 'All';
+  String orderBy;
+  String uid;
+  String detailGiveOrTake;
 
-  void orderByFilter(String filtering) {
-    orderBy = filtering;
+  void detailPageUid(String uid, String detailGiveOrTake) {
+    this.uid = uid;
+    this.detailGiveOrTake = detailGiveOrTake;
+    print("detail page uid -> " + uid);
+    init();
+  }
+
+  void orderByFilter(String orderBy) {
+    this.orderBy = orderBy;
     print("filtering ->  " + orderBy);
     init();
   }
 
   ApplicationState() {
+    orderBy = 'All';
+    uid = "null";
     init();
   }
 
   List<Product> _giveProducts = [];
   List<Product> _takeProducts = [];
+  List<Comment> _commentContext = [];
+  List<Like> _likeList = [];
+  int likeCount = 0;
+
+  Stream<QuerySnapshot> currentStream;
 
   //collection 'giveProducts' 파이어베이스에서 불러오기
   Future<void> init() async {
@@ -216,10 +232,42 @@ class ApplicationState extends ChangeNotifier {
         notifyListeners();
       });
     }
+
+    if (uid != "null") {
+      FirebaseFirestore.instance
+          .collection('comments/' + uid + '/commentList')
+          .orderBy('time', descending: true)
+          .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
+          .listen((snapshot) {
+        _commentContext = [];
+        snapshot.docs.forEach((document) {
+          _commentContext.add(Comment(
+            userName: document.data()['userName'],
+            comment: document.data()['comment'],
+            time: document.data()['time'],
+          ));
+        });
+        notifyListeners();
+      });
+
+      FirebaseFirestore.instance
+          .collection(detailGiveOrTake + '/' + uid + '/like')
+          .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
+          .listen((snapshot) {
+        _likeList = [];
+        snapshot.docs.forEach((document) {
+          _likeList.add(Like(
+            uid: document.data()['uid'],
+          ));
+        });
+        likeCount = _likeList.length;
+        notifyListeners();
+      });
+    }
   }
 
   List<Product> get giveProducts => _giveProducts;
-  //giveProducts 업데이트 완료
   List<Product> get takeProducts => _takeProducts;
-//takeProducts 업데이트 완료
+  List<Comment> get commentContext => _commentContext;
+  List<Like> get likeList => _likeList;
 }

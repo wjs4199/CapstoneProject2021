@@ -69,12 +69,17 @@ class PostTile extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        if (_giveOrTake == 0)
+        if (_giveOrTake == 0) {
+          Provider.of<ApplicationState>(context, listen: false)
+              .detailPageUid(_product.id, 'giveProducts');
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/giveProducts');
-        else
+        } else {
+          Provider.of<ApplicationState>(context, listen: false)
+              .detailPageUid(_product.id, 'takeProducts');
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/takeProducts');
+        }
       },
 
       /// Custom Tile 구조로 생성 (tile.dart 구조 참조)
@@ -189,7 +194,7 @@ class _HomePageState extends State<HomePage> {
   /// Index 별 위젯 반환: (순서: 0-Give, 1-Take, 2-Chart, 3-MyPage)
   List<Widget> _buildWidgetOptions(
       BuildContext context, ApplicationState appState) {
-    List<Widget> _widgetOptions = <Widget>[
+    var _widgetOptions = <Widget>[
       /// 0(Give):
       CustomScrollView(
         physics: const BouncingScrollPhysics(

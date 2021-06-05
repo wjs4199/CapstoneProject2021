@@ -10,30 +10,38 @@ import 'product.dart';
 import 'main.dart';
 
 class DetailPage extends StatefulWidget {
+  DetailPage({this.productId, this.detailGiveOrTake});
+
   final String productId;
   final String detailGiveOrTake;
-
-  DetailPage({this.productId, this.detailGiveOrTake});
 
   @override
   _DetailPageState createState() => _DetailPageState();
 }
 
 class _DetailPageState extends State<DetailPage> {
-  Scaffold _buildScaffold(BuildContext context, ApplicationState appState) {
-    String productId = this.widget.productId;
-    String detailGiveOrTake = this.widget.detailGiveOrTake;
+  @override
+  Widget build(BuildContext context) {
+    var likeList = context.watch<ApplicationState>().likeList;
+    var likeCount = context.watch<ApplicationState>().likeCount;
 
-    List<Product> Products = detailGiveOrTake == 'giveProducts'
-        ? appState.giveProducts
-        : appState.takeProducts;
+    print('likeList-> $likeList');
+
+    var productId = widget.productId;
+    var detailGiveOrTake = widget.detailGiveOrTake;
+
+    var products = detailGiveOrTake == 'giveProducts'
+        ? context.watch<ApplicationState>().giveProducts
+        : context.watch<ApplicationState>().takeProducts;
     Product product;
-    String userId = FirebaseAuth.instance.currentUser.uid;
-    bool productFound = false;
+    var userId = FirebaseAuth.instance.currentUser.uid;
+    var userName = FirebaseAuth.instance.currentUser.displayName;
+    var productFound = false;
 
-    for (int i = 0; i < Products.length; i++) {
-      if (Products[i].id == productId) {
-        product = Products[i];
+    for (var i = 0; i < products.length; i++) {
+      if (products[i].id == productId) {
+        product = products[i];
+
         print(product.userName);
         print(product.uid);
 
@@ -41,22 +49,22 @@ class _DetailPageState extends State<DetailPage> {
       }
     }
 
-    if (Products == null ||
-        Products.isEmpty ||
+    if (products == null ||
+        products.isEmpty ||
         productFound == false ||
         product.modified == null) {
+      print("로딩중");
       return Scaffold(
         body: CircularProgressIndicator(),
       );
     }
 
     // Set name for Firebase Storage
-    firebase_storage.FirebaseStorage storage =
-        firebase_storage.FirebaseStorage.instance;
+    var storage = firebase_storage.FirebaseStorage.instance;
 
     // Download image url of each product based on id
     Future<String> downloadURL(String id) async {
-      await Future.delayed(Duration(seconds: 2));
+      //await Future.delayed(Duration(seconds: 1));
       try {
         return await storage
             .ref()
@@ -78,6 +86,11 @@ class _DetailPageState extends State<DetailPage> {
           .collection('takeProducts/' + productId + '/like');
     }
 
+    // Collection 참조 ->  comments
+    CollectionReference comments;
+    comments = FirebaseFirestore.instance
+        .collection('comments/' + productId + '/commentList');
+
     // Add a like
     Future<void> addLike() {
       return likes
@@ -86,19 +99,14 @@ class _DetailPageState extends State<DetailPage> {
           .catchError((error) => print('Failed to add a like: $error'));
     }
 
-    /*// Delete like
+    // Delete like
     Future<void> deleteLike() async {
       try {
-        return await FirebaseFirestore.instance
-            .collection(detailGiveOrTake)
-            .doc(productId)
-            .snapshots()
-            .['likes']
-            .delete();
+        return likes.doc(userId).delete();
       } on Exception {
         return null;
       }
-    }*/
+    }
 
     // Delete item
     Future<void> deleteProduct() async {
@@ -112,6 +120,32 @@ class _DetailPageState extends State<DetailPage> {
       }
     }
 
+    // Delete comment
+    Future<void> deleteComment() async {
+      try {
+        return await FirebaseFirestore.instance
+            .collection('comments/$productId/commentList')
+            .doc(productId)
+            .delete();
+      } on Exception {
+        return null;
+      }
+    }
+
+    Future<void> addComments(String comment) {
+      return comments
+          .add({
+            'userName': FirebaseAuth.instance.currentUser.displayName,
+            'comment': comment,
+            'time': FieldValue.serverTimestamp(),
+          })
+          .then((value) => print('add comment!'))
+          .catchError((error) => print('Failed to add a comment: $error'));
+    }
+
+    // Check if already liked
+    //var isLike;
+
     // Check if already liked
     bool isLiked(AsyncSnapshot<QuerySnapshot> snapshot) {
       bool liked = false;
@@ -120,6 +154,18 @@ class _DetailPageState extends State<DetailPage> {
       });
       return liked;
     }
+
+    /*bool isLiked2() {
+      for (var i = 0; i < likeCount; i++) {
+        if (likeList[i].uid == productId) {
+          return true;
+        } else {
+          print(likeList[i].uid);
+          print(productId);
+          return false;
+        }
+      }
+    }*/
 
     return Scaffold(
       appBar: AppBar(
@@ -160,9 +206,9 @@ class _DetailPageState extends State<DetailPage> {
                     ? () => showDialog(
                         context: context,
                         builder: (BuildContext context) => CupertinoAlertDialog(
-                              title: Text("Deleting Item"),
+                              title: Text('Deleting Item'),
                               content: Text(
-                                  "Are you sure that you want to delete this item?"),
+                                  'Are you sure that you want to delete this item?'),
                               actions: <Widget>[
                                 CupertinoDialogAction(
                                   isDefaultAction: true,
@@ -171,17 +217,20 @@ class _DetailPageState extends State<DetailPage> {
                                   },
                                   child: Text("No"),
                                 ),
-                                CupertinoDialogAction(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    deleteProduct()
-                                        .then((value) => appState.init())
-                                        .catchError((error) => null)
-                                        .whenComplete(
-                                            () => Navigator.pop(context));
-                                  },
-                                  child: Text("Yes"),
-                                ),
+                                Consumer<ApplicationState>(
+                                  builder: (context, appState, _) =>
+                                      CupertinoDialogAction(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      deleteProduct()
+                                          .then((value) => appState.init())
+                                          .catchError((error) => null)
+                                          .whenComplete(
+                                              () => Navigator.pop(context));
+                                    },
+                                    child: Text('Yes'),
+                                  ),
+                                )
                               ],
                             ))
                     : null)
@@ -190,154 +239,368 @@ class _DetailPageState extends State<DetailPage> {
       body: SafeArea(
         child: ListView(
           children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              child: FutureBuilder(
-                future: downloadURL(productId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Column(
-                      children: [
-                        SizedBox(height: 50),
-                        Center(child: CircularProgressIndicator()),
-                        SizedBox(height: 48),
-                      ],
-                    );
-                  } else {
-                    if (snapshot.hasData) {
-                      return Image.network(snapshot.data.toString(),
-                          fit: BoxFit.fitWidth);
-                    } else if (snapshot.hasData == false) {
-                      return Image.asset('assets/logo.png');
-                    } else {
-                      return Container(
-                        child: Text('Snapshot Error!'),
+            Consumer<ApplicationState>(
+              builder: (context, appState, _) => Container(
+                width: MediaQuery.of(context).size.width,
+                child: FutureBuilder(
+                  future: downloadURL(productId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Column(
+                        children: [
+                          SizedBox(height: 50),
+                          Center(child: CircularProgressIndicator()),
+                          SizedBox(height: 48),
+                        ],
                       );
+                    } else {
+                      if (snapshot.hasData) {
+                        return Image.network(snapshot.data.toString(),
+                            fit: BoxFit.fitWidth);
+                      } else if (snapshot.hasData == false) {
+                        return Image.asset('assets/logo.png');
+                      } else {
+                        return Container(
+                          child: Text('Snapshot Error!'),
+                        );
+                      }
                     }
-                  }
-                },
+                  },
+                ),
               ),
             ),
             Row(
               children: [
+                SizedBox(width: 12),
                 Expanded(
-                  flex: 1,
-                  child: Container(),
-                ),
-                Expanded(
-                  flex: 8,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 8.0),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 8,
-                            child: Text(
-                              product.category,
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Color(0xff3792cb),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 8.0),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 8,
+                              child: Text(
+                                product.category,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Color(0xff3792cb),
+                                ),
                               ),
                             ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: StreamBuilder<QuerySnapshot>(
-                              stream: likes.snapshots(),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                                if (snapshot.hasError) {
-                                  return Text('Error!');
-                                }
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Text('Loading');
-                                }
-                                int count = snapshot.data.size;
-                                return Row(
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        (count != 0)
-                                            ? Icons.favorite
-                                            : Icons.favorite_outline,
-                                        color: Colors.red,
-                                        semanticLabel: 'like',
+                            Expanded(
+                              flex: 2,
+                              child: StreamBuilder<QuerySnapshot>(
+                                stream: likes.snapshots(),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                                  if (snapshot.hasError) {
+                                    return Text('Error!');
+                                  }
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Text('Loading');
+                                  }
+                                  var count = snapshot.data.size;
+                                  return Row(
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(
+                                          (isLiked(snapshot))
+                                              ? Icons.favorite
+                                              : Icons.favorite_outlined,
+                                          color: Colors.red,
+                                          semanticLabel: 'like',
+                                        ),
+                                        onPressed: () => (isLiked(snapshot))
+                                            ? print('You can only like once!')
+                                            : addLike(),
                                       ),
-                                      onPressed: () => (isLiked(snapshot))
-                                          ? print('You can only like once!')
-                                          : addLike(),
-                                    ),
-                                    Text(count.toString())
-                                  ],
-                                );
-                              },
+                                      Text(count.toString())
+                                    ],
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      Divider(thickness: 1.0),
-                      SizedBox(height: 8.0),
-                      Text(
-                        product.title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Color(0xff296d98),
+                          ],
                         ),
-                      ),
-                      SizedBox(height: 8.0),
-                      Divider(thickness: 1.0),
-                      Row(
-                        children: [
-                          Text(
-                            product.userName.toString() +
-                                "                            ",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xff296d98),
-                            ),
+                        Divider(thickness: 1.0),
+                        SizedBox(height: 8.0),
+                        Text(
+                          product.title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Color(0xff296d98),
                           ),
-                          Text(
-                            DateFormat('yyyy.MM.dd HH:mm')
-                                .format(product.modified.toDate()),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xff296d98),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(thickness: 1.0),
-                      SizedBox(height: 8.0),
-                      Text(
-                        product.content ?? product.content,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xff3792cb),
                         ),
-                      ),
-                    ],
-                  ),
+                        SizedBox(height: 8.0),
+                        Divider(thickness: 1.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              product.userName.toString() +
+                                  "                            ",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color(0xff296d98),
+                              ),
+                            ),
+                            Text(
+                              DateFormat('yyyy.MM.dd HH:mm')
+                                  .format(product.modified.toDate()),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color(0xff296d98),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Divider(thickness: 1.0),
+                        SizedBox(height: 8.0),
+                        Text(
+                          product.content ?? product.content,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Color(0xff3792cb),
+                          ),
+                        ),
+                        Divider(thickness: 1.0),
+                      ]),
                 ),
-                Expanded(
-                  flex: 1,
-                  child: Container(),
-                ),
+                SizedBox(width: 12),
               ],
             ),
+            Container(
+                padding: const EdgeInsets.all(8.0),
+                child: CommentBook(
+                  addComments: (String comment) => addComments(comment),
+                  detailGiveOrTake: detailGiveOrTake,
+                  productId: productId,
+                ))
           ],
         ),
       ),
     );
   }
+}
+
+class CommentBook extends StatefulWidget {
+  CommentBook(
+      {this.addComments,
+      this.detailGiveOrTake,
+      this.productId}); //, required this.dates
+  final Future<void> Function(String message) addComments;
+  final String productId;
+  final String detailGiveOrTake;
+
+  @override
+  _CommentBookState createState() => _CommentBookState();
+}
+
+class _CommentBookState extends State<CommentBook> {
+  final _commentFormKey = GlobalKey<FormState>(debugLabel: '_CommentState');
+  final _commentController = TextEditingController();
+
+  Future<String> convertDateTime(Timestamp time) async {
+    //await Future.delayed(Duration(seconds: 1));
+    try {
+      return await DateFormat('MM.dd HH:mm').format(time.toDate());
+    } on Exception {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ApplicationState>(
-      builder: (context, appState, _) => _buildScaffold(context, appState),
+    var comments = context.watch<ApplicationState>().commentContext;
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Form(
+        key: _commentFormKey,
+        child: Row(
+          children: [
+            Expanded(
+                child: Padding(
+              padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
+              child: TextFormField(
+                controller: _commentController,
+                decoration: const InputDecoration(
+                  hintText: 'Leave a comment',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Enter your message to continue';
+                  }
+                  return null;
+                },
+              ),
+            )),
+            SizedBox(width: 3),
+            IconButton(
+              icon: const Icon(Icons.send),
+              iconSize: 38,
+              color: Colors.blueAccent,
+              onPressed: () async {
+                var currentFocus = FocusScope.of(context);
+                currentFocus.unfocus();
+                setState(() {
+                  if (_commentFormKey.currentState.validate()) {
+                    widget.addComments(_commentController.text);
+                    _commentController.clear();
+                    context.watch<ApplicationState>().detailPageUid(
+                        widget.productId, widget.detailGiveOrTake);
+                    print("clear!");
+                  }
+                });
+              },
+            ),
+          ],
+        ),
+      ),
+      SizedBox(height: 8),
+      for (var eachComment in comments)
+        Column(children: [
+          Padding(
+              padding: const EdgeInsets.fromLTRB(10.0, 5, 0.0, 15),
+              child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                Container(
+                    margin: const EdgeInsets.only(right: 16.0),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10),
+                        CircleAvatar(
+                          radius: 27,
+                          child: Text(eachComment.userName),
+                          //backgroundColor: Colors.
+                        ),
+                        SizedBox(height: 10),
+                        FutureBuilder(
+                          future: convertDateTime(eachComment.time),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Column(
+                                children: [
+                                  SizedBox(
+                                      width: 5,
+                                      height: 5,
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.grey),
+                                        strokeWidth: 1.0,
+                                      )),
+                                ],
+                              );
+                            } else {
+                              if (snapshot.hasData) {
+                                return Text(snapshot.data.toString(),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey,
+                                    ));
+                              } else if (snapshot.hasData == false) {
+                                return Text('알수없음',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey,
+                                    ));
+                              } else {
+                                return Container(
+                                  child: Text('Snapshot Error!'),
+                                );
+                              }
+                            }
+                          },
+                        ),
+                      ],
+                    )),
+                Container(
+                    padding: EdgeInsets.all(3.0),
+                    width: 200,
+                    child: RichText(
+                        text: TextSpan(
+                            style: DefaultTextStyle.of(context).style,
+                            children: <TextSpan>[
+                          TextSpan(text: eachComment.comment + '\n'),
+                        ]))),
+                Expanded(
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                      _buildCommentToggleButtons(
+                          context, context.watch<ApplicationState>()),
+                      SizedBox(height: 20),
+                    ]))
+              ])),
+          Divider(thickness: 1.0),
+        ])
+    ]);
+  }
+
+  List<bool> _selections = List.generate(3, (_) => false);
+
+  ToggleButtons _buildCommentToggleButtons(
+      BuildContext context, ApplicationState appState) {
+    return ToggleButtons(
+      color: Colors.black.withOpacity(0.60),
+      constraints: BoxConstraints(
+        minWidth: 25,
+        minHeight: 25,
+      ),
+      selectedBorderColor: Colors.cyan,
+      selectedColor: Colors.cyan,
+      borderRadius: BorderRadius.circular(4.0),
+      isSelected: _selections,
+      onPressed: (int index) {
+        setState(() {
+          if (index == 2) {
+            //_selections[2] = !_selections[1];
+            //나중에는 애타처럼 시간 옆에 손가락 뜨도록 만들기
+            /*덧글좋아요 컬랙션에 추가*/
+          }
+          /*----------------------
+          else {
+            _selections[1] = false;
+          }
+            else if(index == 0){
+              //채팅으로 이동
+            }
+            else if(index == 2){
+              //더보기 -> 삭제, 수정 기능
+            }
+            -----------------------*/
+        }
+            /*if (_selections[index] == true) {
+            if (index == 0)
+             //
+            else if (index == 1)
+              //
+            else
+              //
+          } else {
+            //
+          }*/
+            );
+      },
+      children: [
+        Icon(
+          Icons.chat,
+          size: 15,
+        ),
+        Icon(
+          Icons.thumb_up,
+          size: 15,
+        ),
+        Icon(
+          Icons.delete,
+          size: 15,
+        ),
+      ],
     );
   }
 }
