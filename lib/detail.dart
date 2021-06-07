@@ -365,6 +365,7 @@ class _DetailPageState extends State<DetailPage> {
                   deleteComments: () => deleteComments(),
                   detailGiveOrTake: detailGiveOrTake,
                   productId: productId,
+                  userName: userName,
                 ))
           ],
         ),
@@ -378,11 +379,13 @@ class CommentBook extends StatefulWidget {
       {this.addComments,
       this.detailGiveOrTake,
       this.productId,
-      this.deleteComments}); //, required this.dates
+      this.deleteComments,
+      this.userName}); //, required this.dates
   final Future<void> Function(String message) addComments;
   final Future<void> Function() deleteComments;
   final String productId;
   final String detailGiveOrTake;
+  final String userName;
 
   @override
   _CommentBookState createState() => _CommentBookState();
@@ -436,7 +439,9 @@ class _CommentBookState extends State<CommentBook> {
                 currentFocus.unfocus();
                 setState(() {
                   if (_commentFormKey.currentState.validate()) {
-                    widget.addComments(_commentController.text);
+                    widget
+                        .addComments(_commentController.text)
+                        .then((value) => print('addcomment ok!'));
                     _commentController.clear();
                     context.watch<ApplicationState>().detailPageUid(
                         widget.productId, widget.detailGiveOrTake);
@@ -450,82 +455,75 @@ class _CommentBookState extends State<CommentBook> {
       ),
       SizedBox(height: 8),
       for (var eachComment in comments)
-        Column(children: [
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Padding(
-              padding: const EdgeInsets.fromLTRB(10.0, 5, 0.0, 15),
-              child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                Container(
-                    margin: const EdgeInsets.only(right: 16.0),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 10),
-                        CircleAvatar(
-                          backgroundColor: Colors.lightBlue,
-                          radius: 27,
-                          child: Image.asset('assets/defaultUser.png'),
-                          //backgroundColor: Colors.
-                        ),
-                        SizedBox(height: 10),
-                        FutureBuilder(
-                          future: convertDateTime(eachComment.time),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Column(
-                                children: [
-                                  SizedBox(
-                                      width: 5,
-                                      height: 5,
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                Colors.grey),
-                                        strokeWidth: 1.0,
-                                      )),
-                                ],
-                              );
-                            } else {
-                              if (snapshot.hasData) {
-                                return Text(eachComment.userName,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.grey,
-                                    ));
-                              } else if (snapshot.hasData == false) {
-                                return Text('알수없음',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.grey,
-                                    ));
-                              } else {
-                                return Container(
-                                  child: Text('Snapshot Error!'),
-                                );
-                              }
-                            }
-                          },
-                        ),
-                      ],
-                    )),
-                Container(
-                    padding: EdgeInsets.all(3.0),
-                    width: 220,
-                    child: RichText(
-                        text: TextSpan(
-                            style: DefaultTextStyle.of(context).style,
-                            children: <TextSpan>[
-                          TextSpan(text: eachComment.comment + '\n'),
-                        ]))),
-                /*Expanded(
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                      _buildCommentToggleButtons(
-                          context, context.watch<ApplicationState>()),
-                      SizedBox(height: 20),
-                    ]))*/
-              ])),
+              padding: const EdgeInsets.fromLTRB(10.0, 5, 0.0, 13),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.lightBlue,
+                    radius: 15,
+                    child: Image.asset('assets/userDefault.png'),
+                    //backgroundColor: Colors.
+                  ),
+                  SizedBox(width: 7.0),
+                  FutureBuilder(
+                    future: convertDateTime(eachComment.time),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Column(
+                          children: [
+                            SizedBox(
+                                width: 5,
+                                height: 5,
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.grey),
+                                  strokeWidth: 1.0,
+                                )),
+                          ],
+                        );
+                      } else {
+                        if (snapshot.hasData) {
+                          return Text(eachComment.userName,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.black,
+                              ));
+                        } else if (snapshot.hasData == false) {
+                          return Text('알수없음',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ));
+                        } else {
+                          return Container(
+                            child: Text('Snapshot Error!'),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                  /*Expanded(
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                        _buildCommentToggleButtons(
+                            context, context.watch<ApplicationState>()),
+                        SizedBox(width: 10),
+                      ]))*/
+                ],
+              )),
+          Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+            SizedBox(width: 10.0),
+            RichText(
+                text: TextSpan(
+                    style: DefaultTextStyle.of(context).style,
+                    children: <TextSpan>[
+                  TextSpan(text: eachComment.comment + '\n'),
+                ])),
+          ]),
           Divider(thickness: 1.0),
         ])
     ]);
@@ -548,12 +546,61 @@ class _CommentBookState extends State<CommentBook> {
       onPressed: (int index) {
         setState(() {
           if (index == 2) {
-            //widget.deleteComments;
-            //_selections[2] = !_selections[1];
-            //나중에는 애타처럼 시간 옆에 손가락 뜨도록 만들기
-            /*덧글좋아요 컬랙션에 추가*/
+            print('push delete button!');
+            print(FirebaseAuth.instance.currentUser.displayName);
+            print(widget.userName);
+            /////
+            if (FirebaseAuth.instance.currentUser.displayName ==
+                widget.userName) {
+              print('same userName');
+
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) => CupertinoAlertDialog(
+                        title: Text('Deleting Item'),
+                        content: Text(
+                            'Are you sure that you want to delete this comment?'),
+                        actions: <Widget>[
+                          CupertinoDialogAction(
+                            isDefaultAction: true,
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text("No"),
+                          ),
+                          CupertinoDialogAction(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              widget
+                                  .deleteComments()
+                                  .then((value) => appState.init())
+                                  .catchError((error) => null);
+                            },
+                            child: Text('Yes'),
+                          ),
+                        ],
+                      ));
+            } else {
+              null;
+            }
+
+            /////
           }
-          /*----------------------
+        });
+      },
+
+      /*onPressed: (int index) {
+        setState(() {
+          if (index == 2) {
+            print('push delete button!');
+          }
+        });
+      },*/
+
+      //_selections[2] = !_selections[1];
+      //나중에는 애타처럼 시간 옆에 손가락 뜨도록 만들기
+      /*덧글좋아요 컬랙션에 추가*/
+      /*----------------------
           else {
             _selections[1] = false;
           }
@@ -564,8 +611,8 @@ class _CommentBookState extends State<CommentBook> {
               //더보기 -> 삭제, 수정 기능
             }
             -----------------------*/
-        }
-            /*if (_selections[index] == true) {
+
+      /*if (_selections[index] == true) {
             if (index == 0)
              //
             else if (index == 1)
@@ -575,8 +622,7 @@ class _CommentBookState extends State<CommentBook> {
           } else {
             //
           }*/
-            );
-      },
+
       children: [
         Icon(
           Icons.chat,
