@@ -51,8 +51,10 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<key>NSLocationAlwaysUsageDescription</key>
 	<false/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+        <key>NSLocationAlwaysUsageDescription</key>
+	<key>io.flutter.embedded_views_preview</key>
+    	<true/>
 </dict>
 </plist>

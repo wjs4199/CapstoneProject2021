@@ -24,22 +24,23 @@ class _MapState extends State<MapPage> {
     });
   }
 
-  var locationMessageLat;
-  var locationMessageLong;
+  // var locationMessageLat;
+  // var locationMessageLong;
 
-  void getCurrentLocation() async {
+  Future<Position> getCurrentLocation() async {
     var position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
     var lastPosition = await Geolocator.getLastKnownPosition();
     print(lastPosition);
-    var locationLat = position.latitude;
-    var locationLong = position.longitude;
-    print(locationLat);
-    setState(() {
-      // locationMessage = "$locationLat, $locationLong";
-      locationMessageLat = "$locationLat";
-      locationMessageLong = "$locationLong";
-    });
+    // var locationLat = position.latitude;
+    // var locationLong = position.longitude;
+    print(position);
+    // setState(() {
+    //   // locationMessage = "$locationLat, $locationLong";
+    //   locationMessageLat = "$locationLat";
+    //   locationMessageLong = "$locationLong";
+    // });
+    return position;
   }
 
   Future<Position> getLocation() async {
@@ -67,7 +68,7 @@ class _MapState extends State<MapPage> {
           //   ),
           // ),
           body: FutureBuilder(
-              future: getLocation(),
+              future: getCurrentLocation(),
               builder: (BuildContext context,
                   AsyncSnapshot<Position> currentPosition) {
                 if (currentPosition.hasData) {
@@ -75,8 +76,8 @@ class _MapState extends State<MapPage> {
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height,
                     child: GoogleMap(
-                      onMapCreated: _onMapCreated,
-                      markers: _markers,
+                      // onMapCreated: _onMapCreated,
+                      // markers: _markers,
                       initialCameraPosition: CameraPosition(
                         target: LatLng(currentPosition.data.latitude,
                             currentPosition.data.longitude),
