@@ -637,6 +637,8 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
+                    CustomPieChart2(
+                        appState.giveProducts + appState.takeProducts),
                   ],
                 ),
               ],
@@ -649,7 +651,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   FloatingActionButton buildFAB() {
-    if (_selectedIndex == 0)
+    if (_selectedIndex == 0) {
       return FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/giveadd');
@@ -657,7 +659,7 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.cyan,
         child: Icon(Icons.add),
       );
-    else if (_selectedIndex == 1)
+    } else if (_selectedIndex == 1) {
       return FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/takeadd');
@@ -665,6 +667,7 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.cyan,
         child: Icon(Icons.add),
       );
+    }
     return null;
   }
 
@@ -794,6 +797,9 @@ class _HomePageState extends State<HomePage> {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.cyan,
+            ),
             child: Padding(
               padding: const EdgeInsets.all(15.0),
               child: Align(
@@ -806,9 +812,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-            ),
-            decoration: BoxDecoration(
-              color: Colors.cyan,
             ),
           ),
           ListTile(

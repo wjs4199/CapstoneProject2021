@@ -431,9 +431,9 @@ class _CommentBookState extends State<CommentBook> {
             )),
             SizedBox(width: 3),
             IconButton(
-              icon: const Icon(Icons.send),
+              icon: const Icon(Icons.comment),
               iconSize: 38,
-              color: Colors.blueAccent,
+              color: Colors.cyan,
               onPressed: () async {
                 var currentFocus = FocusScope.of(context);
                 currentFocus.unfocus();
@@ -531,7 +531,7 @@ class _CommentBookState extends State<CommentBook> {
 
   List<bool> _selections = List.generate(3, (_) => false);
 
-  ToggleButtons _buildCommentToggleButtons(
+/*ToggleButtons _buildCommentToggleButtons(
       BuildContext context, ApplicationState appState) {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
@@ -587,9 +587,9 @@ class _CommentBookState extends State<CommentBook> {
             /////
           }
         });
-      },
+      },*/
 
-      /*onPressed: (int index) {
+/*onPressed: (int index) {
         setState(() {
           if (index == 2) {
             print('push delete button!');
@@ -597,10 +597,10 @@ class _CommentBookState extends State<CommentBook> {
         });
       },*/
 
-      //_selections[2] = !_selections[1];
-      //나중에는 애타처럼 시간 옆에 손가락 뜨도록 만들기
-      /*덧글좋아요 컬랙션에 추가*/
-      /*----------------------
+//_selections[2] = !_selections[1];
+//나중에는 애타처럼 시간 옆에 손가락 뜨도록 만들기
+/*덧글좋아요 컬랙션에 추가*/
+/*----------------------
           else {
             _selections[1] = false;
           }
@@ -612,7 +612,7 @@ class _CommentBookState extends State<CommentBook> {
             }
             -----------------------*/
 
-      /*if (_selections[index] == true) {
+/*if (_selections[index] == true) {
             if (index == 0)
              //
             else if (index == 1)
@@ -623,7 +623,7 @@ class _CommentBookState extends State<CommentBook> {
             //
           }*/
 
-      children: [
+/* children: [
         Icon(
           Icons.chat,
           size: 15,
@@ -639,4 +639,5 @@ class _CommentBookState extends State<CommentBook> {
       ],
     );
   }
+}*/
 }
