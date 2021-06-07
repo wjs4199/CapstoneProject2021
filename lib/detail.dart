@@ -505,14 +505,14 @@ class _CommentBookState extends State<CommentBook> {
                       }
                     },
                   ),
-                  /*Expanded(
+                  Expanded(
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                         _buildCommentToggleButtons(
                             context, context.watch<ApplicationState>()),
                         SizedBox(width: 10),
-                      ]))*/
+                      ]))
                 ],
               )),
           Row(mainAxisAlignment: MainAxisAlignment.start, children: [
@@ -531,7 +531,7 @@ class _CommentBookState extends State<CommentBook> {
 
   List<bool> _selections = List.generate(3, (_) => false);
 
-/*ToggleButtons _buildCommentToggleButtons(
+  ToggleButtons _buildCommentToggleButtons(
       BuildContext context, ApplicationState appState) {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
@@ -587,7 +587,7 @@ class _CommentBookState extends State<CommentBook> {
             /////
           }
         });
-      },*/
+      },
 
 /*onPressed: (int index) {
         setState(() {
@@ -623,7 +623,7 @@ class _CommentBookState extends State<CommentBook> {
             //
           }*/
 
-/* children: [
+      children: [
         Icon(
           Icons.chat,
           size: 15,
@@ -639,5 +639,4 @@ class _CommentBookState extends State<CommentBook> {
       ],
     );
   }
-}*/
 }
