@@ -18,8 +18,8 @@ dependencies:
   google_sign_in: ^5.0.3
   provider: ^5.0.0
   cupertino_icons: ^1.0.2
-  image_picker: ^0.7.4
-  url_launcher: ^5.4.0
+  image_picker: ^0.8.0+1
+  url_launcher: ^6.0.6
   fl_chart: ^0.36.1 # 새로운 api 사용(1) flutter chart
   flutter_sticky_header: ^0.6.0 # 새로운 api 사용(2) flutter sticky header
   google_maps_flutter: ^2.0.6 # 새로운 api 사용 (3) google maps flutter
@@ -31,14 +31,14 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   pedantic: ^1.11.0
-  build_runner: ^1.10.0
+  build_runner: ^2.0.4
 
 flutter:
   uses-material-design: true
   assets:
     - assets/hgu.png
     - assets/logo.png
-    - assets/defaultUser.png
+    - assets/userDefault.png
 
   fonts:
     - family: Pacifico
