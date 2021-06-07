@@ -243,7 +243,7 @@ class _DetailPageState extends State<DetailPage> {
                         return Image.network(snapshot.data.toString(),
                             fit: BoxFit.fitWidth);
                       } else if (snapshot.hasData == false) {
-                        return Image.asset('assets/logo.png');
+                        return Container();
                       } else {
                         return Container(
                           child: Text('Snapshot Error!'),
@@ -428,9 +428,9 @@ class _CommentBookState extends State<CommentBook> {
             )),
             SizedBox(width: 3),
             IconButton(
-              icon: const Icon(Icons.send),
+              icon: const Icon(Icons.comment),
               iconSize: 38,
-              color: Colors.blueAccent,
+              color: Colors.cyan,
               onPressed: () async {
                 var currentFocus = FocusScope.of(context);
                 currentFocus.unfocus();
@@ -460,9 +460,8 @@ class _CommentBookState extends State<CommentBook> {
                       children: [
                         SizedBox(height: 10),
                         CircleAvatar(
-                          backgroundColor: Colors.lightBlue,
                           radius: 27,
-                          child: Image.asset('assets/defaultUser.png'),
+                          backgroundImage: AssetImage('assets/defaultUser.png'),
                           //backgroundColor: Colors.
                         ),
                         SizedBox(height: 10),
