@@ -4,7 +4,6 @@ import 'src/locations.dart' as locations;
 import 'package:geolocator/geolocator.dart';
 import 'package:geolocator_platform_interface/src/enums/location_accuracy.dart';
 
-
 var latitude;
 var longitude;
 
@@ -14,7 +13,6 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapState extends State<MapPage> {
-
   Set<Marker> _markers = {};
 
   void _onMapCreated(GoogleMapController controller) {
@@ -44,29 +42,51 @@ class _MapState extends State<MapPage> {
     });
   }
 
-
+  Future<Position> getLocation() async {
+    var position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low);
+    return position;
+  }
 
   @override
   Widget build(BuildContext context) {
-    getCurrentLocation();
+    // Position currentPosition = getLocation();
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Google Map'),
-          backgroundColor: Colors.cyan,
-        ),
-        body: GoogleMap(
-                onMapCreated: _onMapCreated,
-                markers: _markers,
-                initialCameraPosition: CameraPosition(
-                  zoom: 15,
-                  target:
-                  LatLng(double.parse(locationMessageLat.toString()),
-                    double.parse(locationMessageLong.toString())),
-
+          appBar: AppBar(
+            title: const Text('Google Map'),
+            backgroundColor: Colors.cyan,
           ),
-        ),
-      ),
+          // body: GoogleMap(
+          //   onMapCreated: _onMapCreated,
+          //   markers: _markers,
+          //   initialCameraPosition: CameraPosition(
+          //     zoom: 15,
+          //     target: LatLng(double.parse(locationMessageLat),
+          //         double.parse(locationMessageLong)),
+          //   ),
+          // ),
+          body: FutureBuilder(
+              future: getLocation(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<Position> currentPosition) {
+                if (currentPosition.hasData) {
+                  return Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    child: GoogleMap(
+                      onMapCreated: _onMapCreated,
+                      markers: _markers,
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(currentPosition.data.latitude,
+                            currentPosition.data.longitude),
+                        zoom: 18,
+                      ),
+                    ),
+                  );
+                }
+                return Center(child: CircularProgressIndicator());
+              })),
     );
   }
 }

@@ -794,6 +794,9 @@ class _HomePageState extends State<HomePage> {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.cyan,
+            ),
             child: Padding(
               padding: const EdgeInsets.all(15.0),
               child: Align(
@@ -806,9 +809,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-            ),
-            decoration: BoxDecoration(
-              color: Colors.cyan,
             ),
           ),
           ListTile(
