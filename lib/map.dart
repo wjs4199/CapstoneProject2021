@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'src/locations.dart' as locations;
 import 'package:geolocator/geolocator.dart';
+import 'package:geolocator_platform_interface/src/enums/location_accuracy.dart';
+
+
+var latitude;
+var longitude;
 
 class MapPage extends StatefulWidget {
   @override
@@ -9,49 +14,56 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapState extends State<MapPage> {
-  Future<void> _onMapCreated(GoogleMapController controller) async {
-    Future<Position> _determinePosition() async {
-      bool serviceEnabled;
-      LocationPermission permission;
 
-      // Test if location services are enabled.
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        return Future.error('Location services are disabled.');
-      }
+  Set<Marker> _markers = {};
 
-      permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          return Future.error('Location permissions are denied');
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        // Permissions are denied forever, handle appropriately.
-        return Future.error(
-            'Location permissions are permanently denied, we cannot request permissions.');
-      }
-
-      return await Geolocator.getCurrentPosition();
-    }
+  void _onMapCreated(GoogleMapController controller) {
+    setState(() {
+      _markers.add(Marker(
+          markerId: MarkerId('id-1'),
+          // position: LatLng(46.493882, 30.683254599999998)));
+          position: LatLng(37.4219983, -122.084)));
+    });
   }
+
+  var locationMessageLat;
+  var locationMessageLong;
+
+  void getCurrentLocation() async {
+    var position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    var lastPosition = await Geolocator.getLastKnownPosition();
+    print(lastPosition);
+    var locationLat = position.latitude;
+    var locationLong = position.longitude;
+    print(locationLat);
+    setState(() {
+      // locationMessage = "$locationLat, $locationLong";
+      locationMessageLat = "$locationLat";
+      locationMessageLong = "$locationLong";
+    });
+  }
+
 
 
   @override
   Widget build(BuildContext context) {
+    getCurrentLocation();
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Google Map'),
-          backgroundColor: Colors.green[700],
+          backgroundColor: Colors.cyan,
         ),
         body: GoogleMap(
-          onMapCreated: _onMapCreated,
-          initialCameraPosition: CameraPosition(
-            target: const LatLng(0, 0),
-            zoom: 2,
+                onMapCreated: _onMapCreated,
+                markers: _markers,
+                initialCameraPosition: CameraPosition(
+                  zoom: 15,
+                  target:
+                  LatLng(double.parse(locationMessageLat.toString()),
+                    double.parse(locationMessageLong.toString())),
+
           ),
         ),
       ),
