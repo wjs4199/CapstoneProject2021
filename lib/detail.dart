@@ -121,7 +121,7 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     // Delete comment
-    Future<void> deleteComment() async {
+    Future<void> deleteComments() async {
       try {
         return await FirebaseFirestore.instance
             .collection('comments/$productId/commentList')
@@ -144,9 +144,6 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     // Check if already liked
-    //var isLike;
-
-    // Check if already liked
     bool isLiked(AsyncSnapshot<QuerySnapshot> snapshot) {
       bool liked = false;
       snapshot.data.docs.forEach((document) {
@@ -154,18 +151,6 @@ class _DetailPageState extends State<DetailPage> {
       });
       return liked;
     }
-
-    /*bool isLiked2() {
-      for (var i = 0; i < likeCount; i++) {
-        if (likeList[i].uid == productId) {
-          return true;
-        } else {
-          print(likeList[i].uid);
-          print(productId);
-          return false;
-        }
-      }
-    }*/
 
     return Scaffold(
       appBar: AppBar(
@@ -377,6 +362,7 @@ class _DetailPageState extends State<DetailPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: CommentBook(
                   addComments: (String comment) => addComments(comment),
+                  deleteComments: () => deleteComments(),
                   detailGiveOrTake: detailGiveOrTake,
                   productId: productId,
                 ))
@@ -391,8 +377,10 @@ class CommentBook extends StatefulWidget {
   CommentBook(
       {this.addComments,
       this.detailGiveOrTake,
-      this.productId}); //, required this.dates
+      this.productId,
+      this.deleteComments}); //, required this.dates
   final Future<void> Function(String message) addComments;
+  final Future<void> Function() deleteComments;
   final String productId;
   final String detailGiveOrTake;
 
@@ -472,8 +460,9 @@ class _CommentBookState extends State<CommentBook> {
                       children: [
                         SizedBox(height: 10),
                         CircleAvatar(
+                          backgroundColor: Colors.lightBlue,
                           radius: 27,
-                          child: Text(eachComment.userName),
+                          child: Image.asset('assets/defaultUser.png'),
                           //backgroundColor: Colors.
                         ),
                         SizedBox(height: 10),
@@ -497,7 +486,7 @@ class _CommentBookState extends State<CommentBook> {
                               );
                             } else {
                               if (snapshot.hasData) {
-                                return Text(snapshot.data.toString(),
+                                return Text(eachComment.userName,
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: Colors.grey,
@@ -520,14 +509,14 @@ class _CommentBookState extends State<CommentBook> {
                     )),
                 Container(
                     padding: EdgeInsets.all(3.0),
-                    width: 200,
+                    width: 220,
                     child: RichText(
                         text: TextSpan(
                             style: DefaultTextStyle.of(context).style,
                             children: <TextSpan>[
                           TextSpan(text: eachComment.comment + '\n'),
                         ]))),
-                Expanded(
+                /*Expanded(
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -535,7 +524,7 @@ class _CommentBookState extends State<CommentBook> {
                       _buildCommentToggleButtons(
                           context, context.watch<ApplicationState>()),
                       SizedBox(height: 20),
-                    ]))
+                    ]))*/
               ])),
           Divider(thickness: 1.0),
         ])
@@ -559,6 +548,7 @@ class _CommentBookState extends State<CommentBook> {
       onPressed: (int index) {
         setState(() {
           if (index == 2) {
+            //widget.deleteComments;
             //_selections[2] = !_selections[1];
             //나중에는 애타처럼 시간 옆에 손가락 뜨도록 만들기
             /*덧글좋아요 컬랙션에 추가*/
