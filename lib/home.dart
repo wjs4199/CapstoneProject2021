@@ -64,8 +64,17 @@ class PostTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     /// Firebase TimeStamp => DateFormat 변환
-    String formattedDate =
-        DateFormat('MMM d, HH:mm').format(_product.created.toDate());
+    // String formattedDate =
+    //     DateFormat('MMM d, HH:mm').format(_product.created.toDate());
+    Future<String> returnDate() async {
+      //await Future.delayed(Duration(seconds: 1));
+      try {
+        return await DateFormat('MMM d, HH:mm')
+            .format(_product.created.toDate());
+      } on Exception {
+        return null;
+      }
+    }
 
     return InkWell(
       onTap: () {
@@ -83,37 +92,42 @@ class PostTile extends StatelessWidget {
       },
 
       /// Custom Tile 구조로 생성 (tile.dart 구조 참조)
-      child: CustomListItem(
-        // leading: CircleAvatar(
-        //   backgroundImage: NetworkImage(highResUrl),
-        //   backgroundColor: Colors.transparent,
-        // ),
-        title: _product.title,
-        subtitle: _product.content,
-        author: _product.userName,
-        publishDate: formattedDate,
-        category: _product.category,
-        likes: _product.likes,
-        thumbnail: FutureBuilder(
-          future: downloadURL(_product.id),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else {
-              if (snapshot.hasData) {
-                return ClipRRect(
-                  borderRadius: new BorderRadius.circular(8.0),
-                  child: Image.network(snapshot.data.toString(),
-                      fit: BoxFit.fitWidth),
-                );
-              } else if (snapshot.hasData == false) {
-                return Container();
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            }
-          },
-        ),
+      child: FutureBuilder(
+        future: returnDate(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else {
+            return CustomListItem(
+              title: _product.title,
+              subtitle: _product.content,
+              author: _product.userName,
+              publishDate: snapshot.data,
+              category: _product.category,
+              likes: _product.likes,
+              thumbnail: FutureBuilder(
+                future: downloadURL(_product.id),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else {
+                    if (snapshot.hasData) {
+                      return ClipRRect(
+                        borderRadius: new BorderRadius.circular(8.0),
+                        child: Image.network(snapshot.data.toString(),
+                            fit: BoxFit.fitWidth),
+                      );
+                    } else if (snapshot.hasData == false) {
+                      return Container();
+                    } else {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                  }
+                },
+              ),
+            );
+          }
+        },
       ),
     );
   }
