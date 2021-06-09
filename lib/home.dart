@@ -69,8 +69,7 @@ class PostTile extends StatelessWidget {
     Future<String> returnDate() async {
       //await Future.delayed(Duration(seconds: 1));
       try {
-        return await DateFormat('MMM d, HH:mm')
-            .format(_product.created.toDate());
+        return DateFormat('MMM d, HH:mm').format(_product.created.toDate());
       } on Exception {
         return null;
       }
