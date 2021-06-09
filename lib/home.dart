@@ -403,7 +403,9 @@ class _HomePageState extends State<HomePage> {
                   Icons.location_on,
                   semanticLabel: 'location',
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, '/map');
+                },
               ),
             ],
           ),
