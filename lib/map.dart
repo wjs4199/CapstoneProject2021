@@ -33,6 +33,12 @@ class _MapState extends State<MapPage> {
       home: Scaffold(
           appBar: AppBar(
             title: const Text('Google Map'),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
             backgroundColor: Colors.cyan,
           ),
           body: FutureBuilder(
