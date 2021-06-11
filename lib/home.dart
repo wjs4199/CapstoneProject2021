@@ -84,10 +84,6 @@ class PostTile extends StatelessWidget {
 
       /// Custom Tile 구조로 생성 (tile.dart 구조 참조)
       child: CustomListItem(
-        // leading: CircleAvatar(
-        //   backgroundImage: NetworkImage(highResUrl),
-        //   backgroundColor: Colors.transparent,
-        // ),
         title: _product.title,
         subtitle: _product.content,
         author: _product.userName,
@@ -188,7 +184,6 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: buildFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
-    //);
   }
 
   /// Index 별 위젯 반환: (순서: 0-Give, 1-Take, 2-Chart, 3-MyPage)
@@ -313,51 +308,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-
-      // Column(
-      //   mainAxisAlignment: MainAxisAlignment.center,
-      //   children: [
-      //     HeaderTile(),
-      //     Container(
-      //       padding: EdgeInsets.fromLTRB(12, 4, 4, 4),
-      //       child: Row(
-      //         children: [
-      //           Expanded(
-      //             child: Text(
-      //               'Give | 나눔 게시판',
-      //               style: TextStyle(
-      //                 fontFamily: 'NanumSquareRoundR',
-      //                 fontSize: 16.0,
-      //                 fontWeight: FontWeight.bold,
-      //                 color: Colors.black87,
-      //               ),
-      //             ),
-      //           ),
-      //           _buildToggleButtonBar(context, appState),
-      //         ],
-      //       ),
-      //     ),
-      //     Expanded(
-      //       /// New method (listview builder 사용)
-      //       child: ListView.separated(
-      //         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      //         itemCount: appState.giveProducts.length,
-      //         itemBuilder: (BuildContext context, int index) {
-      //           return PostTile(appState.giveProducts[index], _selectedIndex);
-      //         },
-      //         separatorBuilder: (context, index) {
-      //           // if (index == 0) return SizedBox.shrink();
-      //           return const Divider(
-      //             height: 20,
-      //             thickness: 1,
-      //             indent: 8,
-      //             endIndent: 8,
-      //           );
-      //         },
-      //       ),
-      //     ),
-      //   ],
-      // ),
 
       /// 1(Take):
       CustomScrollView(
@@ -723,40 +673,6 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
-
-  // /// Builder Widget for AppBar
-  // AppBar buildAppBar(BuildContext context) {
-  //   return AppBar(
-  //     title: Center(
-  //       child: Text(
-  //         'Give & Take',
-  //         style: TextStyle(
-  //           fontSize: 18,
-  //           fontFamily: 'NanumSquareRoundR',
-  //           fontWeight: FontWeight.bold,
-  //         ),
-  //       ),
-  //     ),
-  //     backgroundColor: Colors.cyan,
-  //     leading: IconButton(
-  //       icon: Icon(
-  //         Icons.menu_rounded,
-  //         semanticLabel: 'menu',
-  //       ),
-  //       onPressed: () =>
-  //           _scaffoldKey.currentState.openDrawer(), // Open drawer on pressed
-  //     ),
-  //     actions: <Widget>[
-  //       IconButton(
-  //         icon: Icon(
-  //           Icons.location_on,
-  //           semanticLabel: 'location',
-  //         ),
-  //         onPressed: () {},
-  //       ),
-  //     ],
-  //   );
-  // }
 
   /// Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {

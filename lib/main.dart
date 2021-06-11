@@ -124,7 +124,7 @@ class ApplicationState extends ChangeNotifier {
           .collection('giveProducts')
           .where('category', isEqualTo: orderBy)
           .orderBy('modified', descending: true)
-          .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
+          .snapshots()
           .listen((snapshot) {
         _giveProducts = [];
         snapshot.docs.forEach((document) {
@@ -193,15 +193,6 @@ class ApplicationState extends ChangeNotifier {
             modified: document.data()['modified'],
             userName: document.data()['userName'],
             uid: document.data()['uid'],
-
-            /// 아래 부분 로직이 맞지 않음(좋아요, 댓글은 서브컬렉션(혹은 새로운 컬랙션)으로 만들것이기 때문에 그 구조에 맞춰서 정보 넣어야 함.
-            /// 아래 코드는 collection -> document -> attribute 를 가져오는 코드임
-
-            likes: document.data()['like'],
-            mark: document.data()['mark'],
-            comments: document.data()['comments'],
-
-            /// 여기까지 틀림(반복되는 코드 전부 포함)
           ));
         });
         notifyListeners();
@@ -224,9 +215,6 @@ class ApplicationState extends ChangeNotifier {
             modified: document.data()['modified'],
             userName: document.data()['userName'],
             uid: document.data()['uid'],
-            likes: document.data()['like'],
-            mark: document.data()['mark'],
-            comments: document.data()['comments'],
           ));
         });
         notifyListeners();

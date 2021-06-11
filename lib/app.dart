@@ -25,14 +25,3 @@ class _ApplicationState extends State<Application> {
     );
   }
 }
-
-// 동적 경로할당 위해 추후 사용
-// onGenerateRoute: (RouteSettings settings) {
-//   final List<String> pathElements = settings.name.split('/');
-//   if (pathElements[1] == 'detail') {
-//     return MaterialPageRoute(
-//       builder: (_) => DetailPage(itemId: pathElements[2]),
-//     );
-//   }
-//   return null;
-// },
