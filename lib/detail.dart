@@ -406,7 +406,8 @@ class _CommentBookState extends State<CommentBook> {
 
   @override
   Widget build(BuildContext context) {
-    var comments = context.watch<ApplicationState>().commentContext;
+    var comments =
+        Provider.of<ApplicationState>(context, listen: false).commentContext;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Form(
@@ -443,8 +444,9 @@ class _CommentBookState extends State<CommentBook> {
                         .addComments(_commentController.text)
                         .then((value) => print('addcomment ok!'));
                     _commentController.clear();
-                    context.watch<ApplicationState>().detailPageUid(
-                        widget.productId, widget.detailGiveOrTake);
+                    Provider.of<ApplicationState>(context, listen: false)
+                        .detailPageUid(
+                            widget.productId, widget.detailGiveOrTake);
                     print("clear!");
                   }
                 });
@@ -509,8 +511,11 @@ class _CommentBookState extends State<CommentBook> {
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
+                        //
                         _buildCommentToggleButtons(
-                            context, context.watch<ApplicationState>()),
+                            context,
+                            Provider.of<ApplicationState>(context,
+                                listen: false)),
                         SizedBox(width: 10),
                       ]))
                 ],
