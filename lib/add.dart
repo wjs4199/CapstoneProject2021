@@ -262,6 +262,9 @@ class _takeAddPageState extends State<takeAddPage> {
     });
   }
 
+
+  //***********여기부터 take 페이지 내의 add기능...없애버리기...*************//
+
   // Input form related
   final _formKey = GlobalKey<FormState>(debugLabel: '_takeAddPageState');
   final _titleController = TextEditingController();

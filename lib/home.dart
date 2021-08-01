@@ -142,6 +142,7 @@ class _HomePageState extends State<HomePage> {
   ///* ----------------- BottomNavigationBar, PageView 관련 ----------------- *///
   int _selectedIndex = 0;
 
+  // 이게 정확히 어디에서 나타나는 효과인지 모르겠어요!
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -153,6 +154,7 @@ class _HomePageState extends State<HomePage> {
 
   PageController _pageController;
 
+  //이 밑에 두개 override된 부분이 뭔지 모르겠어요!
   @override
   void initState() {
     super.initState();
