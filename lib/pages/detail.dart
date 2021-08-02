@@ -59,6 +59,8 @@ class _DetailPageState extends State<DetailPage> {
       );
     }
 
+
+    //*****************여기부터******************************//
     // Set name for Firebase Storage
     var storage = firebase_storage.FirebaseStorage.instance;
 
@@ -75,8 +77,10 @@ class _DetailPageState extends State<DetailPage> {
         return null;
       }
     }
+    //******여기까지는 edit.dart와 겹치는 부분인데 또 써야할 필요가 있을까...?//
 
-    // Get Likes
+
+    // Get Likes //어떤 식으로 like 가져올지 정한 다음에 수정되야함
     CollectionReference likes;
     if (detailGiveOrTake == 'giveProducts') {
       likes = FirebaseFirestore.instance
@@ -120,6 +124,7 @@ class _DetailPageState extends State<DetailPage> {
       }
     }
 
+    // 삭제기능 제대로 먹히지 않으므로 다시 짜야함
     // Delete comment
     Future<void> deleteComments() async {
       try {
