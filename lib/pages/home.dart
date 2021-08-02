@@ -196,18 +196,26 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      bottomNavigationBar: buildNavBar(context),
+      bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black,
+              ),
+            ],
+          ),
+          child: buildNavBar(context)),
       floatingActionButton: buildFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
     //);
   }
 
-  /// Index 별 위젯 반환: (순서: 0-Give, 1-Take, 2-Chart, 3-MyPage)
+  /// Index 별 위젯 반환: (순서: 0-홈, 1-나눔, 2-메신저, 3-My)
   List<Widget> _buildWidgetOptions(
       BuildContext context, ApplicationState appState) {
     var _widgetOptions = <Widget>[
-      /// 0(Give):
+      /// 0(홈):
       CustomScrollView(
         physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics()),
@@ -221,7 +229,7 @@ class _HomePageState extends State<HomePage> {
             expandedHeight: 120.0,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
-                'Home | Give',
+                '홈',
                 style: TextStyle(
                   fontSize: 18,
                   fontFamily: 'NanumSquareRoundR',
@@ -326,52 +334,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
 
-      // Column(
-      //   mainAxisAlignment: MainAxisAlignment.center,
-      //   children: [
-      //     HeaderTile(),
-      //     Container(
-      //       padding: EdgeInsets.fromLTRB(12, 4, 4, 4),
-      //       child: Row(
-      //         children: [
-      //           Expanded(
-      //             child: Text(
-      //               'Give | 나눔 게시판',
-      //               style: TextStyle(
-      //                 fontFamily: 'NanumSquareRoundR',
-      //                 fontSize: 16.0,
-      //                 fontWeight: FontWeight.bold,
-      //                 color: Colors.black87,
-      //               ),
-      //             ),
-      //           ),
-      //           _buildToggleButtonBar(context, appState),
-      //         ],
-      //       ),
-      //     ),
-      //     Expanded(
-      //       /// New method (listview builder 사용)
-      //       child: ListView.separated(
-      //         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      //         itemCount: appState.giveProducts.length,
-      //         itemBuilder: (BuildContext context, int index) {
-      //           return PostTile(appState.giveProducts[index], _selectedIndex);
-      //         },
-      //         separatorBuilder: (context, index) {
-      //           // if (index == 0) return SizedBox.shrink();
-      //           return const Divider(
-      //             height: 20,
-      //             thickness: 1,
-      //             indent: 8,
-      //             endIndent: 8,
-      //           );
-      //         },
-      //       ),
-      //     ),
-      //   ],
-      // ),
-
-      /// 1(Take):
+      /// 1(나눔):
       CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
@@ -383,7 +346,7 @@ class _HomePageState extends State<HomePage> {
             expandedHeight: 120.0,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
-                'Take',
+                '나눔',
                 style: TextStyle(
                   fontSize: 18,
                   fontFamily: 'NanumSquareRoundR',
@@ -466,12 +429,12 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
 
-      /// 2(Chart) 작업중, Sliver 사용 실험중:
+      /// 2(메신저):
       CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
             title: Text(
-              'Chart Analysis',
+              '메신저',
               style: TextStyle(
                 fontSize: 18,
                 fontFamily: 'NanumSquareRoundR',
@@ -505,12 +468,11 @@ class _HomePageState extends State<HomePage> {
       ),
 
       /// 3(MyPage):
-
       CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
             title: Text(
-              'My Page',
+              'My',
               style: TextStyle(
                 fontSize: 18,
                 fontFamily: 'NanumSquareRoundR',
@@ -749,6 +711,7 @@ class _HomePageState extends State<HomePage> {
   BottomNavigationBar buildNavBar(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
+      elevation: 0,
       selectedItemColor: Colors.cyan,
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
@@ -758,20 +721,20 @@ class _HomePageState extends State<HomePage> {
           fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
       items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.redo),
-          label: 'Give',
+          icon: Icon(Icons.home),
+          label: '홈',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.undo),
-          label: 'Take',
+          icon: Icon(Icons.accessibility),
+          label: '나눔',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.bar_chart),
-          label: 'Chart',
+          icon: Icon(Icons.messenger),
+          label: '메신저',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.account_circle),
-          label: 'MyPage',
+          label: 'My',
         )
       ],
     );
