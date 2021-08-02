@@ -9,12 +9,12 @@ import 'package:provider/provider.dart';
 import 'dart:io';
 import '../main.dart';
 
-class giveAddPage extends StatefulWidget {
+class AddPage extends StatefulWidget {
   @override
-  _giveAddPageState createState() => _giveAddPageState();
+  _AddPageState createState() => _AddPageState();
 }
 
-class _giveAddPageState extends State<giveAddPage> {
+class _AddPageState extends State<AddPage> {
   // Image picker
   File _image;
   final picker = ImagePicker();
@@ -70,7 +70,7 @@ class _giveAddPageState extends State<giveAddPage> {
       'userName': name,
     }).then((value) {
       if (_image != null) uploadFile(_image, value.id);
-    }).catchError((error) => print("Error: $error"));
+    }).catchError((error) => print('Error: $error'));
   }
 
   /// Add product in 'takeProducts' collection
@@ -88,7 +88,7 @@ class _giveAddPageState extends State<giveAddPage> {
       'userName': name,
     }).then((value) {
       if (_image != null) uploadFile(_image, value.id);
-    }).catchError((error) => print("Error: $error"));
+    }).catchError((error) => print('Error: $error'));
   }
 
   // Upload photo to storage
@@ -209,7 +209,7 @@ class _giveAddPageState extends State<giveAddPage> {
                                       ).toList(),
                                       onChanged: (value) {
                                         if (value != _selectedFilter)
-                                          _selectedFilter = value;
+                                          { _selectedFilter= value;}
                                         setState(() {
                                           _selectedFilter = value;
                                         });
