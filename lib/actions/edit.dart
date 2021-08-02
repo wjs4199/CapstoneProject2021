@@ -1,12 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import 'main.dart';
-import 'product.dart';
+import '../main.dart';
+import '../model/product.dart';
 import 'dart:io';
 
 class EditPage extends StatefulWidget {
@@ -82,7 +81,7 @@ class _EditPageState extends State<EditPage> {
         ? appState.giveProducts
         : appState.takeProducts;
     Product product;
-    String userId = FirebaseAuth.instance.currentUser.uid;
+    // String userId = FirebaseAuth.instance.currentUser.uid;
     bool productFound = false;
 
     for (int i = 0; i < products.length; i++) {

@@ -6,10 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
-import 'main.dart';
-import 'product.dart';
-import 'tile.dart';
-import 'chart.dart';
+import '../main.dart';
+import '../model/product.dart';
+import '../components/tile.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -257,7 +256,7 @@ class _HomePageState extends State<HomePage> {
                   semanticLabel: 'location',
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, '/map');
+                  // Navigator.pushNamed(context, '/map');
                 },
               ),
             ],
@@ -374,7 +373,7 @@ class _HomePageState extends State<HomePage> {
                   semanticLabel: 'location',
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, '/map');
+                  // Navigator.pushNamed(context, '/map');
                 },
               ),
             ],
@@ -456,32 +455,7 @@ class _HomePageState extends State<HomePage> {
           ),
           SliverList(
             delegate: SliverChildListDelegate(
-              [
-                Padding(
-                  padding: const EdgeInsets.only(left: 18, top: 9),
-                  child: Text(
-                    'Analysis on Give Board:',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontFamily: 'NanumSquareRoundR',
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                CustomPieChart(appState.giveProducts),
-                Padding(
-                  padding: const EdgeInsets.only(left: 18, top: 9),
-                  child: Text(
-                    'Analysis on Take Board:',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontFamily: 'NanumSquareRoundR',
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                CustomPieChart(appState.takeProducts),
-              ],
+              [],
             ),
           )
         ],
@@ -525,6 +499,7 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(height: 20.0),
+                    if(photoUrl != null)
                     CircleAvatar(
                       radius: 50.0,
                       backgroundImage:
@@ -609,8 +584,6 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    CustomPieChart2(
-                        appState.giveProducts + appState.takeProducts),
                   ],
                 ),
               ],
@@ -769,7 +742,7 @@ class _HomePageState extends State<HomePage> {
               Icons.map,
             ),
             onTap: () {
-              Navigator.pushNamed(context, '/map');
+              // Navigator.pushNamed(context, '/');
             },
           ),
           ListTile(

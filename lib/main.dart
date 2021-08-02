@@ -3,14 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'home.dart';
-import 'login.dart';
-import 'detail.dart';
-import 'chart.dart';
-import 'map.dart';
-import 'product.dart';
-import 'add.dart';
-import 'edit.dart';
+import 'pages/home.dart';
+import 'pages/login.dart';
+import 'pages/detail.dart';
+import 'legacy/map.dart';
+import 'model/product.dart';
+import 'actions/add.dart';
+import 'actions/edit.dart';
 
 void main() {
   runApp(
@@ -32,19 +31,18 @@ class Application extends StatelessWidget {
             title: 'Give_N_Take',
             home: HomePage(),
             initialRoute: '/login',
-
             // Named Routes
             routes: {
               '/login': (context) => LoginPage(),
               '/home': (context) => HomePage(),
               '/giveadd': (context) => giveAddPage(),
-              '/takeadd': (context) => takeAddPage(),
+              //'/takeadd': (context) => takeAddPage(),
               '/map': (context) => MapPage(),
             },
 
             // 동적 경로할당
             onGenerateRoute: (RouteSettings settings) {
-              final List<String> pathElements = settings.name.split('/');
+              final pathElements = settings.name.split('/');
               //detail 페이지로 이동시키는 동적 경로할당
               // give페이지의 detail페이지에서 필요로한다는 뜻인거 같음
               // give&take 통합할 거니까 detail 페이지에서 부를 경우만 나타내면 될듯
