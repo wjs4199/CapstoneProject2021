@@ -1,182 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:giveandtake/components/headerTile.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 import '../main.dart';
 import '../model/product.dart';
-import '../components/tile.dart';
+import '../components/postTile.dart';
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-/// Header 타일 - 공지사항용 타일
-class HeaderTile extends StatelessWidget {
-  /// url_launcher api 함수
-  void _launchURL(url) async =>
-      await canLaunch(url) ? await launch(url) : throw 'Could not launch $url';
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Container(
-        child: GestureDetector(
-          onTap: () => _launchURL('https://flutter.dev'),
-          child: Image.network(
-              "https://t1.daumcdn.net/thumb/R720x0/?fname=https://t1.daumcdn.net/brunch/service/user/1YN0/image/ak-gRe29XA2HXzvSBowU7Tl7LFE.png"),
-        ),
-      ),
-    );
-  }
-}
-
-/// PostTile - 각 게시글 표시해주는 타일, Listview.builder(separated) 사용해 자동 생성
-class PostTile extends StatelessWidget {
-  PostTile(this._product, this._giveOrTake);
-
-  final Product _product;
-  final int _giveOrTake;
-
-  /// Set name for Firebase Storage
-  final firebase_storage.FirebaseStorage storage =
-      firebase_storage.FirebaseStorage.instance;
-
-  /// Download image url of each product based on id
-  Future<String> downloadURL(String id) async {
-    await Future.delayed(Duration(seconds: 1));
-    try {
-      return await storage
-          .ref() //스토리지 참조
-          .child('images')
-          .child('$id.png') //차일드로 가져오고
-          .getDownloadURL(); //url 다운로드
-    } on Exception {
-      return null;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    /// Firebase TimeStamp => DateFormat 변환
-    // String formattedDate =
-    //     DateFormat('MMM d, HH:mm').format(_product.created.toDate());
-    Future<String> returnDate() async {
-      //await Future.delayed(Duration(seconds: 1));
-      try {
-        return DateFormat('MMM d, HH:mm').format(_product.created.toDate());
-      } on Exception {
-        return null;
-      }
-    }
-
-    return InkWell(
-      onTap: () {
-        if (_giveOrTake == 0) {
-          Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'giveProducts');
-          Navigator.pushNamed(
-              context, '/detail/' + _product.id + '/giveProducts');
-        } else {
-          Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'takeProducts');
-          Navigator.pushNamed(
-              context, '/detail/' + _product.id + '/takeProducts');
-        }
-      },
-
-      /// Custom Tile 구조로 생성 (tile.dart 구조 참조)
-      child: FutureBuilder(
-        future: returnDate(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else {
-            return CustomListItem(
-              title: _product.title,
-              subtitle: _product.content,
-              author: _product.userName,
-              publishDate: snapshot.data,
-              category: _product.category,
-              likes: _product.likes,
-              thumbnail: FutureBuilder(
-                future: downloadURL(_product.id),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else {
-                    if (snapshot.hasData) {
-                      return ClipRRect(
-                        borderRadius: new BorderRadius.circular(8.0),
-                        child: Image.network(snapshot.data.toString(),
-                            fit: BoxFit.fitWidth),
-                      );
-                    } else if (snapshot.hasData == false) {
-                      return Container();
-                    } else {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                  }
-                },
-              ),
-            );
-          }
-        },
-      ),
-    );
-  }
-}
-
 class _HomePageState extends State<HomePage> {
-  /// ToggleButtons - 각 버튼용 bool list
-  List<bool> _selections = List.generate(3, (_) => false);
-
-  /// Drawer 관련 Key
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  ///* ----------------- BottomNavigationBar, PageView 관련 ----------------- *///
-  int _selectedIndex = 0;
-
-  // 이게 정확히 어디에서 나타나는 효과인지 모르겠어요!
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      //using this page controller you can make beautiful animation effects
-      _pageController.animateToPage(index,
-          duration: Duration(milliseconds: 500), curve: Curves.easeOut);
-    });
-  }
-
-  PageController _pageController;
-
-  //이 밑에 두개 override된 부분이 뭔지 모르겠어요!
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  ///* -------------------------------------------------------------------- *///
-
-  /// For profile photo resizing
-  String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
-  // String highResUrl = photoUrl.replaceAll('s96-c', 's400-c');
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      // appBar: buildAppBar(context),
+      // appBar: buildAppBar(context), /// SliverUI 사용으로 appBar 미사용
       drawer: buildDrawer(context),
       body: Consumer<ApplicationState>(
         builder: (context, appState, _) => Container(
@@ -190,7 +34,8 @@ class _HomePageState extends State<HomePage> {
                   onPageChanged: (index) {
                     setState(() => _selectedIndex = index);
                   },
-                  // NavBar Index 별 상응 위젯 출력
+
+                  /// _selectedIndex 값에 따른 페이지(상응 위젯) 출력
                   children: _buildWidgetOptions(context, appState),
                 ),
               ),
@@ -210,13 +55,56 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: buildFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
+    //);
+  }
+
+  /// Builder Widget for Drawer
+  Drawer buildDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.cyan,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  /// 작업 필요
+                  '-Drawer-\n프로필, 레밸 등 배치',
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          /// 작업 필요
+          ListTile(
+            title: Text('Home'),
+            // - The Menu Icons should be placed in the leading position
+            leading: Icon(
+              Icons.home,
+            ),
+            onTap: () {
+              // - Each menu should be navigated by Named Routes
+              Navigator.pushNamed(context, '/home');
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   /// Index 별 위젯 반환: (순서: 0-홈, 1-나눔, 2-메신저, 3-My)
   List<Widget> _buildWidgetOptions(
       BuildContext context, ApplicationState appState) {
     var _widgetOptions = <Widget>[
-
       /// 0(홈):
       CustomScrollView(
         physics: const BouncingScrollPhysics(
@@ -319,7 +207,8 @@ class _HomePageState extends State<HomePage> {
                   return Column(
                     children: [
                       SizedBox(height: 5),
-                      PostTile(appState.giveProducts[index], _selectedIndex),
+                      PostTileMaker(
+                          appState.giveProducts[index], _selectedIndex),
                       SizedBox(height: 5),
                       Divider(
                         height: 1,
@@ -335,7 +224,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-
 
       /// 1(나눔):
       CustomScrollView(
@@ -415,7 +303,8 @@ class _HomePageState extends State<HomePage> {
                   return Column(
                     children: [
                       SizedBox(height: 5),
-                      PostTile(appState.takeProducts[index], _selectedIndex),
+                      PostTileMaker(
+                          appState.takeProducts[index], _selectedIndex),
                       SizedBox(height: 5),
                       Divider(
                         height: 1,
@@ -507,7 +396,6 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(height: 20.0),
-                    if(photoUrl != null)
                     CircleAvatar(
                       radius: 50.0,
                       backgroundImage:
@@ -603,27 +491,6 @@ class _HomePageState extends State<HomePage> {
     return _widgetOptions;
   }
 
-  FloatingActionButton buildFAB() {
-    if (_selectedIndex == 0) {
-      return FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/giveadd');
-        },
-        backgroundColor: Colors.cyan,
-        child: Icon(Icons.add),
-      );
-    } else if (_selectedIndex == 1) {
-      return FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/takeadd');
-        },
-        backgroundColor: Colors.cyan,
-        child: Icon(Icons.add),
-      );
-    }
-    return null;
-  }
-
   /// 필터링 기능을 토글버튼화하여 버튼바로 생성
   ToggleButtons _buildToggleButtons(
       BuildContext context, ApplicationState appState) {
@@ -677,6 +544,31 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// FloatingActionButton 생성기
+  FloatingActionButton buildFAB() {
+    if (_selectedIndex == 0) {
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/giveadd');
+        },
+        backgroundColor: Colors.cyan,
+        child: Icon(Icons.add),
+      );
+    } else if (_selectedIndex == 1) {
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/takeadd');
+        },
+        backgroundColor: Colors.cyan,
+        child: Icon(Icons.add),
+      );
+    }
+    return null;
+  }
+
+  /// ToggleButtons - 각 버튼용 bool list 생성
+  final List<bool> _selections = List.generate(3, (_) => false);
+
   /// Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
     return BottomNavigationBar(
@@ -710,67 +602,138 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Builder Widget for Drawer
-  Drawer buildDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.cyan,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  '-Drawer-',
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                  ),
-                ),
+  /// Drawer 관련 Scaffold Key
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  /// 프로필 사진 url retrieve 용
+  String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
+  // String highResUrl = photoUrl.replaceAll('s96-c', 's400-c'); // 고해상도
+
+  ///* ----------------- BottomNavigationBar, PageView 관련 ----------------- *///
+  /// PaveView 용 controller
+  PageController _pageController;
+
+  /// 현재 선택된 인덱스값 (첫번째 인덱스로 초기화)
+  int _selectedIndex = 0;
+
+  /// BottomNavigationBar 인덱스 시경 시 _selectedIndex 변경 및 애니메이션 처리
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      //using this page controller you can make beautiful animation effects
+      _pageController.animateToPage(index,
+          duration: Duration(milliseconds: 500), curve: Curves.easeOut);
+    });
+  }
+
+  /// 시스템 함수에 PageView 기능 반영 처리(1)
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  /// 시스템 함수에 PageView 기능 반영 처리(2)
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  ///* -------------------------------------------------------------------- *///
+}
+
+/// PostTileMaker - 각 게시글 별 postTile Listview.builder(separated) 사용해 자동 생성
+class PostTileMaker extends StatelessWidget {
+  PostTileMaker(this._product, this._giveOrTake);
+
+  final Product _product;
+  final int _giveOrTake;
+
+  /// Set name for Firebase Storage
+  final firebase_storage.FirebaseStorage storage =
+      firebase_storage.FirebaseStorage.instance;
+
+  /// Download image url of each product based on id
+  Future<String> downloadURL(String id) async {
+    await Future.delayed(Duration(seconds: 1));
+    try {
+      return await storage
+          .ref() //스토리지 참조
+          .child('images')
+          .child('$id.png') //차일드로 가져오고
+          .getDownloadURL(); //url 다운로드
+    } on Exception {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    /// Firebase TimeStamp => DateFormat 변환
+    // String formattedDate =
+    //     DateFormat('MMM d, HH:mm').format(_product.created.toDate());
+    Future<String> returnDate() async {
+      //await Future.delayed(Duration(seconds: 1));
+      try {
+        return DateFormat('MMM d, HH:mm').format(_product.created.toDate());
+      } on Exception {
+        return null;
+      }
+    }
+
+    return InkWell(
+      onTap: () {
+        if (_giveOrTake == 0) {
+          Provider.of<ApplicationState>(context, listen: false)
+              .detailPageUid(_product.id, 'giveProducts');
+          Navigator.pushNamed(
+              context, '/detail/' + _product.id + '/giveProducts');
+        } else {
+          Provider.of<ApplicationState>(context, listen: false)
+              .detailPageUid(_product.id, 'takeProducts');
+          Navigator.pushNamed(
+              context, '/detail/' + _product.id + '/takeProducts');
+        }
+      },
+
+      /// Custom Tile 구조로 생성 (postTile.dart 구조 참조)
+      child: FutureBuilder(
+        future: returnDate(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else {
+            return CustomListItem(
+              title: _product.title,
+              subtitle: _product.content,
+              author: _product.userName,
+              publishDate: snapshot.data,
+              category: _product.category,
+              likes: _product.likes,
+              thumbnail: FutureBuilder(
+                future: downloadURL(_product.id),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else {
+                    if (snapshot.hasData) {
+                      return ClipRRect(
+                        borderRadius: new BorderRadius.circular(8.0),
+                        child: Image.network(snapshot.data.toString(),
+                            fit: BoxFit.fitWidth),
+                      );
+                    } else if (snapshot.hasData == false) {
+                      return Container();
+                    } else {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                  }
+                },
               ),
-            ),
-          ),
-          ListTile(
-            title: Text('Home'),
-            // - The Menu Icons should be placed in the leading position
-            leading: Icon(
-              Icons.home,
-            ),
-            onTap: () {
-              // - Each menu should be navigated by Named Routes
-              Navigator.pushNamed(context, '/home');
-            },
-          ),
-          ListTile(
-            title: Text('Map'),
-            leading: Icon(
-              Icons.map,
-            ),
-            onTap: () {
-              // Navigator.pushNamed(context, '/');
-            },
-          ),
-          ListTile(
-            title: Text('My Page'),
-            leading: Icon(
-              Icons.account_circle,
-            ),
-            onTap: () {
-              Navigator.pushNamed(context, '/mypage');
-            },
-          ),
-          ListTile(
-            title: Text('Settings'),
-            leading: Icon(
-              Icons.settings,
-            ),
-            onTap: () {},
-          ),
-        ],
+            );
+          }
+        },
       ),
     );
   }
