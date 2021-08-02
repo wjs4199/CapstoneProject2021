@@ -36,10 +36,6 @@ class _giveAddPageState extends State<giveAddPage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
-  // Firestore
-  CollectionReference giveProduct =
-      FirebaseFirestore.instance.collection('giveProducts');
-
   // Storage
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
@@ -47,12 +43,39 @@ class _giveAddPageState extends State<giveAddPage> {
   var user = FirebaseAuth.instance.currentUser;
   var name;
 
-  // Add product in Firestore
+  /// Add 페이지 내에서 give/take 중 무엇을 선택했는지를 담고 있는 변수
+
+
+  /// Firestore collection names
+  CollectionReference giveProduct =
+  FirebaseFirestore.instance.collection('giveProducts');
+  CollectionReference takeProduct =
+  FirebaseFirestore.instance.collection('takeProducts');
+
+  /// Add product in 'giveProducts' collection
   Future<void> addGiveProduct(String title, String content, String category) {
     if (user != null) {
       name = user.displayName;
     }
     return giveProduct.add({
+      'title': title,
+      'content': content,
+      'category': category,
+      'uid': FirebaseAuth.instance.currentUser.uid,
+      'created': FieldValue.serverTimestamp(),
+      'modified': FieldValue.serverTimestamp(),
+      'userName': name,
+    }).then((value) {
+      if (_image != null) uploadFile(_image, value.id);
+    }).catchError((error) => print("Error: $error"));
+  }
+
+  /// Add product in 'takeProducts' collection
+  Future<void> addTakeProduct(String title, String content, String category) {
+    if (user != null) {
+      name = user.displayName;
+    }
+    return takeProduct.add({
       'title': title,
       'content': content,
       'category': category,

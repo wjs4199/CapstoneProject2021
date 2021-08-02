@@ -210,6 +210,7 @@ class _HomePageState extends State<HomePage> {
       BuildContext context, ApplicationState appState) {
     var _widgetOptions = <Widget>[
       /// 0(Give):
+      /// 상단바랑 하단바 사이에 들어오는 부분
       CustomScrollView(
         physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics()),
