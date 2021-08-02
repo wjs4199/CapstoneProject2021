@@ -31,14 +31,7 @@ class _MapState extends State<MapPage> {
         desiredAccuracy: LocationAccuracy.high);
     var lastPosition = await Geolocator.getLastKnownPosition();
     print(lastPosition);
-    // var locationLat = position.latitude;
-    // var locationLong = position.longitude;
     print(position);
-    // setState(() {
-    //   // locationMessage = "$locationLat, $locationLong";
-    //   locationMessageLat = "$locationLat";
-    //   locationMessageLong = "$locationLong";
-    // });
     return position;
   }
 
@@ -50,7 +43,6 @@ class _MapState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Position currentPosition = getLocation();
     return MaterialApp(
       home: Scaffold(
           appBar: AppBar(
@@ -82,8 +74,6 @@ class _MapState extends State<MapPage> {
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height,
                     child: GoogleMap(
-                      // onMapCreated: _onMapCreated,
-                      // markers: _markers,
                       initialCameraPosition: CameraPosition(
                         target: LatLng(currentPosition.data.latitude,
                             currentPosition.data.longitude),

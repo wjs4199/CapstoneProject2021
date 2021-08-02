@@ -141,6 +141,7 @@ class _HomePageState extends State<HomePage> {
   ///* ----------------- BottomNavigationBar, PageView 관련 ----------------- *///
   int _selectedIndex = 0;
 
+  // 이게 정확히 어디에서 나타나는 효과인지 모르겠어요!
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -152,6 +153,7 @@ class _HomePageState extends State<HomePage> {
 
   PageController _pageController;
 
+  //이 밑에 두개 override된 부분이 뭔지 모르겠어요!
   @override
   void initState() {
     super.initState();
@@ -208,13 +210,13 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: buildFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
-    //);
   }
 
   /// Index 별 위젯 반환: (순서: 0-홈, 1-나눔, 2-메신저, 3-My)
   List<Widget> _buildWidgetOptions(
       BuildContext context, ApplicationState appState) {
     var _widgetOptions = <Widget>[
+
       /// 0(홈):
       CustomScrollView(
         physics: const BouncingScrollPhysics(
@@ -333,6 +335,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+
 
       /// 1(나눔):
       CustomScrollView(
@@ -504,6 +507,7 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(height: 20.0),
+                    if(photoUrl != null)
                     CircleAvatar(
                       radius: 50.0,
                       backgroundImage:
@@ -672,40 +676,6 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
-
-  // /// Builder Widget for AppBar
-  // AppBar buildAppBar(BuildContext context) {
-  //   return AppBar(
-  //     title: Center(
-  //       child: Text(
-  //         'Give & Take',
-  //         style: TextStyle(
-  //           fontSize: 18,
-  //           fontFamily: 'NanumSquareRoundR',
-  //           fontWeight: FontWeight.bold,
-  //         ),
-  //       ),
-  //     ),
-  //     backgroundColor: Colors.cyan,
-  //     leading: IconButton(
-  //       icon: Icon(
-  //         Icons.menu_rounded,
-  //         semanticLabel: 'menu',
-  //       ),
-  //       onPressed: () =>
-  //           _scaffoldKey.currentState.openDrawer(), // Open drawer on pressed
-  //     ),
-  //     actions: <Widget>[
-  //       IconButton(
-  //         icon: Icon(
-  //           Icons.location_on,
-  //           semanticLabel: 'location',
-  //         ),
-  //         onPressed: () {},
-  //       ),
-  //     ],
-  //   );
-  // }
 
   /// Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {

@@ -36,7 +36,7 @@ class Application extends StatelessWidget {
               '/login': (context) => LoginPage(),
               '/home': (context) => HomePage(),
               '/giveadd': (context) => giveAddPage(),
-              '/takeadd': (context) => takeAddPage(),
+              //'/takeadd': (context) => takeAddPage(),
               '/map': (context) => MapPage(),
             },
 
@@ -44,6 +44,8 @@ class Application extends StatelessWidget {
             onGenerateRoute: (RouteSettings settings) {
               final pathElements = settings.name.split('/');
               //detail 페이지로 이동시키는 동적 경로할당
+              // give페이지의 detail페이지에서 필요로한다는 뜻인거 같음
+              // give&take 통합할 거니까 detail 페이지에서 부를 경우만 나타내면 될듯
               if (pathElements[1] == 'detail' &&
                   pathElements[3] == 'giveProducts') {
                 return MaterialPageRoute(
@@ -87,6 +89,9 @@ class ApplicationState extends ChangeNotifier {
   String uid;
   String detailGiveOrTake;
 
+  // comment와 like를 collection안에 어떤 구조로 넣을 것인가?
+  // 원래 하던대로 상품 uid통해 찾으려면 이미 init한 상품 리스트들을 돌면서
+  // datail페이지에 필요한 내용을 찾아내는 형식으로 해야할까?
   void detailPageUid(String uid, String detailGiveOrTake) {
     this.uid = uid;
     this.detailGiveOrTake = detailGiveOrTake;
@@ -122,7 +127,7 @@ class ApplicationState extends ChangeNotifier {
           .collection('giveProducts')
           .where('category', isEqualTo: orderBy)
           .orderBy('modified', descending: true)
-          .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
+          .snapshots()
           .listen((snapshot) {
         _giveProducts = [];
         snapshot.docs.forEach((document) {
@@ -191,15 +196,6 @@ class ApplicationState extends ChangeNotifier {
             modified: document.data()['modified'],
             userName: document.data()['userName'],
             uid: document.data()['uid'],
-
-            /// 아래 부분 로직이 맞지 않음(좋아요, 댓글은 서브컬렉션(혹은 새로운 컬랙션)으로 만들것이기 때문에 그 구조에 맞춰서 정보 넣어야 함.
-            /// 아래 코드는 collection -> document -> attribute 를 가져오는 코드임
-
-            likes: document.data()['like'],
-            mark: document.data()['mark'],
-            comments: document.data()['comments'],
-
-            /// 여기까지 틀림(반복되는 코드 전부 포함)
           ));
         });
         notifyListeners();
@@ -222,15 +218,17 @@ class ApplicationState extends ChangeNotifier {
             modified: document.data()['modified'],
             userName: document.data()['userName'],
             uid: document.data()['uid'],
-            likes: document.data()['like'],
-            mark: document.data()['mark'],
-            comments: document.data()['comments'],
           ));
         });
         notifyListeners();
       });
     }
 
+    // comment 컬랙션을 따로 만들었기 때문에 comment 컬랙션 내에서 상품 uid를 또또찾고,
+    // 그 후에 해당 상품에 달린 comments들을 찾아오는 게 필요해진 것 같은데,
+    // comments들을 하위 콜랙션으로 만들면 더 편해지지 않을 까요?
+    // 그리고 comments는 댓글 달릴 때마다 업데이트 시켜줘야하는 부분이니까 지금처럼 init()
+    // 함수 내에 있을 게 아니라 다른 함수로 빼줘야하지 않을 까요?
     if (uid != "null") {
       FirebaseFirestore.instance
           .collection('comments/' + uid + '/commentList')
@@ -248,6 +246,8 @@ class ApplicationState extends ChangeNotifier {
         notifyListeners();
       });
 
+      //like는 이부분 만들어놓기만 했지 제대로 collection에서 못가져와서 사용안했던 거 같아요!
+      // 없애고 새로 만들어도 될듯...
       FirebaseFirestore.instance
           .collection(detailGiveOrTake + '/' + uid + '/like')
           .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
