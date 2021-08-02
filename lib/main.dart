@@ -3,14 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'home.dart';
-import 'login.dart';
-import 'detail.dart';
-import 'chart.dart';
-import 'map.dart';
-import 'product.dart';
-import 'add.dart';
-import 'edit.dart';
+import 'pages/home.dart';
+import 'pages/login.dart';
+import 'pages/detail.dart';
+import 'legacy/map.dart';
+import 'model/product.dart';
+import 'actions/add.dart';
+import 'actions/edit.dart';
 
 void main() {
   runApp(
@@ -32,7 +31,6 @@ class Application extends StatelessWidget {
             title: 'Give_N_Take',
             home: HomePage(),
             initialRoute: '/login',
-
             // Named Routes
             routes: {
               '/login': (context) => LoginPage(),
@@ -44,7 +42,7 @@ class Application extends StatelessWidget {
 
             // 동적 경로할당
             onGenerateRoute: (RouteSettings settings) {
-              final List<String> pathElements = settings.name.split('/');
+              final pathElements = settings.name.split('/');
               //detail 페이지로 이동시키는 동적 경로할당
               if (pathElements[1] == 'detail' &&
                   pathElements[3] == 'giveProducts') {

@@ -6,8 +6,8 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
-import 'product.dart';
-import 'main.dart';
+import '../model/product.dart';
+import '../main.dart';
 
 class DetailPage extends StatefulWidget {
   DetailPage({this.productId, this.detailGiveOrTake});
@@ -23,7 +23,7 @@ class _DetailPageState extends State<DetailPage> {
   @override
   Widget build(BuildContext context) {
     var likeList = context.watch<ApplicationState>().likeList;
-    var likeCount = context.watch<ApplicationState>().likeCount;
+    // var likeCount = context.watch<ApplicationState>().likeCount;
 
     print('likeList-> $likeList');
 
@@ -100,13 +100,13 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     // Delete like
-    Future<void> deleteLike() async {
-      try {
-        return likes.doc(userId).delete();
-      } on Exception {
-        return null;
-      }
-    }
+    // Future<void> deleteLike() async {
+    //   try {
+    //     return likes.doc(userId).delete();
+    //   } on Exception {
+    //     return null;
+    //   }
+    // }
 
     // Delete item
     Future<void> deleteProduct() async {

@@ -17,5 +17,4 @@ class Post {
   final Timestamp time;
   final String uid;
   final String id;
-
 }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'indicator.dart';
 
-import 'product.dart';
+import '../model/product.dart';
 
 class CustomPieChart extends StatefulWidget {
   CustomPieChart(this._products);
