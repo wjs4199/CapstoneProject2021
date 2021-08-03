@@ -25,6 +25,8 @@ class EditPage extends StatefulWidget {
 
 class _EditPageState extends State<EditPage> {
 
+  ///********************* 사진 변경 기능을 위한 부분 *********************///
+
   /// 유저가 사진을 변경할 시 변경된 사진파일이 담길 변수
   File _image;
 
@@ -47,7 +49,7 @@ class _EditPageState extends State<EditPage> {
   /// Firebase Storage 참조 간략화
   var storage = firebase_storage.FirebaseStorage.instance;
 
-  /// 변경된 사진을 저장할 때 Firebase에 업로드 시키는 함수
+  /// 변경된 사진을 저장할 때 Firebase 에 업로드 시키는 함수
   Future<void> uploadFile(File photo, String id) async {
     try {
       await storage.ref('images/' + id + '.png').putFile(photo);
@@ -55,6 +57,25 @@ class _EditPageState extends State<EditPage> {
       return null;
     }
   }
+
+  ///********************* 카테고리 변경 기능을 위한 부분 *********************///
+
+  /// 'Product', 'Time', 'Talent' 카테고리를 선택하는 DropdownButton 의 선택지 리스트
+  final _filter = ['Product', 'Time', 'Talent'];
+
+  /// DropdownButton 에서 선택한 카테고리를 담는 변수 (기본으로 보여지는 항목을 'Product'로 초기화)
+  var _selectedFilter = 'Product';
+
+  /// DropdownButton 의 상태를 사용자의 선택에 따라 변경하는 함수
+  void dropdownUpdate(value) {
+    if (value != _selectedFilter) _selectedFilter = value;
+    setState(() {
+      _selectedFilter = value;
+    });
+  }
+
+
+  ///********************* 게시'글' 내용 변경 기능을 위한 부분 *********************///
 
   /// title과 content의 Text상자 상태를 검증하는 GlobalKey
   final _formKey = GlobalKey<FormState>(debugLabel: '_EditPageState');
@@ -65,39 +86,11 @@ class _EditPageState extends State<EditPage> {
   /// content 를 수정하는 text 상자의 Controller
   final _contentController = TextEditingController();
 
-  /// ProductID에 따라 해당하는 image url 다운로드
-  Future<String> downloadURL(String id) async {
-    try {
-      return await storage
-          .ref()
-          .child('images')
-          .child('$id.png')
-          .getDownloadURL();
-    } on Exception {
-      return null;
-    }
-  }
-
-
-  /// 'Product', 'Time', 'Talent' 카테고리를 선택하는 DropdownButton 의 선택지 리스트
-  final _filter = ['Product', 'Time', 'Talent'];
-
-  /// DropdownButton 에서 선택한 카테고리를 담는 변수
-  /// DropdownButton 에 기본으로 보여지는 항목을 'Product'로 초기화
-  var _selectedFilter;
-
-  //원래 바로 밑에 return Scaffold 안에 dorpdownUpdate(value)함수 있는 자리에
-  // setState를 바로 넣어서 돌리니까 edit 페이지에서 드롭다운 버튼이 value값에 따라 변하질 않았는데
-  // setState를 밖에다가 함수로 만들어서 넣으니까 잘 돌아간다...(왜인지 정확히 모르겠음,,)
-  void dropdownUpdate(value) {
-    if (value != _selectedFilter) _selectedFilter = value;
-    setState(() {
-      _selectedFilter = value;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
+
+    ///*********** ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ***********///
 
     /// EditPage 호출시 받는 매개변수 참조
     var productId = widget.productId;
@@ -107,6 +100,7 @@ class _EditPageState extends State<EditPage> {
     var products = editGiveOrTake == 'giveProducts'
         ? context.watch<ApplicationState>().giveProducts
         : context.watch<ApplicationState>().takeProducts;
+
     /// 컬랙션 내에서 productId가 같은 제품을 찾아냈을 때 그 내용을 담을 변수
     Product product;
 
@@ -133,11 +127,26 @@ class _EditPageState extends State<EditPage> {
       );
     }
 
+    /// ProductID에 따라 해당하는 image url 다운로드
+    Future<String> downloadURL(String id) async {
+      try {
+        return await storage
+            .ref()
+            .child('images')
+            .child('$id.png')
+            .getDownloadURL();
+      } on Exception {
+        return null;
+      }
+    }
+
+    ///********************* 변경한 내용대로 게시물을 업데이트 *********************///
+
     /// giveProducts 또는 takeProducts 중 어디 컬랙션에 속한 게시물인지에 따라 참조할 path 결정
     CollectionReference target =
     FirebaseFirestore.instance.collection(editGiveOrTake);
 
-    /// 변경한 내용대로 게시물 재 저장시키는 함수
+    /// 변경한 내용대로 게시물 업데이트 시키는 함수
     Future<void> editProduct(String category, String title, String content) {
       return target.doc(productId).update({
         'title': title,
@@ -149,6 +158,7 @@ class _EditPageState extends State<EditPage> {
       }).catchError((error) => print('Error: $error'));
     }
 
+    /// Edit 페이지 화면 구성
     return Consumer<ApplicationState>(
       builder: (context, appState, _) {
       return Scaffold(

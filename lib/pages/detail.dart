@@ -28,6 +28,8 @@ class _DetailPageState extends State<DetailPage> {
   @override
   Widget build(BuildContext context) {
 
+    ///******* ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 *******///
+
     /// DetailPage() 호출시 받는 매개변수 참조
     var productId = widget.productId;
     var detailGiveOrTake = widget.detailGiveOrTake;
@@ -96,8 +98,9 @@ class _DetailPageState extends State<DetailPage> {
       }
     }
 
-    ///************** like 기능 구현부분 ************** ///
-    /// 어떤 식으로 like 가져올지 정한 다음에 수정되야 함
+
+    ///************************ like 기능 구현부분 (수정필요) ************************///
+
     /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
     CollectionReference likes;
     if (detailGiveOrTake == 'giveProducts') {
@@ -108,6 +111,7 @@ class _DetailPageState extends State<DetailPage> {
           .collection('takeProducts/' + productId + '/like');
     }
 
+    /// 현재는 하트버튼 누르면 사용자가 이미 눌렀든 말든 간에 계속 숫자 올라감 ㅋㅎ (수정필요)
     /// 현재 사용자가 이미 좋아요를 누른 경우를 분별하는 함수
     bool isLiked(AsyncSnapshot<QuerySnapshot> snapshot) {
       snapshot.data.docs.forEach((document) {
@@ -135,7 +139,9 @@ class _DetailPageState extends State<DetailPage> {
        }
      }*/
 
-    ///************** comments 기능 구현부분 ************** ///
+
+    ///************************* comments 기능 구현부분 *************************///
+
     /// 'comments' Collection 참조
     CollectionReference comments = FirebaseFirestore.instance
         .collection('comments/' + productId + '/commentList');
@@ -152,7 +158,7 @@ class _DetailPageState extends State<DetailPage> {
           .catchError((error) => print('Failed to add a comment: $error'));
     }
 
-    /// 좋아요 취소기능 (구현이 안됨 -> 다시 짜기)
+    /// comment 삭제기능 (구현이 안됨 -> 다시 짜기)
     Future<void> deleteComments() async {
       try {
         return await FirebaseFirestore.instance
