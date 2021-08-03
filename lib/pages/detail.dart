@@ -10,9 +10,13 @@ import '../model/product.dart';
 import '../main.dart';
 
 class DetailPage extends StatefulWidget {
+
   DetailPage({this.productId, this.detailGiveOrTake});
 
+  /// route 생성 시에 사용되는 product ID
   final String productId;
+
+  /// giveProducts / takeProducts collection 중 어디서 가져와야하는 지 표시
   final String detailGiveOrTake;
 
   @override
@@ -20,53 +24,57 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
+
   @override
   Widget build(BuildContext context) {
-    var likeList = context.watch<ApplicationState>().likeList;
-    // var likeCount = context.watch<ApplicationState>().likeCount;
 
-    print('likeList-> $likeList');
+    ///******* ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 *******///
 
+    /// DetailPage() 호출시 받는 매개변수 참조
     var productId = widget.productId;
     var detailGiveOrTake = widget.detailGiveOrTake;
 
+    /// detailGiveOrTake 가 담고 있는 collection 이름에 따라 그 collection 담긴 내용 가져오기
     var products = detailGiveOrTake == 'giveProducts'
         ? context.watch<ApplicationState>().giveProducts
         : context.watch<ApplicationState>().takeProducts;
-    Product product;
+
+    /// 현재 유저의 아이디와 이름 간략화
     var userId = FirebaseAuth.instance.currentUser.uid;
     var userName = FirebaseAuth.instance.currentUser.displayName;
+
+    /// 컬랙션(products) 내에서 productId가 같은 제품을 찾아냈을 때 그 내용을 담을 변수
+    Product product;
+
+    /// 컬랙션(products) 내에서 productId가 같은 제품을 찾아냈는지 여부 표시 (찾아냈을 때 true)
     var productFound = false;
 
+    /// products에 담긴 것들 중 현재 productId와 같은 것 찾기
     for (var i = 0; i < products.length; i++) {
       if (products[i].id == productId) {
         product = products[i];
+        productFound = true;
 
         print(product.userName);
         print(product.uid);
-
-        productFound = true;
       }
     }
 
+    /// productId와 일치하는 게시글이 없을 경우 로딩 표시
     if (products == null ||
         products.isEmpty ||
         productFound == false ||
         product.modified == null) {
-      print("로딩중");
       return Scaffold(
         body: CircularProgressIndicator(),
       );
     }
 
-
-    //*****************여기부터******************************//
-    // Set name for Firebase Storage
+    /// Firebase Storage 참조 간략화
     var storage = firebase_storage.FirebaseStorage.instance;
 
-    // Download image url of each product based on id
+    /// ProductID에 따라 해당하는 image url 다운로드
     Future<String> downloadURL(String id) async {
-      //await Future.delayed(Duration(seconds: 1));
       try {
         return await storage
             .ref()
@@ -77,42 +85,8 @@ class _DetailPageState extends State<DetailPage> {
         return null;
       }
     }
-    //******여기까지는 edit.dart와 겹치는 부분인데 또 써야할 필요가 있을까...?//
 
-
-    // Get Likes //어떤 식으로 like 가져올지 정한 다음에 수정되야함
-    CollectionReference likes;
-    if (detailGiveOrTake == 'giveProducts') {
-      likes = FirebaseFirestore.instance
-          .collection('giveProducts/' + productId + '/like');
-    } else {
-      likes = FirebaseFirestore.instance
-          .collection('takeProducts/' + productId + '/like');
-    }
-
-    // Collection 참조 ->  comments
-    CollectionReference comments;
-    comments = FirebaseFirestore.instance
-        .collection('comments/' + productId + '/commentList');
-
-    // Add a like
-    Future<void> addLike() {
-      return likes
-          .add({'uid': userId})
-          .then((value) => print('LIKED!'))
-          .catchError((error) => print('Failed to add a like: $error'));
-    }
-
-    // Delete like
-    // Future<void> deleteLike() async {
-    //   try {
-    //     return likes.doc(userId).delete();
-    //   } on Exception {
-    //     return null;
-    //   }
-    // }
-
-    // Delete item
+    /// 게시물 자체 삭제 기능 (왼쪽 상단 휴지통 버튼)
     Future<void> deleteProduct() async {
       try {
         return await FirebaseFirestore.instance
@@ -124,19 +98,55 @@ class _DetailPageState extends State<DetailPage> {
       }
     }
 
-    // 삭제기능 제대로 먹히지 않으므로 다시 짜야함
-    // Delete comment
-    Future<void> deleteComments() async {
-      try {
-        return await FirebaseFirestore.instance
-            .collection('comments/$productId/commentList')
-            .doc(productId)
-            .delete();
-      } on Exception {
-        return null;
-      }
+
+    ///************************ like 기능 구현부분 (수정필요) ************************///
+
+    /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
+    CollectionReference likes;
+    if (detailGiveOrTake == 'giveProducts') {
+      likes = FirebaseFirestore.instance
+          .collection('giveProducts/' + productId + '/like');
+    } else {
+      likes = FirebaseFirestore.instance
+          .collection('takeProducts/' + productId + '/like');
     }
 
+    /// 현재는 하트버튼 누르면 사용자가 이미 눌렀든 말든 간에 계속 숫자 올라감 ㅋㅎ (수정필요)
+    /// 현재 사용자가 이미 좋아요를 누른 경우를 분별하는 함수
+    bool isLiked(AsyncSnapshot<QuerySnapshot> snapshot) {
+      snapshot.data.docs.forEach((document) {
+        if (document['uid'] == userId) {
+          return true;
+        }
+      });
+      return false;
+    }
+
+    /// 사용자가 하트 누른 경우 좋아요 추가하는 기능
+    Future<void> addLike() {
+      return likes
+          .add({'uid': userId})
+          .then((value) => print('LIKED!'))
+          .catchError((error) => print('Failed to add a like: $error'));
+    }
+
+    /// 좋아요 취소기능 (구현이 안됨 -> 다시 짜기)
+    /* Future<void> deleteLike() async {
+       try {
+         return likes.doc(userId).delete();
+       } on Exception {
+         return null;
+       }
+     }*/
+
+
+    ///************************* comments 기능 구현부분 *************************///
+
+    /// 'comments' Collection 참조
+    CollectionReference comments = FirebaseFirestore.instance
+        .collection('comments/' + productId + '/commentList');
+
+    /// comment 추가 기능
     Future<void> addComments(String comment) {
       return comments
           .add({
@@ -148,15 +158,19 @@ class _DetailPageState extends State<DetailPage> {
           .catchError((error) => print('Failed to add a comment: $error'));
     }
 
-    // Check if already liked
-    bool isLiked(AsyncSnapshot<QuerySnapshot> snapshot) {
-      bool liked = false;
-      snapshot.data.docs.forEach((document) {
-        if (document['uid'] == userId) liked = true;
-      });
-      return liked;
+    /// comment 삭제기능 (구현이 안됨 -> 다시 짜기)
+    Future<void> deleteComments() async {
+      try {
+        return await FirebaseFirestore.instance
+            .collection('comments/$productId/commentList')
+            .doc(productId)
+            .delete();
+      } on Exception {
+        return null;
+      }
     }
 
+    /// Add 페이지 화면 구성
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.cyan,
@@ -205,7 +219,7 @@ class _DetailPageState extends State<DetailPage> {
                                   onPressed: () {
                                     Navigator.pop(context);
                                   },
-                                  child: Text("No"),
+                                  child: Text('No'),
                                 ),
                                 Consumer<ApplicationState>(
                                   builder: (context, appState, _) =>
@@ -332,7 +346,7 @@ class _DetailPageState extends State<DetailPage> {
                           children: [
                             Text(
                               product.userName.toString() +
-                                  "                            ",
+                                  '                            ',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Color(0xff296d98),
@@ -403,7 +417,7 @@ class _CommentBookState extends State<CommentBook> {
   Future<String> convertDateTime(Timestamp time) async {
     //await Future.delayed(Duration(seconds: 1));
     try {
-      return await DateFormat('MM.dd HH:mm').format(time.toDate());
+      return DateFormat('MM.dd HH:mm').format(time.toDate());
     } on Exception {
       return null;
     }
@@ -452,7 +466,7 @@ class _CommentBookState extends State<CommentBook> {
                     Provider.of<ApplicationState>(context, listen: false)
                         .detailPageUid(
                             widget.productId, widget.detailGiveOrTake);
-                    print("clear!");
+                    print('clear!');
                   }
                 });
               },
@@ -539,7 +553,7 @@ class _CommentBookState extends State<CommentBook> {
     ]);
   }
 
-  List<bool> _selections = List.generate(3, (_) => false);
+  final List<bool> _selections = List.generate(3, (_) => false);
 
   ToggleButtons _buildCommentToggleButtons(
       BuildContext context, ApplicationState appState) {
@@ -576,7 +590,7 @@ class _CommentBookState extends State<CommentBook> {
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            child: Text("No"),
+                            child: Text('No'),
                           ),
                           CupertinoDialogAction(
                             onPressed: () {

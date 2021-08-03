@@ -35,7 +35,7 @@ class Application extends StatelessWidget {
             routes: {
               '/login': (context) => LoginPage(),
               '/home': (context) => HomePage(),
-              '/giveadd': (context) => giveAddPage(),
+              '/add': (context) => AddPage(),
               //'/takeadd': (context) => takeAddPage(),
               '/map': (context) => MapPage(),
             },
