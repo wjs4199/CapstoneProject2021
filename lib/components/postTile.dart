@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 class _ArticleDescription extends StatelessWidget {
+  /// 타일용 자료구조 - DB 에서 필요한 정보만 추출
   const _ArticleDescription({
     Key key,
     this.title,
     this.subtitle,
     this.author,
     this.publishDate,
-    this.category,
+    // this.category,
     this.likes,
   }) : super(key: key);
 
@@ -15,7 +16,7 @@ class _ArticleDescription extends StatelessWidget {
   final String subtitle;
   final String author;
   final String publishDate;
-  final String category;
+  // final String category;
   final int likes;
 
   @override
@@ -28,6 +29,7 @@ class _ArticleDescription extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              /// 게시글 제목 영역
               Text(
                 title,
                 maxLines: 1,
@@ -38,6 +40,8 @@ class _ArticleDescription extends StatelessWidget {
                 ),
               ),
               const Padding(padding: EdgeInsets.only(bottom: 4.0)),
+
+              /// 게시글 본문(미리보기) 영역 2줄초과시 뒷부분 ... 처리
               Text(
                 subtitle,
                 maxLines: 2,
@@ -57,8 +61,9 @@ class _ArticleDescription extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
+              /// 작성자 영역(카테고리 제거)
               Text(
-                '$category | $author',
+                '$author',
                 style: const TextStyle(
                   fontFamily: 'NanumSquareRoundR',
                   fontSize: 12.0,
@@ -66,6 +71,8 @@ class _ArticleDescription extends StatelessWidget {
                 ),
               ),
               const Padding(padding: EdgeInsets.only(bottom: 2.0)),
+
+              /// 작성날짜 영역 (DB 개선후 좋아요 기능 추가시 수정)
               Text(
                 // '$publishDate - ♥️: $likes',
                 publishDate,
@@ -91,7 +98,7 @@ class CustomListItem extends StatelessWidget {
     this.subtitle,
     this.author,
     this.publishDate,
-    this.category,
+    // this.category,
     this.likes,
   }) : super(key: key);
 
@@ -100,7 +107,7 @@ class CustomListItem extends StatelessWidget {
   final String subtitle;
   final String author;
   final String publishDate;
-  final String category;
+  // final String category;
   final int likes;
 
   @override
@@ -118,7 +125,7 @@ class CustomListItem extends StatelessWidget {
                 subtitle: subtitle,
                 author: author,
                 publishDate: publishDate,
-                category: category,
+                // category: category,
                 likes: likes,
               ),
             ),

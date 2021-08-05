@@ -339,7 +339,7 @@ class PostTileMaker extends StatelessWidget {
               subtitle: _product.content,
               author: _product.userName,
               publishDate: snapshot.data,
-              category: _product.category,
+              // category: _product.category,
               likes: _product.likes,
               thumbnail: FutureBuilder(
                 future: downloadURL(_product.id),
