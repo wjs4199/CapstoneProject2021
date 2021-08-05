@@ -139,7 +139,7 @@ class _HomePageState extends State<HomePage> {
       isSelected: _selections,
       onPressed: (int index) {
         setState(() {
-          for (int buttonIndex = 0;
+          for (var buttonIndex = 0;
               buttonIndex < _selections.length;
               buttonIndex++) {
             if (buttonIndex == index) {
@@ -149,12 +149,13 @@ class _HomePageState extends State<HomePage> {
             }
           }
           if (_selections[index] == true) {
-            if (index == 0)
+            if (index == 0) {
               appState.orderByFilter('Product');
-            else if (index == 1)
+            } else if (index == 1) {
               appState.orderByFilter('Time');
-            else
+            } else {
               appState.orderByFilter('Talent');
+            }
           } else {
             appState.orderByFilter('All');
           }
@@ -348,7 +349,7 @@ class PostTileMaker extends StatelessWidget {
                   } else {
                     if (snapshot.hasData) {
                       return ClipRRect(
-                        borderRadius: new BorderRadius.circular(8.0),
+                        borderRadius: BorderRadius.circular(8.0),
                         child: Image.network(snapshot.data.toString(),
                             fit: BoxFit.fitWidth),
                       );
