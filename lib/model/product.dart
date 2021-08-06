@@ -34,11 +34,13 @@ class Comment {
     @required this.userName,
     @required this.comment,
     @required this.time,
+    @required this.id,
   });
 
   final String userName;
   final String comment;
   final Timestamp time;
+  final String id;
 }
 
 class Like {

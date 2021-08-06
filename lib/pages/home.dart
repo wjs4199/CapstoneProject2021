@@ -183,7 +183,7 @@ class _HomePageState extends State<HomePage> {
     if (_selectedIndex == 0) {
       return FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/giveadd');
+          Navigator.pushNamed(context, '/add');
         },
         backgroundColor: Colors.cyan,
         child: Icon(Icons.add),
@@ -191,7 +191,7 @@ class _HomePageState extends State<HomePage> {
     } else if (_selectedIndex == 1) {
       return FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/takeadd');
+          Navigator.pushNamed(context, '/add');
         },
         backgroundColor: Colors.cyan,
         child: Icon(Icons.add),
