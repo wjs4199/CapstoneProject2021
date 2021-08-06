@@ -75,7 +75,7 @@ Widget NanumView(
                 ),
               ),
 
-              /// *** 작업중 ***
+              // 토글버튼 제거
               // _buildToggleButtons(context, appState),
             ],
           ),

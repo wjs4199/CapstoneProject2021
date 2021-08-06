@@ -124,60 +124,59 @@ class _HomePageState extends State<HomePage> {
     return _widgetOptions;
   }
 
-  /// ***작업중***
-  /// 필터링 기능을 토글버튼화하여 버튼바로 생성
-  ToggleButtons _buildToggleButtons(
-      BuildContext context, ApplicationState appState) {
-    return ToggleButtons(
-      color: Colors.black.withOpacity(0.60),
-      constraints: BoxConstraints(
-        minWidth: 30,
-        minHeight: 30,
-      ),
-      selectedBorderColor: Colors.cyan,
-      selectedColor: Colors.cyan,
-      borderRadius: BorderRadius.circular(4.0),
-      isSelected: _selections,
-      onPressed: (int index) {
-        setState(() {
-          for (var buttonIndex = 0;
-              buttonIndex < _selections.length;
-              buttonIndex++) {
-            if (buttonIndex == index) {
-              _selections[buttonIndex] = !_selections[buttonIndex];
-            } else {
-              _selections[buttonIndex] = false;
-            }
-          }
-          if (_selections[index] == true) {
-            if (index == 0) {
-              appState.orderByFilter('Product');
-            } else if (index == 1) {
-              appState.orderByFilter('Time');
-            } else {
-              appState.orderByFilter('Talent');
-            }
-          } else {
-            appState.orderByFilter('All');
-          }
-        });
-      },
-      children: [
-        Icon(
-          Icons.shopping_bag,
-          size: 20,
-        ),
-        Icon(
-          Icons.access_time,
-          size: 20,
-        ),
-        Icon(
-          Icons.school,
-          size: 20,
-        ),
-      ],
-    );
-  }
+  // /// 필터링 기능을 토글버튼화하여 버튼바로 생성
+  // ToggleButtons _buildToggleButtons(
+  //     BuildContext context, ApplicationState appState) {
+  //   return ToggleButtons(
+  //     color: Colors.black.withOpacity(0.60),
+  //     constraints: BoxConstraints(
+  //       minWidth: 30,
+  //       minHeight: 30,
+  //     ),
+  //     selectedBorderColor: Colors.cyan,
+  //     selectedColor: Colors.cyan,
+  //     borderRadius: BorderRadius.circular(4.0),
+  //     isSelected: _selections,
+  //     onPressed: (int index) {
+  //       setState(() {
+  //         for (var buttonIndex = 0;
+  //             buttonIndex < _selections.length;
+  //             buttonIndex++) {
+  //           if (buttonIndex == index) {
+  //             _selections[buttonIndex] = !_selections[buttonIndex];
+  //           } else {
+  //             _selections[buttonIndex] = false;
+  //           }
+  //         }
+  //         if (_selections[index] == true) {
+  //           if (index == 0) {
+  //             appState.orderByFilter('Product');
+  //           } else if (index == 1) {
+  //             appState.orderByFilter('Time');
+  //           } else {
+  //             appState.orderByFilter('Talent');
+  //           }
+  //         } else {
+  //           appState.orderByFilter('All');
+  //         }
+  //       });
+  //     },
+  //     children: [
+  //       Icon(
+  //         Icons.shopping_bag,
+  //         size: 20,
+  //       ),
+  //       Icon(
+  //         Icons.access_time,
+  //         size: 20,
+  //       ),
+  //       Icon(
+  //         Icons.school,
+  //         size: 20,
+  //       ),
+  //     ],
+  //   );
+  // }
 
   /// FloatingActionButton 생성기
   FloatingActionButton buildFAB() {
@@ -201,8 +200,8 @@ class _HomePageState extends State<HomePage> {
     return null;
   }
 
-  /// ToggleButtons - 각 버튼용 bool list 생성
-  final List<bool> _selections = List.generate(3, (_) => false);
+  // /// ToggleButtons - 각 버튼용 bool list 생성
+  // final List<bool> _selections = List.generate(3, (_) => false);
 
   /// Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
