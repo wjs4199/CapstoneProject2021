@@ -17,7 +17,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> {
       HomeView(context, appState, selectedIndex),
 
       /// 1(나눔):
-      NanumView(context, appState, selectedIndex),
+      NanumView(context, appState, selectedIndex, _tabController),
 
       /// 2(메신저):
       MsgView(context, appState, selectedIndex),
@@ -242,6 +242,7 @@ class _HomePageState extends State<HomePage> {
   ///* ----------------- BottomNavigationBar, PageView 관련 ----------------- *///
   /// PaveView 용 controller
   PageController _pageController;
+  TabController _tabController;
 
   /// 현재 선택된 인덱스값 (첫번째 인덱스로 초기화)
   int _selectedIndex = 0;
@@ -261,12 +262,14 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   /// 시스템 함수에 PageView 기능 반영 처리(2)
   @override
   void dispose() {
     _pageController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
