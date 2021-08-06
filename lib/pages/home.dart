@@ -11,6 +11,7 @@ import 'views/1_nanum_view.dart';
 import 'views/2_msg_view.dart';
 import 'views/3_my_view.dart';
 
+// home
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
