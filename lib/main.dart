@@ -241,6 +241,7 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             comment: document.data()['comment'],
             time: document.data()['time'],
+            id: document.id,
           ));
         });
         notifyListeners();

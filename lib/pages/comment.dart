@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
+import '../model/product.dart';
 import '../main.dart';
+
 
 class CommentBook extends StatefulWidget {
   CommentBook({this.detailGiveOrTake, this.productId,}); //, required this.dates
@@ -32,81 +34,6 @@ class _CommentBookState extends State<CommentBook> {
 
   /// comment 를 적는 텍스트 상자의 상태를 control 할 때 사용
   final _commentController = TextEditingController();
-
-  /// ToggleButtons 내의 대댓글, 좋아요, 삭제 버튼의 상태를 표시하기 위해 필요한 리스트 변수
-  final List<bool> _selections = List.generate(3, (_) => false);
-
-  /// ToggleButtons 위젯(대댓글, 좋아요, 삭제)
-  ToggleButtons _buildCommentToggleButtons(
-      BuildContext context, ApplicationState appState, Future<void> Function() deleteComments) {
-    return ToggleButtons(
-      color: Colors.black.withOpacity(0.60),
-      constraints: BoxConstraints(
-        minWidth: 25,
-        minHeight: 25,
-      ),
-      selectedBorderColor: Colors.cyan,
-      selectedColor: Colors.cyan,
-      borderRadius: BorderRadius.circular(4.0),
-      isSelected: _selections,
-      onPressed: (int index) {
-        setState(() {
-          if (index == 2) {
-            print('push delete button!');
-            print(FirebaseAuth.instance.currentUser.displayName);
-            print(userName);
-            /// 사용자가 올린 댓글만 삭제 가능하도록 사용자 이름과 댓글 기록자의 이름을 비교(수정 필요)
-            if (FirebaseAuth.instance.currentUser.displayName ==
-                userName) {
-              print('same userName');
-              /// 정말 삭제할 것인지 사용자에게 질문하는 알림창을 띄우는 위젯
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) => CupertinoAlertDialog(
-                    title: Text('Deleting Item'),
-                    content: Text(
-                        'Are you sure that you want to delete this comment?'),
-                    actions: <Widget>[
-                      CupertinoDialogAction(
-                        isDefaultAction: true,
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text('No'),
-                      ),
-                      CupertinoDialogAction(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          deleteComments()
-                              .then((value) => appState.init())
-                              .catchError((error) => null);
-                        },
-                        child: Text('Yes'),
-                      ),
-                    ],
-                  ));
-            } else {
-              null;
-            }
-          }
-        });
-      },
-      children: [
-        Icon(
-          Icons.chat,
-          size: 15,
-        ),
-        Icon(
-          Icons.thumb_up,
-          size: 15,
-        ),
-        Icon(
-          Icons.delete,
-          size: 15,
-        ),
-      ],
-    );
-  }
 
   /// 해당 댓글이 달린 Timestamp 형식의 시간을 UI에 표기 가능한 형식으로 바꾸는 함수
   Future<String> convertDateTime(Timestamp time) async {
@@ -147,15 +74,98 @@ class _CommentBookState extends State<CommentBook> {
     }
 
     /// comment 삭제기능 (구현이 안됨 -> 다시 짜기)
-    Future<void> deleteComments() async {
+    Future<void> deleteComments(Comment comment) async {
       try {
-        return await FirebaseFirestore.instance
-            .collection('comments/$productId/commentList')
-            .doc(productId)
-            .delete();
+        for (var eachComment in commentsList){
+          if(eachComment.id == comment.id){
+            return await FirebaseFirestore.instance
+                .collection('comments/$productId/commentList')
+                .doc(comment.id)
+                .delete();
+          }
+        }
       } on Exception {
         return null;
       }
+    }
+
+    /// ToggleButtons 내의 대댓글, 좋아요, 삭제 버튼의 상태를 표시하기 위해 필요한 리스트 변수
+    var _selections = List<bool>.generate(3, (_) => false);
+
+    /// 보기 쉽게 빼려고 하였으나 deleteComments() 함수 아래에 있어야해서...여기로 옴...
+    /// 왜 ToggleButtons 매개변수로 deleteComments()가 전달시키면 가능!(나는 실패..)
+    /// ToggleButtons 위젯(대댓글, 좋아요, 삭제)
+    ToggleButtons _buildCommentToggleButtons(
+        BuildContext context, ApplicationState appState, Comment comment) {
+      return ToggleButtons(
+        color: Colors.black.withOpacity(0.60),
+        constraints: BoxConstraints(
+          minWidth: 25,
+          minHeight: 25,
+        ),
+        selectedBorderColor: Colors.cyan,
+        selectedColor: Colors.cyan,
+        borderRadius: BorderRadius.circular(4.0),
+        isSelected: _selections,
+        onPressed: (int index) {
+          setState(() {
+            if (index == 2) {
+              print('push delete button!');
+              print(FirebaseAuth.instance.currentUser.displayName);
+              print(userName);
+              /// 사용자가 올린 댓글만 삭제 가능하도록 사용자 이름과 댓글 기록자의 이름을 비교(수정 필요)
+              if (FirebaseAuth.instance.currentUser.displayName ==
+                  userName) {
+                print('same userName');
+
+                /// 정말 삭제할 것인지 사용자에게 질문하는 알림창을 띄우는 위젯
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) => CupertinoAlertDialog(
+                      title: Text('Deleting Comment'),
+                      content: Text(
+                          'Are you sure that you want to delete this comment?'),
+                      actions: <Widget>[
+                        CupertinoDialogAction(
+                          isDefaultAction: true,
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('No'),
+                        ),
+                        CupertinoDialogAction(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            deleteComments(comment)
+                                .then((value) => appState.init())
+                                .catchError((error) => null);
+
+                          },
+                          child: Text('Yes'),
+                        ),
+                      ],
+                    ));
+              } else {
+                null;
+              }
+            }
+          });
+        },
+        children: [
+          Icon(
+            Icons.chat,
+            size: 15,
+          ),
+          Icon(
+            Icons.thumb_up,
+            size: 15,
+          ),
+          Icon(
+            Icons.delete,
+            size: 15,
+          ),
+        ],
+      );
     }
 
     /// comments 나열된 화면 구성
@@ -265,7 +275,7 @@ class _CommentBookState extends State<CommentBook> {
                             _buildCommentToggleButtons(
                                 context,
                                 Provider.of<ApplicationState>(context, listen: false),
-                                deleteComments,
+                                eachComment
                             ),
                             SizedBox(width: 10),
                           ]))
