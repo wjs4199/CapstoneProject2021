@@ -33,12 +33,15 @@ class Comment {
   Comment({
     @required this.userName,
     @required this.comment,
-    @required this.time,
+    @required this.created,
+    // @required this.isDeleted,
+
   });
 
   final String userName;
   final String comment;
-  final Timestamp time;
+  final Timestamp created;
+// final bool isDeleted;
 }
 
 class Like {

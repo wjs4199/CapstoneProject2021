@@ -143,8 +143,9 @@ class _DetailPageState extends State<DetailPage> {
     ///************************* comments 기능 구현부분 *************************///
 
     /// 'comments' Collection 참조
+    /// editted
     CollectionReference comments = FirebaseFirestore.instance
-        .collection('comments/' + productId + '/commentList');
+        .collection('giveProducts/' + productId + '/comment');
 
     /// comment 추가 기능
     Future<void> addComments(String comment) {
@@ -152,7 +153,7 @@ class _DetailPageState extends State<DetailPage> {
           .add({
             'userName': FirebaseAuth.instance.currentUser.displayName,
             'comment': comment,
-            'time': FieldValue.serverTimestamp(),
+            'created': FieldValue.serverTimestamp(), ///editted
           })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
@@ -490,7 +491,7 @@ class _CommentBookState extends State<CommentBook> {
                   ),
                   SizedBox(width: 7.0),
                   FutureBuilder(
-                    future: convertDateTime(eachComment.time),
+                    future: convertDateTime(eachComment.created),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Column(

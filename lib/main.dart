@@ -231,8 +231,8 @@ class ApplicationState extends ChangeNotifier {
     // 함수 내에 있을 게 아니라 다른 함수로 빼줘야하지 않을 까요?
     if (uid != "null") {
       FirebaseFirestore.instance
-          .collection('comments/' + uid + '/commentList')
-          .orderBy('time', descending: true)
+          .collection('giveProducts/' + uid + '/comment') ///editted
+          .orderBy('created', descending: true)
           .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
           .listen((snapshot) {
         _commentContext = [];
@@ -240,7 +240,8 @@ class ApplicationState extends ChangeNotifier {
           _commentContext.add(Comment(
             userName: document.data()['userName'],
             comment: document.data()['comment'],
-            time: document.data()['time'],
+            created: document.data()['time'], ///editted
+            //   isDeleted: document.data()['idDeleted'],
           ));
         });
         notifyListeners();
