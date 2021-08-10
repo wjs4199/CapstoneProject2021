@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 import '../main.dart';
@@ -16,19 +17,35 @@ class AddPage extends StatefulWidget {
 
 class _AddPageState extends State<AddPage> {
   // Image picker
-  File _image;
-  final picker = ImagePicker();
+  //List<File> _image;
+  //List<Asset> _images;
+  List<Asset> imageList = [];
 
-  Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+  //final picker = MultiImagePicker();
 
+  void getMultiImage(int index) async {
+    List<Asset> resultList;
+    resultList = await MultiImagePicker.pickImages(
+      maxImages: index,
+      enableCamera: true,
+      selectedAssets: imageList
+    );
     setState(() {
+      imageList = resultList;
+      numberOfImages = imageList.length;
+      if(numberOfImages >= 10){
+        numberOfImagesTextColor = true;
+      } else {
+        numberOfImagesTextColor = false;
+      }
+    });
+    /*setState(() {
       if (pickedFile != null) {
-        _image = File(pickedFile.path);
+        _image[index] = File(pickedFile.path);
       } else {
         print('No image selected.');
       }
-    });
+    });*/
   }
 
   /// Give or Take 선택용 ToggleButtons - 각 버튼용 bool list
@@ -56,7 +73,7 @@ class _AddPageState extends State<AddPage> {
   FirebaseFirestore.instance.collection('takeProducts');
 
   /// Add product in 'giveProducts' collection
-  Future<void> addGiveProduct(String title, String content, String category) {
+  /*Future<void> addGiveProduct(String title, String content, String category) {
     if (user != null) {
       name = user.displayName;
     }
@@ -89,7 +106,7 @@ class _AddPageState extends State<AddPage> {
     }).then((value) {
       if (_image != null) uploadFile(_image, value.id);
     }).catchError((error) => print('Error: $error'));
-  }
+  }*/
 
   // Upload photo to storage
   Future<void> uploadFile(File photo, String id) async {
@@ -102,6 +119,182 @@ class _AddPageState extends State<AddPage> {
 
   final _filter = ['Product', 'Time', 'Talent'];
   var _selectedFilter = 'Product';
+
+  /// 업로드 된 이미지의 개수
+  int numberOfImages = 0;
+  bool numberOfImagesTextColor = false;
+
+  /// 상단 사진업로드하는 위젯
+  Widget imageUpLoadWidget() {
+    return Container(
+        color: Colors.white,
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height * (0.11),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+            ),
+            Container(
+                width: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      primary: Colors.black,
+                      backgroundColor: Colors.transparent,
+                      textStyle: TextStyle(
+                        color: numberOfImagesTextColor ? Colors.red : Colors.black,
+                        fontSize: 9,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        getMultiImage(10);
+                        if(numberOfImages < 10) {
+                          numberOfImagesTextColor = false;
+                        } else {
+                          numberOfImagesTextColor = true;
+                          //getMultiImage(10);
+                        }
+
+                      });
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.camera_alt_rounded,
+                          semanticLabel: 'Image upload',
+                          color: Colors.grey,
+                        ),
+                        Text('$numberOfImages/10',
+                        style: TextStyle(color: numberOfImagesTextColor ? Colors.red : Colors.black,),)
+                      ],
+                    )
+                ),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+            ),
+            /// 업로드 된 사진들 가로 스크롤 가능
+            Row(
+               children: [
+                imageList.isEmpty
+                    ? Container(
+                        height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                        width: MediaQuery.of(context).size.width * 0.75,)
+                    : Container(
+                        height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                        width: MediaQuery.of(context).size.width * 0.75,
+                        child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: imageList.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              var asset = imageList[index];
+                              return Stack(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          AssetThumb(asset:asset, height: 200, width: 200,),
+                                          SizedBox(
+                                            height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                            width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                                          ),
+                                        ],
+                                      ),
+                                      /// 삭제버튼 구현하다 관둠...
+                                      /*Container(
+                                        height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                        width: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                          child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              children: [
+                                                Container(
+                                                  height: 20,
+                                                  width: 20,
+                                                  child: IconButton(
+                                                  icon: const Icon(Icons.cancel_rounded),
+                                                  color: Colors.grey,
+                                                    onPressed: () {
+                                                      //
+                                                    },
+                                                  ),
+                                                )
+                                              ]
+                                          )
+                                      )*/
+                                ],
+                              );
+                            }),
+
+                  /*ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            for(int i=0; i< numberOfImages; i++)
+                              Container(
+                                height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                width: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                child: AssetThumb( asset: imageList[i]),
+                              )
+                          ],
+                        )*/
+                )
+
+
+
+
+
+                /*Container(
+                      height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                      width: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                      child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: imageList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            var asset = imageList[index];
+                            return Container(
+                              width: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                              height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                              child: AssetThumb(
+                                  asset: asset),
+                            );
+                          }
+                      ),
+                )*/
+    ]
+            )
+
+
+
+     /* _image == null
+          ? Image.asset(
+        'assets/logo.png',
+      )
+          : Image.file(
+        _image,
+        fit: BoxFit.fitWidth,
+      ),*/
+    ]));
+  }
+
+  /*Widget imageListview(int index) {
+    return ListView(
+      scrollDirection: Axis.horizontal,
+      children: [
+        for(int i=0; i< index; i++)
+          Container(
+            height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+            width: MediaQuery.of(context).size.height * (0.11) * 0.7,
+            child: AssetThumb( asset: imageList[i]),
+          )
+      ],
+    );
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +311,7 @@ class _AddPageState extends State<AddPage> {
               Navigator.pop(context);
             },
           ),
-          title: Text('Add'),
+          title: Text('나눔 글쓰기'),
           centerTitle: true,
           actions: <Widget>[
             IconButton(
@@ -127,7 +320,7 @@ class _AddPageState extends State<AddPage> {
                   semanticLabel: 'save',
                 ),
                 onPressed: () {
-                  if (_formKey.currentState.validate()) {
+                  /*if (_formKey.currentState.validate()) {
                     if(giveOrTakeCategory == 'give') {
                       addGiveProduct(
                         _titleController.text,
@@ -143,14 +336,15 @@ class _AddPageState extends State<AddPage> {
                     }
                     Navigator.pop(context);
                     appState.orderByFilter('All');
-                  }
+                  }*/
                 }),
           ],
         ),
         body: SafeArea(
           child: ListView(
             children: [
-              Container(
+              imageUpLoadWidget(),
+              /*Container(
                 width: MediaQuery.of(context).size.width,
                 // height: MediaQuery.of(context).size.height / 2,
                 child: _image == null
@@ -161,8 +355,8 @@ class _AddPageState extends State<AddPage> {
                         _image,
                         fit: BoxFit.fitWidth,
                       ),
-              ),
-              Row(
+              ),*/
+              /*Row(
                 children: [
                   Expanded(
                     flex: 9,
@@ -270,11 +464,11 @@ class _AddPageState extends State<AddPage> {
                     child: Container(),
                   ),
                 ],
-              ),
+              ),*/
             ],
           ),
         ),
-      ),
+      )
     );
   }
 

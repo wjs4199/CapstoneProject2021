@@ -11,9 +11,9 @@ dependencies:
     sdk: flutter
   firebase_core : ^1.2.0
   cloud_firestore: ^2.2.0
-  firebase_auth: ^1.2.0
+  firebase_auth: ^3.0.1
   geolocator: ^7.0.3
-  firebase_storage: ^8.0.5
+  firebase_storage: ^10.0.1
   google_fonts: ^2.0.0
   google_sign_in: ^5.0.3
   provider: ^5.0.0
@@ -25,7 +25,7 @@ dependencies:
   google_maps_flutter: ^2.0.6 # 새로운 api 사용 (3) google maps flutter
   http: ^0.13.1
   json_serializable: ^4.1.0
-
+  multi_image_picker: ^4.7.14
 
 dev_dependencies:
   flutter_test:
