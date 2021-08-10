@@ -5,8 +5,8 @@ import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import '../../main.dart';
 import '../home.dart';
 
-Widget NanumView(
-    BuildContext context, ApplicationState appState, int selectedIndex) {
+Widget NanumView(BuildContext context, ApplicationState appState,
+    int selectedIndex, TabController tabController) {
   return CustomScrollView(
     slivers: <Widget>[
       SliverAppBar(
@@ -17,13 +17,23 @@ Widget NanumView(
         floating: false,
         expandedHeight: 120.0,
         flexibleSpace: FlexibleSpaceBar(
-          title: Text(
-            '나눔',
-            style: TextStyle(
-              fontSize: 18,
-              fontFamily: 'NanumSquareRoundR',
-              fontWeight: FontWeight.bold,
-            ),
+          title: Align(
+            // alignment: Alignment.topLeft,
+            child: TabBar(
+                isScrollable: true,
+                indicatorColor: Colors.white,
+                indicatorSize: TabBarIndicatorSize.label,
+                controller: tabController,
+                labelPadding:
+                    EdgeInsets.only(top: 13, bottom: 13, left: 16, right: 16),
+                tabs: [
+                  Text(
+                    'Give',
+                  ),
+                  Text(
+                    'Take',
+                  ),
+                ]),
           ),
           background: Stack(
             fit: StackFit.expand,
@@ -75,7 +85,7 @@ Widget NanumView(
                 ),
               ),
 
-              /// *** 작업중 ***
+              // 토글버튼 제거
               // _buildToggleButtons(context, appState),
             ],
           ),
