@@ -51,3 +51,19 @@ class Like {
 
   final String uid;
 }
+
+class User {
+
+  User({
+    @required this.uid,
+    @required this.email,
+    @required this.username,
+
+  });
+
+  final String uid;
+  final String email;
+  final String username;
+
+
+}
