@@ -26,6 +26,7 @@ dependencies:
   http: ^0.13.1
   json_serializable: ^4.1.0
   multi_image_picker: ^4.7.14
+  flutter_absolute_path: ^1.0.6
 
 dev_dependencies:
   flutter_test:
