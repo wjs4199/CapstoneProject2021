@@ -10,7 +10,7 @@ import 'views/0_home_view.dart';
 import 'views/1_nanum_view.dart';
 import 'views/2_msg_view.dart';
 import 'views/3_my_view.dart';
-//
+//ㄹㅇㄹㅇ
 // home
 class HomePage extends StatefulWidget {
   @override
