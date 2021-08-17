@@ -82,8 +82,8 @@ class SignUpState extends State<SignUp> {
                      /*
                           username.add(
                        {
-                       //  uid:
-                       //      email:
+                       //  uid:  FirebaseAuth.instance.currentUser.uid,
+                       //      email:  FirebaseAuth.instance.currentUser.email,
                       // username: textEditingController1.text.toString()
                        }
                      );
