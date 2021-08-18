@@ -34,6 +34,7 @@ class SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser.uid;
     final email =  FirebaseAuth.instance.currentUser.email;
+    bool isLogged = false;
     CollectionReference signup = FirebaseFirestore.instance.collection("UserName");
 
 
@@ -74,6 +75,8 @@ class SignUpState extends State<SignUp> {
                     ElevatedButton(
                       onPressed: () async {
                         print("click actionbutton");
+                        isLogged = true;
+
 
                         ///editted
                         /// DB 추가 부분
@@ -87,6 +90,7 @@ class SignUpState extends State<SignUp> {
                                   'email': email,
                                   'username': textEditingController1.text.toString(),
                                   'created': FieldValue.serverTimestamp(),
+                                  'isLogged' : isLogged,
                                 }
                             ).then((value) =>
                                 ScaffoldMessenger.of(context).showSnackBar(

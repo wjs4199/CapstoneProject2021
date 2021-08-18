@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:giveandtake/model/product.dart';
 import 'package:giveandtake/pages/signup.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
+import 'home.dart';
 
 // For Google Sign in
 Future<UserCredential> signInWithGoogle() async {
@@ -22,32 +25,18 @@ Future<UserCredential> signInWithGoogle() async {
 }
 
 class LoginPage extends StatefulWidget {
+
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
 
-///수정필요
-/*
-  CollectionReference signup = FirebaseFirestore.instance.collection("UserName");
+//var productId = documentReference.id;
+  bool isLogged = false;
 
 
-
-  Future<void> getData() async {
-    // Get docs from collection reference
-    QuerySnapshot querySnapshot = await signup.get();
-
-    // Get data from docs and convert map to List
-    final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
-
-    print(allData);
-  }
-  var products = context.watch<ApplicationState>().UserName;
-  UserName product;
-  bool productFound = false;
-
- */
 
 
 
@@ -77,7 +66,12 @@ class _LoginPageState extends State<LoginPage> {
                   // Sign in with Google account,
                   // Traditional style (then, catchError) used here
                   signInWithGoogle().then((value) {
+                    ///document ID 불러오는 것 다시 할 것
+                    DocumentReference documentReference = FirebaseFirestore.instance.collection('UserName').doc();
+                    var productId = documentReference.id;
+
                     print('User: ' + value.user.displayName);
+                    print(productId);
                     // Display User Info with SnackBar
                     // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     //   content: Text('Welcome, ' + value.user.displayName + '!'),
@@ -85,28 +79,30 @@ class _LoginPageState extends State<LoginPage> {
                     //   duration: Duration(seconds: 1),
                     // ));
 
-///수정필요
-/*
-                    Future<void> future = getData();
 
-                    for (var i = 0; i < product.length; i++) {
-                      if (product[i].id == productId) {
-                        product = products[i];
-                        productFound = true;
-
-                        print(product.username);
-                        print(product.uid);
-                      }
-                    }
-
-
- */
-
-
+                    ///수정 필요
+    FirebaseFirestore.instance.collection('UserName').doc(productId).get().then((DocumentSnapshot ds)
+    {
+    isLogged = ds.get("isLogged");
+    print("let me printout isLogged " + isLogged.toString());
+    });
+                if(isLogged == false)
+                  {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => SignUp()));
+                  }
+                else
+                  {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => HomePage()));
+                  }
+
+
+
                   }).catchError((error) {
                     showDialog(
                         context: context,
@@ -142,3 +138,41 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+///수정필요
+/*
+  CollectionReference signup = FirebaseFirestore.instance.collection("UserName");
+
+
+
+  Future<void> getData() async {
+    // Get docs from collection reference
+    QuerySnapshot querySnapshot = await signup.get();
+
+    // Get data from docs and convert map to List
+    final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
+
+    print(allData);
+  }
+  var products = context.watch<ApplicationState>().UserName;
+  UserName product;
+  bool productFound = false;
+
+ */
+
+
+///수정필요
+/*
+                    Future<void> future = getData();
+
+                    for (var i = 0; i < product.length; i++) {
+                      if (product[i].id == productId) {
+                        product = products[i];
+                        productFound = true;
+
+                        print(product.username);
+                        print(product.uid);
+                      }
+                    }
+
+
+ */
