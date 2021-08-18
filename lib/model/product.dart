@@ -52,18 +52,21 @@ class Like {
   final String uid;
 }
 
-class User {
+class UserName {
 
-  User({
+  UserName({
     @required this.uid,
     @required this.email,
     @required this.username,
+    @required this.created,
 
   });
 
   final String uid;
   final String email;
   final String username;
+  final Timestamp created;
+
 
 
 }

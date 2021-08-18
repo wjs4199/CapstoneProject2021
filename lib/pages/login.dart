@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:giveandtake/model/product.dart';
 import 'package:giveandtake/pages/signup.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -25,6 +27,30 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+///수정필요
+/*
+  CollectionReference signup = FirebaseFirestore.instance.collection("UserName");
+
+
+
+  Future<void> getData() async {
+    // Get docs from collection reference
+    QuerySnapshot querySnapshot = await signup.get();
+
+    // Get data from docs and convert map to List
+    final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
+
+    print(allData);
+  }
+  var products = context.watch<ApplicationState>().UserName;
+  UserName product;
+  bool productFound = false;
+
+ */
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +84,25 @@ class _LoginPageState extends State<LoginPage> {
                     //   behavior: SnackBarBehavior.fixed,
                     //   duration: Duration(seconds: 1),
                     // ));
+
+///수정필요
+/*
+                    Future<void> future = getData();
+
+                    for (var i = 0; i < product.length; i++) {
+                      if (product[i].id == productId) {
+                        product = products[i];
+                        productFound = true;
+
+                        print(product.username);
+                        print(product.uid);
+                      }
+                    }
+
+
+ */
+
+
                     Navigator.push(
                         context,
                         MaterialPageRoute(

@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-
 import 'home.dart';
 
 
@@ -29,8 +28,15 @@ class SignUp extends StatefulWidget {
 class SignUpState extends State<SignUp> {
   TextEditingController textEditingController1 = TextEditingController();
 
+
+
   @override
   Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser.uid;
+    final email =  FirebaseAuth.instance.currentUser.email;
+    CollectionReference signup = FirebaseFirestore.instance.collection("UserName");
+
+
     return Material(
       child: Form(
         key: _formKey,
@@ -66,40 +72,39 @@ class SignUpState extends State<SignUp> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         print("click actionbutton");
 
-
+                        ///editted
                         /// DB 추가 부분
-                        if (_formKey.currentState.validate()) {
+                          if (_formKey.currentState.validate()) {
+                            // If the form is valid, display a snackbar. In the real world,
+                            // you'd often call a server or save the information in a database.
 
-                         // CollectionReference username = FirebaseFirestore.instance.collection("UserName");
+                            await signup.add(
+                                {
+                                  'uid': uid,
+                                  'email': email,
+                                  'username': textEditingController1.text.toString(),
+                                  'created': FieldValue.serverTimestamp(),
+                                }
+                            ).then((value) =>
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Welcome' + ' ' + textEditingController1.text.toString(),
 
-                          // If the form is valid, display a snackbar. In the real world,
-                          // you'd often call a server or save the information in a database.
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Processed Data')));
-                     /*
-                          username.add(
-                       {
-                       //  uid:  FirebaseAuth.instance.currentUser.uid,
-                       //      email:  FirebaseAuth.instance.currentUser.email,
-                      // username: textEditingController1.text.toString()
-                       }
-                     );
-
-                      */
+                                    ))),
+                            ).catchError((error) => print('Failed to signup: $error') );
 
 
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => HomePage()));
-                        }
+
+                            await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => HomePage()));
+                          }
+
+
                       },
-                      child: Text(
-                        '시작하기',
-                      ),
                       style: ElevatedButton.styleFrom(
                           primary: Colors.grey,
                           textStyle: TextStyle(
@@ -107,6 +112,9 @@ class SignUpState extends State<SignUp> {
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           )),
+                      child: Text(
+                        '시작하기',
+                      ),
                     ),
                   ],
                 ),
@@ -120,14 +128,20 @@ class SignUpState extends State<SignUp> {
 }
 
 /*
-Future<void> addUser(String comment) {
-  return comments
-      .add({
-    'userName': FirebaseAuth.instance.currentUser.displayName,
-    'comment': comment,
-    'created': FieldValue.serverTimestamp(), ///editted
-  })
-      .then((value) => print('add user!'))
-      .catchError((error) => print('Failed to add an user: $error'));
-}
-*/
+    Future <void> createUser (String uid, String email, String username){
+
+
+      FirebaseFirestore.instance.collection("UserName")
+          .add(
+          {
+            uid: uid,
+            email: email,
+            username: username,
+          }
+      );
+
+    }
+
+ */
+
+
