@@ -118,6 +118,7 @@ class ApplicationState extends ChangeNotifier {
   List<Comment> _commentContext = [];
   List<Like> _likeList = [];
   int likeCount = 0;
+  List<UserName> _username = []; /// added
 
   Stream<QuerySnapshot> currentStream;
 
@@ -225,6 +226,30 @@ class ApplicationState extends ChangeNotifier {
         notifyListeners();
       });
     }
+    
+    
+    ///UserName
+    ///added
+    if (orderBy != 'All') {
+      FirebaseFirestore.instance
+          .collection('UserName')
+          .snapshots()
+          .listen((snapshot) {
+        _username = [];
+        snapshot.docs.forEach((document) {
+          _username.add(UserName(
+            uid: document.data()['uid'],
+            email: document.data()['email'],
+            username: document.data()['username'],
+            created: document.data()['created'], ///added
+            isLogged: document.data()['isLogged'],
+            //   isDeleted: document.data()['idDeleted'],
+          ));
+        });
+        notifyListeners();
+      });
+
+    }
 
     // comment 컬랙션을 따로 만들었기 때문에 comment 컬랙션 내에서 상품 uid를 또또찾고,
     // 그 후에 해당 상품에 달린 comments들을 찾아오는 게 필요해진 것 같은데,
@@ -271,4 +296,5 @@ class ApplicationState extends ChangeNotifier {
   List<Product> get takeProducts => _takeProducts;
   List<Comment> get commentContext => _commentContext;
   List<Like> get likeList => _likeList;
+  List<UserName> get username => _username; /// added
 }
