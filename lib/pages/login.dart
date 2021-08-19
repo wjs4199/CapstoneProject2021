@@ -45,6 +45,9 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    var UserProducts = Provider.of<ApplicationState>(context, listen: false).username;
+    bool productFound = false;
+    
     return Scaffold(
       body: SafeArea(
         child: ListView(
