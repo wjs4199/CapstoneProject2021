@@ -59,6 +59,7 @@ class UserName {
     @required this.email,
     @required this.username,
     @required this.created,
+    @required this.isLogged,
 
   });
 
@@ -66,7 +67,7 @@ class UserName {
   final String email;
   final String username;
   final Timestamp created;
-
+  final bool isLogged;
 
 
 }
