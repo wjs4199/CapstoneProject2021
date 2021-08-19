@@ -6,6 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:giveandtake/model/product.dart';
 import 'package:giveandtake/pages/signup.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
+
+import '../main.dart';
 
 import 'home.dart';
 
@@ -62,10 +65,10 @@ class _LoginPageState extends State<LoginPage> {
               child: ElevatedButton.icon(
                 label: Text('Sign in with Google'),
                 icon: Icon(Icons.android),
-                onPressed: () {
+                onPressed: () async {
                   // Sign in with Google account,
                   // Traditional style (then, catchError) used here
-                  signInWithGoogle().then((value) {
+                  await signInWithGoogle().then((value) {
                     ///document ID 불러오는 것 다시 할 것
                     DocumentReference documentReference = FirebaseFirestore.instance.collection('UserName').doc();
                     var productId = documentReference.id;
@@ -78,28 +81,49 @@ class _LoginPageState extends State<LoginPage> {
                     //   behavior: SnackBarBehavior.fixed,
                     //   duration: Duration(seconds: 1),
                     // ));
+                    
+                     print('User: ' + value.user.displayName);
+                    print(FirebaseAuth.instance.currentUser.uid);
+                    print(productFound);
+                    print(UserProducts.length);
 
 
                     ///수정 필요
-    FirebaseFirestore.instance.collection('UserName').doc(productId).get().then((DocumentSnapshot ds)
-    {
-    isLogged = ds.get("isLogged");
-    print("let me printout isLogged " + isLogged.toString());
-    });
-                if(isLogged == false)
-                  {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SignUp()));
-                  }
-                else
-                  {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => HomePage()));
-                  }
+                    
+                   /*
+                    
+                    for (var i = 0; i < UserProducts.length; i++) {
+                      if ( FirebaseAuth.instance.currentUser.uid == UserProducts[i].uid ) {
+                        temp = UserProducts[i];
+                        productFound = true;
+
+                        print(productFound);
+                        // print("let me print temp.uid" + temp.uid);
+                        //print("let me print temp.username " + temp.username);
+
+
+                      }
+                    }
+                    
+                    
+                    if(temp.isLogged == false || UserProducts.isEmpty)
+                    {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SignUp()));
+                    }
+                    else
+                    {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => HomePage()));
+                    }
+                    
+                    
+                    */
+  
 
 
 
