@@ -54,7 +54,7 @@ class _DetailPageState extends State<DetailPage> {
       if (products[i].id == productId) {
         product = products[i];
         productFound = true;
-
+        print(products.length);
         print(product.userName);
         print(product.uid);
       }

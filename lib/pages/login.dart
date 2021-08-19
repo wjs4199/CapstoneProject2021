@@ -37,7 +37,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
 
 //var productId = documentReference.id;
-  bool isLogged = false;
+
 
 
 
@@ -45,8 +45,15 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    var UserProducts = Provider.of<ApplicationState>(context, listen: false).username;
-    bool productFound = false;
+
+    var UserProducts =
+        context.watch<ApplicationState>().username;
+        //Provider.of<ApplicationState>(context, listen: false).username;
+
+    UserName temp;
+    //
+    var productFound = false;
+
     
     return Scaffold(
       body: SafeArea(
@@ -68,33 +75,24 @@ class _LoginPageState extends State<LoginPage> {
               child: ElevatedButton.icon(
                 label: Text('Sign in with Google'),
                 icon: Icon(Icons.android),
-                onPressed: () async {
+                onPressed: ()  {
                   // Sign in with Google account,
                   // Traditional style (then, catchError) used here
-                  await signInWithGoogle().then((value) {
+                    signInWithGoogle().then((value) {
                     ///document ID 불러오는 것 다시 할 것
-                    DocumentReference documentReference = FirebaseFirestore.instance.collection('UserName').doc();
-                    var productId = documentReference.id;
 
                     print('User: ' + value.user.displayName);
-                    print(productId);
                     // Display User Info with SnackBar
                     // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     //   content: Text('Welcome, ' + value.user.displayName + '!'),
                     //   behavior: SnackBarBehavior.fixed,
                     //   duration: Duration(seconds: 1),
                     // ));
-                    
-                     print('User: ' + value.user.displayName);
+
                     print(FirebaseAuth.instance.currentUser.uid);
                     print(productFound);
                     print(UserProducts.length);
 
-
-                    ///수정 필요
-                    
-                   /*
-                    
                     for (var i = 0; i < UserProducts.length; i++) {
                       if ( FirebaseAuth.instance.currentUser.uid == UserProducts[i].uid ) {
                         temp = UserProducts[i];
@@ -107,8 +105,22 @@ class _LoginPageState extends State<LoginPage> {
 
                       }
                     }
+
+
+
+
+                    ///수정 필요
                     
+
                     
+
+
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => HomePage()));
+                    
+                    /*
                     if(temp.isLogged == false || UserProducts.isEmpty)
                     {
                       Navigator.push(

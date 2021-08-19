@@ -125,6 +125,29 @@ class ApplicationState extends ChangeNotifier {
   //collection 'giveProducts' 파이어베이스에서 불러오기
   Future<void> init() async {
     // FirebaseFirestore.instance
+    ///UserName
+    ///added
+
+      FirebaseFirestore.instance
+          .collection('UserName')
+          .snapshots()
+          .listen((snapshot) {
+        _username = [];
+        snapshot.docs.forEach((document) {
+          _username.add(UserName(
+            uid: document.data()['uid'],
+            email: document.data()['email'],
+            username: document.data()['username'],
+            created: document.data()['created'], ///added
+            isLogged: document.data()['isLogged'],
+            //   isDeleted: document.data()['idDeleted'],
+          ));
+        });
+        notifyListeners();
+      });
+
+
+
     if (orderBy != 'All') {
       FirebaseFirestore.instance
           .collection('giveProducts')
@@ -226,30 +249,6 @@ class ApplicationState extends ChangeNotifier {
         notifyListeners();
       });
     }
-    
-    
-    ///UserName
-    ///added
-    if (orderBy != 'All') {
-      FirebaseFirestore.instance
-          .collection('UserName')
-          .snapshots()
-          .listen((snapshot) {
-        _username = [];
-        snapshot.docs.forEach((document) {
-          _username.add(UserName(
-            uid: document.data()['uid'],
-            email: document.data()['email'],
-            username: document.data()['username'],
-            created: document.data()['created'], ///added
-            isLogged: document.data()['isLogged'],
-            //   isDeleted: document.data()['idDeleted'],
-          ));
-        });
-        notifyListeners();
-      });
-
-    }
 
     // comment 컬랙션을 따로 만들었기 때문에 comment 컬랙션 내에서 상품 uid를 또또찾고,
     // 그 후에 해당 상품에 달린 comments들을 찾아오는 게 필요해진 것 같은데,
@@ -258,7 +257,7 @@ class ApplicationState extends ChangeNotifier {
     // 함수 내에 있을 게 아니라 다른 함수로 빼줘야하지 않을 까요?
     if (uid != "null") {
       FirebaseFirestore.instance
-          .collection('giveProducts/' + uid + '/comment') ///editted
+          .collection('giveProducts/' + uid + '/comment') ///edited
           .orderBy('created', descending: true)
           .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
           .listen((snapshot) {
@@ -267,7 +266,7 @@ class ApplicationState extends ChangeNotifier {
           _commentContext.add(Comment(
             userName: document.data()['userName'],
             comment: document.data()['comment'],
-            created: document.data()['time'], ///editted
+            created: document.data()['time'], ///edited
             //   isDeleted: document.data()['idDeleted'],
           ));
         });
@@ -289,6 +288,7 @@ class ApplicationState extends ChangeNotifier {
         likeCount = _likeList.length;
         notifyListeners();
       });
+
     }
   }
 
