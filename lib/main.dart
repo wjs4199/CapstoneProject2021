@@ -11,8 +11,6 @@ import 'model/product.dart';
 import 'actions/add.dart';
 import 'actions/edit.dart';
 
-///testing
-
 void main() {
   runApp(
     ChangeNotifierProvider(
@@ -87,13 +85,12 @@ class Application extends StatelessWidget {
 }
 
 class ApplicationState extends ChangeNotifier {
-  
   ApplicationState() {
     orderBy = 'All';
     uid = 'null';
     init();
   }
-  
+
   String orderBy;
   String uid;
   String detailGiveOrTake;
@@ -119,7 +116,9 @@ class ApplicationState extends ChangeNotifier {
   List<Comment> _commentContext = [];
   List<Like> _likeList = [];
   int likeCount = 0;
-  List<UserName> _userName = []; /// added
+  List<UserName> _userName = [];
+
+  /// added
 
   Stream<QuerySnapshot> currentStream;
 
@@ -194,7 +193,8 @@ class ApplicationState extends ChangeNotifier {
             created: document.data()['created'],
             modified: document.data()['modified'],
             userName: document.data()['userName'],
-            uid: document.data()['uid'], likes: null,
+            uid: document.data()['uid'],
+            likes: null,
           ));
         });
         notifyListeners();
@@ -216,7 +216,8 @@ class ApplicationState extends ChangeNotifier {
             created: document.data()['created'],
             modified: document.data()['modified'],
             userName: document.data()['userName'],
-            uid: document.data()['uid'], likes: null,
+            uid: document.data()['uid'],
+            likes: null,
           ));
         });
         notifyListeners();
@@ -230,7 +231,9 @@ class ApplicationState extends ChangeNotifier {
     // 함수 내에 있을 게 아니라 다른 함수로 빼줘야하지 않을 까요?
     if (uid != 'null') {
       FirebaseFirestore.instance
-          .collection('giveProducts/' + uid + '/comment') ///edited
+          .collection('giveProducts/' + uid + '/comment')
+
+          ///edited
           .orderBy('created', descending: true)
           .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
           .listen((snapshot) {
@@ -239,9 +242,10 @@ class ApplicationState extends ChangeNotifier {
           _commentContext.add(Comment(
             userName: document.data()['userName'],
             comment: document.data()['comment'],
-            created: document.data()['time'], ///edited
-            //   isDeleted: document.data()['idDeleted'],
+            created: document.data()['time'],
 
+            ///edited
+            //   isDeleted: document.data()['idDeleted'],
           ));
         });
         notifyListeners();
@@ -262,7 +266,6 @@ class ApplicationState extends ChangeNotifier {
         likeCount = _likeList.length;
         notifyListeners();
       });
-
     }
 
     ///UserName
@@ -277,19 +280,21 @@ class ApplicationState extends ChangeNotifier {
           uid: document.data()['uid'],
           email: document.data()['email'],
           username: document.data()['username'],
-          created: document.data()['created'], ///added
+          created: document.data()['created'],
+
+          ///added
           isLogged: document.data()['isLogged'],
         ));
       });
       notifyListeners();
     });
-
-
   }
 
   List<Product> get giveProducts => _giveProducts;
   List<Product> get takeProducts => _takeProducts;
   List<Comment> get commentContext => _commentContext;
   List<Like> get likeList => _likeList;
-  List<UserName> get username => _userName; /// added
+  List<UserName> get username => _userName;
+
+  /// added
 }

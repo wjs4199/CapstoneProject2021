@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'const.dart';
-
-
+import '../model/const.dart';
 
 class Loading extends StatelessWidget {
   const Loading();
