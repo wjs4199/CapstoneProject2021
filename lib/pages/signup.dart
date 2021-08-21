@@ -34,7 +34,7 @@ class SignUpState extends State<SignUp> {
   }
 
   void isSignedIn() async {
-    this.setState(() {
+    setState(() {
       isLoading = true;
     });
 
@@ -48,7 +48,7 @@ class SignUpState extends State<SignUp> {
       );
     }
 
-    this.setState(() {
+    setState(() {
       isLoading = false;
     });
   }
@@ -57,20 +57,20 @@ class SignUpState extends State<SignUp> {
   Future<UserCredential> handleSignIn() async {
     prefs = await SharedPreferences.getInstance();
 
-    this.setState(() {
+    setState(() {
       isLoading = true;
       isLoggedIn = true;
     });
 
-    GoogleSignInAccount googleUser = await googleSignIn.signIn();
+    var googleUser = await googleSignIn.signIn();
     if (googleUser != null) {
-      GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      var googleAuth = await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      User firebaseUser = (await firebaseAuth.signInWithCredential(credential)).user;
+      var firebaseUser = (await firebaseAuth.signInWithCredential(credential)).user;
 
       if (firebaseUser != null) {
         // Check is already sign up
@@ -92,8 +92,8 @@ class SignUpState extends State<SignUp> {
           await prefs?.setString('username', currentUser.displayName ?? "");
           await prefs?.setString('photoUrl', currentUser.photoURL ?? "");
         } else {
-          DocumentSnapshot documentSnapshot = documents[0];
-          UserChat userChat = UserChat.fromDocument(documentSnapshot);
+          var documentSnapshot = documents[0];
+          var userChat = UserChat.fromDocument(documentSnapshot);
           // Write data to local
           await prefs?.setString('uid', userChat.id);
           await prefs?.setString('username', userChat.nickname);
@@ -101,20 +101,20 @@ class SignUpState extends State<SignUp> {
           await prefs?.setString('aboutMe', userChat.aboutMe);
         }
         await Fluttertoast.showToast(msg: "Sign in success");
-        this.setState(() {
+        setState(() {
           isLoading = false;
         });
 
        // Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(currentUserId: firebaseUser.uid)));
       } else {
-        Fluttertoast.showToast(msg: "Sign in fail");
-        this.setState(() {
+        await Fluttertoast.showToast(msg: "Sign in fail");
+        setState(() {
           isLoading = false;
         });
       }
     } else {
-      Fluttertoast.showToast(msg: "Can not init google sign in");
-      this.setState(() {
+      await Fluttertoast.showToast(msg: "Can not init google sign in");
+      setState(() {
         isLoading = false;
       });
     }
@@ -166,10 +166,7 @@ class SignUpState extends State<SignUp> {
 
 
                   await handleSignIn().then((value) {
-
-
-                    ///document ID 불러오는 것 다시 할 것
-                    //print('User: ' + value.user.displayName);
+                    print('User: ' + value.user.displayName);
                    /*
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Authenticated\n',
@@ -211,7 +208,7 @@ class SignUpState extends State<SignUp> {
                        // isLogged = true;
 
                         if(isLoggedIn){
-                          await textEditingController1.clear();
+                          textEditingController1.clear();
                           await Navigator.push(
                               context,
                               MaterialPageRoute(
