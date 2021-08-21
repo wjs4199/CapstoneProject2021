@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
+//import 'package:intl/intl.dart';
 
 import '../model/product.dart';
 import '../main.dart';
+import '../pages/comment.dart';
 
 class DetailPage extends StatefulWidget {
 
@@ -24,6 +25,29 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
+
+  /// 프로필 사진 url retrieve 용
+  String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
+
+  var appbarIconColor = true;
+
+  void appbarColor(bool ImageExist) {
+    setState(() {
+      if(ImageExist) {
+        appbarIconColor = true;
+      } else {
+        appbarIconColor = false;
+      }
+    });
+  }
+
+  /// comment 적는 텍스트 칸이 빈칸인지 아닌지 분별할 때 사용됨
+  final _commentFormKey = GlobalKey<FormState>(debugLabel: '_CommentState');
+
+  /// comment 를 적는 텍스트 상자의 상태를 control 할 때 사용
+  final _commentController = TextEditingController();
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -139,8 +163,113 @@ class _DetailPageState extends State<DetailPage> {
        }
      }*/
 
+    /// 현재시간 - 게시글 마지막 수정 시간 계산하여 내보내는 위젯
+    String calculateTime() {
+      var time =
+        DateTime(
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day).difference(
+            DateTime(
+                product.modified.toDate().year,
+                product.modified.toDate().month,
+                product.modified.toDate().day)
+        ).inDays;
 
-    ///************************* comments 기능 구현부분 *************************///
+      /// 하루가 안지났을 때
+      if(time < 1) {
+        time = DateTime(
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day).difference(
+            DateTime(
+                product.modified.toDate().year,
+                product.modified.toDate().month,
+                product.modified.toDate().day)
+        ).inHours;
+        /// 한시간도 안지났을 때
+        if(time< 1){
+          time = DateTime(
+              DateTime.now().year,
+              DateTime.now().month,
+              DateTime.now().day).difference(
+              DateTime(
+                  product.modified.toDate().year,
+                  product.modified.toDate().month,
+                  product.modified.toDate().day)
+          ).inMinutes;
+          /// 1분도 안지났을 때
+          if(time<1){
+            time = DateTime(
+                DateTime.now().year,
+                DateTime.now().month,
+                DateTime.now().day).difference(
+                DateTime(
+                    product.modified.toDate().year,
+                    product.modified.toDate().month,
+                    product.modified.toDate().day)
+            ).inSeconds;
+            return '$time초 전';
+          } else {
+            return '$time분 전';
+          }
+        } else {
+            return '$time시간 전';
+          }
+      } /// 7일이 안지났을 때
+      else if(time < 7) {
+        return '$time일 전';
+      }
+      /// 일주일 이상 지났고 한달 미만의 시간이 지났을 떄
+      else if(time >= 7 && time < 30) {
+        time = DateTime(
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day).difference(
+            DateTime(
+                product.modified.toDate().year,
+                product.modified.toDate().month,
+                product.modified.toDate().day)
+        ).inDays;
+        if(time < 14){
+          return '1주 전';
+        } else if(time < 21){
+          return '2주 전';
+        } else if(time< 28){
+          return '3주 전';
+        } else if(time< 30){
+          return '한달 전';
+        }
+      } /// 한달이상 지났을 때
+      else if (time >= 30) {
+        time = DateTime(
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day).difference(
+            DateTime(
+                product.modified.toDate().year,
+                product.modified.toDate().month,
+                product.modified.toDate().day)
+        ).inDays;
+        if(time <= 60) {
+          return '한달 전';
+        } else if (time <= 90) {
+          return '두달 전';
+        } else if (time <= 120) {
+          return '세달 전';
+        } else if (time <= 150) {
+          return '네달 전';
+        } else if (time <= 150) {
+          return '다섯달 전';
+        } else if (time <= 180) {
+          return '반년 전';
+        } else {
+          return '오래 된 글';
+        }
+      } else {
+        return '오래 된 글';
+      }
+    }
 
     /// 'comments' Collection 참조
     /// editted
@@ -151,517 +280,399 @@ class _DetailPageState extends State<DetailPage> {
     Future<void> addComments(String comment) {
       return comments
           .add({
+
             'userName': FirebaseAuth.instance.currentUser.displayName,
             'comment': comment,
             'created': FieldValue.serverTimestamp(), ///editted
           })
+      })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
     }
 
-    /// comment 삭제기능 (구현이 안됨 -> 다시 짜기)
-    Future<void> deleteComments() async {
-      try {
-        return await FirebaseFirestore.instance
-            .collection('comments/$productId/commentList')
-            .doc(productId)
-            .delete();
-      } on Exception {
-        return null;
-      }
-    }
-
     /// Add 페이지 화면 구성
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.cyan,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            semanticLabel: 'back',
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text('Detail'),
-        centerTitle: true,
-        actions: <Widget>[
-          if (FirebaseAuth.instance.currentUser.uid == product.uid)
-            IconButton(
-                icon: Icon(
-                  Icons.create,
-                  semanticLabel: 'edit',
-                ),
-                onPressed:
-                    (FirebaseAuth.instance.currentUser.uid == product.uid)
-                        ? () => Navigator.pushNamed(
-                              context,
-                              '/edit/' + productId + '/' + detailGiveOrTake,
-                            )
-                        : null),
-          if (FirebaseAuth.instance.currentUser.uid == product.uid)
-            IconButton(
-                icon: Icon(
-                  Icons.delete,
-                  semanticLabel: 'delete',
-                ),
-                onPressed: (FirebaseAuth.instance.currentUser.uid ==
-                        product.uid)
-                    ? () => showDialog(
-                        context: context,
-                        builder: (BuildContext context) => CupertinoAlertDialog(
-                              title: Text('Deleting Item'),
-                              content: Text(
-                                  'Are you sure that you want to delete this item?'),
-                              actions: <Widget>[
-                                CupertinoDialogAction(
-                                  isDefaultAction: true,
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text('No'),
-                                ),
-                                Consumer<ApplicationState>(
-                                  builder: (context, appState, _) =>
-                                      CupertinoDialogAction(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      deleteProduct()
-                                          .then((value) => appState.init())
-                                          .catchError((error) => null)
-                                          .whenComplete(
-                                              () => Navigator.pop(context));
-                                    },
-                                    child: Text('Yes'),
-                                  ),
-                                )
-                              ],
-                            ))
-                    : null)
-        ],
-      ),
       body: SafeArea(
-        child: ListView(
-          children: [
-            Consumer<ApplicationState>(
-              builder: (context, appState, _) => Container(
-                width: MediaQuery.of(context).size.width,
-                child: FutureBuilder(
-                  future: downloadURL(productId),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Column(
-                        children: [
-                          SizedBox(height: 50),
-                          Center(child: CircularProgressIndicator()),
-                          SizedBox(height: 48),
-                        ],
-                      );
-                    } else {
-                      if (snapshot.hasData) {
-                        return Image.network(snapshot.data.toString(),
-                            fit: BoxFit.fitWidth);
-                      } else if (snapshot.hasData == false) {
-                        return Image.asset('assets/logo.png');
-                      } else {
-                        return Container(
-                          child: Text('Snapshot Error!'),
-                        );
-                      }
-                    }
-                  },
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
+            children: [
+              ListView(
+                  children: [
+                    Stack(
                       children: [
-                        SizedBox(height: 8.0),
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 8,
-                              child: Text(
-                                product.category,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Color(0xff3792cb),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: StreamBuilder<QuerySnapshot>(
-                                stream: likes.snapshots(),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                                  if (snapshot.hasError) {
-                                    return Text('Error!');
+                        Consumer<ApplicationState>(
+                          builder: (context, appState, _) =>
+                              FutureBuilder(
+                                future: downloadURL(productId),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return Column(
+                                      children: [
+                                        SizedBox(height: 50),
+                                        Center(child: CircularProgressIndicator()),
+                                        SizedBox(height: 48),
+                                      ],
+                                    );
+                                  } else {
+                                    if (snapshot.hasData) {
+                                      appbarIconColor = true;
+                                      return Stack(
+                                        children: [
+                                          Container(
+                                            height: MediaQuery.of(context).size.height * 0.5,
+                                            width: MediaQuery.of(context).size.width,
+                                            color: Color(0xffced3d0),
+                                          ),
+                                          Container(
+                                              height: MediaQuery.of(context).size.height * 0.5,
+                                              width: MediaQuery.of(context).size.width,
+                                              child: Image.network(snapshot.data.toString(),
+                                                  fit: BoxFit.fitWidth)
+                                          )
+                                        ],
+                                      );
+                                    } else if (snapshot.hasData == false) {
+
+                                      return Container(height: 35,);
+                                    } else {
+                                      return Container(
+                                        child: Text('Snapshot Error!'),
+                                      );
+                                    }
                                   }
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return Text('Loading');
-                                  }
-                                  var count = snapshot.data.size;
-                                  return Row(
-                                    children: [
-                                      IconButton(
-                                        icon: Icon(
-                                          (isLiked(snapshot))
-                                              ? Icons.favorite
-                                              : Icons.favorite_outlined,
-                                          color: Colors.red,
-                                          semanticLabel: 'like',
-                                        ),
-                                        onPressed: () => (isLiked(snapshot))
-                                            ? print('You can only like once!')
-                                            : addLike(),
-                                      ),
-                                      Text(count.toString())
-                                    ],
-                                  );
                                 },
                               ),
+                        ),
+                        AppBar(
+                          foregroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          backgroundColor: Colors.transparent,
+                          leading: IconButton(
+                            color: appbarIconColor? Color(0xffeeeeee) : Colors.black,
+                            iconSize: 35,
+                            icon: Icon(
+                              Icons.arrow_back,
+                              semanticLabel: 'back',
                             ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          actions: <Widget>[
+                            if (FirebaseAuth.instance.currentUser.uid == product.uid)
+                              IconButton(
+                                  iconSize: 30,
+                                  icon: Icon(
+                                    Icons.create,
+                                    semanticLabel: 'edit',
+                                    color: Color(0xffeeeeee),
+                                  ),
+                                  onPressed:
+                                  (FirebaseAuth.instance.currentUser.uid == product.uid)
+                                      ? () => Navigator.pushNamed(
+                                    context,
+                                    '/edit/' + productId + '/' + detailGiveOrTake,
+                                  )
+                                      : null),
+                            if (FirebaseAuth.instance.currentUser.uid == product.uid)
+                              IconButton(
+                                  color: Color(0xffeeeeee),
+                                  iconSize: 30,
+                                  icon: Icon(
+                                    Icons.delete,
+                                    semanticLabel: 'delete',
+                                  ),
+                                  onPressed: (FirebaseAuth.instance.currentUser.uid ==
+                                      product.uid)
+                                      ? () => showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) => CupertinoAlertDialog(
+                                        title: Text('게시글 삭제'),
+                                        content: Text(
+                                            '정말 이 게시글을 삭제하시겠습니까?'),
+                                        actions: <Widget>[
+                                          CupertinoDialogAction(
+                                            isDefaultAction: true,
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text('아니오'),
+                                          ),
+                                          Consumer<ApplicationState>(
+                                            builder: (context, appState, _) =>
+                                                CupertinoDialogAction(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                    deleteProduct()
+                                                        .then((value) => appState.init())
+                                                        .catchError((error) => null)
+                                                        .whenComplete(
+                                                            () => Navigator.pop(context));
+                                                  },
+                                                  child: Text('네'),
+                                                ),
+                                          )
+                                        ],
+                                      ))
+                                      : null)
                           ],
                         ),
-                        Divider(thickness: 1.0),
-                        SizedBox(height: 8.0),
-                        Text(
-                          product.title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: Color(0xff296d98),
-                          ),
+                      ],
+                    ),
+                    /// 사진 밑의 게시글 내용들
+                    Row(
+                      children: [
+                        SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 20.0),
+                                /// 게시자 사진, 이름 , 시간
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    /// 게시자 사진
+                                    CircleAvatar(
+                                      radius: 21.0,
+                                      backgroundImage:
+                                      NetworkImage(photoUrl.replaceAll('s96-c', 's400-c')),
+                                    ),
+                                    SizedBox(width: 10.0),
+                                    SizedBox(
+                                      height: 40,
+                                      child:
+                                      /// 이름과 시간
+                                      RichText(
+                                        text: TextSpan(
+                                            style: TextStyle(
+                                              fontFamily: 'Roboto_Black',
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            children: <TextSpan>[
+                                              TextSpan(
+                                                text: '${product.userName}\n',
+                                                style: TextStyle(
+                                                  fontFamily: 'Roboto_Bold',
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18,
+                                                  height: 1,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: '${calculateTime()}',
+                                                style: TextStyle(
+                                                  fontFamily: 'Roboto_Bold',
+                                                  color: Colors.grey,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                  height: 1.55,
+                                                ),
+                                              )
+                                            ]
+                                        ),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(height: 9.0),
+                                Divider(thickness: 1.0),
+                                SizedBox(height: 9.0),
+                                Row(
+                                  children: [
+                                    RichText(
+                                      text: TextSpan(
+                                          style: TextStyle(
+                                            fontFamily: 'Roboto_Black',
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text: '${product.title}\n',
+                                              style: TextStyle(
+                                                fontFamily: 'Roboto_Bold',
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 22,
+                                                height: 1,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: '${product.category} · ${calculateTime()}\n\n',
+                                              style: TextStyle(
+                                                fontFamily: 'Roboto_Bold',
+                                                color: Colors.grey,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                height: 1.6,
+                                              ),
+                                            ),
+                                          ]
+                                      ),
+                                      textAlign: TextAlign.start,
+                                    ),
+                                  ],
+                                ),
+                                /// 게시글 내용
+                                Text(
+                                  product.content ?? product.content,
+                                  style: TextStyle(
+                                    fontFamily: 'Roboto_Bold',
+                                    color: Colors.black,
+                                    //fontWeight: FontWeight.bold,
+                                    fontSize: 17,
+                                    height: 1.5,
+                                  ),
+                                ),
+                                StreamBuilder<QuerySnapshot>(
+                                  stream: likes.snapshots(),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    if (snapshot.hasError) {
+                                      return Text('Error!');
+                                    }
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return Text('Loading');
+                                    }
+                                    var count = snapshot.data.size;
+                                    return Text(
+                                      '\n\n조회 5회 · 좋아요 $count회',
+                                      style: TextStyle(
+                                        fontFamily: 'Roboto_Bold',
+                                        color: Colors.grey,
+                                        //fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                        height: 1,
+                                      ),
+                                    );
+                                  },
+                                ),
+                                SizedBox(height: 9.0),
+                                Divider(thickness: 1.0),
+                              ]),
                         ),
-                        SizedBox(height: 8.0),
-                        Divider(thickness: 1.0),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              product.userName.toString() +
-                                  '                            ',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xff296d98),
-                              ),
-                            ),
-                            Text(
-                              DateFormat('yyyy.MM.dd HH:mm')
-                                  .format(product.modified.toDate()),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xff296d98),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Divider(thickness: 1.0),
-                        SizedBox(height: 8.0),
-                        Text(
-                          product.content ?? product.content,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Color(0xff3792cb),
-                          ),
-                        ),
-                        Divider(thickness: 1.0),
-                      ]),
-                ),
-                SizedBox(width: 12),
-              ],
-            ),
-            Container(
-                padding: const EdgeInsets.all(8.0),
-                child: CommentBook(
-                  addComments: (String comment) => addComments(comment),
-                  deleteComments: () => deleteComments(),
-                  detailGiveOrTake: detailGiveOrTake,
-                  productId: productId,
-                  userName: userName,
-                ))
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class CommentBook extends StatefulWidget {
-  CommentBook(
-      {this.addComments,
-      this.detailGiveOrTake,
-      this.productId,
-      this.deleteComments,
-      this.userName}); //, required this.dates
-  final Future<void> Function(String message) addComments;
-  final Future<void> Function() deleteComments;
-  final String productId;
-  final String detailGiveOrTake;
-  final String userName;
-
-  @override
-  _CommentBookState createState() => _CommentBookState();
-}
-
-class _CommentBookState extends State<CommentBook> {
-  final _commentFormKey = GlobalKey<FormState>(debugLabel: '_CommentState');
-  final _commentController = TextEditingController();
-
-  Future<String> convertDateTime(Timestamp time) async {
-    //await Future.delayed(Duration(seconds: 1));
-    try {
-      return DateFormat('MM.dd HH:mm').format(time.toDate());
-    } on Exception {
-      return null;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var comments =
-        Provider.of<ApplicationState>(context, listen: false).commentContext;
-
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Form(
-        key: _commentFormKey,
-        child: Row(
-          children: [
-            Expanded(
-                child: Padding(
-              padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
-              child: TextFormField(
-                controller: _commentController,
-                decoration: const InputDecoration(
-                  hintText: 'Leave a comment',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Enter your message to continue';
-                  }
-                  return null;
-                },
+                        SizedBox(width: 20),
+                      ],
+                    ),
+                    /// 게시물 내용 아래 댓글들
+                    Container(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CommentBook(
+                          detailGiveOrTake: detailGiveOrTake,
+                          productId: productId,
+                        )
+                    )
+                  ]
               ),
-            )),
-            SizedBox(width: 3),
-            IconButton(
-              icon: const Icon(Icons.comment),
-              iconSize: 38,
-              color: Colors.cyan,
-              onPressed: () async {
-                var currentFocus = FocusScope.of(context);
-                currentFocus.unfocus();
-                setState(() {
-                  if (_commentFormKey.currentState.validate()) {
-                    widget
-                        .addComments(_commentController.text)
-                        .then((value) => print('addcomment ok!'));
-                    _commentController.clear();
-                    Provider.of<ApplicationState>(context, listen: false)
-                        .detailPageUid(
-                            widget.productId, widget.detailGiveOrTake);
-                    print('clear!');
-                  }
-                });
-              },
-            ),
-          ],
-        ),
-      ),
-      SizedBox(height: 8),
-      for (var eachComment in comments)
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Padding(
-              padding: const EdgeInsets.fromLTRB(10.0, 5, 0.0, 13),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.lightBlue,
-                    radius: 15,
-                    child: Image.asset('assets/userDefault.png'),
-                    //backgroundColor: Colors.
-                  ),
-                  SizedBox(width: 7.0),
-                  FutureBuilder(
-                    future: convertDateTime(eachComment.created),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Column(
-                          children: [
-                            SizedBox(
-                                width: 5,
-                                height: 5,
-                                child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.grey),
-                                  strokeWidth: 1.0,
-                                )),
-                          ],
-                        );
-                      } else {
-                        if (snapshot.hasData) {
-                          return Text(eachComment.userName,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.black,
-                              ));
-                        } else if (snapshot.hasData == false) {
-                          return Text('알수없음',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey,
-                              ));
-                        } else {
-                          return Container(
-                            child: Text('Snapshot Error!'),
-                          );
-                        }
-                      }
-                    },
-                  ),
-                  Expanded(
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                        //
-                        _buildCommentToggleButtons(
-                            context,
-                            Provider.of<ApplicationState>(context,
-                                listen: false)),
-                        SizedBox(width: 10),
-                      ]))
-                ],
-              )),
-          Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-            SizedBox(width: 10.0),
-            RichText(
-                text: TextSpan(
-                    style: DefaultTextStyle.of(context).style,
-                    children: <TextSpan>[
-                  TextSpan(text: eachComment.comment + '\n'),
-                ])),
-          ]),
-          Divider(thickness: 1.0),
-        ])
-    ]);
-  }
-
-  final List<bool> _selections = List.generate(3, (_) => false);
-
-  ToggleButtons _buildCommentToggleButtons(
-      BuildContext context, ApplicationState appState) {
-    return ToggleButtons(
-      color: Colors.black.withOpacity(0.60),
-      constraints: BoxConstraints(
-        minWidth: 25,
-        minHeight: 25,
-      ),
-      selectedBorderColor: Colors.cyan,
-      selectedColor: Colors.cyan,
-      borderRadius: BorderRadius.circular(4.0),
-      isSelected: _selections,
-      onPressed: (int index) {
-        setState(() {
-          if (index == 2) {
-            print('push delete button!');
-            print(FirebaseAuth.instance.currentUser.displayName);
-            print(widget.userName);
-            /////
-            if (FirebaseAuth.instance.currentUser.displayName ==
-                widget.userName) {
-              print('same userName');
-
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) => CupertinoAlertDialog(
-                        title: Text('Deleting Item'),
-                        content: Text(
-                            'Are you sure that you want to delete this comment?'),
-                        actions: <Widget>[
-                          CupertinoDialogAction(
-                            isDefaultAction: true,
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text('No'),
-                          ),
-                          CupertinoDialogAction(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              widget
-                                  .deleteComments()
-                                  .then((value) => appState.init())
-                                  .catchError((error) => null);
-                            },
-                            child: Text('Yes'),
-                          ),
+              /// 고정된 댓글 창
+              Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height * 0.057,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Color(0xffe5e5e5),
+                        boxShadow: [
+                          BoxShadow(color: Color(0xffe5e5e5), spreadRadius: 2),
                         ],
-                      ));
-            } else {
-              null;
-            }
+                      ),
+                      margin: EdgeInsets.fromLTRB(7.0, 7.0, 7.0, 0.0),
+                      child: Form(
+                        key: _commentFormKey,
+                        child: Row(
+                          children: [
+                            StreamBuilder<QuerySnapshot>(
+                              stream: likes.snapshots(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text('Error!');
+                                }
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Text('Loading');
+                                }
+                                return IconButton(
+                                  icon: Icon(
+                                    (isLiked(snapshot))
+                                        ? Icons.favorite
+                                        : Icons.favorite_outlined,
+                                    color: Colors.red,
+                                    semanticLabel: 'like',
+                                  ),
+                                  onPressed: () => (isLiked(snapshot))
+                                      ? print('You can only like once!')
+                                      : addLike(),
+                                );
+                              },
+                            ),
+                            Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
+                                  child: TextFormField(
+                                    controller: _commentController,
+                                    decoration: const InputDecoration(
+                                      focusedBorder: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      errorBorder: InputBorder.none,
+                                      disabledBorder: InputBorder.none,
+                                      hintText: '댓글을 입력하세요',
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return '댓글을 입력하세요';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                )),
+                            SizedBox(width: 3),
+                            IconButton(
+                              icon: const Icon(Icons.send_outlined),
+                              iconSize: 27,
+                              color: Color(0xffc32323),
+                              onPressed: () async {
+                                var currentFocus = FocusScope.of(context);
+                                currentFocus.unfocus();
+                                setState(() {
+                                  if (_commentFormKey.currentState.validate()) {
+                                    addComments(_commentController.text)
+                                        .then((value) => print('add comment ok!'));
+                                    _commentController.clear();
+                                    Provider.of<ApplicationState>(context, listen: false)
+                                        .detailPageUid(
+                                        widget.productId, widget.detailGiveOrTake);
+                                    print('clear!');
+                                  }
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
 
-            /////
-          }
-        });
-      },
+                  ],
+                ),
+              )
+            ],
+          )
 
-/*onPressed: (int index) {
-        setState(() {
-          if (index == 2) {
-            print('push delete button!');
-          }
-        });
-      },*/
 
-//_selections[2] = !_selections[1];
-//나중에는 애타처럼 시간 옆에 손가락 뜨도록 만들기
-/*덧글좋아요 컬랙션에 추가*/
-/*----------------------
-          else {
-            _selections[1] = false;
-          }
-            else if(index == 0){
-              //채팅으로 이동
-            }
-            else if(index == 2){
-              //더보기 -> 삭제, 수정 기능
-            }
-            -----------------------*/
+    ),
 
-/*if (_selections[index] == true) {
-            if (index == 0)
-             //
-            else if (index == 1)
-              //
-            else
-              //
-          } else {
-            //
-          }*/
-
-      children: [
-        Icon(
-          Icons.chat,
-          size: 15,
-        ),
-        Icon(
-          Icons.thumb_up,
-          size: 15,
-        ),
-        Icon(
-          Icons.delete,
-          size: 15,
-        ),
-      ],
+  
     );
   }
 }
+

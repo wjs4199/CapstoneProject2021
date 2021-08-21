@@ -87,6 +87,13 @@ class Application extends StatelessWidget {
 }
 
 class ApplicationState extends ChangeNotifier {
+  
+  ApplicationState() {
+    orderBy = 'All';
+    uid = 'null';
+    init();
+  }
+  
   String orderBy;
   String uid;
   String detailGiveOrTake;
@@ -97,19 +104,13 @@ class ApplicationState extends ChangeNotifier {
   void detailPageUid(String uid, String detailGiveOrTake) {
     this.uid = uid;
     this.detailGiveOrTake = detailGiveOrTake;
-    print("detail page uid -> " + uid);
+    print('detail page uid -> ' + uid);
     init();
   }
 
   void orderByFilter(String orderBy) {
     this.orderBy = orderBy;
-    print("filtering ->  " + orderBy);
-    init();
-  }
-
-  ApplicationState() {
-    orderBy = 'All';
-    uid = "null";
+    print('filtering ->  ' + orderBy);
     init();
   }
 
@@ -145,8 +146,6 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: document.data()['like'],
-            mark: document.data()['mark'],
-            comments: document.data()['comments'],
           ));
         });
         notifyListeners();
@@ -171,8 +170,6 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: document.data()['like'],
-            mark: document.data()['mark'],
-            comments: document.data()['comments'],
           ));
         });
         notifyListeners();
@@ -188,9 +185,7 @@ class ApplicationState extends ChangeNotifier {
           //A non null string must be provided to a text widget
           //밑에는 위의 오류 때문에 넣은 부분
           String content = document.data()['content'];
-          if (content == null) {
-            content = "글 읽기 실패";
-          }
+          content ??= '글 읽기 실패';
           _giveProducts.add(Product(
             id: document.id,
             title: document.data()['title'],
@@ -199,7 +194,7 @@ class ApplicationState extends ChangeNotifier {
             created: document.data()['created'],
             modified: document.data()['modified'],
             userName: document.data()['userName'],
-            uid: document.data()['uid'],
+            uid: document.data()['uid'], likes: null,
           ));
         });
         notifyListeners();
@@ -221,7 +216,7 @@ class ApplicationState extends ChangeNotifier {
             created: document.data()['created'],
             modified: document.data()['modified'],
             userName: document.data()['userName'],
-            uid: document.data()['uid'],
+            uid: document.data()['uid'], likes: null,
           ));
         });
         notifyListeners();
@@ -233,7 +228,7 @@ class ApplicationState extends ChangeNotifier {
     // comments들을 하위 콜랙션으로 만들면 더 편해지지 않을 까요?
     // 그리고 comments는 댓글 달릴 때마다 업데이트 시켜줘야하는 부분이니까 지금처럼 init()
     // 함수 내에 있을 게 아니라 다른 함수로 빼줘야하지 않을 까요?
-    if (uid != "null") {
+    if (uid != 'null') {
       FirebaseFirestore.instance
           .collection('giveProducts/' + uid + '/comment') ///edited
           .orderBy('created', descending: true)
@@ -246,6 +241,7 @@ class ApplicationState extends ChangeNotifier {
             comment: document.data()['comment'],
             created: document.data()['time'], ///edited
             //   isDeleted: document.data()['idDeleted'],
+
           ));
         });
         notifyListeners();

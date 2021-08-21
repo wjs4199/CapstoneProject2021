@@ -14,16 +14,22 @@ import 'package:giveandtake/pages/chat.dart';
 import 'package:giveandtake/pages/login.dart';
 import 'package:giveandtake/model/user_chat.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:intl/intl.dart';
-import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 import '../main.dart';
 import '../model/product.dart';
 import '../components/postTile.dart';
+import 'views/0_home_view.dart';
+import 'views/1_nanum_view.dart';
+import 'views/2_request_view.dart';
+import 'views/3_msg_view.dart';
+import 'views/4_my_view.dart';
 
+// home
 class HomePage extends StatefulWidget {
 final String currentUserId;
 HomePage({Key key, @required this.currentUserId}) : super(key: key);
@@ -31,7 +37,6 @@ HomePage({Key key, @required this.currentUserId}) : super(key: key);
   @override
   State createState() => HomePageState(currentUserId: currentUserId);
 }
-
 class HomePageState extends State<HomePage> {
   HomePageState({Key key, @required this.currentUserId});
   final String currentUserId;
@@ -224,8 +229,7 @@ class HomePageState extends State<HomePage> {
 
 
 
-
-
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -246,7 +250,8 @@ class HomePageState extends State<HomePage> {
                   },
 
                   /// _selectedIndex 값에 따른 페이지(상응 위젯) 출력
-                  children: _buildWidgetOptions(context, appState),
+                  children:
+                      _buildWidgetOptions(context, appState, _selectedIndex),
                 ),
               ),
             ),
@@ -311,11 +316,13 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  /// Index 별 위젯 반환: (순서: 0-홈, 1-나눔, 2-메신저, 3-My)
+  /// ***작업중***
+  /// Index 별 위젯 반환: (순서: 0-홈, 1-나눔, 2-나눔요청, 3-메신저, 4-My)
   List<Widget> _buildWidgetOptions(
-      BuildContext context, ApplicationState appState) {
+      BuildContext context, ApplicationState appState, int selectedIndex) {
     var _widgetOptions = <Widget>[
       /// 0(홈):
+
       CustomScrollView(
         physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics()),
@@ -792,69 +799,85 @@ class HomePageState extends State<HomePage> {
           )
         ],
       ),
+
+      HomeView(context, appState, selectedIndex),
+
+      /// 1(나눔):
+      NanumView(context, appState, selectedIndex, _tabController),
+
+      /// 2(나눔요청):
+      RequestView(context, appState, selectedIndex, _tabController),
+
+      /// 3(메신저):
+      MsgView(context, appState, selectedIndex),
+
+      /// 4(MyPage):
+      MyView(context, appState, selectedIndex)
+
     ];
     return _widgetOptions;
   }
 
-  /// 필터링 기능을 토글버튼화하여 버튼바로 생성
-  ToggleButtons _buildToggleButtons(
-      BuildContext context, ApplicationState appState) {
-    return ToggleButtons(
-      color: Colors.black.withOpacity(0.60),
-      constraints: BoxConstraints(
-        minWidth: 30,
-        minHeight: 30,
-      ),
-      selectedBorderColor: Colors.cyan,
-      selectedColor: Colors.cyan,
-      borderRadius: BorderRadius.circular(4.0),
-      isSelected: _selections,
-      onPressed: (int index) {
-        setState(() {
-          for (int buttonIndex = 0;
-              buttonIndex < _selections.length;
-              buttonIndex++) {
-            if (buttonIndex == index) {
-              _selections[buttonIndex] = !_selections[buttonIndex];
-            } else {
-              _selections[buttonIndex] = false;
-            }
-          }
-          if (_selections[index] == true) {
-            if (index == 0)
-              appState.orderByFilter('Product');
-            else if (index == 1)
-              appState.orderByFilter('Time');
-            else
-              appState.orderByFilter('Talent');
-          } else {
-            appState.orderByFilter('All');
-          }
-        });
-      },
-      children: [
-        Icon(
-          Icons.shopping_bag,
-          size: 20,
-        ),
-        Icon(
-          Icons.access_time,
-          size: 20,
-        ),
-        Icon(
-          Icons.school,
-          size: 20,
-        ),
-      ],
-    );
-  }
+  // /// 필터링 기능을 토글버튼화하여 버튼바로 생성
+  // ToggleButtons _buildToggleButtons(
+  //     BuildContext context, ApplicationState appState) {
+  //   return ToggleButtons(
+  //     color: Colors.black.withOpacity(0.60),
+  //     constraints: BoxConstraints(
+  //       minWidth: 30,
+  //       minHeight: 30,
+  //     ),
+  //     selectedBorderColor: Colors.cyan,
+  //     selectedColor: Colors.cyan,
+  //     borderRadius: BorderRadius.circular(4.0),
+  //     isSelected: _selections,
+  //     onPressed: (int index) {
+  //       setState(() {
+  //         for (var buttonIndex = 0;
+  //             buttonIndex < _selections.length;
+  //             buttonIndex++) {
+  //           if (buttonIndex == index) {
+  //             _selections[buttonIndex] = !_selections[buttonIndex];
+  //           } else {
+  //             _selections[buttonIndex] = false;
+  //           }
+  //         }
+  //         if (_selections[index] == true) {
+  //           if (index == 0) {
+  //             appState.orderByFilter('Product');
+  //           } else if (index == 1) {
+  //             appState.orderByFilter('Time');
+  //           } else {
+  //             appState.orderByFilter('Talent');
+  //           }
+  //         } else {
+  //           appState.orderByFilter('All');
+  //         }
+  //       });
+  //     },
+  //     children: [
+  //       Icon(
+  //         Icons.shopping_bag,
+  //         size: 20,
+  //       ),
+  //       Icon(
+  //         Icons.access_time,
+  //         size: 20,
+  //       ),
+  //       Icon(
+  //         Icons.school,
+  //         size: 20,
+  //       ),
+  //     ],
+  //   );
+  // }
 
   /// FloatingActionButton 생성기
   FloatingActionButton buildFAB() {
     if (_selectedIndex == 0) {
       return FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/giveadd');
+          Navigator.pushNamed(context, '/add');
         },
         backgroundColor: Colors.cyan,
         child: Icon(Icons.add),
@@ -862,7 +885,15 @@ class HomePageState extends State<HomePage> {
     } else if (_selectedIndex == 1) {
       return FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/takeadd');
+          Navigator.pushNamed(context, '/add');
+        },
+        backgroundColor: Colors.cyan,
+        child: Icon(Icons.add),
+      );
+    } else if (_selectedIndex == 2) {
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/add');
         },
         backgroundColor: Colors.cyan,
         child: Icon(Icons.add),
@@ -871,8 +902,8 @@ class HomePageState extends State<HomePage> {
     return null;
   }
 
-  /// ToggleButtons - 각 버튼용 bool list 생성
-  final List<bool> _selections = List.generate(3, (_) => false);
+  // /// ToggleButtons - 각 버튼용 bool list 생성
+  // final List<bool> _selections = List.generate(3, (_) => false);
 
   /// Builder Widget for Bottom Navigation Bar
   BottomNavigationBar buildNavBar(BuildContext context) {
@@ -896,6 +927,10 @@ class HomePageState extends State<HomePage> {
           label: '나눔',
         ),
         BottomNavigationBarItem(
+          icon: Icon(Icons.accessibility_new),
+          label: '나눔요청',
+        ),
+        BottomNavigationBarItem(
           icon: Icon(Icons.messenger),
           label: '메신저',
         ),
@@ -910,13 +945,10 @@ class HomePageState extends State<HomePage> {
   /// Drawer 관련 Scaffold Key
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  /// 프로필 사진 url retrieve 용
-  String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
-  // String highResUrl = photoUrl.replaceAll('s96-c', 's400-c'); // 고해상도
-
   ///* ----------------- BottomNavigationBar, PageView 관련 ----------------- *///
   /// PaveView 용 controller
   PageController _pageController;
+  TabController _tabController;
 
   /// 현재 선택된 인덱스값 (첫번째 인덱스로 초기화)
   int _selectedIndex = 0;
@@ -938,6 +970,7 @@ class HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   */
@@ -946,6 +979,7 @@ class HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _pageController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -1125,7 +1159,7 @@ class PostTileMaker extends StatelessWidget {
               subtitle: _product.content,
               author: _product.userName,
               publishDate: snapshot.data,
-              category: _product.category,
+              // category: _product.category,
               likes: _product.likes,
               thumbnail: FutureBuilder(
                 future: downloadURL(_product.id),
@@ -1135,7 +1169,7 @@ class PostTileMaker extends StatelessWidget {
                   } else {
                     if (snapshot.hasData) {
                       return ClipRRect(
-                        borderRadius: new BorderRadius.circular(8.0),
+                        borderRadius: BorderRadius.circular(8.0),
                         child: Image.network(snapshot.data.toString(),
                             fit: BoxFit.fitWidth),
                       );
