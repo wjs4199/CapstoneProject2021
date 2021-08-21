@@ -1,31 +1,30 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:giveandtake/model/product.dart';
+import 'package:giveandtake/pages/signup.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 
-// For Google Sign in
-Future<UserCredential> signInWithGoogle() async {
-  // Trigger the authentication flow
-  final googleUser = await GoogleSignIn().signIn();
-  // Obtain the auth details from the request
-  final googleAuth = await googleUser.authentication;
-  // Create a new credential
-  final credential = GoogleAuthProvider.credential(
-    accessToken: googleAuth.accessToken,
-    idToken: googleAuth.idToken,
-  );
-  // Once signed in, return the UserCredential
-  return await FirebaseAuth.instance.signInWithCredential(credential);
-}
+import '../main.dart';
+
+import 'home.dart';
 
 class LoginPage extends StatefulWidget {
+
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)  {
+
+
     return Scaffold(
       body: SafeArea(
         child: ListView(
@@ -46,37 +45,15 @@ class _LoginPageState extends State<LoginPage> {
               child: ElevatedButton.icon(
                 label: Text('Sign in with Google'),
                 icon: Icon(Icons.android),
-                onPressed: () {
+                onPressed: ()   async {
                   // Sign in with Google account,
                   // Traditional style (then, catchError) used here
-                  signInWithGoogle().then((value) {
-                    print('User: ' + value.user.displayName);
-                    // Display User Info with SnackBar
-                    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    //   content: Text('Welcome, ' + value.user.displayName + '!'),
-                    //   behavior: SnackBarBehavior.fixed,
-                    //   duration: Duration(seconds: 1),
-                    // ));
-                    Navigator.pop(context);
-                  }).catchError((error) {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) => CupertinoAlertDialog(
-                              title: Text("Login Failed"),
-                              content: Text(
-                                  "You must complete your\nGoogle sign in procedures."),
-                              actions: <Widget>[
-                                CupertinoDialogAction(
-                                  isDefaultAction: true,
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("Dismiss"),
-                                ),
-                              ],
-                            ));
-                    print('error: $error');
-                  });
+                  await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => SignUp()));
+
+
                 },
                 style: ElevatedButton.styleFrom(
                   primary: Colors.cyan,
@@ -92,3 +69,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+

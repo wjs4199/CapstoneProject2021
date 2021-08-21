@@ -78,7 +78,7 @@ class _DetailPageState extends State<DetailPage> {
       if (products[i].id == productId) {
         product = products[i];
         productFound = true;
-
+        print(products.length);
         print(product.userName);
         print(product.uid);
       }
@@ -272,16 +272,19 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     /// 'comments' Collection 참조
+    /// editted
     CollectionReference comments = FirebaseFirestore.instance
-        .collection('comments/' + productId + '/commentList');
+        .collection('giveProducts/' + productId + '/comment');
 
     /// comment 추가 기능
     Future<void> addComments(String comment) {
       return comments
           .add({
-        'userName': FirebaseAuth.instance.currentUser.displayName,
-        'comment': comment,
-        'time': FieldValue.serverTimestamp(),
+
+            'userName': FirebaseAuth.instance.currentUser.displayName,
+            'comment': comment,
+            'created': FieldValue.serverTimestamp(), ///editted
+          })
       })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
@@ -668,274 +671,7 @@ class _DetailPageState extends State<DetailPage> {
 
     ),
 
-      /*Expanded(
-                                  flex: 12,
-                                  child: Text(
-                                    product.title,
-                                    style: TextStyle(
-                                      fontFamily: 'Roboto_Bold',
-                                      fontSize: 19,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 3,
-                                  child: StreamBuilder<QuerySnapshot>(
-                                    stream: likes.snapshots(),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                                      if (snapshot.hasError) {
-                                        return Text('Error!');
-                                      }
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return Text('Loading');
-                                      }
-                                      var count = snapshot.data.size;
-                                      return Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(
-                                              (isLiked(snapshot))
-                                                  ? Icons.favorite
-                                                  : Icons.favorite_outlined,
-                                              color: Colors.red,
-                                              semanticLabel: 'like',
-                                            ),
-                                            onPressed: () => (isLiked(snapshot))
-                                                ? print('You can only like once!')
-                                                : addLike(),
-                                          ),
-                                          Text(count.toString(),
-                                            textAlign: TextAlign.start,
-                                            style: TextStyle(
-                                              fontSize: 16
-                                            ),
-                                          )
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ),*/
-
-    /*appBar: AppBar(
-        backgroundColor: Colors.cyan,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            semanticLabel: 'back',
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text('Detail'),
-        centerTitle: true,
-        actions: <Widget>[
-          if (FirebaseAuth.instance.currentUser.uid == product.uid)
-            IconButton(
-                icon: Icon(
-                  Icons.create,
-                  semanticLabel: 'edit',
-                ),
-                onPressed:
-                    (FirebaseAuth.instance.currentUser.uid == product.uid)
-                        ? () => Navigator.pushNamed(
-                              context,
-                              '/edit/' + productId + '/' + detailGiveOrTake,
-                            )
-                        : null),
-          if (FirebaseAuth.instance.currentUser.uid == product.uid)
-            IconButton(
-                icon: Icon(
-                  Icons.delete,
-                  semanticLabel: 'delete',
-                ),
-                onPressed: (FirebaseAuth.instance.currentUser.uid ==
-                        product.uid)
-                    ? () => showDialog(
-                        context: context,
-                        builder: (BuildContext context) => CupertinoAlertDialog(
-                              title: Text('Deleting Item'),
-                              content: Text(
-                                  'Are you sure that you want to delete this item?'),
-                              actions: <Widget>[
-                                CupertinoDialogAction(
-                                  isDefaultAction: true,
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text('No'),
-                                ),
-                                Consumer<ApplicationState>(
-                                  builder: (context, appState, _) =>
-                                      CupertinoDialogAction(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      deleteProduct()
-                                          .then((value) => appState.init())
-                                          .catchError((error) => null)
-                                          .whenComplete(
-                                              () => Navigator.pop(context));
-                                    },
-                                    child: Text('Yes'),
-                                  ),
-                                )
-                              ],
-                            ))
-                    : null)
-        ],
-      ),
-      body: SafeArea(
-        child: ListView(
-          children: [
-            Consumer<ApplicationState>(
-              builder: (context, appState, _) => Container(
-                width: MediaQuery.of(context).size.width,
-                child: FutureBuilder(
-                  future: downloadURL(productId),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Column(
-                        children: [
-                          SizedBox(height: 50),
-                          Center(child: CircularProgressIndicator()),
-                          SizedBox(height: 48),
-                        ],
-                      );
-                    } else {
-                      if (snapshot.hasData) {
-                        return Image.network(snapshot.data.toString(),
-                            fit: BoxFit.fitWidth);
-                      } else if (snapshot.hasData == false) {
-                        return Image.asset('assets/logo.png');
-                      } else {
-                        return Container(
-                          child: Text('Snapshot Error!'),
-                        );
-                      }
-                    }
-                  },
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 8.0),
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 8,
-                              child: Text(
-                                product.category,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Color(0xff3792cb),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: StreamBuilder<QuerySnapshot>(
-                                stream: likes.snapshots(),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                                  if (snapshot.hasError) {
-                                    return Text('Error!');
-                                  }
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return Text('Loading');
-                                  }
-                                  var count = snapshot.data.size;
-                                  return Row(
-                                    children: [
-                                      IconButton(
-                                        icon: Icon(
-                                          (isLiked(snapshot))
-                                              ? Icons.favorite
-                                              : Icons.favorite_outlined,
-                                          color: Colors.red,
-                                          semanticLabel: 'like',
-                                        ),
-                                        onPressed: () => (isLiked(snapshot))
-                                            ? print('You can only like once!')
-                                            : addLike(),
-                                      ),
-                                      Text(count.toString())
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        Divider(thickness: 1.0),
-                        SizedBox(height: 8.0),
-                        Text(
-                          product.title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: Color(0xff296d98),
-                          ),
-                        ),
-                        SizedBox(height: 8.0),
-                        Divider(thickness: 1.0),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              product.userName.toString() +
-                                  '                            ',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xff296d98),
-                              ),
-                            ),
-                            Text(
-                              DateFormat('yyyy.MM.dd HH:mm')
-                                  .format(product.modified.toDate()),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xff296d98),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Divider(thickness: 1.0),
-                        SizedBox(height: 8.0),
-                        Text(
-                          product.content ?? product.content,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Color(0xff3792cb),
-                          ),
-                        ),
-                        Divider(thickness: 1.0),
-                      ]),
-                ),
-                SizedBox(width: 12),
-              ],
-            ),
-            Container(
-                padding: const EdgeInsets.all(8.0),
-                /// 게시물 내용 아래 comment 다는 부분
-                child: CommentBook(
-                  detailGiveOrTake: detailGiveOrTake,
-                  productId: productId,
-                ))
-          ],
-        ),
-      ),*/
+  
     );
   }
 }
