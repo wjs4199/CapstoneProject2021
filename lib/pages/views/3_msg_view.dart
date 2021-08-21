@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../main.dart';
 
-Widget MsgView(
-    BuildContext context, ApplicationState appState, int selectedIndex) {
+Widget MsgView(BuildContext context, ApplicationState appState) {
   return Text('');
   // return CustomScrollView(
   //     slivers: <Widget>[

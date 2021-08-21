@@ -6,8 +6,7 @@ import 'package:giveandtake/components/headerTile.dart';
 import '../../main.dart';
 import '../home.dart';
 
-Widget HomeView(
-    BuildContext context, ApplicationState appState, int selectedIndex) {
+Widget HomeView(BuildContext context, ApplicationState appState) {
   return CustomScrollView(
     physics:
         const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
@@ -111,7 +110,7 @@ Widget HomeView(
               return Column(
                 children: [
                   SizedBox(height: 5),
-                  PostTileMaker(appState.giveProducts[index], selectedIndex),
+                  PostTileMaker(appState.giveProducts[index], true),
                   SizedBox(height: 5),
                   Divider(
                     height: 1,
@@ -165,7 +164,7 @@ Widget HomeView(
               return Column(
                 children: [
                   SizedBox(height: 5),
-                  PostTileMaker(appState.takeProducts[index], selectedIndex),
+                  PostTileMaker(appState.takeProducts[index], false),
                   SizedBox(height: 5),
                   Divider(
                     height: 1,

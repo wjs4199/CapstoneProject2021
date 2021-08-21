@@ -6,7 +6,7 @@ import '../../main.dart';
 import '../home.dart';
 
 Widget RequestView(BuildContext context, ApplicationState appState,
-    int selectedIndex, TabController tabController) {
+    TabController tabController) {
   return CustomScrollView(
     slivers: <Widget>[
       SliverAppBar(
@@ -86,7 +86,7 @@ Widget RequestView(BuildContext context, ApplicationState appState,
               return Column(
                 children: [
                   SizedBox(height: 5),
-                  PostTileMaker(appState.takeProducts[index], selectedIndex),
+                  PostTileMaker(appState.takeProducts[index], false),
                   SizedBox(height: 5),
                   Divider(
                     height: 1,

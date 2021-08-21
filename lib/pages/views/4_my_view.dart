@@ -8,8 +8,7 @@ import '../../main.dart';
 String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
 // String highResUrl = photoUrl.replaceAll('s96-c', 's400-c'); // 고해상도
 
-Widget MyView(
-    BuildContext context, ApplicationState appState, int selectedIndex) {
+Widget MyView(BuildContext context, ApplicationState appState) {
   return CustomScrollView(
     slivers: <Widget>[
       SliverAppBar(

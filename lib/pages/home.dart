@@ -324,7 +324,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
             onTap: () {
               // - Each menu should be navigated by Named Routes
-              // handleSignOut(); // 오류수정후 탑재
+              /// 오류수정
+              handleSignOut();
             },
           ),
         ],
@@ -337,19 +338,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       BuildContext context, ApplicationState appState, int selectedIndex) {
     var _widgetOptions = <Widget>[
       /// 0(홈):
-      HomeView(context, appState, selectedIndex),
+      HomeView(context, appState),
 
       /// 1(나눔):
-      NanumView(context, appState, selectedIndex, _tabController),
+      NanumView(context, appState, _tabController),
 
       /// 2(나눔요청):
-      RequestView(context, appState, selectedIndex, _tabController),
+      RequestView(context, appState, _tabController),
 
       /// 3(메신저):
-      MsgView(context, appState, selectedIndex),
+      MsgView(context, appState),
 
       /// 4(MyPage):
-      MyView(context, appState, selectedIndex)
+      MyView(context, appState)
     ];
     return _widgetOptions;
   }
@@ -454,7 +455,7 @@ class PostTileMaker extends StatelessWidget {
   PostTileMaker(this._product, this._giveOrTake);
 
   final Product _product;
-  final int _giveOrTake;
+  final bool _giveOrTake;
 
   /// Set name for Firebase Storage
   final firebase_storage.FirebaseStorage storage =
@@ -490,7 +491,7 @@ class PostTileMaker extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        if (_giveOrTake == 0) {
+        if (_giveOrTake) {
           Provider.of<ApplicationState>(context, listen: false)
               .detailPageUid(_product.id, 'giveProducts');
           Navigator.pushNamed(
