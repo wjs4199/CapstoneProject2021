@@ -170,7 +170,7 @@ class _CommentBookState extends State<CommentBook> {
 
     /// comments 나열된 화면 구성
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Form(
+      /*Form(
         key: _commentFormKey,
         child: Row(
           children: [
@@ -213,8 +213,8 @@ class _CommentBookState extends State<CommentBook> {
             ),
           ],
         ),
-      ),
-      SizedBox(height: 8),
+      ),*/
+
       for (var eachComment in commentsList)
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Padding(
