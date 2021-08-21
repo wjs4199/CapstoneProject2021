@@ -1,19 +1,13 @@
 import 'dart:async';
-import 'dart:io' show Platform, exit;
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:giveandtake/model/const.dart';
 import 'package:giveandtake/pages/login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:intl/intl.dart';
-
 import '../main.dart';
 import '../model/product.dart';
 import '../components/postTile.dart';
@@ -30,7 +24,6 @@ class HomePage extends StatefulWidget {
   HomePage({Key key, @required this.currentUserId}) : super(key: key); // 필요X
 
   ///* ------------------------------------------------------------------ *////
-
   @override
   State createState() => _HomePageState(currentUserId: currentUserId);
 }
@@ -44,179 +37,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
 
-  bool isLoading = false;
-  int _limit = 20;
-  final int _limitIncrement = 20;
+ /// bool isLoading = false; handleSign을 위한 변수
 
-  void registerNotification() {
-    firebaseMessaging.requestPermission();
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('onMessage: $message');
-      if (message.notification != null) {
-        showNotification(message.notification);
-      }
-      return;
-    });
 
-    firebaseMessaging.getToken().then((token) {
-      print('token: $token');
-      FirebaseFirestore.instance
-          .collection('UserName')
-          .doc(currentUserId)
-          .update({'pushToken': token});
-    }).catchError((err) {
-      Fluttertoast.showToast(msg: err.message.toString());
-    });
-  }
-
-  void configLocalNotification() {
-    var initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
-    var initializationSettingsIOS = IOSInitializationSettings();
-    var initializationSettings = InitializationSettings(
-        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
-
-  void scrollListener() {
-    if (listScrollController.offset >=
-            listScrollController.position.maxScrollExtent &&
-        !listScrollController.position.outOfRange) {
-      setState(() {
-        _limit += _limitIncrement;
-      });
-    }
-  }
-
-  void showNotification(RemoteNotification remoteNotification) async {
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      Platform.isAndroid
-          ? 'com.dfa.flutterchatdemo'
-          : 'com.duytq.flutterchatdemo',
-      'Flutter chat demo',
-      'your channel description',
-      playSound: true,
-      enableVibration: true,
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
-    var platformChannelSpecifics = NotificationDetails(
-        android: androidPlatformChannelSpecifics,
-        iOS: iOSPlatformChannelSpecifics);
-
-    print(remoteNotification);
-
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      remoteNotification.title,
-      remoteNotification.body,
-      platformChannelSpecifics,
-      payload: null,
-    );
-  }
-
-  Future<bool> onBackPress() {
-    openDialog();
-    return Future.value(false);
-  }
-
-  Future<Null> openDialog() async {
-    // UI 관련은 새로 .dart 생성해서 정의
-    switch (await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return SimpleDialog(
-            contentPadding:
-                EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
-            children: <Widget>[
-              Container(
-                color: themeColor,
-                margin: EdgeInsets.all(0.0),
-                padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
-                height: 100.0,
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(bottom: 10.0),
-                      child: Icon(
-                        Icons.exit_to_app,
-                        size: 30.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      'Exit app',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'Are you sure to exit app?',
-                      style: TextStyle(color: Colors.white70, fontSize: 14.0),
-                    ),
-                  ],
-                ),
-              ),
-              SimpleDialogOption(
-                onPressed: () {
-                  Navigator.pop(context, 0);
-                },
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(right: 10.0),
-                      child: Icon(
-                        Icons.cancel,
-                        color: primaryColor,
-                      ),
-                    ),
-                    Text(
-                      'CANCEL',
-                      style: TextStyle(
-                          color: primaryColor, fontWeight: FontWeight.bold),
-                    )
-                  ],
-                ),
-              ),
-              SimpleDialogOption(
-                onPressed: () {
-                  Navigator.pop(context, 1);
-                },
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(right: 10.0),
-                      child: Icon(
-                        Icons.check_circle,
-                        color: primaryColor,
-                      ),
-                    ),
-                    Text(
-                      'YES',
-                      style: TextStyle(
-                          color: primaryColor, fontWeight: FontWeight.bold),
-                    )
-                  ],
-                ),
-              ),
-            ],
-          );
-        })) {
-      case 0:
-        break;
-      case 1:
-        exit(0);
-    }
-  }
-
-  ///* ------------------------------------------------------------------ *////
 
   /// 시스템 함수에 PageView 기능 반영 처리(1) +@
   @override
@@ -224,9 +52,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     _pageController = PageController();
     _tabController = TabController(length: 2, vsync: this);
-    registerNotification();
-    configLocalNotification();
-    listScrollController.addListener(scrollListener);
+
   }
 
   /// 시스템 함수에 PageView 기능 반영 처리(2)
@@ -258,7 +84,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                   /// _selectedIndex 값에 따른 페이지(상응 위젯) 출력
                   children:
-                      _buildWidgetOptions(context, appState, _selectedIndex),
+                  _buildWidgetOptions(context, appState, _selectedIndex),
                 ),
               ),
             ),
@@ -412,21 +238,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   /// Sign Out (call on null 오류)
   Future<Null> handleSignOut() async {
+    /*
     setState(() {
       isLoading = true;
     });
 
+     */
+
     await FirebaseAuth.instance.signOut();
     await googleSignIn.disconnect();
     await googleSignIn.signOut();
-
+/*
     setState(() {
       isLoading = false;
     });
 
+
+ */
     await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
-        (Route<dynamic> route) => false);
+            (Route<dynamic> route) => false);
   }
 
   ///* ---------------- BottomNavigationBar, PageView 관련 ----------------- *///
@@ -447,7 +278,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
-  ///* -------------------------------------------------------------------- *///
+///* -------------------------------------------------------------------- *///
 }
 
 /// PostTileMaker - 각 게시글 별 postTile Listview.builder(separated) 사용해 자동 생성

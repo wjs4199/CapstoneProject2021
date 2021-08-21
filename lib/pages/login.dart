@@ -1,16 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:giveandtake/model/product.dart';
 import 'package:giveandtake/pages/signup.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:provider/provider.dart';
 
-import '../main.dart';
-
-import 'home.dart';
 
 class LoginPage extends StatefulWidget {
 
@@ -43,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               height: 50.0,
               child: ElevatedButton.icon(
-                label: Text('Sign in with Google'),
+                label: Text('앱 시작하기'),
                 icon: Icon(Icons.android),
                 onPressed: ()   async {
                   // Sign in with Google account,

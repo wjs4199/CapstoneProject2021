@@ -1,14 +1,41 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:giveandtake/pages/login.dart';
 
 import '../../main.dart';
+import '3_msg_view.dart';
 
 /// 프로필 사진 url retrieve 용
 String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
 // String highResUrl = photoUrl.replaceAll('s96-c', 's400-c'); // 고해상도
 
+bool isLoading = false; ///handleSignout 변수
+
 Widget MyView(BuildContext context, ApplicationState appState) {
+
+  Future<Null> handleSignOut() async {
+    /*
+  setState(() {
+    isLoading = true;
+  });
+
+  */
+    ///
+    await FirebaseAuth.instance.signOut();
+    await googleSignIn.disconnect();
+    await googleSignIn.signOut();
+/*
+  setState(() {
+    isLoading = false;
+  });
+
+ */
+
+    await Navigator.of(context)
+        .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => LoginPage()), (Route<dynamic> route) => false);
+  }
+
   return CustomScrollView(
     slivers: <Widget>[
       SliverAppBar(
@@ -35,6 +62,16 @@ Widget MyView(BuildContext context, ApplicationState appState) {
               semanticLabel: 'location',
             ),
             onPressed: () {},
+          ),
+
+          IconButton(
+            icon: Icon(
+              Icons.logout,
+              //semanticLabel: 'location',
+            ),
+            onPressed: () {
+               handleSignOut();
+            },
           ),
         ],
       ),
