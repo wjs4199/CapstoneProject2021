@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -95,7 +96,7 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     /// Firebase Storage 참조 간략화
-    var storage = firebase_storage.FirebaseStorage.instance;
+    var storage = FirebaseStorage.instance;
 
     /// ProductID에 따라 해당하는 image url 다운로드
     Future<String> downloadURL(String id) async {

@@ -1,3 +1,4 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -292,8 +293,7 @@ class PostTileMaker extends StatelessWidget {
   final int _giveOrTake;
 
   /// Set name for Firebase Storage
-  final firebase_storage.FirebaseStorage storage =
-      firebase_storage.FirebaseStorage.instance;
+  final FirebaseStorage storage =FirebaseStorage.instance;
 
   /// Download image url of each product based on id
   Future<String> downloadURL(String id) async {

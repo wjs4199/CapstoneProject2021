@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:image_picker/image_picker.dart';
@@ -44,7 +45,7 @@ class _EditPageState extends State<EditPage> {
   }
 
   /// Firebase Storage 참조 간략화
-  var storage = firebase_storage.FirebaseStorage.instance;
+  var storage = FirebaseStorage.instance;
 
   /// 변경된 사진을 저장할 때 Firebase 에 업로드 시키는 함수
   Future<void> uploadFile(File photo, String id) async {

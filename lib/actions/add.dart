@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -50,8 +51,7 @@ class _AddPageState extends State<AddPage> {
   final _contentController = TextEditingController();
 
   /// Firebase Storage 참조 간략화
-  firebase_storage.FirebaseStorage storage =
-      firebase_storage.FirebaseStorage.instance;
+  FirebaseStorage storage = FirebaseStorage.instance;
 
   /// 현재 유저의 이름 참조 간략화
   var user = FirebaseAuth.instance.currentUser;
