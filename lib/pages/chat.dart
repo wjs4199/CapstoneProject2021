@@ -97,7 +97,7 @@ class ChatScreenState extends State<ChatScreen> {
       });
     }
   }
-
+  /// 상대방과 채팅 연동 부분
   readLocal() async {
     prefs = await SharedPreferences.getInstance();
     id = prefs?.getString('id') ?? '';
@@ -158,9 +158,9 @@ class ChatScreenState extends State<ChatScreen> {
       await Fluttertoast.showToast(msg: e.message ?? e.toString());
     }
   }
-
+///message 보내는 부분
   void onSendMessage(String content, int type) {
-    // type: 0 = text, 1 = image, 2 = sticker
+    /// 보내는 메시지 type: 0 = text, 1 = image(이모티콘, local에 있는 gif_추후에 추가), 2 = sticker
     if (content.trim() != '') {
       textEditingController.clear();
 
