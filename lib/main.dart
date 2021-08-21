@@ -11,6 +11,8 @@ import 'model/product.dart';
 import 'actions/add.dart';
 import 'actions/edit.dart';
 
+///testing
+
 void main() {
   runApp(
     ChangeNotifierProvider(
@@ -117,12 +119,14 @@ class ApplicationState extends ChangeNotifier {
   List<Comment> _commentContext = [];
   List<Like> _likeList = [];
   int likeCount = 0;
+  List<UserName> _userName = []; /// added
 
   Stream<QuerySnapshot> currentStream;
 
   //collection 'giveProducts' 파이어베이스에서 불러오기
   Future<void> init() async {
     // FirebaseFirestore.instance
+
     if (orderBy != 'All') {
       FirebaseFirestore.instance
           .collection('giveProducts')
@@ -226,8 +230,8 @@ class ApplicationState extends ChangeNotifier {
     // 함수 내에 있을 게 아니라 다른 함수로 빼줘야하지 않을 까요?
     if (uid != 'null') {
       FirebaseFirestore.instance
-          .collection('comments/' + uid + '/commentList')
-          .orderBy('time', descending: true)
+          .collection('giveProducts/' + uid + '/comment') ///edited
+          .orderBy('created', descending: true)
           .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
           .listen((snapshot) {
         _commentContext = [];
@@ -235,8 +239,9 @@ class ApplicationState extends ChangeNotifier {
           _commentContext.add(Comment(
             userName: document.data()['userName'],
             comment: document.data()['comment'],
-            time: document.data()['time'],
-            id: document.id,
+            created: document.data()['time'], ///edited
+            //   isDeleted: document.data()['idDeleted'],
+
           ));
         });
         notifyListeners();
@@ -257,11 +262,34 @@ class ApplicationState extends ChangeNotifier {
         likeCount = _likeList.length;
         notifyListeners();
       });
+
     }
+
+    ///UserName
+    ///added
+    FirebaseFirestore.instance
+        .collection('UserName')
+        .snapshots()
+        .listen((snapshot) {
+      _userName = [];
+      snapshot.docs.forEach((document) {
+        _userName.add(UserName(
+          uid: document.data()['uid'],
+          email: document.data()['email'],
+          username: document.data()['username'],
+          created: document.data()['created'], ///added
+          isLogged: document.data()['isLogged'],
+        ));
+      });
+      notifyListeners();
+    });
+
+
   }
 
   List<Product> get giveProducts => _giveProducts;
   List<Product> get takeProducts => _takeProducts;
   List<Comment> get commentContext => _commentContext;
   List<Like> get likeList => _likeList;
+  List<UserName> get username => _userName; /// added
 }
