@@ -35,10 +35,13 @@ final String currentUserId;
 HomePage({Key key, @required this.currentUserId}) : super(key: key);
 
   @override
-  State createState() => HomePageState(currentUserId: currentUserId);
+  State createState() => _HomePageState(currentUserId: currentUserId);
 }
-class HomePageState extends State<HomePage> {
-  HomePageState({Key key, @required this.currentUserId});
+
+
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  _HomePageState({Key key, @required this.currentUserId});
+
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -48,8 +51,6 @@ class HomePageState extends State<HomePage> {
   bool isLoading = false;
   int _limit = 20;
   int _limitIncrement = 20;
-
-
 
 
   @override
@@ -74,22 +75,27 @@ class HomePageState extends State<HomePage> {
 
     firebaseMessaging.getToken().then((token) {
       print('token: $token');
-      FirebaseFirestore.instance.collection('UserName').doc(currentUserId).update({'pushToken': token});
+      FirebaseFirestore.instance.collection('UserName')
+          .doc(currentUserId)
+          .update({'pushToken': token});
     }).catchError((err) {
       Fluttertoast.showToast(msg: err.message.toString());
     });
   }
 
   void configLocalNotification() {
-    AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+    AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings(
+        'app_icon');
     IOSInitializationSettings initializationSettingsIOS = IOSInitializationSettings();
     InitializationSettings initializationSettings =
-    InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
   void scrollListener() {
-    if (listScrollController.offset >= listScrollController.position.maxScrollExtent &&
+    if (listScrollController.offset >=
+        listScrollController.position.maxScrollExtent &&
         !listScrollController.position.outOfRange) {
       setState(() {
         _limit += _limitIncrement;
@@ -99,7 +105,9 @@ class HomePageState extends State<HomePage> {
 
   void showNotification(RemoteNotification remoteNotification) async {
     AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      Platform.isAndroid ? 'com.dfa.flutterchatdemo' : 'com.duytq.flutterchatdemo',
+      Platform.isAndroid
+          ? 'com.dfa.flutterchatdemo'
+          : 'com.duytq.flutterchatdemo',
       'Flutter chat demo',
       'your channel description',
       playSound: true,
@@ -109,7 +117,8 @@ class HomePageState extends State<HomePage> {
     );
     IOSNotificationDetails iOSPlatformChannelSpecifics = IOSNotificationDetails();
     NotificationDetails platformChannelSpecifics =
-    NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
+    NotificationDetails(android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics);
 
     print(remoteNotification);
 
@@ -126,12 +135,14 @@ class HomePageState extends State<HomePage> {
     openDialog();
     return Future.value(false);
   }
+
   Future<Null> openDialog() async {
     switch (await showDialog(
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
-            contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
+            contentPadding: EdgeInsets.only(
+                left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
             children: <Widget>[
               Container(
                 color: themeColor,
@@ -150,7 +161,9 @@ class HomePageState extends State<HomePage> {
                     ),
                     Text(
                       'Exit app',
-                      style: TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white,
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'Are you sure to exit app?',
@@ -174,7 +187,8 @@ class HomePageState extends State<HomePage> {
                     ),
                     Text(
                       'CANCEL',
-                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -194,7 +208,8 @@ class HomePageState extends State<HomePage> {
                     ),
                     Text(
                       'YES',
-                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -214,6 +229,7 @@ class HomePageState extends State<HomePage> {
     this.setState(() {
       isLoading = true;
     });
+
     ///
     await FirebaseAuth.instance.signOut();
     await googleSignIn.disconnect();
@@ -224,12 +240,10 @@ class HomePageState extends State<HomePage> {
     });
 
     await Navigator.of(context)
-        .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => LoginPage()), (Route<dynamic> route) => false);
+        .pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginPage()), (
+        Route<dynamic> route) => false);
   }
-
-
-
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -424,7 +438,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  _buildToggleButtons(context, appState),
+                 // _buildToggleButtons(context, appState),
                 ],
               ),
             ),
@@ -530,7 +544,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  _buildToggleButtons(context, appState),
+                  //_buildToggleButtons(context, appState),
                 ],
               ),
             ),

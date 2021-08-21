@@ -166,15 +166,15 @@ class _DetailPageState extends State<DetailPage> {
     /// 현재시간 - 게시글 마지막 수정 시간 계산하여 내보내는 위젯
     String calculateTime() {
       var time =
-        DateTime(
-            DateTime.now().year,
-            DateTime.now().month,
-            DateTime.now().day).difference(
-            DateTime(
-                product.modified.toDate().year,
-                product.modified.toDate().month,
-                product.modified.toDate().day)
-        ).inDays;
+          DateTime(
+              DateTime.now().year,
+              DateTime.now().month,
+              DateTime.now().day).difference(
+              DateTime(
+                  product.modified.toDate().year,
+                  product.modified.toDate().month,
+                  product.modified.toDate().day)
+          ).inDays;
 
       /// 하루가 안지났을 때
       if(time < 1) {
@@ -214,8 +214,8 @@ class _DetailPageState extends State<DetailPage> {
             return '$time분 전';
           }
         } else {
-            return '$time시간 전';
-          }
+          return '$time시간 전';
+        }
       } /// 7일이 안지났을 때
       else if(time < 7) {
         return '$time일 전';
@@ -281,10 +281,9 @@ class _DetailPageState extends State<DetailPage> {
       return comments
           .add({
 
-            'userName': FirebaseAuth.instance.currentUser.displayName,
-            'comment': comment,
-            'created': FieldValue.serverTimestamp(), ///editted
-          })
+        'userName': FirebaseAuth.instance.currentUser.displayName,
+        'comment': comment,
+        'created': FieldValue.serverTimestamp(), ///editted
       })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
@@ -669,10 +668,9 @@ class _DetailPageState extends State<DetailPage> {
           )
 
 
-    ),
+      ),
 
-  
+
     );
   }
 }
-
