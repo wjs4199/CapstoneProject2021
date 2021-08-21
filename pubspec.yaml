@@ -57,3 +57,7 @@ flutter:
     - family: NanumSquareRoundR
       fonts:
         - asset: fonts/NanumSquareRoundR.ttf
+
+    - family: Roboto_Bold
+      fonts:
+        - asset: fonts/Roboto-Bold.ttf

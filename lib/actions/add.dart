@@ -60,6 +60,21 @@ class _AddPageState extends State<AddPage> {
   /// Add 페이지 내에서 give/take 중 무엇을 선택했는지를 담고 있는 변수
   String giveOrTakeCategory;
 
+
+  /// 이미지 storage 에 저장할 때 productID 뒤에 숫자붙여서 저장하기
+  Future<void> uploadFile(String id) async {
+    await getImageFileFromAssets();
+
+    try {
+      for (var num = 0; num < imageList.length; num++) {
+        await storage.ref('images/' + id + num.toString() + '.png').putFile(file[num]);
+      }
+    } on Exception {
+      print('storage에 안올라감!');
+      return null;
+    }
+  }
+
   /// Firestore collection names
   CollectionReference giveProduct =
       FirebaseFirestore.instance.collection('giveProducts');
@@ -118,18 +133,6 @@ class _AddPageState extends State<AddPage> {
     }
   }
 
-  /// 이미지 storage 에 저장할 때 productID 뒤에 숫자붙여서 저장하기
-  Future<void> uploadFile(String id) async {
-    await getImageFileFromAssets();
-
-    try {
-      for (var num = 0; num < imageList.length; num++) {
-        await storage.ref('images/' + id + num.toString() + '.png').putFile(file[num]);
-      }
-    } on Exception {
-      return null;
-    }
-  }
 
   final _filter = ['카테고리', '여성 의류', '남성의류', '음식', '쿠폰', '전자제품', '책','학용품', '재능기부', '기타'];
   var _selectedFilter = '카테고리';
@@ -239,7 +242,6 @@ class _AddPageState extends State<AddPage> {
                   )
                 ])
               ]),
-              //Divider(thickness: 1,),
           ],
         )
     );
