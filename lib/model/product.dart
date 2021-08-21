@@ -29,14 +29,17 @@ class Comment {
   Comment({
     @required this.userName,
     @required this.comment,
-    @required this.time,
-    @required this.id,
+    @required this.created,
+    // @required this.isDeleted,
+
+
   });
 
   final String userName;
   final String comment;
-  final Timestamp time;
-  final String id;
+  final Timestamp created;
+// final bool isDeleted;
+
 }
 
 class Like {
@@ -45,4 +48,24 @@ class Like {
   });
 
   final String uid;
+}
+
+class UserName {
+
+  UserName({
+    @required this.uid,
+    @required this.email,
+    @required this.username,
+    @required this.created,
+    @required this.isLogged,
+
+  });
+
+  final String uid;
+  final String email;
+  final String username;
+  final Timestamp created;
+  final bool isLogged;
+
+
 }

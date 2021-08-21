@@ -72,7 +72,7 @@ class _CommentBookState extends State<CommentBook> {
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
     }
-
+/*
     /// comment 삭제기능 (구현이 안됨 -> 다시 짜기)
     Future<void> deleteComments(Comment comment) async {
       try {
@@ -89,6 +89,7 @@ class _CommentBookState extends State<CommentBook> {
       }
     }
 
+ */
     /// ToggleButtons 내의 대댓글, 좋아요, 삭제 버튼의 상태를 표시하기 위해 필요한 리스트 변수
     var _selections = List<bool>.generate(3, (_) => false);
 
@@ -136,9 +137,9 @@ class _CommentBookState extends State<CommentBook> {
                         CupertinoDialogAction(
                           onPressed: () {
                             Navigator.pop(context);
-                            deleteComments(comment)
-                                .then((value) => appState.init())
-                                .catchError((error) => null);
+                           // deleteComments(comment)
+                           //     .then((value) => appState.init())
+                             //   .catchError((error) => null);
 
                           },
                           child: Text('Yes'),
@@ -231,7 +232,7 @@ class _CommentBookState extends State<CommentBook> {
                   SizedBox(width: 7.0),
                   FutureBuilder(
                     /// 지금은 댓글 단 시간이 안들어가 있지만 원래 시간도 댓글마다 표기하려 했으므로 futrue에 사용됨
-                    future: convertDateTime(eachComment.time),
+                    future: convertDateTime(eachComment.created),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Column(
