@@ -200,6 +200,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         backgroundColor: Colors.cyan,
         child: Icon(Icons.add),
       );
+    } else if (_selectedIndex == 2) {
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/add');
+        },
+        backgroundColor: Colors.cyan,
+        child: Icon(Icons.add),
+      );
     }
     return null;
   }
