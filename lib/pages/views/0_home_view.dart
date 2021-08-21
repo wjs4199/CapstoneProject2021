@@ -47,17 +47,17 @@ Widget HomeView(
             ],
           ),
         ),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.location_on,
-              semanticLabel: 'location',
-            ),
-            onPressed: () {
-              // Navigator.pushNamed(context, '/map');
-            },
-          ),
-        ],
+        // actions: <Widget>[
+        //   IconButton(
+        //     icon: Icon(
+        //       Icons.location_on,
+        //       semanticLabel: 'location',
+        //     ),
+        //     onPressed: () {
+        //       // Navigator.pushNamed(context, '/map');
+        //     },
+        //   ),
+        // ],
       ),
       SliverStickyHeader(
         header: Container(
