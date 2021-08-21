@@ -5,7 +5,7 @@ import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import '../../main.dart';
 import '../home.dart';
 
-Widget NanumView(BuildContext context, ApplicationState appState,
+Widget RequestView(BuildContext context, ApplicationState appState,
     int selectedIndex, TabController tabController) {
   return CustomScrollView(
     slivers: <Widget>[
@@ -18,7 +18,7 @@ Widget NanumView(BuildContext context, ApplicationState appState,
         expandedHeight: 120.0,
         flexibleSpace: FlexibleSpaceBar(
           title: Text(
-            '나눔',
+            '나눔요청',
             style: TextStyle(
               fontSize: 18,
               fontFamily: 'NanumSquareRoundR',
@@ -65,7 +65,7 @@ Widget NanumView(BuildContext context, ApplicationState appState,
             children: [
               Expanded(
                 child: Text(
-                  '나눔',
+                  '나눔요청',
                   style: TextStyle(
                     fontFamily: 'NanumSquareRoundR',
                     fontSize: 16.0,
@@ -86,7 +86,7 @@ Widget NanumView(BuildContext context, ApplicationState appState,
               return Column(
                 children: [
                   SizedBox(height: 5),
-                  PostTileMaker(appState.giveProducts[index], selectedIndex),
+                  PostTileMaker(appState.takeProducts[index], selectedIndex),
                   SizedBox(height: 5),
                   Divider(
                     height: 1,
@@ -96,7 +96,7 @@ Widget NanumView(BuildContext context, ApplicationState appState,
                 ],
               );
             },
-            childCount: appState.giveProducts.length,
+            childCount: appState.takeProducts.length,
           ),
         ),
       ),

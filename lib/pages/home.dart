@@ -8,8 +8,9 @@ import '../model/product.dart';
 import '../components/postTile.dart';
 import 'views/0_home_view.dart';
 import 'views/1_nanum_view.dart';
-import 'views/2_msg_view.dart';
-import 'views/3_my_view.dart';
+import 'views/2_request_view.dart';
+import 'views/3_msg_view.dart';
+import 'views/4_my_view.dart';
 
 // home
 class HomePage extends StatefulWidget {
@@ -105,7 +106,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   /// ***작업중***
-  /// Index 별 위젯 반환: (순서: 0-홈, 1-나눔, 2-메신저, 3-My)
+  /// Index 별 위젯 반환: (순서: 0-홈, 1-나눔, 2-나눔요청, 3-메신저, 4-My)
   List<Widget> _buildWidgetOptions(
       BuildContext context, ApplicationState appState, int selectedIndex) {
     var _widgetOptions = <Widget>[
@@ -115,10 +116,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       /// 1(나눔):
       NanumView(context, appState, selectedIndex, _tabController),
 
-      /// 2(메신저):
+      /// 2(나눔요청):
+      RequestView(context, appState, selectedIndex, _tabController),
+
+      /// 3(메신저):
       MsgView(context, appState, selectedIndex),
 
-      /// 3(MyPage):
+      /// 4(MyPage):
       MyView(context, appState, selectedIndex)
     ];
     return _widgetOptions;
@@ -223,6 +227,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         BottomNavigationBarItem(
           icon: Icon(Icons.accessibility),
           label: '나눔',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.accessibility_new),
+          label: '나눔요청',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.messenger),

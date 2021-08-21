@@ -66,7 +66,7 @@ Widget HomeView(
           color: Colors.cyan.shade50,
           padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
           child: Text(
-            'Notice | 공지사항',
+            '공지사항',
             style: TextStyle(
               fontFamily: 'NanumSquareRoundR',
               fontSize: 16.0,
@@ -90,7 +90,7 @@ Widget HomeView(
             children: [
               Expanded(
                 child: Text(
-                  'Give | 나눔 게시판',
+                  '나눔 | 최신글',
                   style: TextStyle(
                     fontFamily: 'NanumSquareRoundR',
                     fontSize: 16.0,
@@ -121,7 +121,61 @@ Widget HomeView(
                 ],
               );
             },
-            childCount: appState.giveProducts.length,
+            childCount: 4,
+          ),
+        ),
+      ),
+      // SliverList(
+      //   delegate: SliverChildListDelegate(
+      //     [
+      //       Container(
+      //         height: 40,
+      //         child: Text('나눔글 더보기'),
+      //       )
+      //     ],
+      //   ),
+      // ),
+      SliverStickyHeader(
+        header: Container(
+          height: 40,
+          color: Colors.cyan.shade50,
+          padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '나눔요청 | 최신글',
+                  style: TextStyle(
+                    fontFamily: 'NanumSquareRoundR',
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+
+              // 토글버튼 제거
+              // _buildToggleButtons(context, appState),
+            ],
+          ),
+        ),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) {
+              return Column(
+                children: [
+                  SizedBox(height: 5),
+                  PostTileMaker(appState.takeProducts[index], selectedIndex),
+                  SizedBox(height: 5),
+                  Divider(
+                    height: 1,
+                    indent: 12,
+                    endIndent: 12,
+                  ),
+                ],
+              );
+            },
+            childCount: 4,
           ),
         ),
       ),
