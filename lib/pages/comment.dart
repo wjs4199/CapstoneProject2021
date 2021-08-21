@@ -48,33 +48,14 @@ class _CommentBookState extends State<CommentBook> {
   @override
   Widget build(BuildContext context) {
 
+
     ///******** comment 의 추가/삭제에 따라 Firebase 와 연동시키기 위해 필요한 변수/함수 ********///
 
     /// comment 가 어느 게시물 밑에 달린 것인지 알기 위해 필요한 Product ID
     var productId = widget.productId;
 
-    /// 'comments' Collection 참조
-    CollectionReference comments = FirebaseFirestore.instance
-        .collection('comments/' + productId + '/commentList');
-
-    /// 해당 productId에 부합하는 게시물에 담긴 comment 들을 가져와 담을 변수
-    var commentsList =
-        Provider.of<ApplicationState>(context, listen: false).commentContext;
-
-    /// comment 추가 기능
-    Future<void> addComments(String comment) {
-      return comments
-          .add({
-        'userName': FirebaseAuth.instance.currentUser.displayName,
-        'comment': comment,
-        'time': FieldValue.serverTimestamp(),
-      })
-          .then((value) => print('add comment!'))
-          .catchError((error) => print('Failed to add a comment: $error'));
-    }
-
     /// comment 삭제기능 (구현이 안됨 -> 다시 짜기)
-    Future<void> deleteComments(Comment comment) async {
+    /*Future<void> deleteComments(Comment comment) async {
       try {
         for (var eachComment in commentsList){
           if(eachComment.id == comment.id){
@@ -87,7 +68,12 @@ class _CommentBookState extends State<CommentBook> {
       } on Exception {
         return null;
       }
-    }
+    }*/
+
+    /// 해당 productId에 부합하는 게시물에 담긴 comment 들을 가져와 담을 변수
+    var commentsList =
+        Provider.of<ApplicationState>(context, listen: false).commentContext;
+
 
     /// ToggleButtons 내의 대댓글, 좋아요, 삭제 버튼의 상태를 표시하기 위해 필요한 리스트 변수
     var _selections = List<bool>.generate(3, (_) => false);
@@ -136,9 +122,9 @@ class _CommentBookState extends State<CommentBook> {
                         CupertinoDialogAction(
                           onPressed: () {
                             Navigator.pop(context);
-                            deleteComments(comment)
-                                .then((value) => appState.init())
-                                .catchError((error) => null);
+                            //deleteComments(comment)
+                                //.then((value) => appState.init())
+                                //.catchError((error) => null);
 
                           },
                           child: Text('Yes'),
@@ -231,7 +217,7 @@ class _CommentBookState extends State<CommentBook> {
                   SizedBox(width: 7.0),
                   FutureBuilder(
                     /// 지금은 댓글 단 시간이 안들어가 있지만 원래 시간도 댓글마다 표기하려 했으므로 futrue에 사용됨
-                    future: convertDateTime(eachComment.time),
+                    future: convertDateTime(eachComment.created),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Column(
