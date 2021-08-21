@@ -118,35 +118,13 @@ class ApplicationState extends ChangeNotifier {
   List<Comment> _commentContext = [];
   List<Like> _likeList = [];
   int likeCount = 0;
-  List<UserName> _username = []; /// added
+  List<UserName> _userName = []; /// added
 
   Stream<QuerySnapshot> currentStream;
 
   //collection 'giveProducts' 파이어베이스에서 불러오기
   Future<void> init() async {
     // FirebaseFirestore.instance
-    ///UserName
-    ///added
-
-      FirebaseFirestore.instance
-          .collection('UserName')
-          .snapshots()
-          .listen((snapshot) {
-        _username = [];
-        snapshot.docs.forEach((document) {
-          _username.add(UserName(
-            uid: document.data()['uid'],
-            email: document.data()['email'],
-            username: document.data()['username'],
-            created: document.data()['created'], ///added
-            isLogged: document.data()['isLogged'],
-            //   isDeleted: document.data()['idDeleted'],
-          ));
-        });
-        notifyListeners();
-      });
-
-
 
     if (orderBy != 'All') {
       FirebaseFirestore.instance
@@ -290,11 +268,32 @@ class ApplicationState extends ChangeNotifier {
       });
 
     }
+
+    ///UserName
+    ///added
+    FirebaseFirestore.instance
+        .collection('UserName')
+        .snapshots()
+        .listen((snapshot) {
+      _userName = [];
+      snapshot.docs.forEach((document) {
+        _userName.add(UserName(
+          uid: document.data()['uid'],
+          email: document.data()['email'],
+          username: document.data()['username'],
+          created: document.data()['created'], ///added
+          isLogged: document.data()['isLogged'],
+        ));
+      });
+      notifyListeners();
+    });
+
+
   }
 
   List<Product> get giveProducts => _giveProducts;
   List<Product> get takeProducts => _takeProducts;
   List<Comment> get commentContext => _commentContext;
   List<Like> get likeList => _likeList;
-  List<UserName> get username => _username; /// added
+  List<UserName> get username => _userName; /// added
 }

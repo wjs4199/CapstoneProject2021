@@ -12,21 +12,6 @@ import '../main.dart';
 
 import 'home.dart';
 
-// For Google Sign in
-Future<UserCredential> signInWithGoogle() async {
-  // Trigger the authentication flow
-  final googleUser = await GoogleSignIn().signIn();
-  // Obtain the auth details from the request
-  final googleAuth = await googleUser.authentication;
-  // Create a new credential
-  final credential = GoogleAuthProvider.credential(
-    accessToken: googleAuth.accessToken,
-    idToken: googleAuth.idToken,
-  );
-  // Once signed in, return the UserCredential
-  return await FirebaseAuth.instance.signInWithCredential(credential);
-}
-
 class LoginPage extends StatefulWidget {
 
 
@@ -36,25 +21,10 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
 
-//var productId = documentReference.id;
-
-
-
-
-
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)  {
 
-    var UserProducts =
-        context.watch<ApplicationState>().username;
-        //Provider.of<ApplicationState>(context, listen: false).username;
 
-    UserName temp;
-    //
-    var productFound = false;
-
-    
     return Scaffold(
       body: SafeArea(
         child: ListView(
@@ -75,93 +45,15 @@ class _LoginPageState extends State<LoginPage> {
               child: ElevatedButton.icon(
                 label: Text('Sign in with Google'),
                 icon: Icon(Icons.android),
-                onPressed: ()  {
+                onPressed: ()   async {
                   // Sign in with Google account,
                   // Traditional style (then, catchError) used here
-                    signInWithGoogle().then((value) {
-                    ///document ID 불러오는 것 다시 할 것
-
-                    print('User: ' + value.user.displayName);
-                    // Display User Info with SnackBar
-                    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    //   content: Text('Welcome, ' + value.user.displayName + '!'),
-                    //   behavior: SnackBarBehavior.fixed,
-                    //   duration: Duration(seconds: 1),
-                    // ));
-
-                    print(FirebaseAuth.instance.currentUser.uid);
-                    print(productFound);
-                    print(UserProducts.length);
-
-                    for (var i = 0; i < UserProducts.length; i++) {
-                      if ( FirebaseAuth.instance.currentUser.uid == UserProducts[i].uid ) {
-                        temp = UserProducts[i];
-                        productFound = true;
-
-                        print(productFound);
-                        // print("let me print temp.uid" + temp.uid);
-                        //print("let me print temp.username " + temp.username);
+                  await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => SignUp()));
 
 
-                      }
-                    }
-
-
-
-
-                    ///수정 필요
-                    
-
-                    
-
-
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => HomePage()));
-                    
-                    /*
-                    if(temp.isLogged == false || UserProducts.isEmpty)
-                    {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SignUp()));
-                    }
-                    else
-                    {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => HomePage()));
-                    }
-                    
-                    
-                    */
-  
-
-
-
-                  }).catchError((error) {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) =>
-                            CupertinoAlertDialog(
-                              title: Text("Login Failed"),
-                              content: Text(
-                                  "You must complete your\nGoogle sign in procedures."),
-                              actions: <Widget>[
-                                CupertinoDialogAction(
-                                  isDefaultAction: true,
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("Dismiss"),
-                                ),
-                              ],
-                            ));
-                    print('error: $error');
-                  });
                 },
                 style: ElevatedButton.styleFrom(
                   primary: Colors.cyan,
@@ -177,41 +69,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-///수정필요
-/*
-  CollectionReference signup = FirebaseFirestore.instance.collection("UserName");
 
-
-
-  Future<void> getData() async {
-    // Get docs from collection reference
-    QuerySnapshot querySnapshot = await signup.get();
-
-    // Get data from docs and convert map to List
-    final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
-
-    print(allData);
-  }
-  var products = context.watch<ApplicationState>().UserName;
-  UserName product;
-  bool productFound = false;
-
- */
-
-
-///수정필요
-/*
-                    Future<void> future = getData();
-
-                    for (var i = 0; i < product.length; i++) {
-                      if (product[i].id == productId) {
-                        product = products[i];
-                        productFound = true;
-
-                        print(product.username);
-                        print(product.uid);
-                      }
-                    }
-
-
- */
