@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:intl/intl.dart';
+import 'package:carousel_pro/carousel_pro.dart';
 
 import '../model/product.dart';
 import '../main.dart';
@@ -27,20 +26,6 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
 
-  /// 프로필 사진 url retrieve 용
-  String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
-
-  var appbarIconColor = true;
-
-  void appbarColor(bool ImageExist) {
-    setState(() {
-      if(ImageExist) {
-        appbarIconColor = true;
-      } else {
-        appbarIconColor = false;
-      }
-    });
-  }
 
   /// comment 적는 텍스트 칸이 빈칸인지 아닌지 분별할 때 사용됨
   final _commentFormKey = GlobalKey<FormState>(debugLabel: '_CommentState');
@@ -48,12 +33,14 @@ class _DetailPageState extends State<DetailPage> {
   /// comment 를 적는 텍스트 상자의 상태를 control 할 때 사용
   final _commentController = TextEditingController();
 
+  /// appbar 아이콘의 컬러를 사진 여부에 따라 다르게 표시하기 위해 필요한 변수
+  bool appbarIconColor = false;
 
 
   @override
   Widget build(BuildContext context) {
 
-    ///******* ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 *******///
+    ///************ ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ************///
 
     /// DetailPage() 호출시 받는 매개변수 참조
     var productId = widget.productId;
@@ -66,7 +53,7 @@ class _DetailPageState extends State<DetailPage> {
 
     /// 현재 유저의 아이디와 이름 간략화
     var userId = FirebaseAuth.instance.currentUser.uid;
-    var userName = FirebaseAuth.instance.currentUser.displayName;
+    //var userName = FirebaseAuth.instance.currentUser.displayName;
 
     /// 컬랙션(products) 내에서 productId가 같은 제품을 찾아냈을 때 그 내용을 담을 변수
     Product product;
@@ -74,7 +61,7 @@ class _DetailPageState extends State<DetailPage> {
     /// 컬랙션(products) 내에서 productId가 같은 제품을 찾아냈는지 여부 표시 (찾아냈을 때 true)
     var productFound = false;
 
-    /// products에 담긴 것들 중 현재 productId와 같은 것 찾기
+    /// products 에 담긴 것들 중 현재 productId와 같은 것 찾기
     for (var i = 0; i < products.length; i++) {
       if (products[i].id == productId) {
         product = products[i];
@@ -95,21 +82,9 @@ class _DetailPageState extends State<DetailPage> {
       );
     }
 
-    /// Firebase Storage 참조 간략화
-    var storage = firebase_storage.FirebaseStorage.instance;
 
-    /// ProductID에 따라 해당하는 image url 다운로드
-    Future<String> downloadURL(String id) async {
-      try {
-        return await storage
-            .ref()
-            .child('images')
-            .child('$id.png')
-            .getDownloadURL();
-      } on Exception {
-        return null;
-      }
-    }
+
+    ///************************ 게시글 삭제 및  지난 시간 계산 함수들 ************************///
 
     /// 게시물 자체 삭제 기능 (왼쪽 상단 휴지통 버튼)
     Future<void> deleteProduct() async {
@@ -122,47 +97,6 @@ class _DetailPageState extends State<DetailPage> {
         return null;
       }
     }
-
-
-    ///************************ like 기능 구현부분 (수정필요) ************************///
-
-    /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
-    CollectionReference likes;
-    if (detailGiveOrTake == 'giveProducts') {
-      likes = FirebaseFirestore.instance
-          .collection('giveProducts/' + productId + '/like');
-    } else {
-      likes = FirebaseFirestore.instance
-          .collection('takeProducts/' + productId + '/like');
-    }
-
-    /// 현재는 하트버튼 누르면 사용자가 이미 눌렀든 말든 간에 계속 숫자 올라감 ㅋㅎ (수정필요)
-    /// 현재 사용자가 이미 좋아요를 누른 경우를 분별하는 함수
-    bool isLiked(AsyncSnapshot<QuerySnapshot> snapshot) {
-      snapshot.data.docs.forEach((document) {
-        if (document['uid'] == userId) {
-          return true;
-        }
-      });
-      return false;
-    }
-
-    /// 사용자가 하트 누른 경우 좋아요 추가하는 기능
-    Future<void> addLike() {
-      return likes
-          .add({'uid': userId})
-          .then((value) => print('LIKED!'))
-          .catchError((error) => print('Failed to add a like: $error'));
-    }
-
-    /// 좋아요 취소기능 (구현이 안됨 -> 다시 짜기)
-    /* Future<void> deleteLike() async {
-       try {
-         return likes.doc(userId).delete();
-       } on Exception {
-         return null;
-       }
-     }*/
 
     /// 현재시간 - 게시글 마지막 수정 시간 계산하여 내보내는 위젯
     String calculateTime() {
@@ -272,8 +206,93 @@ class _DetailPageState extends State<DetailPage> {
       }
     }
 
+
+
+    ///************************* 사진 띄우는 부분 관련 변수/ 함수들*************************///
+
+    /// Firebase Storage 참조 간략화
+    var storage = firebase_storage.FirebaseStorage.instance;
+
+    /// multi image들의 url을 담아서 저장하는 리스트
+    var imageUrls = [];
+
+    /// ProductID에 따라 해당하는 image url 다운로드
+    Future<List> downloadURL(String id) async {
+      try {
+        for(var num =0; num<10; num++){
+          imageUrls[num] =
+          await storage.ref()
+              .child('images')
+              .child('$id + $num + .png')
+              .getDownloadURL();
+          print('사진 url ->  ${imageUrls[num]}');
+        }
+        return imageUrls;
+      } on Exception {
+        return null;
+      }
+    }
+
+    var _listOfImages = <NetworkImage>[];
+
+    Future<void> list(List<NetworkImage> imageList) async {
+      for (var i = 0; i < imageList.length; i++) {
+        print('사진 url ->  ${imageList[i]}');
+        _listOfImages.add(
+            NetworkImage(
+              imageList[i].toString(),
+            ));
+      }
+    }
+    Future<void> listOfImages(String id) async {
+      await downloadURL(id)
+          .then((value) => list(value))
+          .catchError((error) => print('Failed to add a like: $error'));
+    }
+
+    ///************************ like 기능 구현부분 (수정필요) ************************///
+
+    /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
+    CollectionReference likes;
+    if (detailGiveOrTake == 'giveProducts') {
+      likes = FirebaseFirestore.instance
+          .collection('giveProducts/' + productId + '/like');
+    } else {
+      likes = FirebaseFirestore.instance
+          .collection('takeProducts/' + productId + '/like');
+    }
+
+    /// 현재는 하트버튼 누르면 사용자가 이미 눌렀든 말든 간에 계속 숫자 올라감 ㅋㅎ (수정필요)
+    /// 현재 사용자가 이미 좋아요를 누른 경우를 분별하는 함수
+    bool isLiked(AsyncSnapshot<QuerySnapshot> snapshot) {
+      snapshot.data.docs.forEach((document) {
+        if (document['uid'] == userId) {
+          return true;
+        }
+      });
+      return false;
+    }
+
+    /// 사용자가 하트 누른 경우 좋아요 추가하는 기능
+    Future<void> addLike() {
+      return likes
+          .add({'uid': userId})
+          .then((value) => print('LIKED!'))
+          .catchError((error) => print('Failed to add a like: $error'));
+    }
+
+    /// 좋아요 취소기능 (구현이 안됨 -> 다시 짜기)
+    /* Future<void> deleteLike() async {
+       try {
+         return likes.doc(userId).delete();
+       } on Exception {
+         return null;
+       }
+     }*/
+
+
+
     /// 'comments' Collection 참조
-    /// editted
     CollectionReference comments = FirebaseFirestore.instance
         .collection('giveProducts/' + productId + '/comment');
 
@@ -284,7 +303,7 @@ class _DetailPageState extends State<DetailPage> {
 
         'userName': FirebaseAuth.instance.currentUser.displayName,
         'comment': comment,
-        'created': FieldValue.serverTimestamp(), ///editted
+        'created': FieldValue.serverTimestamp(),
       })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
@@ -314,7 +333,9 @@ class _DetailPageState extends State<DetailPage> {
                                     );
                                   } else {
                                     if (snapshot.hasData) {
-                                      appbarIconColor = true;
+                                      setState(() {
+                                        appbarIconColor = true;
+                                      });
                                       return Stack(
                                         children: [
                                           Container(
@@ -325,8 +346,15 @@ class _DetailPageState extends State<DetailPage> {
                                           Container(
                                               height: MediaQuery.of(context).size.height * 0.5,
                                               width: MediaQuery.of(context).size.width,
-                                              child: Image.network(snapshot.data.toString(),
-                                                  fit: BoxFit.fitWidth)
+                                              child: Carousel(
+                                                  boxFit: BoxFit.cover,
+                                                  images: [NetworkImage(snapshot.data[0]),],
+                                                  autoplay: false,
+                                                  indicatorBgPadding: 5.0,
+                                                  dotPosition: DotPosition.bottomCenter,
+                                                  animationCurve: Curves.fastOutSlowIn,
+                                                  animationDuration:
+                                                  Duration(milliseconds: 2000)),
                                           )
                                         ],
                                       );
