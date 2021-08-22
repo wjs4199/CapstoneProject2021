@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 
-import 'const.dart';
+import '../model/const.dart';
 
 class FullPhoto extends StatelessWidget {
   final String url;

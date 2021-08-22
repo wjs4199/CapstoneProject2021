@@ -10,9 +10,9 @@ class UserChat {
   UserChat({@required this.id, @required this.photoUrl, @required this.nickname, @required this.aboutMe});
 
   factory UserChat.fromDocument(DocumentSnapshot doc) {
-    String aboutMe = "";
-    String photoUrl = "";
-    String nickname = "";
+    var aboutMe = "";
+    var photoUrl = "";
+    var nickname = "";
     try {
       aboutMe = doc.get('aboutMe');
     } catch (e) {}
