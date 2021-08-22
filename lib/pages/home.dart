@@ -36,14 +36,13 @@ final String currentUserId;
 HomePage({Key key, @required this.currentUserId}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState(currentUserId: currentUserId);
+  State createState() => _HomePageState(currentUserId: currentUserId);
 }
 
 
-
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-
   _HomePageState({Key key, @required this.currentUserId});
+
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -53,11 +52,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool isLoading = false;
   int _limit = 20;
   int _limitIncrement = 20;
-
-  //_HomePageState(this.currentUserId);
-
-
-
 
 
   @override
@@ -82,22 +76,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     firebaseMessaging.getToken().then((token) {
       print('token: $token');
-      FirebaseFirestore.instance.collection('UserName').doc(currentUserId).update({'pushToken': token});
+      FirebaseFirestore.instance.collection('UserName')
+          .doc(currentUserId)
+          .update({'pushToken': token});
     }).catchError((err) {
       Fluttertoast.showToast(msg: err.message.toString());
     });
   }
 
   void configLocalNotification() {
-    AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+    AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings(
+        'app_icon');
     IOSInitializationSettings initializationSettingsIOS = IOSInitializationSettings();
     InitializationSettings initializationSettings =
-    InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
   void scrollListener() {
-    if (listScrollController.offset >= listScrollController.position.maxScrollExtent &&
+    if (listScrollController.offset >=
+        listScrollController.position.maxScrollExtent &&
         !listScrollController.position.outOfRange) {
       setState(() {
         _limit += _limitIncrement;
@@ -107,7 +106,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void showNotification(RemoteNotification remoteNotification) async {
     AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      Platform.isAndroid ? 'com.dfa.flutterchatdemo' : 'com.duytq.flutterchatdemo',
+      Platform.isAndroid
+          ? 'com.dfa.flutterchatdemo'
+          : 'com.duytq.flutterchatdemo',
       'Flutter chat demo',
       'your channel description',
       playSound: true,
@@ -117,7 +118,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
     IOSNotificationDetails iOSPlatformChannelSpecifics = IOSNotificationDetails();
     NotificationDetails platformChannelSpecifics =
-    NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
+    NotificationDetails(android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics);
 
     print(remoteNotification);
 
@@ -134,12 +136,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     openDialog();
     return Future.value(false);
   }
+
   Future<Null> openDialog() async {
     switch (await showDialog(
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
-            contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
+            contentPadding: EdgeInsets.only(
+                left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
             children: <Widget>[
               Container(
                 color: themeColor,
@@ -158,7 +162,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                     Text(
                       'Exit app',
-                      style: TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white,
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'Are you sure to exit app?',
@@ -182,7 +188,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                     Text(
                       'CANCEL',
-                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -202,7 +209,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                     Text(
                       'YES',
-                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -222,6 +230,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     this.setState(() {
       isLoading = true;
     });
+
     ///
     await FirebaseAuth.instance.signOut();
     await googleSignIn.disconnect();
@@ -232,10 +241,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
 
     await Navigator.of(context)
-        .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => LoginPage()), (Route<dynamic> route) => false);
+        .pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginPage()), (
+        Route<dynamic> route) => false);
   }
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -430,7 +439,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  //_buildToggleButtons(context, appState),
+                 // _buildToggleButtons(context, appState),
                 ],
               ),
             ),
@@ -536,7 +545,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  //_buildToggleButtons(context, appState),
+                  ///_buildToggleButtons(context, appState),
                 ],
               ),
             ),
@@ -985,7 +994,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void dispose() {
     _pageController.dispose();
-    //_tabController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -1107,7 +1116,7 @@ class PostTileMaker extends StatelessWidget {
   final int _giveOrTake;
 
   /// Set name for Firebase Storage
-  final storage =
+  final firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
 
   /// Download image url of each product based on id

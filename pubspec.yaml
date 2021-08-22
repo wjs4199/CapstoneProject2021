@@ -45,7 +45,7 @@ flutter:
   assets:
     - assets/hgu.png
     - assets/logo.png
-    - assets/userDefault.png
+    - assets/userDefaultImage.png
 
   fonts:
     - family: Pacifico

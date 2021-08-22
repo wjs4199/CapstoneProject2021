@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => SignUp()));
-
+                /// 여기를 홈페이지로 바꾸면 로그인 사라짐
 
                 },
                 style: ElevatedButton.styleFrom(
