@@ -24,25 +24,14 @@ class _LoginPageState extends State<LoginPage> {
   SharedPreferences prefs;
   bool isLoading = false;
   bool isLoggedIn = false;
-  User currentUser;
+ // User currentUser;
 
   @override
   void initState() {
     super.initState();
-    init();
+    isSignedIn(); ///자동로그인 호출
   }
 
-  Future init() async {
-    /// 정보를 로컬 디스크에 저장할 preferences 초기화
-    prefs = await SharedPreferences.getInstance();
-    isLoggedIn = await googleSignIn.isSignedIn();
-    //FirebaseUser firebaseUser = await firebaseAuth.currentUser();
-    //FirebaseUser firebaseUser = await firebaseAuth.currentUser();
-    if (isLoggedIn != false) {
-      MaterialPageRoute(builder: (context) =>
-          HomePage(currentUserId: prefs.getString('id') ?? ""));
-    }
-  }
 
   void isSignedIn() async {
     setState(() {
@@ -56,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
       await Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) =>
-            HomePage(currentUserId: prefs.getString('id') ?? "")),
+            HomePage(currentUserId: prefs.getString('id'))),
       );
     }
 
@@ -66,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
 
-  Future<UserCredential> handleSignIn() async {
+  Future handleSignIn() async {
     var googleUser = await googleSignIn.signIn();
     var googleAuth = await googleUser.authentication;
 
@@ -95,10 +84,10 @@ class _LoginPageState extends State<LoginPage> {
           /// Update data to firestore if new user
 
           // Write data to local
-          currentUser = firebaseUser;
-          await prefs?.setString('id', currentUser.uid);
-          await prefs?.setString('username', currentUser.displayName ?? "");
-          await prefs?.setString('photoUrl', currentUser.photoURL ?? "");
+         // currentUser = firebaseUser;
+          await prefs.setString('id', firebaseUser.uid);
+          await prefs.setString('username', firebaseUser.displayName);
+          await prefs.setString('photoUrl', firebaseUser.photoURL);
 
           await Navigator.push(context, MaterialPageRoute(
               builder: (context) => SignUp()));
@@ -106,10 +95,10 @@ class _LoginPageState extends State<LoginPage> {
           var documentSnapshot = documents[0];
           var userChat = UserChat.fromDocument(documentSnapshot);
           // Write data to local
-          await prefs?.setString('id', userChat.id);
-          await prefs?.setString('username', userChat.nickname);
-          await prefs?.setString('photoUrl', userChat.photoUrl);
-          await prefs?.setString('aboutMe', userChat.aboutMe);
+          await prefs.setString('id', userChat.id);
+          await prefs.setString('username', userChat.nickname);
+          await prefs.setString('photoUrl', userChat.photoUrl);
+          await prefs.setString('aboutMe', userChat.aboutMe);
 
 
         }
@@ -118,8 +107,11 @@ class _LoginPageState extends State<LoginPage> {
           isLoading = false;
         });
 
+
         await Navigator.push(context, MaterialPageRoute(
             builder: (context) => HomePage(currentUserId: firebaseUser.uid)));
+
+
         //
 
 
@@ -137,7 +129,6 @@ class _LoginPageState extends State<LoginPage> {
         isLoading = false;
       });
     }
-
 
     }
     @override
@@ -166,13 +157,8 @@ class _LoginPageState extends State<LoginPage> {
                     // Sign in with Google account,
                     // Traditional style (then, catchError) used here
                     await handleSignIn();
-                    /*
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SignUp()));
 
-                     */
+
                   },
                   style: ElevatedButton.styleFrom(
                     primary: Colors.cyan,
