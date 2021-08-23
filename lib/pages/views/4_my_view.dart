@@ -14,23 +14,12 @@ bool isLoading = false; ///handleSignout 변수
 
 Widget MyView(BuildContext context, ApplicationState appState) {
 
+  ///logout
   Future<Null> handleSignOut() async {
-    /*
-  setState(() {
-    isLoading = true;
-  });
 
-  */
-    ///
     await FirebaseAuth.instance.signOut();
     await googleSignIn.disconnect();
     await googleSignIn.signOut();
-/*
-  setState(() {
-    isLoading = false;
-  });
-
- */
 
     await Navigator.of(context)
         .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => LoginPage()), (Route<dynamic> route) => false);

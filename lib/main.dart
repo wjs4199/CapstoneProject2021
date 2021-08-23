@@ -116,7 +116,7 @@ class ApplicationState extends ChangeNotifier {
   List<Comment> _commentContext = [];
   List<Like> _likeList = [];
   int likeCount = 0;
-  List<UserName> _userName = [];
+  List<Users> _userName = [];
 
   /// added
 
@@ -276,14 +276,14 @@ class ApplicationState extends ChangeNotifier {
         .listen((snapshot) {
       _userName = [];
       snapshot.docs.forEach((document) {
-        _userName.add(UserName(
-          uid: document.data()['uid'],
-          email: document.data()['email'],
+        _userName.add(Users(
+          chattingWith: document.data()['chattingWith'],
+          createdAt: document.data()['createdAt'],
+          id: document.data()['id'],
+          nickname: document.data()['nick'],
+          photoUrl: document.data()['photoUrl'],
           username: document.data()['username'],
-          created: document.data()['created'],
 
-          ///added
-          isLogged: document.data()['isLogged'],
         ));
       });
       notifyListeners();
@@ -294,7 +294,7 @@ class ApplicationState extends ChangeNotifier {
   List<Product> get takeProducts => _takeProducts;
   List<Comment> get commentContext => _commentContext;
   List<Like> get likeList => _likeList;
-  List<UserName> get username => _userName;
+  List<Users> get username => _userName;
 
   /// added
 }

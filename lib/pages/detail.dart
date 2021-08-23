@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:giveandtake/pages/chat.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -503,9 +504,26 @@ class _DetailPageState extends State<DetailPage> {
                                         ),
                                         textAlign: TextAlign.start,
                                       ),
-                                    )
-                                  ],
+                                    ),
+                                    IconButton(onPressed: (){
+                                      print('IconButton clicked');
+
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => Chat(
+                                            peerId: product.userName,
+                                            //peerAvatar: product.photoUrl,
+                                          ),
+                                        ),
+                                      );
+
+
+                                    }, icon: Icon(Icons.chat)),
+
+                                  ], ///
                                 ),
+
                                 SizedBox(height: 9.0),
                                 Divider(thickness: 1.0),
                                 SizedBox(height: 9.0),
@@ -585,7 +603,7 @@ class _DetailPageState extends State<DetailPage> {
                               ]),
                         ),
                         SizedBox(width: 20),
-                      ],
+                      ],///
                     ),
                     /// 게시물 내용 아래 댓글들
                     Container(

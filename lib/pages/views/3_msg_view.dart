@@ -1,5 +1,7 @@
 
 
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -23,7 +25,6 @@ final ScrollController listScrollController = ScrollController();
 
 bool isLoading = false;
 int _limit = 20;
-//int _limitIncrement = 20;
 
 Widget MsgView(BuildContext context, ApplicationState appState) {
 
@@ -78,7 +79,7 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
             ),
 
             WillPopScope(
-              onWillPop: () {  },
+              onWillPop: (){},
               child: Stack(
                 children: <Widget>[
                   // List
