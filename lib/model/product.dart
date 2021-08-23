@@ -50,22 +50,24 @@ class Like {
   final String uid;
 }
 
-class UserName {
+class Users {
 
-  UserName({
-    @required this.uid,
-    @required this.email,
+  Users({
+    @required this.chattingWith,
+    @required this.createdAt,
+    @required this.id,
+    @required this.nickname,
+    @required this.photoUrl,
     @required this.username,
-    @required this.created,
-    @required this.isLogged,
 
   });
 
-  final String uid;
-  final String email;
+  final String chattingWith;
+  final Timestamp createdAt;
+  final String id;
+  final String nickname;
+  final String photoUrl;
   final String username;
-  final Timestamp created;
-  final bool isLogged;
 
 
 }
