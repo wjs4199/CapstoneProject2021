@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:giveandtake/pages/login.dart';
+import 'package:giveandtake/pages/signup.dart';
 
 import '../../main.dart';
 import '3_msg_view.dart';
@@ -77,13 +78,28 @@ Widget MyView(BuildContext context, ApplicationState appState) {
                       NetworkImage(photoUrl.replaceAll('s96-c', 's400-c')),
                 ),
                 SizedBox(height: 10.0),
-                Text(
-                  FirebaseAuth.instance.currentUser.displayName,
-                  style: TextStyle(
-                    fontFamily: 'NanumBarunGothic',
-                    fontSize: 20.0,
-                    color: Colors.black87,
-                    // fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.only(left: 40.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        FirebaseAuth.instance.currentUser.displayName,
+                        style: TextStyle(
+                          fontFamily: 'NanumBarunGothic',
+                          fontSize: 25.0,
+                          color: Colors.black87,
+                          // fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(onPressed: (){
+                        Navigator.push(context, MaterialPageRoute(
+                            builder: (context) => SignUp()));
+
+                      }, icon: Icon(
+                        Icons.edit, size: 20,
+                      ),)
+                    ],
                   ),
                 ),
                 Text(
