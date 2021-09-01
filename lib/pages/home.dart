@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -306,6 +307,8 @@ class PostTileMaker extends StatelessWidget {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     /// Firebase TimeStamp => DateFormat 변환
@@ -320,6 +323,13 @@ class PostTileMaker extends StatelessWidget {
       }
     }
 
+    /// 사용자가 게시글 눌러 들어갈 때마다 조회수 올리는 함수
+    Future<void> editProductHits(String GiveOrTake) {
+      return FirebaseFirestore.instance.collection(GiveOrTake).doc(_product.id).update({
+        'hits': _product.hits + 1,
+      });
+    }
+
     return InkWell(
       onTap: () {
         if (_giveOrTake) {
@@ -327,11 +337,13 @@ class PostTileMaker extends StatelessWidget {
               .detailPageUid(_product.id, 'giveProducts');
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/giveProducts');
+          editProductHits('giveProducts');
         } else {
           Provider.of<ApplicationState>(context, listen: false)
               .detailPageUid(_product.id, 'takeProducts');
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/takeProducts');
+          editProductHits('takeProducts');
         }
       },
 
