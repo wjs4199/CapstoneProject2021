@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:carousel_pro/carousel_pro.dart';
-
+import 'package:carousel_slider/carousel_slider.dart';
 import '../model/product.dart';
 import '../main.dart';
 import '../pages/comment.dart';
@@ -207,50 +207,6 @@ class _DetailPageState extends State<DetailPage> {
       }
     }
 
-
-
-    ///************************* 사진 띄우는 부분 관련 변수/ 함수들*************************///
-
-    /// Firebase Storage 참조 간략화
-    var storage = firebase_storage.FirebaseStorage.instance;
-
-    /// multi image들의 url을 담아서 저장하는 리스트
-    var imageUrls = [];
-
-    /// ProductID에 따라 해당하는 image url 다운로드
-    Future<List> downloadURL(String id) async {
-      try {
-        for(var num =0; num<10; num++){
-          imageUrls[num] =
-          await storage.ref()
-              .child('images')
-              .child('$id + $num + .png')
-              .getDownloadURL();
-          print('사진 url ->  ${imageUrls[num]}');
-        }
-        return imageUrls;
-      } on Exception {
-        return null;
-      }
-    }
-
-    var _listOfImages = <NetworkImage>[];
-
-    Future<void> list(List<NetworkImage> imageList) async {
-      for (var i = 0; i < imageList.length; i++) {
-        print('사진 url ->  ${imageList[i]}');
-        _listOfImages.add(
-            NetworkImage(
-              imageList[i].toString(),
-            ));
-      }
-    }
-    Future<void> listOfImages(String id) async {
-      await downloadURL(id)
-          .then((value) => list(value))
-          .catchError((error) => print('Failed to add a like: $error'));
-    }
-
     ///************************ like 기능 구현부분 (수정필요) ************************///
 
     /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
@@ -310,6 +266,50 @@ class _DetailPageState extends State<DetailPage> {
           .catchError((error) => print('Failed to add a comment: $error'));
     }
 
+
+    ///************************* 사진 띄우는 부분 관련 변수/ 함수들*************************///
+
+    /// Firebase Storage 참조 간략화
+    var storage = firebase_storage.FirebaseStorage.instance;
+
+    /// multi image들의 url을 담아서 저장하는 리스트
+    var imageUrls = [];
+
+    /// ProductID에 따라 해당하는 image url 다운로드
+    Future<String> downloadURL(String id, int num) async {
+      try {
+        return await storage
+            .ref()
+            .child('images')
+            .child('$id$num.png')
+            .getDownloadURL();
+      } on Exception {
+        return null;
+      }
+    }
+
+    //var _listOfImages;
+
+    /*Future<List> listOfImages(String id) async {
+      var listNum = 0;
+      var loopBreak = false;
+      for(var i =0; i<10; i++){
+        await downloadURL(productId,i)
+            .then((value) {
+          _listOfImages[i] = value;
+          listNum = listNum + 1;
+        }).onError((error, stackTrace) {
+          print('Failed to add a like: $error');
+          loopBreak = true;
+        });
+
+        if(loopBreak == true) {
+          break;
+        }
+      }
+      return _listOfImages;
+    }*/
+
     /// Add 페이지 화면 구성
     return Scaffold(
       body: SafeArea(
@@ -322,40 +322,62 @@ class _DetailPageState extends State<DetailPage> {
                         Consumer<ApplicationState>(
                           builder: (context, appState, _) =>
                               FutureBuilder(
-                                future: downloadURL(productId),
+                                future:
+                                Future.wait([
+                                  downloadURL(productId,0),
+                                  downloadURL(productId,1),
+                                  downloadURL(productId,2),
+                                  downloadURL(productId,3),
+                                  downloadURL(productId,4),
+                                  downloadURL(productId,5),
+                                  downloadURL(productId,6),
+                                  downloadURL(productId,7),
+                                  downloadURL(productId,8),
+                                  downloadURL(productId,9),]),
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState == ConnectionState.waiting) {
                                     return Column(
                                       children: [
-                                        SizedBox(height: 50),
                                         Center(child: CircularProgressIndicator()),
-                                        SizedBox(height: 48),
                                       ],
                                     );
                                   } else {
                                     if (snapshot.hasData) {
-                                      setState(() {
-                                        appbarIconColor = true;
-                                      });
                                       return Stack(
                                         children: [
                                           Container(
                                             height: MediaQuery.of(context).size.height * 0.5,
                                             width: MediaQuery.of(context).size.width,
                                             color: Color(0xffced3d0),
+                                            //child: Image.network(snapshot.data),
                                           ),
                                           Container(
                                               height: MediaQuery.of(context).size.height * 0.5,
                                               width: MediaQuery.of(context).size.width,
-                                              child: Carousel(
-                                                  boxFit: BoxFit.cover,
-                                                  images: [NetworkImage(snapshot.data[0]),],
+                                              child: CarouselSlider(
+                                                options: CarouselOptions(
+                                                  height: MediaQuery.of(context).size.height* 0.5,
+                                                  aspectRatio: 16 / 9,
+                                                  viewportFraction: 1.0,
+                                                  enlargeCenterPage: false,),
+                                                  items: snapshot.data.map<Widget>((item) {
+                                                    if(item != null) {
+                                                      Container(
+                                                        child: Image.network(item,
+                                                            fit: BoxFit.cover,
+                                                            width: 1000),
+                                                      );
+                                                    }
+                                                  }).toList(),
+                                                  /*boxFit: BoxFit.cover,
+                                                  images: [NetworkImage(snapshot.data),],
                                                   autoplay: false,
                                                   indicatorBgPadding: 5.0,
                                                   dotPosition: DotPosition.bottomCenter,
                                                   animationCurve: Curves.fastOutSlowIn,
                                                   animationDuration:
-                                                  Duration(milliseconds: 2000)),
+                                                  Duration(milliseconds: 2000)),*/
+                                              )
                                           )
                                         ],
                                       );
@@ -587,7 +609,7 @@ class _DetailPageState extends State<DetailPage> {
                                     }
                                     var count = snapshot.data.size;
                                     return Text(
-                                      '\n\n조회 5회 · 좋아요 $count회',
+                                      '\n\n조회 ${product.hits}회 · 좋아요 $count회',
                                       style: TextStyle(
                                         fontFamily: 'Roboto_Bold',
                                         color: Colors.grey,

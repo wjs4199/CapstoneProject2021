@@ -145,6 +145,7 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: document.data()['like'],
+            hits: document.data()['hits'],
           ));
         });
         notifyListeners();
@@ -169,6 +170,7 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: document.data()['like'],
+            hits: document.data()['hits'],
           ));
         });
         notifyListeners();
@@ -195,6 +197,7 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: null,
+            hits: document.data()['hits'],
           ));
         });
         notifyListeners();
@@ -218,6 +221,7 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: null,
+            hits: document.data()['hits'],
           ));
         });
         notifyListeners();

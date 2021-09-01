@@ -107,6 +107,7 @@ class _AddPageState extends State<AddPage> {
       'created': FieldValue.serverTimestamp(),
       'modified': FieldValue.serverTimestamp(),
       'userName': name,
+      'hits': 1,
     }).then((value) async {
       if (images.isNotEmpty) {
         await uploadFile(value.id);
@@ -127,6 +128,7 @@ class _AddPageState extends State<AddPage> {
       'created': FieldValue.serverTimestamp(),
       'modified': FieldValue.serverTimestamp(),
       'userName': name,
+      'hits': 1,
     }).then((value) {
       if (images.isNotEmpty) uploadFile(value.id);
     }).catchError((error) => print('Error: $error'));
@@ -370,8 +372,8 @@ class _AddPageState extends State<AddPage> {
                           ),
                         ),
                         onPressed: () {
-                          setState(() async {
-                            await getMultiImage(10);
+                          setState(() {
+                            getMultiImage(10);
                             if (numberOfImages < 10) {
                               numberOfImagesTextColor = false;
                             } else {
