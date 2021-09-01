@@ -71,7 +71,6 @@ class SignUpState extends State<SignUp> {
                         await FirebaseFirestore.instance.collection('users')
                             .doc(FirebaseAuth.instance.currentUser.uid)
                             .set({
-
                           'username': FirebaseAuth.instance.currentUser.displayName,
                           'photoUrl': FirebaseAuth.instance.currentUser.photoURL,
                           'id': FirebaseAuth.instance.currentUser.uid,
