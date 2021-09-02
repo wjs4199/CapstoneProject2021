@@ -281,34 +281,13 @@ class _DetailPageState extends State<DetailPage> {
         return await storage
             .ref()
             .child('images')
-            .child('$id$num.png')
+            .child('$id.png')
+            //.child('$id$num.png')
             .getDownloadURL();
       } on Exception {
         return null;
       }
     }
-
-    //var _listOfImages;
-
-    /*Future<List> listOfImages(String id) async {
-      var listNum = 0;
-      var loopBreak = false;
-      for(var i =0; i<10; i++){
-        await downloadURL(productId,i)
-            .then((value) {
-          _listOfImages[i] = value;
-          listNum = listNum + 1;
-        }).onError((error, stackTrace) {
-          print('Failed to add a like: $error');
-          loopBreak = true;
-        });
-
-        if(loopBreak == true) {
-          break;
-        }
-      }
-      return _listOfImages;
-    }*/
 
     /// Add 페이지 화면 구성
     return Scaffold(
@@ -322,18 +301,19 @@ class _DetailPageState extends State<DetailPage> {
                         Consumer<ApplicationState>(
                           builder: (context, appState, _) =>
                               FutureBuilder(
-                                future:
-                                Future.wait([
-                                  downloadURL(productId,0),
-                                  downloadURL(productId,1),
-                                  downloadURL(productId,2),
-                                  downloadURL(productId,3),
-                                  downloadURL(productId,4),
-                                  downloadURL(productId,5),
-                                  downloadURL(productId,6),
-                                  downloadURL(productId,7),
-                                  downloadURL(productId,8),
-                                  downloadURL(productId,9),]),
+                                future: downloadURL(productId,0),
+                                //future:Future.wait([
+                                  //downloadURL(productId,0),
+                                  //downloadURL(productId,1),
+                                  //downloadURL(productId,2),
+                                  //downloadURL(productId,3),
+                                  //downloadURL(productId,4),
+                                  //downloadURL(productId,5),
+                                  //downloadURL(productId,6),
+                                  //downloadURL(productId,7),
+                                  //downloadURL(productId,8),
+                                  //downloadURL(productId,9),
+                                //]),
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState == ConnectionState.waiting) {
                                     return Column(
@@ -354,7 +334,10 @@ class _DetailPageState extends State<DetailPage> {
                                           Container(
                                               height: MediaQuery.of(context).size.height * 0.5,
                                               width: MediaQuery.of(context).size.width,
-                                              child: CarouselSlider(
+                                              child: Image.network(snapshot.data.toString(),
+                                  fit: BoxFit.cover,
+                                  width: 1000),
+                                  /*CarouselSlider(
                                                 options: CarouselOptions(
                                                   height: MediaQuery.of(context).size.height* 0.5,
                                                   aspectRatio: 16 / 9,
@@ -368,17 +351,9 @@ class _DetailPageState extends State<DetailPage> {
                                                             width: 1000),
                                                       );
                                                     }
-                                                  }).toList(),
-                                                  /*boxFit: BoxFit.cover,
-                                                  images: [NetworkImage(snapshot.data),],
-                                                  autoplay: false,
-                                                  indicatorBgPadding: 5.0,
-                                                  dotPosition: DotPosition.bottomCenter,
-                                                  animationCurve: Curves.fastOutSlowIn,
-                                                  animationDuration:
-                                                  Duration(milliseconds: 2000)),*/
+                                                  }).toList(),*/
                                               )
-                                          )
+
                                         ],
                                       );
                                     } else if (snapshot.hasData == false) {
@@ -527,23 +502,22 @@ class _DetailPageState extends State<DetailPage> {
                                         textAlign: TextAlign.start,
                                       ),
                                     ),
-                                    IconButton(onPressed: (){
-                                      print('IconButton clicked');
-
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => Chat(
-                                            peerId: product.userName,
-                                            //peerAvatar: product.photoUrl,
+                                    /// 채팅으로 넘어가는 버튼
+                                    IconButton(
+                                        onPressed: (){
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => Chat(
+                                              peerId: product.userName,
+                                              //peerAvatar: product.photoUrl,
+                                            ),
                                           ),
-                                        ),
-                                      );
-
-
-                                    }, icon: Icon(Icons.chat)),
-
-                                  ], ///
+                                        );
+                                      },
+                                        icon: Icon(Icons.chat)
+                                    ),
+                                  ],
                                 ),
 
                                 SizedBox(height: 9.0),
