@@ -334,13 +334,13 @@ class PostTileMaker extends StatelessWidget {
       onTap: () {
         if (_giveOrTake) {
           Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'giveProducts');
+              .detailPageUid(_product.id, 'giveProducts', _product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/giveProducts');
           editProductHits('giveProducts');
         } else {
           Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'takeProducts');
+              .detailPageUid(_product.id, 'takeProducts',_product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/takeProducts');
           editProductHits('takeProducts');

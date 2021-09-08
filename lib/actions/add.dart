@@ -83,7 +83,7 @@ class _AddPageState extends State<AddPage> {
 
 
   ///**************** 게시글 저장과 관련된 변수/ 함수들 ***************///
-  ///
+
   /// 현재 유저의 이름 참조 간략화
   var user = FirebaseAuth.instance.currentUser;
   var name;
@@ -108,6 +108,7 @@ class _AddPageState extends State<AddPage> {
       'modified': FieldValue.serverTimestamp(),
       'userName': name,
       'hits': 1,
+      'photo': numberOfImages,
     }).then((value) async {
       if (images.isNotEmpty) {
         await uploadFile(value.id);
@@ -129,6 +130,7 @@ class _AddPageState extends State<AddPage> {
       'modified': FieldValue.serverTimestamp(),
       'userName': name,
       'hits': 1,
+      'photo': numberOfImages
     }).then((value) {
       if (images.isNotEmpty) uploadFile(value.id);
     }).catchError((error) => print('Error: $error'));

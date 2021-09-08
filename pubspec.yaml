@@ -48,6 +48,7 @@ flutter:
     - assets/hgu.png
     - assets/logo.png
     - assets/userDefaultImage.png
+    - assets/defaultPhoto.png
     - images/img_not_available.jpeg
     - images/mimi1.gif
     - images/mimi2.gif

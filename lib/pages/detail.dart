@@ -13,7 +13,7 @@ import '../pages/comment.dart';
 
 class DetailPage extends StatefulWidget {
 
-  DetailPage({this.productId, this.detailGiveOrTake});
+  DetailPage({this.productId, this.detailGiveOrTake, this.photoNum});
 
   /// route 생성 시에 사용되는 product ID
   final String productId;
@@ -21,12 +21,14 @@ class DetailPage extends StatefulWidget {
   /// giveProducts / takeProducts collection 중 어디서 가져와야하는 지 표시
   final String detailGiveOrTake;
 
+  ///
+  final int photoNum;
+
   @override
   _DetailPageState createState() => _DetailPageState();
 }
 
 class _DetailPageState extends State<DetailPage> {
-
 
   /// comment 적는 텍스트 칸이 빈칸인지 아닌지 분별할 때 사용됨
   final _commentFormKey = GlobalKey<FormState>(debugLabel: '_CommentState');
@@ -40,6 +42,8 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    var photoNum = widget.photoNum;
 
     ///************ ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ************///
 
@@ -273,7 +277,7 @@ class _DetailPageState extends State<DetailPage> {
     var storage = firebase_storage.FirebaseStorage.instance;
 
     /// multi image들의 url을 담아서 저장하는 리스트
-    var imageUrls = [];
+    //var imageUrls = [];
 
     /// ProductID에 따라 해당하는 image url 다운로드
     Future<String> downloadURL(String id, int num) async {
@@ -281,13 +285,24 @@ class _DetailPageState extends State<DetailPage> {
         return await storage
             .ref()
             .child('images')
-            .child('$id.png')
-            //.child('$id$num.png')
+            //.child('$id.png')
+            .child('$id$num.png')
             .getDownloadURL();
       } on Exception {
         return null;
       }
     }
+
+    /// 게시글 자체에 저장된 photoNum의 개수만큼만 이미지 url다운받아서 carousel slider에 전달하고 싶은데
+    /// 여러시도 해봐도 잘 안됨 ㅠㅠ
+    /*Future<List> futureList() async {
+      var futureList= [];
+      for(var i = 0; i < widget.photoNum; i++){
+        futureList[i] = await downloadURL(productId,i);
+      }
+      return futureList;
+    }*/
+
 
     /// Add 페이지 화면 구성
     return Scaffold(
@@ -301,19 +316,19 @@ class _DetailPageState extends State<DetailPage> {
                         Consumer<ApplicationState>(
                           builder: (context, appState, _) =>
                               FutureBuilder(
-                                future: downloadURL(productId,0),
-                                //future:Future.wait([
-                                  //downloadURL(productId,0),
-                                  //downloadURL(productId,1),
-                                  //downloadURL(productId,2),
-                                  //downloadURL(productId,3),
-                                  //downloadURL(productId,4),
-                                  //downloadURL(productId,5),
-                                  //downloadURL(productId,6),
-                                  //downloadURL(productId,7),
-                                  //downloadURL(productId,8),
-                                  //downloadURL(productId,9),
-                                //]),
+                                //future: futureList(),
+                                future:Future.wait([
+                                  downloadURL(productId,0),
+                                  downloadURL(productId,1),
+                                  downloadURL(productId,2),
+                                  downloadURL(productId,3),
+                                  downloadURL(productId,4),
+                                  downloadURL(productId,5),
+                                  downloadURL(productId,6),
+                                  downloadURL(productId,7),
+                                  downloadURL(productId,8),
+                                  downloadURL(productId,9),
+                                ]),
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState == ConnectionState.waiting) {
                                     return Column(
@@ -331,29 +346,36 @@ class _DetailPageState extends State<DetailPage> {
                                             color: Color(0xffced3d0),
                                             //child: Image.network(snapshot.data),
                                           ),
-                                          Container(
+                                          /*Container(
                                               height: MediaQuery.of(context).size.height * 0.5,
                                               width: MediaQuery.of(context).size.width,
                                               child: Image.network(snapshot.data.toString(),
-                                  fit: BoxFit.cover,
-                                  width: 1000),
-                                  /*CarouselSlider(
+                                                fit: BoxFit.cover,
+                                                width: 1000),*/
+                                          CarouselSlider(
                                                 options: CarouselOptions(
-                                                  height: MediaQuery.of(context).size.height* 0.5,
-                                                  aspectRatio: 16 / 9,
+                                                  autoPlay: false,
+                                                  enlargeCenterPage: false,
                                                   viewportFraction: 1.0,
-                                                  enlargeCenterPage: false,),
+                                                  aspectRatio: 1.0,
+                                                  height: MediaQuery.of(context).size.height* 0.5,
+                                                  ),
                                                   items: snapshot.data.map<Widget>((item) {
                                                     if(item != null) {
-                                                      Container(
+                                                      return Container(
                                                         child: Image.network(item,
                                                             fit: BoxFit.cover,
                                                             width: 1000),
                                                       );
-                                                    }
-                                                  }).toList(),*/
+                                                    } /*else {
+                                                      return Container(
+                                                        child: Image.asset('assets/defaultPhoto.png',
+                                                            fit: BoxFit.cover,
+                                                            width: 1000),
+                                                      );
+                                                    }*/
+                                                  }).toList(),
                                               )
-
                                         ],
                                       );
                                     } else if (snapshot.hasData == false) {
@@ -693,7 +715,7 @@ class _DetailPageState extends State<DetailPage> {
                                     _commentController.clear();
                                     Provider.of<ApplicationState>(context, listen: false)
                                         .detailPageUid(
-                                        widget.productId, widget.detailGiveOrTake);
+                                        widget.productId, widget.detailGiveOrTake, widget.photoNum);
                                     print('clear!');
                                   }
                                 });
