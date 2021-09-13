@@ -433,11 +433,14 @@ class _DetailPageState extends State<DetailPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     /// 게시자 사진
+
                                     CircleAvatar(
                                       radius: 21.0,
                                       backgroundImage:
-                                      NetworkImage(photoUrl.replaceAll('s96-c', 's400-c')),
+                                      NetworkImage(photoUrl),
                                     ),
+
+
                                     SizedBox(width: 10.0),
                                     SizedBox(
                                       height: 40,
