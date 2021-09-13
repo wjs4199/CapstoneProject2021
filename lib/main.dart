@@ -1,7 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:giveandtake/pages/views/3_msg_view.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'pages/home.dart';
 import 'pages/login.dart';
@@ -20,7 +22,11 @@ void main() {
   );
 }
 
-class Application extends StatelessWidget {
+class Application extends StatefulWidget {
+  @override
+  _ApplicationState createState() => _ApplicationState();
+}
+class _ApplicationState extends State<Application> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -30,7 +36,9 @@ class Application extends StatelessWidget {
           return MaterialApp(
             title: 'Give_N_Take',
             home: HomePage(),
-            initialRoute: '/login',
+            ///edited
+            //isSignedIn(),
+           initialRoute: '/login',
             // Named Routes
             routes: {
               '/login': (context) => LoginPage(),
