@@ -40,8 +40,8 @@ Widget NanumView(BuildContext context, ApplicationState appState,
       ),
       SliverStickyHeader(
         header: Container(
-          height: 40,
-          color: Color(0x80eb6859),
+          height: 35,
+          color: Color(0x80fda26b),
           padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
           child: Row(
             children: [
