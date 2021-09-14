@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -43,18 +42,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
 
- /// bool isLoading = false; handleSign을 위한 변수
-
-
-
-
+  /// bool isLoading = false; handleSign을 위한 변수
   /// 시스템 함수에 PageView 기능 반영 처리(1) +@
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
     _tabController = TabController(length: 2, vsync: this);
-
   }
 
   /// 시스템 함수에 PageView 기능 반영 처리(2)
@@ -73,7 +67,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       drawer: buildDrawer(context),
       body: Consumer<ApplicationState>(
         builder: (context, appState, _) => Container(
-          color: Colors.cyan,
+          color: Color(0xfffc7174),
           child: SafeArea(
             child: Container(
               color: Colors.white,
@@ -116,7 +110,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         children: <Widget>[
           DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.cyan,
+              color: Color(0xfffc7174),
             ),
             child: Padding(
               padding: const EdgeInsets.all(15.0),
@@ -194,7 +188,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           icon: Icons.add,
           animatedIconTheme: IconThemeData(size: 30),
           activeIcon: Icons.close,
-          backgroundColor: Colors.cyan,
+          backgroundColor: Color(0xfffc7174),
           childPadding: EdgeInsets.all(5),
           spacing: 10,
           visible: true,
@@ -206,7 +200,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             // FAB 1
             SpeedDialChild(
               child: Icon(Icons.accessibility, size: 27, color: Colors.white,),
-              backgroundColor: Colors.cyan,
+              backgroundColor: Color(0xfffc7174),
               onTap: () {
                 Navigator.pushNamed(context, '/giveadd');
               },
@@ -216,11 +210,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   fontSize: 16.0),
-              labelBackgroundColor: Colors.cyan,),
+              labelBackgroundColor:Color(0xfffc7174),),
             // FAB 2
             SpeedDialChild(
               child: Icon(Icons.accessibility_new, size: 27, color: Colors.white,),
-              backgroundColor: Colors.cyan,
+              backgroundColor: Color(0xfffc7174),
               onTap: () {
                 Navigator.pushNamed(context, '/takeadd');
               },
@@ -230,13 +224,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   fontSize: 16.0),
-              labelBackgroundColor: Colors.cyan,)
+              labelBackgroundColor: Color(0xfffc7174),)
           ],
         ),
       );
 
 
-        /*FloatingActionButton(
+      /*FloatingActionButton(
         onPressed: () {
           setState(() {
             _getFAB();
@@ -257,7 +251,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
       elevation: 0,
-      selectedItemColor: Colors.cyan,
+      selectedItemColor: Color(0xfffc7174),
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
       selectedLabelStyle: TextStyle(
@@ -298,7 +292,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     setState(() {
       isLoading = true;
     });
-
      */
 
     await FirebaseAuth.instance.signOut();
@@ -308,8 +301,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     setState(() {
       isLoading = false;
     });
-
-
  */
     await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
@@ -362,8 +353,6 @@ class PostTileMaker extends StatelessWidget {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     /// Firebase TimeStamp => DateFormat 변환
@@ -378,27 +367,18 @@ class PostTileMaker extends StatelessWidget {
       }
     }
 
-    /// 사용자가 게시글 눌러 들어갈 때마다 조회수 올리는 함수
-    Future<void> editProductHits(String GiveOrTake) {
-      return FirebaseFirestore.instance.collection(GiveOrTake).doc(_product.id).update({
-        'hits': _product.hits + 1,
-      });
-    }
-
     return InkWell(
       onTap: () {
         if (_giveOrTake) {
           Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'giveProducts', _product.photo);
+              .detailPageUid(_product.id, 'giveProducts');
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/giveProducts');
-          editProductHits('giveProducts');
         } else {
           Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'takeProducts',_product.photo);
+              .detailPageUid(_product.id, 'takeProducts');
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/takeProducts');
-          editProductHits('takeProducts');
         }
       },
 

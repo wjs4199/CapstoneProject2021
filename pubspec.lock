@@ -336,7 +336,7 @@ packages:
       name: fl_chart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.40.0"
+    version: "0.36.4"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -715,7 +715,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.0"
+    version: "5.0.0"
   pub_semver:
     dependency: transitive
     description:
@@ -743,7 +743,7 @@ packages:
       name: shared_preferences
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.7"
+    version: "2.0.6"
   shared_preferences_linux:
     dependency: transitive
     description:
