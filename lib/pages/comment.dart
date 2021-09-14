@@ -48,7 +48,6 @@ class _CommentBookState extends State<CommentBook> {
   @override
   Widget build(BuildContext context) {
 
-
     ///******** comment 의 추가/삭제에 따라 Firebase 와 연동시키기 위해 필요한 변수/함수 ********///
 
     /// comment 가 어느 게시물 밑에 달린 것인지 알기 위해 필요한 Product ID
@@ -62,23 +61,13 @@ class _CommentBookState extends State<CommentBook> {
     var commentsList =
         Provider.of<ApplicationState>(context, listen: false).commentContext;
 
-    //var nickName =
-        //Provider.of<ApplicationState>(context, listen: false).username;
-
     /// comment 추가 기능
     Future<void> addComments(String comment) {
-      /*var commentNickName;
-      for (var i = 0; i < nickName.length; i++) {
-        if (nickName[i].id == FirebaseAuth.instance.currentUser.uid) {
-          commentNickName = nickName[i].nickname;
-        }
-      }*/
       return comments
           .add({
         'userName': FirebaseAuth.instance.currentUser.displayName,
         'comment': comment,
         'time': FieldValue.serverTimestamp(),
-        //'nickname' :commentNickName,
       })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
@@ -151,9 +140,6 @@ class _CommentBookState extends State<CommentBook> {
                            // deleteComments(comment)
                            //     .then((value) => appState.init())
                              //   .catchError((error) => null);
-                            //deleteComments(comment)
-                                //.then((value) => appState.init())
-                                //.catchError((error) => null);
 
                           },
                           child: Text('Yes'),
@@ -238,10 +224,10 @@ class _CommentBookState extends State<CommentBook> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   /// 사용자의 구글 이메일 프로필 사진으로 바꾸는 작업 필요
-                  SizedBox(
-                    width: 30,
-                    height: 30,
-                    child: Image.asset('assets/userDefaultImage.png'),
+                  CircleAvatar(
+                    backgroundColor: Colors.lightBlue,
+                    radius: 15,
+                    child: Image.asset('assets/userDefault.png'),
                   ),
                   SizedBox(width: 7.0),
                   FutureBuilder(
