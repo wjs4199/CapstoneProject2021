@@ -12,6 +12,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+/// 기본적인 stateless 틀
 class Chat extends StatelessWidget {
   final String peerId;
   final String peerAvatar;
@@ -37,6 +39,7 @@ class Chat extends StatelessWidget {
   }
 }
 
+
 class ChatScreen extends StatefulWidget {
   final String peerId;
   final String peerAvatar;
@@ -44,6 +47,8 @@ class ChatScreen extends StatefulWidget {
   ChatScreen({Key key, @required this.peerId, @required this.peerAvatar})
       : super(key: key);
 
+
+  ///파라미터로 받아온 peerId 와 peerAvatar 를 local 에 저장
   @override
   State createState() =>
       ChatScreenState(peerId: peerId, peerAvatar: peerAvatar);
@@ -82,7 +87,8 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   @override
-  void initState() {
+  void initState
+      () {
     super.initState();
     focusNode.addListener(onFocusChange);
     listScrollController.addListener(_scrollListener);
@@ -106,15 +112,16 @@ class ChatScreenState extends State<ChatScreen> {
     } else {
       groupChatId = '$peerId-$id';
     }
-
+/*
     await FirebaseFirestore.instance
         .collection('UserName')
         .doc(id)
         .update({'chattingWith': peerId});
 
+ */
     setState(() {});
   }
-
+/// 사용자의 핸드폰 내에 있는 갤러리의 사진을 가져오는 future
   Future getImage() async {
     var imagePicker = ImagePicker();
     PickedFile pickedFile;
@@ -138,7 +145,7 @@ class ChatScreenState extends State<ChatScreen> {
       isShowSticker = !isShowSticker;
     });
   }
-
+/// getImage 에서 파일 업로드 하는 future
   Future uploadFile() async {
     var fileName = DateTime.now().millisecondsSinceEpoch.toString();
     var reference = FirebaseStorage.instance.ref().child(fileName);
@@ -191,7 +198,7 @@ class ChatScreenState extends State<ChatScreen> {
           textColor: Colors.red);
     }
   }
-
+/// 채팅창 안에서 메시지, 이미지를 보내고 받고 하는 위젯 (메시지들을 화면에 빌드해주는 위젯)
   Widget buildItem(int index, DocumentSnapshot document) {
     if (document != null) {
       if (document.get('idFrom') == id) {
@@ -503,11 +510,14 @@ class ChatScreenState extends State<ChatScreen> {
         isShowSticker = false;
       });
     } else {
+      Navigator.pop(context);
+      /*
       FirebaseFirestore.instance
           .collection('users')
           .doc(id)
           .update({'chattingWith': null});
-      Navigator.pop(context);
+
+       */
     }
 
     return Future.value(false);

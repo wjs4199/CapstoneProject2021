@@ -112,10 +112,6 @@ class _LoginPageState extends State<LoginPage> {
             builder: (context) => HomePage(currentUserId: firebaseUser.uid)));
 
 
-        //
-
-
-
       }
       else {
         await Fluttertoast.showToast(msg: "Sign in fail");

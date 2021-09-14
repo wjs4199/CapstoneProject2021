@@ -107,9 +107,11 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
+
               return Column(
                 children: [
                   SizedBox(height: 5),
+                 // if(index != null)
                   PostTileMaker(appState.giveProducts[index], true),
                   SizedBox(height: 5),
                   Divider(
@@ -164,6 +166,7 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
               return Column(
                 children: [
                   SizedBox(height: 5),
+                 // if(index != null)
                   PostTileMaker(appState.takeProducts[index], false),
                   SizedBox(height: 5),
                   Divider(

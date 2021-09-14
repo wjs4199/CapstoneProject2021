@@ -1,7 +1,5 @@
 
 
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -61,40 +59,26 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
         delegate: SliverChildListDelegate(
           [
             ///added
-            IconButton(
-              icon: Icon(
-                Icons.logout,
-                //semanticLabel: 'location',
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Chat(
-
-                    ),
-                  ),
-                );
-              },
-            ),
-
             WillPopScope(
               onWillPop: (){},
               child: Stack(
                 children: <Widget>[
                   // List
+                  ///chatting list 를 보여주는 container
                   Container(
                     child: StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance.collection('UserName').limit(_limit).snapshots(),
+                      stream: FirebaseFirestore.instance.collection('users').limit(_limit).snapshots(),
                       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                         if (snapshot.hasData) {
                           return ListView.builder(
+                            shrinkWrap: true,
                             padding: EdgeInsets.all(10.0),
+                            /// data 를 가져오는 곳 buildItem 위젯
                             itemBuilder: (context, index) => buildItem(context, snapshot.data.docs[index]),
                             itemCount: snapshot.data.docs.length,
                             controller: listScrollController,
                           );
-                        } else {
+                        } else { /// data 가 없을 시
                           return Center(
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
@@ -126,16 +110,19 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
 }
 
 
-
+///
 Widget buildItem(BuildContext context, DocumentSnapshot document) {
   if (document != null) {
-    UserChat userChat = UserChat.fromDocument(document);
+    var userChat = UserChat.fromDocument(document);
     if (userChat.id == currentUserId) {
       return SizedBox.shrink();
     } else {
       return Container(
         margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
+
+        /// 메신저 탭에서 각각 사용자들 list 를 클릭할 수 있게 만들어 놓은 text button
         child: TextButton(
+          /// 각 사용자들의 list 를 누르면 채팅창으로 넘어간다
           onPressed: () {
             Navigator.push(
               context,
@@ -147,6 +134,7 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
               ),
             );
           },
+          ///위 text button 에 대한 style
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(greyColor2),
             shape: MaterialStateProperty.all<OutlinedBorder>(
@@ -155,12 +143,14 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
               ),
             ),
           ),
+
+          /// 각 사용자에 대한 list 를 만드는 row
           child: Row(
             children: <Widget>[
               Material(
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
                 clipBehavior: Clip.hardEdge,
-                child: userChat.photoUrl.isNotEmpty
+                child: userChat.photoUrl.isNotEmpty /// empty 가 아니면 photoURL 을 가져온다
                     ? Image.network(
                   userChat.photoUrl,
                   fit: BoxFit.cover,
@@ -197,6 +187,7 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
                 ),
               ),
               Flexible(
+                ///nickname 을 가져오는 container
                 child: Container(
                   margin: EdgeInsets.only(left: 20.0),
                   child: Column(
@@ -210,6 +201,7 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
                           style: TextStyle(color: primaryColor),
                         ),
                       ),
+                    /*
                       Container(
                         alignment: Alignment.centerLeft,
                         margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
@@ -219,6 +211,10 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
                           style: TextStyle(color: primaryColor),
                         ),
                       )
+
+                     */
+
+
                     ],
                   ),
                 ),
