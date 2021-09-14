@@ -37,14 +37,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
 
- /// bool isLoading = false; handleSign을 위한 변수
-
-
-
+  /// bool isLoading = false; handleSign을 위한 변수
 
   /// 시스템 함수에 PageView 기능 반영 처리(1) +@
   @override
@@ -52,7 +49,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     _pageController = PageController();
     _tabController = TabController(length: 2, vsync: this);
-
   }
 
   /// 시스템 함수에 PageView 기능 반영 처리(2)
@@ -71,7 +67,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       drawer: buildDrawer(context),
       body: Consumer<ApplicationState>(
         builder: (context, appState, _) => Container(
-          color: Colors.cyan,
+          color: Color(0xfffc7174),
           child: SafeArea(
             child: Container(
               color: Colors.white,
@@ -84,7 +80,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                   /// _selectedIndex 값에 따른 페이지(상응 위젯) 출력
                   children:
-                  _buildWidgetOptions(context, appState, _selectedIndex),
+                      _buildWidgetOptions(context, appState, _selectedIndex),
                 ),
               ),
             ),
@@ -114,7 +110,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         children: <Widget>[
           DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.cyan,
+              color: Color(0xfffc7174),
             ),
             child: Padding(
               padding: const EdgeInsets.all(15.0),
@@ -188,7 +184,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         onPressed: () {
           Navigator.pushNamed(context, '/add');
         },
-        backgroundColor: Colors.cyan,
+        backgroundColor: Color(0xfffc7174),
         child: Icon(Icons.add),
       );
     }
@@ -201,7 +197,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
       elevation: 0,
-      selectedItemColor: Colors.cyan,
+      selectedItemColor: Color(0xfffc7174),
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
       selectedLabelStyle: TextStyle(
@@ -257,7 +253,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
  */
     await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
-            (Route<dynamic> route) => false);
+        (Route<dynamic> route) => false);
   }
 
   ///* ---------------- BottomNavigationBar, PageView 관련 ----------------- *///
@@ -278,7 +274,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
-///* -------------------------------------------------------------------- *///
+  ///* -------------------------------------------------------------------- *///
 }
 
 /// PostTileMaker - 각 게시글 별 postTile Listview.builder(separated) 사용해 자동 생성

@@ -154,7 +154,7 @@ class _EditPageState extends State<EditPage> {
     return Consumer<ApplicationState>(builder: (context, appState, _) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.cyan,
+          backgroundColor: Color(0xfffc7174),
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back,

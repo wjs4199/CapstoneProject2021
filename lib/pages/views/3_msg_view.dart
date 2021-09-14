@@ -1,5 +1,3 @@
-
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -14,10 +12,10 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../../main.dart';
 import '../chat.dart';
 
-
-final String currentUserId =  FirebaseAuth.instance.currentUser.uid;
+final String currentUserId = FirebaseAuth.instance.currentUser.uid;
 final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final ScrollController listScrollController = ScrollController();
 
@@ -25,7 +23,6 @@ bool isLoading = false;
 int _limit = 20;
 
 Widget MsgView(BuildContext context, ApplicationState appState) {
-
   return CustomScrollView(
     slivers: <Widget>[
       SliverAppBar(
@@ -37,7 +34,7 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Colors.cyan,
+        backgroundColor: Color(0xfffc7174),
         pinned: true,
         snap: false,
         floating: true,
@@ -45,43 +42,51 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
         // flexibleSpace: const FlexibleSpaceBar(
         //   background: FlutterLogo(),
         // ),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.location_on,
-              semanticLabel: 'location',
-            ),
-            onPressed: () {},
-          ),
-        ],
+        // actions: <Widget>[
+        //   IconButton(
+        //     icon: Icon(
+        //       Icons.location_on,
+        //       semanticLabel: 'location',
+        //     ),
+        //     onPressed: () {},
+        //   ),
+        // ],
       ),
       SliverList(
         delegate: SliverChildListDelegate(
           [
             ///added
             WillPopScope(
-              onWillPop: (){},
+              onWillPop: () {},
               child: Stack(
                 children: <Widget>[
                   // List
                   ///chatting list 를 보여주는 container
                   Container(
                     child: StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance.collection('users').limit(_limit).snapshots(),
-                      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .limit(_limit)
+                          .snapshots(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<QuerySnapshot> snapshot) {
                         if (snapshot.hasData) {
                           return ListView.builder(
                             shrinkWrap: true,
                             padding: EdgeInsets.all(10.0),
+
                             /// data 를 가져오는 곳 buildItem 위젯
-                            itemBuilder: (context, index) => buildItem(context, snapshot.data.docs[index]),
+                            itemBuilder: (context, index) =>
+                                buildItem(context, snapshot.data.docs[index]),
                             itemCount: snapshot.data.docs.length,
                             controller: listScrollController,
                           );
-                        } else { /// data 가 없을 시
+                        } else {
+                          /// data 가 없을 시
                           return Center(
                             child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(primaryColor),
                             ),
                           );
                         }
@@ -96,19 +101,12 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
                 ],
               ),
             ),
-
           ],
         ),
       )
     ],
   );
-
-
-
-
-
 }
-
 
 ///
 Widget buildItem(BuildContext context, DocumentSnapshot document) {
@@ -134,6 +132,7 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
               ),
             );
           },
+
           ///위 text button 에 대한 style
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(greyColor2),
@@ -150,41 +149,47 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
               Material(
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
                 clipBehavior: Clip.hardEdge,
-                child: userChat.photoUrl.isNotEmpty /// empty 가 아니면 photoURL 을 가져온다
+                child: userChat.photoUrl.isNotEmpty
+
+                    /// empty 가 아니면 photoURL 을 가져온다
                     ? Image.network(
-                  userChat.photoUrl,
-                  fit: BoxFit.cover,
-                  width: 50.0,
-                  height: 50.0,
-                  loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      width: 50,
-                      height: 50,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: primaryColor,
-                          value: loadingProgress.expectedTotalBytes != null &&
-                              loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                              : null,
-                        ),
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, object, stackTrace) {
-                    return Icon(
-                      Icons.account_circle,
-                      size: 50.0,
-                      color: greyColor,
-                    );
-                  },
-                )
+                        userChat.photoUrl,
+                        fit: BoxFit.cover,
+                        width: 50.0,
+                        height: 50.0,
+                        loadingBuilder: (BuildContext context, Widget child,
+                            ImageChunkEvent loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            width: 50,
+                            height: 50,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: primaryColor,
+                                value: loadingProgress.expectedTotalBytes !=
+                                            null &&
+                                        loadingProgress.expectedTotalBytes !=
+                                            null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes
+                                    : null,
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, object, stackTrace) {
+                          return Icon(
+                            Icons.account_circle,
+                            size: 50.0,
+                            color: greyColor,
+                          );
+                        },
+                      )
                     : Icon(
-                  Icons.account_circle,
-                  size: 50.0,
-                  color: greyColor,
-                ),
+                        Icons.account_circle,
+                        size: 50.0,
+                        color: greyColor,
+                      ),
               ),
               Flexible(
                 ///nickname 을 가져오는 container
@@ -201,7 +206,7 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
                           style: TextStyle(color: primaryColor),
                         ),
                       ),
-                    /*
+                      /*
                       Container(
                         alignment: Alignment.centerLeft,
                         margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
@@ -213,8 +218,6 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
                       )
 
                      */
-
-
                     ],
                   ),
                 ),
@@ -394,4 +397,3 @@ Future<Null> openDialog() async {
 }
 
  */
-
