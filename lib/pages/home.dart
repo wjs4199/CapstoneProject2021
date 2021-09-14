@@ -8,6 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:intl/intl.dart';
+import 'package:simple_speed_dial/simple_speed_dial.dart';
+
 import '../main.dart';
 import '../model/product.dart';
 import '../components/postTile.dart';
@@ -178,17 +180,47 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   /// FloatingActionButton 생성기
-  FloatingActionButton buildFAB() {
-    if (_selectedIndex == 0 || _selectedIndex == 1 || _selectedIndex == 2) {
+  dynamic buildFAB() {
+    if (_selectedIndex == 0) {
+      return SpeedDial(
+        closedForegroundColor: Colors.white,
+        openForegroundColor: Colors.white,
+        closedBackgroundColor: Color(0xfffc7174),
+        openBackgroundColor: Color(0xffeb6859),
+        labelsStyle: TextStyle(
+          fontFamily: 'NanumSquareRoundR',
+          fontWeight: FontWeight.bold,
+          // color: Colors.black87,
+        ),
+        // controller: /* Your custom animation controller goes here */
+        speedDialChildren: <SpeedDialChild>[
+          SpeedDialChild(
+            child: Icon(Icons.accessibility),
+            foregroundColor: Colors.white,
+            backgroundColor: Color(0xfffc8862),
+            label: '나눔',
+            onPressed: () {},
+            closeSpeedDialOnPressed: false,
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.accessibility_new),
+            foregroundColor: Colors.white,
+            backgroundColor: Color(0xfffda26b),
+            label: '나눔요청',
+            onPressed: () {},
+          ),
+        ],
+        child: Icon(Icons.mode_edit),
+      );
+    } else if (_selectedIndex == 1 || _selectedIndex == 2) {
       return FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/add');
         },
         backgroundColor: Color(0xfffc7174),
-        child: Icon(Icons.add),
+        child: Icon(Icons.mode_edit),
       );
     }
-    ;
     return null;
   }
 
