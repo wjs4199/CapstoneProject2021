@@ -221,10 +221,10 @@ class PieChart2State extends State {
                 child: PieChart(
                   PieChartData(
                       pieTouchData:
-                      PieTouchData(touchCallback: (pieTouchResponse) {
+                          PieTouchData(touchCallback: (pieTouchResponse) {
                         setState(() {
                           final desiredTouch = pieTouchResponse.touchInput
-                          is! PointerExitEvent &&
+                                  is! PointerExitEvent &&
                               pieTouchResponse.touchInput is! PointerUpEvent;
                           if (desiredTouch &&
                               pieTouchResponse.touchedSection != null) {
@@ -267,7 +267,7 @@ class PieChart2State extends State {
     double total = productCount + timeCount + talentCount;
     return List.generate(
       3,
-          (i) {
+      (i) {
         final isTouched = i == touchedIndex;
         final opacity = isTouched ? 1.0 : 0.6;
         switch (i) {

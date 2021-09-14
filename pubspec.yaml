@@ -16,25 +16,23 @@ dependencies:
   firebase_storage: ^10.0.1
   google_fonts: ^2.0.0
   google_sign_in: ^5.0.3
-  provider: ^6.0.0
+  provider: ^5.0.0
   cupertino_icons: ^1.0.2
   image_picker: ^0.8.0+1
   url_launcher: ^6.0.6
-  fl_chart: ^0.40.0 # 새로운 api 사용(1) flutter chart
+  fl_chart: ^0.36.1 # 새로운 api 사용(1) flutter chart
   flutter_sticky_header: ^0.6.0 # 새로운 api 사용(2) flutter sticky header
   google_maps_flutter: ^2.0.6 # 새로운 api 사용 (3) google maps flutter
   http: ^0.13.1
   json_serializable: ^4.1.0
-  shared_preferences: ^2.0.7 #added
+  shared_preferences: 2.0.6 #added
   fluttertoast: ^8.0.8 #added
   firebase_messaging: ^10.0.5 #added
   flutter_local_notifications: ^8.1.1+1 #added
   photo_view: ^0.12.0 #added
   intl: ^0.17.0 #added
-  multi_image_picker: ^4.7.14 #added
-  flutter_absolute_path: ^1.0.6 #added
-  carousel_pro: ^1.0.0 #added
-  carousel_slider: ^4.0.0 #added
+  multi_image_picker: ^4.7.14
+  flutter_absolute_path: ^1.0.6
 
 dev_dependencies:
   flutter_test:
@@ -47,8 +45,7 @@ flutter:
   assets:
     - assets/hgu.png
     - assets/logo.png
-    - assets/userDefaultImage.png
-    - assets/defaultPhoto.png
+    - assets/userDefault.png
     - images/img_not_available.jpeg
     - images/mimi1.gif
     - images/mimi2.gif
