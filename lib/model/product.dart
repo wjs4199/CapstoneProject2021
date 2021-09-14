@@ -12,6 +12,8 @@ class Product {
     @required this.uid,
     @required this.id,
     @required this.likes,
+    @required this.hits,
+    @required this.photo,
   });
 
   final String category;
@@ -23,6 +25,8 @@ class Product {
   final String uid;
   final String id;
   final int likes;
+  final int hits;
+  final int photo;
 }
 
 class Comment {
@@ -30,6 +34,7 @@ class Comment {
     @required this.userName,
     @required this.comment,
     @required this.created,
+    @required this.nickname,
     // @required this.isDeleted,
 
 
@@ -38,6 +43,7 @@ class Comment {
   final String userName;
   final String comment;
   final Timestamp created;
+  final String nickname;
 // final bool isDeleted;
 
 }
