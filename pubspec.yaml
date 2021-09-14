@@ -35,6 +35,7 @@ dependencies:
   flutter_absolute_path: ^1.0.6 #added
   carousel_pro: ^1.0.0 #added
   carousel_slider: ^4.0.0 #added
+  flutter_speed_dial: ^4.3.0 #added
 
 dev_dependencies:
   flutter_test:

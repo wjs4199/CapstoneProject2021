@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:giveandtake/pages/login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -182,16 +183,70 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return _widgetOptions;
   }
 
-  /// FloatingActionButton 생성기
-  FloatingActionButton buildFAB() {
+  /// FloatingActionButton 생성기 (버튼 2개로 수정)
+  Widget buildFAB() {
     if (_selectedIndex == 0 || _selectedIndex == 1 || _selectedIndex == 2) {
-      return FloatingActionButton(
+      return Container(
+        height: 60,
+        width: 60,
+        color: Colors.transparent,
+        child: SpeedDial(
+          icon: Icons.add,
+          animatedIconTheme: IconThemeData(size: 30),
+          activeIcon: Icons.close,
+          backgroundColor: Colors.cyan,
+          childPadding: EdgeInsets.all(5),
+          spacing: 10,
+          visible: true,
+          elevation: 10.0,
+          curve: Curves.bounceIn,
+          animationSpeed: 120,
+          overlayOpacity: 0.3,
+          children: [
+            // FAB 1
+            SpeedDialChild(
+              child: Icon(Icons.accessibility, size: 27,),
+              backgroundColor: Colors.cyan,
+              onTap: () {
+                Navigator.pushNamed(context, '/add');
+              },
+              label: '나눔',
+              labelStyle: TextStyle(
+                  fontFamily: 'Roboto_Bold',
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                  fontSize: 16.0),
+              labelBackgroundColor: Colors.cyan,),
+            // FAB 2
+            SpeedDialChild(
+              child: Icon(Icons.accessibility_new, size: 27,),
+              backgroundColor: Colors.cyan,
+              onTap: () {
+                Navigator.pushNamed(context, '/add');
+              },
+              label: '나눔 요청',
+              labelStyle: TextStyle(
+                  fontFamily: 'Roboto_Bold',
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                  fontSize: 16.0),
+              labelBackgroundColor: Colors.cyan,)
+          ],
+        ),
+      );
+
+
+        /*FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/add');
+          setState(() {
+            _getFAB();
+          });
+
+          //Navigator.pushNamed(context, '/add');
         },
         backgroundColor: Colors.cyan,
         child: Icon(Icons.add),
-      );
+      );*/
     }
     ;
     return null;
