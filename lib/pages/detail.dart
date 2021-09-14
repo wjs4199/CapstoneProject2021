@@ -41,7 +41,7 @@ class _DetailPageState extends State<DetailPage> {
 
 
   @override
-  Widget build(BuildContext context) {
+  build(BuildContext context) {
 
     var photoNum = widget.photoNum;
 
@@ -280,7 +280,7 @@ class _DetailPageState extends State<DetailPage> {
     //var imageUrls = [];
 
     /// ProductID에 따라 해당하는 image url 다운로드
-    Future<String> downloadURL(String id, int num) async {
+    Future<String> downloadURL(String id, int num)  async {
       try {
         return await storage
             .ref()
@@ -295,13 +295,21 @@ class _DetailPageState extends State<DetailPage> {
 
     /// 게시글 자체에 저장된 photoNum의 개수만큼만 이미지 url다운받아서 carousel slider에 전달하고 싶은데
     /// 여러시도 해봐도 잘 안됨 ㅠㅠ
-    /*Future<List> futureList() async {
-      var futureList= [];
+
+    Future<List> futureList() async{
+      var List= [];
       for(var i = 0; i < widget.photoNum; i++){
-        futureList[i] = await downloadURL(productId,i);
+        List[i] = await downloadURL(productId,i);
       }
-      return futureList;
-    }*/
+      return List;
+    }
+
+    //var list = await futureList();
+
+    List list;
+    Future<void> wait() async {
+      list = await futureList();
+    }
 
 
     /// Add 페이지 화면 구성
@@ -316,8 +324,8 @@ class _DetailPageState extends State<DetailPage> {
                         Consumer<ApplicationState>(
                           builder: (context, appState, _) =>
                               FutureBuilder(
-                                //future: futureList(),
-                                future:Future.wait([
+                                future: wait(),
+                                /*future:Future.wait([
                                   downloadURL(productId,0),
                                   downloadURL(productId,1),
                                   downloadURL(productId,2),
@@ -328,7 +336,7 @@ class _DetailPageState extends State<DetailPage> {
                                   downloadURL(productId,7),
                                   downloadURL(productId,8),
                                   downloadURL(productId,9),
-                                ]),
+                                ]),*/
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState == ConnectionState.waiting) {
                                     return Column(
@@ -344,14 +352,7 @@ class _DetailPageState extends State<DetailPage> {
                                             height: MediaQuery.of(context).size.height * 0.5,
                                             width: MediaQuery.of(context).size.width,
                                             color: Color(0xffced3d0),
-                                            //child: Image.network(snapshot.data),
                                           ),
-                                          /*Container(
-                                              height: MediaQuery.of(context).size.height * 0.5,
-                                              width: MediaQuery.of(context).size.width,
-                                              child: Image.network(snapshot.data.toString(),
-                                                fit: BoxFit.cover,
-                                                width: 1000),*/
                                           CarouselSlider(
                                                 options: CarouselOptions(
                                                   autoPlay: false,
@@ -360,20 +361,20 @@ class _DetailPageState extends State<DetailPage> {
                                                   aspectRatio: 1.0,
                                                   height: MediaQuery.of(context).size.height* 0.5,
                                                   ),
-                                                  items: snapshot.data.map<Widget>((item) {
+                                                  items: list.map<Widget>((item) {
                                                     if(item != null) {
                                                       return Container(
                                                         child: Image.network(item,
                                                             fit: BoxFit.cover,
                                                             width: 1000),
                                                       );
-                                                    } /*else {
+                                                    } else {
                                                       return Container(
                                                         child: Image.asset('assets/defaultPhoto.png',
                                                             fit: BoxFit.cover,
                                                             width: 1000),
                                                       );
-                                                    }*/
+                                                    }
                                                   }).toList(),
                                               )
                                         ],
