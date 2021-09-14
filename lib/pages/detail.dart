@@ -277,7 +277,7 @@ class _DetailPageState extends State<DetailPage> {
     var storage = firebase_storage.FirebaseStorage.instance;
 
     /// multi image들의 url을 담아서 저장하는 리스트
-    ////var imageUrls = [];
+    //var imageUrls = [];
 
     /// ProductID에 따라 해당하는 image url 다운로드
     Future<String> downloadURL(String id, int num)  async {
@@ -486,6 +486,7 @@ class _DetailPageState extends State<DetailPage> {
                                       width: 42,
                                       height: 42,
                                       child: Image.asset('assets/userDefaultImage.png'),
+r
                                     ),
                                     SizedBox(width: 10.0),
                                     SizedBox(
