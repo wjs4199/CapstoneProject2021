@@ -14,6 +14,10 @@ import 'dart:io';
 import '../main.dart';
 
 class AddPage extends StatefulWidget {
+  AddPage({this.giveOrTake});
+
+  final String giveOrTake;
+
   @override
   _AddPageState createState() => _AddPageState();
 }
@@ -170,7 +174,13 @@ class _AddPageState extends State<AddPage> {
                       Navigator.pop(context);
                     },
                   ),
-                  title: Text('나눔 글쓰기'),
+                  title: widget.giveOrTake == 'give'
+                      ? Text('나눔 글쓰기', style: TextStyle(
+                        fontFamily: 'NanumSquareRoundR',
+                        fontWeight: FontWeight.bold,),)
+                      : Text('나눔요청 글쓰기', style: TextStyle(
+                        fontFamily: 'NanumSquareRoundR',
+                        fontWeight: FontWeight.bold,),),
                   centerTitle: true,
                   actions: <Widget>[
                     IconButton(
@@ -180,7 +190,7 @@ class _AddPageState extends State<AddPage> {
                         ),
                         onPressed: () {
                           if (_formKey.currentState.validate()) {
-                            if(giveOrTakeCategory == 'give') {
+                            if(widget.giveOrTake == 'give') {
                               addGiveProduct(
                                 _titleController.text,
                                 _contentController.text,
@@ -287,12 +297,6 @@ class _AddPageState extends State<AddPage> {
                                                   ),
                                                 )
                                             ),
-                                            SizedBox(width: 10,),
-                                            Expanded(
-                                              flex: 6,
-                                              /// 게시물 올릴 카테고리 (give 또는 take) 정하는 토글버튼
-                                              child: _buildToggleButtons(context),
-                                            )
                                           ],
                                         ),
                                         Divider(thickness: 1),

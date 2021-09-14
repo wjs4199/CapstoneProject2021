@@ -43,8 +43,8 @@ class _ApplicationState extends State<Application> {
             routes: {
               '/login': (context) => LoginPage(),
               '/home': (context) => HomePage(),
-              '/add': (context) => AddPage(),
-              //'/takeadd': (context) => takeAddPage(),
+              '/giveadd': (context) => AddPage(giveOrTake: 'give'),
+              '/takeadd': (context) => AddPage(giveOrTake: 'take'),
               '/map': (context) => MapPage(),
             },
 

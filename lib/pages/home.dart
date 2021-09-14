@@ -201,33 +201,33 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           elevation: 10.0,
           curve: Curves.bounceIn,
           animationSpeed: 120,
-          overlayOpacity: 0.3,
+          overlayOpacity: 0.7,
           children: [
             // FAB 1
             SpeedDialChild(
-              child: Icon(Icons.accessibility, size: 27,),
+              child: Icon(Icons.accessibility, size: 27, color: Colors.white,),
               backgroundColor: Colors.cyan,
               onTap: () {
-                Navigator.pushNamed(context, '/add');
+                Navigator.pushNamed(context, '/giveadd');
               },
               label: '나눔',
               labelStyle: TextStyle(
-                  fontFamily: 'Roboto_Bold',
-                  fontWeight: FontWeight.w500,
+                  fontFamily: 'NanumSquareRoundrR',
+                  fontWeight: FontWeight.bold,
                   color: Colors.white,
                   fontSize: 16.0),
               labelBackgroundColor: Colors.cyan,),
             // FAB 2
             SpeedDialChild(
-              child: Icon(Icons.accessibility_new, size: 27,),
+              child: Icon(Icons.accessibility_new, size: 27, color: Colors.white,),
               backgroundColor: Colors.cyan,
               onTap: () {
-                Navigator.pushNamed(context, '/add');
+                Navigator.pushNamed(context, '/takeadd');
               },
               label: '나눔 요청',
               labelStyle: TextStyle(
-                  fontFamily: 'Roboto_Bold',
-                  fontWeight: FontWeight.w500,
+                  fontFamily: 'NanumSquareRoundR',
+                  fontWeight: FontWeight.bold,
                   color: Colors.white,
                   fontSize: 16.0),
               labelBackgroundColor: Colors.cyan,)
