@@ -486,8 +486,8 @@ class _DetailPageState extends State<DetailPage> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => Chat(
-                                            peerId: product.uid,
-                                            peerAvatar: photoUrl,
+                                            peerId: product.userName,
+                                            //peerAvatar: product.photoUrl,
                                           ),
                                         ),
                                       );
