@@ -184,7 +184,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (_selectedIndex == 0) {
       return SpeedDial(
         closedForegroundColor: Colors.white,
-        openForegroundColor: Colors.white,
+        openForegroundColor: Colors.white60,
         closedBackgroundColor: Color(0xfffc7174),
         openBackgroundColor: Color(0xffeb6859),
         labelsStyle: TextStyle(
