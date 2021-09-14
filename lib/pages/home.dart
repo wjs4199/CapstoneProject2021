@@ -199,15 +199,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             foregroundColor: Colors.white,
             backgroundColor: Color(0xfffc8862),
             label: '나눔',
-            onPressed: () {},
-            closeSpeedDialOnPressed: false,
+            onPressed: () {
+              Navigator.pushNamed(context, '/add');
+            },
+            // closeSpeedDialOnPressed: false,
           ),
           SpeedDialChild(
             child: Icon(Icons.accessibility_new),
             foregroundColor: Colors.white,
             backgroundColor: Color(0xfffda26b),
             label: '나눔요청',
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/add');
+            },
           ),
         ],
         child: Icon(Icons.mode_edit),
