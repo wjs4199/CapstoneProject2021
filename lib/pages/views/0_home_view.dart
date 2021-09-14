@@ -9,7 +9,7 @@ import '../home.dart';
 Widget HomeView(BuildContext context, ApplicationState appState) {
   return CustomScrollView(
     physics:
-    const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
     slivers: <Widget>[
       SliverAppBar(
         backgroundColor: Colors.cyan,
@@ -106,13 +106,12 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
         ),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-
+            (BuildContext context, int index) {
               return Column(
                 children: [
                   SizedBox(height: 5),
-                 // if(index != null)
-                  PostTileMaker(appState.giveProducts[index], true),
+                  if (index != null)
+                    PostTileMaker(appState.giveProducts[index], true),
                   SizedBox(height: 5),
                   Divider(
                     height: 1,
@@ -162,12 +161,12 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
         ),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
+            (BuildContext context, int index) {
               return Column(
                 children: [
                   SizedBox(height: 5),
-                 // if(index != null)
-                  PostTileMaker(appState.takeProducts[index], false),
+                  // if(index != null)
+                  PostTileMaker(appState.takeProducts[index], true),
                   SizedBox(height: 5),
                   Divider(
                     height: 1,
