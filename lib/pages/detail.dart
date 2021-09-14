@@ -486,6 +486,7 @@ class _DetailPageState extends State<DetailPage> {
                                       width: 42,
                                       height: 42,
                                       child: Image.asset('assets/userDefaultImage.png'),
+r
                                     ),
                                     SizedBox(width: 10.0),
                                     SizedBox(
