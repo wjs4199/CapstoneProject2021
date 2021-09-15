@@ -14,6 +14,8 @@ class Product {
     @required this.likes,
     @required this.hits,
     @required this.photo,
+    @required this.user_photoURL,
+
   });
 
   final String category;
@@ -27,6 +29,7 @@ class Product {
   final int likes;
   final int hits;
   final int photo;
+  final String user_photoURL;
 }
 
 class Comment {

@@ -156,6 +156,7 @@ class ApplicationState extends ChangeNotifier {
             likes: document.data()['like'],
             hits: document.data()['hits'],
             photo: document.data()['photo'],
+            user_photoURL: document.data()['user_photoURL'],
           ));
         });
         notifyListeners();
@@ -182,6 +183,7 @@ class ApplicationState extends ChangeNotifier {
             likes: document.data()['like'],
             hits: document.data()['hits'],
             photo: document.data()['photo'],
+            user_photoURL: document.data()['user_photoURL'],
           ));
         });
         notifyListeners();
@@ -210,6 +212,7 @@ class ApplicationState extends ChangeNotifier {
             likes: null,
             hits: document.data()['hits'],
             photo: document.data()['photo'],
+            user_photoURL: document.data()['user_photoURL'],
           ));
         });
         notifyListeners();
@@ -235,6 +238,7 @@ class ApplicationState extends ChangeNotifier {
             likes: null,
             hits: document.data()['hits'],
             photo: document.data()['photo'],
+            user_photoURL: document.data()['user_photoURL'],
           ));
         });
         notifyListeners();

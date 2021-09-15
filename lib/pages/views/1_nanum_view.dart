@@ -64,7 +64,7 @@ Widget NanumView(BuildContext context, ApplicationState appState,
         ),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
+                (BuildContext context, int index) {
               return Column(
                 children: [
                   SizedBox(height: 5),
