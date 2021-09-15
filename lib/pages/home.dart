@@ -179,7 +179,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   /// FloatingActionButton 생성기
-  dynamic buildFAB() {
+  Widget buildFAB() {
     if (_selectedIndex == 0) {
       return SpeedDial(
         closedForegroundColor: Colors.white,
@@ -199,7 +199,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             backgroundColor: Color(0xfffc8862),
             label: '나눔',
             onPressed: () {
-              Navigator.pushNamed(context, '/add');
+              Navigator.pushNamed(context, '/giveadd');
             },
             // closeSpeedDialOnPressed: false,
           ),
@@ -209,16 +209,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             backgroundColor: Color(0xfffda26b),
             label: '나눔요청',
             onPressed: () {
-              Navigator.pushNamed(context, '/add');
+              Navigator.pushNamed(context, '/takeadd');
             },
           ),
         ],
         child: Icon(Icons.mode_edit),
       );
-    } else if (_selectedIndex == 1 || _selectedIndex == 2) {
+    } else if (_selectedIndex == 1) {
       return FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/add');
+          Navigator.pushNamed(context, '/giveadd');
+        },
+        backgroundColor: Color(0xfffc7174),
+        child: Icon(Icons.mode_edit),
+      );
+    } else if (_selectedIndex == 2) {
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/takeadd');
         },
         backgroundColor: Color(0xfffc7174),
         child: Icon(Icons.mode_edit),
