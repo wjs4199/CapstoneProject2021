@@ -12,6 +12,8 @@ class Product {
     @required this.uid,
     @required this.id,
     @required this.likes,
+    @required this.hits,
+    @required this.photo,
   });
 
   final String category;
@@ -23,6 +25,8 @@ class Product {
   final String uid;
   final String id;
   final int likes;
+  final int hits;
+  final int photo;
 }
 
 class Comment {

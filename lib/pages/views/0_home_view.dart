@@ -12,21 +12,21 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
     const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
     slivers: <Widget>[
       SliverAppBar(
-        backgroundColor: Colors.cyan,
+        backgroundColor: Color(0xfffc7174),
         // stretch: true,
         pinned: false,
         snap: false,
         floating: false,
-        expandedHeight: 120.0,
+        expandedHeight: 130.0,
         flexibleSpace: FlexibleSpaceBar(
-          title: Text(
-            '홈',
-            style: TextStyle(
-              fontSize: 18,
-              fontFamily: 'NanumSquareRoundR',
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          // title: Text(
+          //   '홈',
+          //   style: TextStyle(
+          //     fontSize: 18,
+          //     fontFamily: 'NanumSquareRoundR',
+          //     fontWeight: FontWeight.bold,
+          //   ),
+          // ),
           background: Stack(
             fit: StackFit.expand,
             children: <Widget>[
@@ -61,8 +61,8 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
       SliverStickyHeader(
         header: Container(
           alignment: Alignment.centerLeft,
-          height: 40,
-          color: Colors.cyan.shade50,
+          height: 35,
+          color: Color(0x80fda26b),
           padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
           child: Text(
             '공지사항',
@@ -82,8 +82,8 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
       ),
       SliverStickyHeader(
         header: Container(
-          height: 40,
-          color: Colors.cyan.shade50,
+          height: 35,
+          color: Color(0x80fda26b),
           padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
           child: Row(
             children: [
@@ -107,12 +107,11 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
-
               return Column(
                 children: [
                   SizedBox(height: 5),
-                 // if(index != null)
-                  PostTileMaker(appState.giveProducts[index], true),
+                  if (index != null)
+                    PostTileMaker(appState.giveProducts[index], true),
                   SizedBox(height: 5),
                   Divider(
                     height: 1,
@@ -138,8 +137,8 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
       // ),
       SliverStickyHeader(
         header: Container(
-          height: 40,
-          color: Colors.cyan.shade50,
+          height: 35,
+          color: Color(0x80fda26b),
           padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
           child: Row(
             children: [
@@ -166,8 +165,8 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
               return Column(
                 children: [
                   SizedBox(height: 5),
-                 // if(index != null)
-                  PostTileMaker(appState.takeProducts[index], false),
+                  if (index != null)
+                    PostTileMaker(appState.takeProducts[index], true),
                   SizedBox(height: 5),
                   Divider(
                     height: 1,

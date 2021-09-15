@@ -1,7 +1,13 @@
+import 'dart:io' as prefix;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
@@ -22,68 +28,103 @@ class EditPage extends StatefulWidget {
 }
 
 class _EditPageState extends State<EditPage> {
-  ///********************* 사진 변경 기능을 위한 부분 *********************///
 
-  /// 유저가 사진을 변경할 시 변경된 사진파일이 담길 변수
-  File _image;
+  ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
 
-  /// 유저가 사진을 변경할 시 필요한 ImagePicker() 참조 변수
-  final picker = ImagePicker();
+  /// Firebase Storage 참조 간략화
+  FirebaseStorage storage = FirebaseStorage.instance;
 
-  /// 유저가 사진변경 버튼을 눌렀을 때 실행되는 사진 변경하여 가져오는 함수
-  Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+  /// multiImage Picker로 선택한 사진들이 담길 리스트 (Asset타입 - 사진 띄울 때 사용됨)
+  List<Asset> images = [];
+
+  /// multiImage Picker로 선택한 사진들이 담길 리스트 (File타입 - 사진 저장할 때 사용됨)
+  List<File> file = [];
+
+  /// 업로드 된 이미지의 개수
+  int numberOfImages = 0;
+
+  /// 10개의 이미지 개수 제한에 다다랐을 때 true 로 변함(글자색 바꿀 때 사용)
+  bool numberOfImagesTextColor = false;
+
+  /// index 만큼의 이미지를 갤러리에서 선택한 후 image 리스트에 저장시키는 함수
+  Future<void> getMultiImage(int index) async {
+    List<Asset> resultList;
+    resultList = await MultiImagePicker.pickImages(
+        maxImages: index, enableCamera: true, selectedAssets: images);
 
     setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
+      images = resultList;
+      numberOfImages = images.length;
+      if (numberOfImages >= 10) {
+        numberOfImagesTextColor = true;
       } else {
-        print('No image selected.');
+        numberOfImagesTextColor = false;
       }
+    });
+    /// 받아온 이미지를 File 타입으로 변환
+    await getImageFileFromAssets();
+  }
+
+  /// image 리스트에 들어있는 Asset 타입 이미지들을 File 타입으로 변환시키는 함수(storage 저장 위해)
+  Future<void> getImageFileFromAssets() async {
+
+    images.forEach((imageAsset) async {
+      final filePath = await FlutterAbsolutePath.getAbsolutePath(imageAsset.identifier);
+      var tempFile = File(filePath);
+
+      file.add(tempFile);
     });
   }
 
-  /// Firebase Storage 참조 간략화
-  var storage = firebase_storage.FirebaseStorage.instance;
-
-  /// 변경된 사진을 저장할 때 Firebase 에 업로드 시키는 함수
-  Future<void> uploadFile(File photo, String id) async {
+  /// ProductID에 따라 해당하는 image url 다운로드
+  Future<String> downloadURL(String id, int num) async {
     try {
-      await storage.ref('images/' + id + '.png').putFile(photo);
+      return await storage
+          .ref()
+          .child('images')
+      //.child('$id.png')
+          .child('$id$num.png')
+          .getDownloadURL();
     } on Exception {
       return null;
     }
   }
 
-  ///********************* 카테고리 변경 기능을 위한 부분 *********************///
+  ///**************** 게시글 저장과 관련된 변수/ 함수들 ***************///
 
-  /// 'Product', 'Time', 'Talent' 카테고리를 선택하는 DropdownButton 의 선택지 리스트
-  final _filter = ['Product', 'Time', 'Talent'];
+  /// 현재 유저의 이름 참조 간략화
+  var user = FirebaseAuth.instance.currentUser;
+  var name;
 
-  /// DropdownButton 에서 선택한 카테고리를 담는 변수 (기본으로 보여지는 항목을 'Product'로 초기화)
-  var _selectedFilter = 'Product';
+  /// Firestore collection 참조 간략화
+  CollectionReference giveProduct =
+  FirebaseFirestore.instance.collection('giveProducts');
+  CollectionReference takeProduct =
+  FirebaseFirestore.instance.collection('takeProducts');
 
-  /// DropdownButton 의 상태를 사용자의 선택에 따라 변경하는 함수
-  void dropdownUpdate(value) {
-    if (value != _selectedFilter) _selectedFilter = value;
-    setState(() {
-      _selectedFilter = value;
-    });
-  }
+  ///**************** UI 구성에 필요한 변수들(하단의 위젯함수 내부에서 사용되는 것들도 포함) ***************///
 
-  ///********************* 게시'글' 내용 변경 기능을 위한 부분 *********************///
+  /// Add 페이지 내에서 give/take 중 무엇을 선택했는지를 담고 있는 변수
+  String giveOrTakeCategory;
 
-  /// title과 content의 Text상자 상태를 검증하는 GlobalKey
+  /// Give or Take 선택용 ToggleButtons - 각 버튼용 bool 리스트
+  final List<bool> _selectionsOfGiveOrTake = List.generate(2, (_) => false);
+
+  /// 게시글 내용 입력과 관련된 key, controller 들
   final _formKey = GlobalKey<FormState>(debugLabel: '_EditPageState');
-
-  /// title 을 수정하는 text 상자의 Controller
   final _titleController = TextEditingController();
-
-  /// content 를 수정하는 text 상자의 Controller
   final _contentController = TextEditingController();
+
+  /// 카테고리 설정하는 토글버튼과 관련된 함수
+  final _filter = ['카테고리', '여성 의류', '남성의류', '음식', '쿠폰', '전자제품', '책','학용품', '재능기부', '기타'];
+  var _selectedFilter = '카테고리';
 
   @override
   Widget build(BuildContext context) {
+
+
+
+
     ///*********** ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ***********///
 
     /// EditPage 호출시 받는 매개변수 참조
@@ -120,13 +161,26 @@ class _EditPageState extends State<EditPage> {
     }
 
     /// ProductID에 따라 해당하는 image url 다운로드
-    Future<String> downloadURL(String id) async {
+    Future<String> downloadURL(String id, int num) async {
       try {
         return await storage
             .ref()
             .child('images')
-            .child('$id.png')
+            .child('$id$num.png')
             .getDownloadURL();
+      } on Exception {
+        return null;
+      }
+    }
+
+    /// 이미지 storage 에 저장할 때 productID 뒤에 숫자붙여서 저장시키는 함수
+    Future<void> uploadFile(String id) async {
+      try {
+        for (var num = 0; num < file.length; num++) {
+          print('file 저장 시작 -> ${num+1}');
+          await storage.ref('images/' + id + (product.photo + num).toString() + '.png')
+              .putFile(file[num]);
+        }
       } on Exception {
         return null;
       }
@@ -136,7 +190,7 @@ class _EditPageState extends State<EditPage> {
 
     /// giveProducts 또는 takeProducts 중 어디 컬랙션에 속한 게시물인지에 따라 참조할 path 결정
     CollectionReference target =
-        FirebaseFirestore.instance.collection(editGiveOrTake);
+    FirebaseFirestore.instance.collection(editGiveOrTake);
 
     /// 변경한 내용대로 게시물 업데이트 시키는 함수
     Future<void> editProduct(String category, String title, String content) {
@@ -145,9 +199,31 @@ class _EditPageState extends State<EditPage> {
         'content': content,
         'category': category,
         'modified': FieldValue.serverTimestamp(),
+        'photo' : product.photo + numberOfImages,
       }).then((value) {
-        if (_image != null) uploadFile(_image, productId);
+        if (images.isNotEmpty) uploadFile(productId);
       }).catchError((error) => print('Error: $error'));
+      /*if (_image != null) uploadFile(_image, productId);
+      }).catchError((error) => print('Error: $error'));*/
+    }
+
+    Widget savedImages(List<String> data) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          for(var i=0; i<product.photo; i++)
+            if(data[i] != null)
+              Container(
+                height: 200,
+                width: 200,
+                child: Image.network(data[i]),
+              ),
+          SizedBox(
+            height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+            width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+          ),
+        ],
+      );
     }
 
     /// Edit 페이지 화면 구성
@@ -164,7 +240,7 @@ class _EditPageState extends State<EditPage> {
               Navigator.pop(context);
             },
           ),
-          title: Text('Edit'),
+          title: Text('글 수정'),
           centerTitle: true,
           actions: <Widget>[
             TextButton(
@@ -179,7 +255,7 @@ class _EditPageState extends State<EditPage> {
                 }
               },
               child: Text(
-                'Save',
+                '저장',
                 style: TextStyle(
                   color: Colors.white,
                 ),
@@ -191,108 +267,283 @@ class _EditPageState extends State<EditPage> {
           child: ListView(
             children: [
               Container(
-                width: MediaQuery.of(context).size.width,
-                child: _image == null
-                    ? FutureBuilder(
-                        future: downloadURL(productId),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            return Image.network(snapshot.data.toString(),
-                                fit: BoxFit.fitWidth);
-                          } else if (snapshot.hasData == false) {
-                            return Image.asset('assets/logo.png');
-                          } else {
-                            return Container(
-                              child: Text('Snapshot Error!'),
-                            );
-                          }
-                        },
-                      )
-                    : Image.file(
-                        _image,
-                        fit: BoxFit.fitWidth,
+                  color: Colors.transparent,
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height * (0.1),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.016,
                       ),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                            ),
+                            Container(
+                              width: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                              height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                              child: OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    primary: Colors.black,
+                                    backgroundColor: Colors.transparent,
+                                    textStyle: TextStyle(
+                                      color: numberOfImagesTextColor ? Colors.red : Colors.black,
+                                      fontSize: 9,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      getMultiImage(10);
+                                      if (numberOfImages < 10) {
+                                        numberOfImagesTextColor = false;
+                                      } else {
+                                        numberOfImagesTextColor = true;
+                                      }
+                                    });
+                                  },
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.camera_alt_rounded,
+                                        semanticLabel: 'Image upload',
+                                        color: Colors.grey,
+                                      ),
+                                      Text(
+                                        '$numberOfImages/10',
+                                        style: TextStyle(
+                                          color:
+                                          numberOfImagesTextColor ? Colors.red : Colors.black,
+                                        ),
+                                      )
+                                    ],
+                                  )),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                            ),
+
+                            /// 업로드 된 사진들 가로 스크롤 가능
+                            FutureBuilder(
+                              future:Future.wait([
+                                downloadURL(productId,0),
+                                downloadURL(productId,1),
+                                downloadURL(productId,2),
+                                downloadURL(productId,3),
+                                downloadURL(productId,4),
+                                downloadURL(productId,5),
+                                downloadURL(productId,6),
+                                downloadURL(productId,7),
+                                downloadURL(productId,8),
+                                downloadURL(productId,9),
+                              ]),
+                              builder: (context, snapshot){
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return Column(
+                                    children: [
+                                      Center(child: CircularProgressIndicator()),
+                                    ],
+                                  );
+                                }  else {
+                                  if(snapshot.hasData) {
+                                    return /*ListView(
+                                  scrollDirection: Axis.horizontal,
+                                  children: [
+                                    savedImages(snapshot.data),
+                                    images.isEmpty ? Container() : Container(
+                                      height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                      width: MediaQuery.of(context).size.height * (0.35),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          for(var i=0; i<numberOfImages; i++)
+                                            AssetThumb(
+                                              asset: images[i],
+                                              height: 200,
+                                              width: 200,
+                                            ),
+                                            SizedBox(
+                                              height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                              width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                                            ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                );*/
+
+
+                                      Row(
+                                          children: [
+                                            //savedImages(snapshot.data),
+                                            images.isEmpty ? Container() : Container(
+                                              height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                              width: MediaQuery.of(context).size.height * (0.35),
+                                              child: ListView.builder(
+                                                  scrollDirection: Axis.horizontal,
+                                                  itemCount: images.length,
+                                                  itemBuilder: (BuildContext context, int index) {
+                                                    var asset = images[index];
+                                                    return Row(
+                                                      children: [
+                                                        Stack(
+                                                          children: [
+                                                            Row(
+                                                              mainAxisAlignment: MainAxisAlignment.start,
+                                                              children: [
+                                                                //savedImages(snapshot.data),
+                                                                AssetThumb(
+                                                                  asset: asset,
+                                                                  height: 200,
+                                                                  width: 200,
+                                                                ),
+                                                                SizedBox(
+                                                                  height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                                                  width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                                                                ),
+                                                              ],
+                                                            ),
+
+                                                            /// 여기서 삭제버튼 구현하다 관둠...
+                                                          ],
+                                                        )
+                                                      ],
+                                                    );
+                                                  }),
+                                            )
+                                          ]);
+                                  } else if (snapshot.hasData == false) {
+                                    return Container(height: 35,);
+                                  } else {
+                                    return Container(
+                                      child: Text('Snapshot Error!'),
+                                    );
+                                  }
+                                }
+                              },
+                            ),
+
+                          ]),
+                    ],
+                  )
               ),
               Row(
                 children: [
+                  SizedBox(width: 14),
                   Expanded(
-                    flex: 1,
-                    child: Container(),
-                  ),
-                  Expanded(
-                    flex: 8,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 48.0),
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 9,
-                              child: Container(),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: IconButton(
-                                icon: Icon(
-                                  Icons.photo_camera,
-                                  semanticLabel: 'pick_photo',
-                                ),
-                                onPressed: getImage,
-                              ),
-                            ),
-                          ],
-                        ),
+                        Divider(thickness: 1),
                         Form(
                           key: _formKey,
                           child: Column(
                             children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: DropdownButton<String>(
-                                      value: _selectedFilter,
-                                      items: _filter.map(
-                                        (value) {
-                                          return DropdownMenuItem(
-                                            value: value,
-                                            child: Text(value),
-                                          );
+                              /// 제목 입력하는 부분
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height * (0.06) ,
+                                child:  Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: _titleController,
+                                        decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          focusedBorder: InputBorder.none,
+                                          enabledBorder: InputBorder.none,
+                                          errorBorder: InputBorder.none,
+                                          disabledBorder: InputBorder.none,
+                                          hintText: product.title,
+                                          hintStyle: TextStyle(
+                                              height: 1.5,
+                                              fontSize: 18.0,
+                                              color: Color(0xffced3d0)
+                                          ),
+                                          contentPadding: EdgeInsets.fromLTRB(0, 10.0, 0, 10.0),
+                                        ),
+                                        style: TextStyle(fontSize: 18, height: 1.5, ),
+                                        enableSuggestions: false,
+                                        autocorrect: false,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            _titleController.text = product.title;
+                                          }
+                                          return null;
                                         },
-                                      ).toList(),
-                                      onChanged: (value) {
-                                        dropdownUpdate(value);
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: _titleController,
-                                      decoration: InputDecoration(
-                                        hintText: product.title,
                                       ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          _titleController.text = product.title;
-                                        }
-                                        return null;
-                                      },
                                     ),
+                                    SizedBox(height: 5,)
+                                  ],
+                                ),
+                              ),
+                              Divider(thickness: 1),
+                              /// 카테고리 드롭다운 버튼과 원해요/나눠요 토글 버튼 있는 Row
+                              Row(
+                                children: [
+                                  Expanded(
+                                      flex: 7,
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton<String>(
+                                          isExpanded: true,
+                                          value: _selectedFilter,
+                                          items: _filter.map(
+                                                (value) {
+                                              return DropdownMenuItem(
+                                                value: value,
+                                                child: Center(
+                                                  child: Text(value,
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ).toList(),
+                                          onChanged: (value) {
+                                            if (value != _selectedFilter)
+                                            { _selectedFilter= value;}
+                                            setState(() {
+                                              _selectedFilter = value;
+                                            });
+                                          },
+                                        ),
+                                      )
                                   ),
+                                  SizedBox(width: 10,),
+                                  Expanded(
+                                    flex: 6,
+                                    /// 게시물 올릴 카테고리 (give 또는 take) 정하는 토글버튼
+                                    child: _buildToggleButtons(context),
+                                  )
                                 ],
                               ),
+                              Divider(thickness: 1),
+                              /// 게시글 내용 입력하는 부분
                               Row(
                                 children: [
                                   Expanded(
                                     child: TextFormField(
+                                      keyboardType: TextInputType.multiline,
+                                      maxLines: null,
                                       controller: _contentController,
                                       decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        focusedBorder: InputBorder.none,
+                                        enabledBorder: InputBorder.none,
+                                        errorBorder: InputBorder.none,
+                                        disabledBorder: InputBorder.none,
+                                        hintMaxLines: 3,
                                         hintText: product.content,
+                                        hintStyle: TextStyle(height: 1.5, fontSize: 18.0, color: Color(0xffced3d0)),
                                       ),
+                                      style: TextStyle(fontSize: 18, height: 1.5,),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
                                           _contentController.text =
@@ -307,14 +558,10 @@ class _EditPageState extends State<EditPage> {
                             ],
                           ),
                         ),
-                        SizedBox(height: 48.0),
                       ],
                     ),
                   ),
-                  Expanded(
-                    flex: 1,
-                    child: Container(),
-                  ),
+                  SizedBox(width: 14),
                 ],
               ),
             ],
@@ -323,4 +570,140 @@ class _EditPageState extends State<EditPage> {
       );
     });
   }
+
+  /// 상단 사진업로드하는 위젯
+  Widget imageUpLoadWidget() {
+    return Container(
+        color: Colors.transparent,
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height * (0.1),
+        child: Column(
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.016,
+            ),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                    height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                    child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          primary: Colors.black,
+                          backgroundColor: Colors.transparent,
+                          textStyle: TextStyle(
+                            color: numberOfImagesTextColor ? Colors.red : Colors.black,
+                            fontSize: 9,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            getMultiImage(10);
+                            if (numberOfImages < 10) {
+                              numberOfImagesTextColor = false;
+                            } else {
+                              numberOfImagesTextColor = true;
+                            }
+                          });
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.camera_alt_rounded,
+                              semanticLabel: 'Image upload',
+                              color: Colors.grey,
+                            ),
+                            Text(
+                              '$numberOfImages/10',
+                              style: TextStyle(
+                                color:
+                                numberOfImagesTextColor ? Colors.red : Colors.black,
+                              ),
+                            )
+                          ],
+                        )),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                  ),
+
+                  /// 업로드 된 사진들 가로 스크롤 가능
+                  Row(children: [
+                    images.isEmpty ? Container() : Container(
+                      height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                      width: MediaQuery.of(context).size.height * (0.35),
+                      child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: images.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            var asset = images[index];
+                            return Stack(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    AssetThumb(
+                                      asset: asset,
+                                      height: 200,
+                                      width: 200,
+                                    ),
+                                    SizedBox(
+                                      height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                      width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                                    ),
+                                  ],
+                                ),
+
+                                /// 여기서 삭제버튼 구현하다 관둠...
+                              ],
+                            );
+                          }),
+                    )
+                  ])
+                ]),
+          ],
+        )
+    );
+  }
+
+  /// give or take 선택하는 토글 버튼
+  ToggleButtons _buildToggleButtons(BuildContext context) {
+    return ToggleButtons(
+      color: Colors.black.withOpacity(0.60),
+      constraints: BoxConstraints(
+        minWidth: MediaQuery.of(context).size.width * 0.2,
+        minHeight: 30,
+      ),
+      selectedBorderColor: Colors.cyan,
+      selectedColor: Colors.cyan,
+      borderRadius: BorderRadius.circular(4.0),
+      isSelected: _selectionsOfGiveOrTake,
+      onPressed: (int index) {
+        setState(() {
+          if (index == 0) {
+            _selectionsOfGiveOrTake[0] = true;
+            _selectionsOfGiveOrTake[1] = false;
+            giveOrTakeCategory = 'give';
+          } else {
+            _selectionsOfGiveOrTake[0] = false;
+            _selectionsOfGiveOrTake[1] = true;
+            giveOrTakeCategory = 'take';
+          }
+        });
+      },
+      children: [
+        Text('나눠요'),
+        Text('원해요'),
+      ],
+    );
+  }
+
 }

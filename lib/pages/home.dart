@@ -8,6 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:intl/intl.dart';
+import 'package:simple_speed_dial/simple_speed_dial.dart';
+
 import '../main.dart';
 import '../model/product.dart';
 import '../components/postTile.dart';
@@ -41,18 +43,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
 
- /// bool isLoading = false; handleSign을 위한 변수
-
-
-
-
+  /// bool isLoading = false; handleSign을 위한 변수
   /// 시스템 함수에 PageView 기능 반영 처리(1) +@
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
     _tabController = TabController(length: 2, vsync: this);
-
   }
 
   /// 시스템 함수에 PageView 기능 반영 처리(2)
@@ -71,7 +68,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       drawer: buildDrawer(context),
       body: Consumer<ApplicationState>(
         builder: (context, appState, _) => Container(
-          color: Colors.cyan,
+          color: Color(0xfffc7174),
           child: SafeArea(
             child: Container(
               color: Colors.white,
@@ -114,7 +111,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         children: <Widget>[
           DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.cyan,
+              color: Color(0xfffc7174),
             ),
             child: Padding(
               padding: const EdgeInsets.all(15.0),
@@ -182,17 +179,51 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   /// FloatingActionButton 생성기
-  FloatingActionButton buildFAB() {
-    if (_selectedIndex == 0 || _selectedIndex == 1 || _selectedIndex == 2) {
+  dynamic buildFAB() {
+    if (_selectedIndex == 0) {
+      return SpeedDial(
+        closedForegroundColor: Colors.white,
+        openForegroundColor: Colors.white60,
+        closedBackgroundColor: Color(0xfffc7174),
+        openBackgroundColor: Color(0xffeb6859),
+        labelsStyle: TextStyle(
+          fontFamily: 'NanumSquareRoundR',
+          fontWeight: FontWeight.bold,
+          // color: Colors.black87,
+        ),
+        // controller: /* Your custom animation controller goes here */
+        speedDialChildren: <SpeedDialChild>[
+          SpeedDialChild(
+            child: Icon(Icons.accessibility),
+            foregroundColor: Colors.white,
+            backgroundColor: Color(0xfffc8862),
+            label: '나눔',
+            onPressed: () {
+              Navigator.pushNamed(context, '/add');
+            },
+            // closeSpeedDialOnPressed: false,
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.accessibility_new),
+            foregroundColor: Colors.white,
+            backgroundColor: Color(0xfffda26b),
+            label: '나눔요청',
+            onPressed: () {
+              Navigator.pushNamed(context, '/add');
+            },
+          ),
+        ],
+        child: Icon(Icons.mode_edit),
+      );
+    } else if (_selectedIndex == 1 || _selectedIndex == 2) {
       return FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/add');
         },
-        backgroundColor: Colors.cyan,
-        child: Icon(Icons.add),
+        backgroundColor: Color(0xfffc7174),
+        child: Icon(Icons.mode_edit),
       );
     }
-    ;
     return null;
   }
 
@@ -201,7 +232,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
       elevation: 0,
-      selectedItemColor: Colors.cyan,
+      selectedItemColor: Color(0xfffc7174),
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
       selectedLabelStyle: TextStyle(
@@ -242,7 +273,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     setState(() {
       isLoading = true;
     });
-
      */
 
     await FirebaseAuth.instance.signOut();
@@ -252,8 +282,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     setState(() {
       isLoading = false;
     });
-
-
  */
     await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
@@ -324,12 +352,12 @@ class PostTileMaker extends StatelessWidget {
       onTap: () {
         if (_giveOrTake) {
           Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'giveProducts');
+              .detailPageUid(_product.id, 'giveProducts',_product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/giveProducts');
         } else {
           Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'takeProducts');
+              .detailPageUid(_product.id, 'takeProducts',_product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/takeProducts');
         }

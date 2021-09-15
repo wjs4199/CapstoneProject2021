@@ -38,13 +38,13 @@ class _ApplicationState extends State<Application> {
             home: HomePage(),
             ///edited
             //isSignedIn(),
-           initialRoute: '/login',
+            initialRoute: '/login',
             // Named Routes
             routes: {
               '/login': (context) => LoginPage(),
               '/home': (context) => HomePage(),
-              '/add': (context) => AddPage(),
-              //'/takeadd': (context) => takeAddPage(),
+              '/giveadd': (context) => AddPage(giveOrTake: 'give'),
+              '/takeadd': (context) => AddPage(giveOrTake: 'take'),
               '/map': (context) => MapPage(),
             },
 
@@ -102,13 +102,15 @@ class ApplicationState extends ChangeNotifier {
   String orderBy;
   String uid;
   String detailGiveOrTake;
+  int photo;
 
   // comment와 like를 collection안에 어떤 구조로 넣을 것인가?
   // 원래 하던대로 상품 uid통해 찾으려면 이미 init한 상품 리스트들을 돌면서
   // datail페이지에 필요한 내용을 찾아내는 형식으로 해야할까?
-  void detailPageUid(String uid, String detailGiveOrTake) {
+  void detailPageUid(String uid, String detailGiveOrTake, int photo) {
     this.uid = uid;
     this.detailGiveOrTake = detailGiveOrTake;
+    this.photo = photo;
     print('detail page uid -> ' + uid);
     init();
   }
@@ -127,7 +129,6 @@ class ApplicationState extends ChangeNotifier {
   List<Users> _userName = [];
 
   /// added
-
   Stream<QuerySnapshot> currentStream;
 
   //collection 'giveProducts' 파이어베이스에서 불러오기
@@ -153,6 +154,8 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: document.data()['like'],
+            hits: document.data()['hits'],
+            photo: document.data()['photo'],
           ));
         });
         notifyListeners();
@@ -177,6 +180,8 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: document.data()['like'],
+            hits: document.data()['hits'],
+            photo: document.data()['photo'],
           ));
         });
         notifyListeners();
@@ -203,6 +208,8 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: null,
+            hits: document.data()['hits'],
+            photo: document.data()['photo'],
           ));
         });
         notifyListeners();
@@ -226,6 +233,8 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: null,
+            hits: document.data()['hits'],
+            photo: document.data()['photo'],
           ));
         });
         notifyListeners();
@@ -241,7 +250,7 @@ class ApplicationState extends ChangeNotifier {
       FirebaseFirestore.instance
           .collection('giveProducts/' + uid + '/comment')
 
-          ///edited
+      ///edited
           .orderBy('created', descending: true)
           .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
           .listen((snapshot) {
@@ -304,5 +313,5 @@ class ApplicationState extends ChangeNotifier {
   List<Like> get likeList => _likeList;
   List<Users> get username => _userName;
 
-  /// added
+/// added
 }
