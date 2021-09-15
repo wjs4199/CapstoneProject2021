@@ -65,14 +65,14 @@ Widget MyView(BuildContext context, ApplicationState appState) {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(height: 20.0),
-                /*
+
                 CircleAvatar(
                   radius: 50.0,
                   backgroundImage:
-                      NetworkImage(photoUrl.replaceAll('s96-c', 's400-c')),
+                      NetworkImage(FirebaseAuth.instance.currentUser.photoURL),
                 ),
 
-                 */
+
                 SizedBox(height: 10.0),
                 Padding(
                   padding: const EdgeInsets.only(left: 40.0),

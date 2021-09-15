@@ -5,7 +5,7 @@ import 'package:giveandtake/pages/chat.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:carousel_pro/carousel_pro.dart';
+//import 'package:carousel_pro/carousel_pro.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../model/product.dart';
 import '../main.dart';
@@ -43,10 +43,9 @@ class _DetailPageState extends State<DetailPage> {
   @override
   build(BuildContext context) {
 
-    var photoNum = widget.photoNum;
+    //var photoNum = widget.photoNum;
 
     ///************ ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ************///
-
     /// DetailPage() 호출시 받는 매개변수 참조
     var productId = widget.productId;
     var detailGiveOrTake = widget.detailGiveOrTake;
@@ -90,7 +89,6 @@ class _DetailPageState extends State<DetailPage> {
 
 
     ///************************ 게시글 삭제 및  지난 시간 계산 함수들 ************************///
-
     /// 게시물 자체 삭제 기능 (왼쪽 상단 휴지통 버튼)
     Future<void> deleteProduct() async {
       try {
@@ -212,7 +210,6 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     ///************************ like 기능 구현부분 (수정필요) ************************///
-
     /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
     CollectionReference likes;
     if (detailGiveOrTake == 'giveProducts') {
@@ -272,13 +269,11 @@ class _DetailPageState extends State<DetailPage> {
 
 
     ///************************* 사진 띄우는 부분 관련 변수/ 함수들*************************///
-
     /// Firebase Storage 참조 간략화
     var storage = firebase_storage.FirebaseStorage.instance;
 
     /// multi image들의 url을 담아서 저장하는 리스트
     ////var imageUrls = [];
-
     /// ProductID에 따라 해당하는 image url 다운로드
     Future<String> downloadURL(String id, int num)  async {
       try {
@@ -295,7 +290,6 @@ class _DetailPageState extends State<DetailPage> {
 
     /// 게시글 자체에 저장된 photoNum의 개수만큼만 이미지 url다운받아서 carousel slider에 전달하고 싶은데
     /// 여러시도 해봐도 잘 안됨 ㅠㅠ
-
     Future<List> futureList() async{
       var List= [];
       for(var i = 0; i < widget.photoNum; i++){
@@ -532,8 +526,8 @@ class _DetailPageState extends State<DetailPage> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) => Chat(
-                                                peerId: product.userName,
-                                                //peerAvatar: product.photoUrl,
+                                                peerId: product.uid,
+                                                peerAvatar: FirebaseAuth.instance.currentUser.photoURL,
                                               ),
                                             ),
                                           );

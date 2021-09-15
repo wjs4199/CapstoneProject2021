@@ -56,9 +56,7 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
         delegate: SliverChildListDelegate(
           [
             ///added
-            WillPopScope(
-              onWillPop: () {},
-              child: Stack(
+            Stack(
                 children: <Widget>[
                   // List
                   ///chatting list 를 보여주는 container
@@ -100,7 +98,6 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
                   )
                 ],
               ),
-            ),
           ],
         ),
       )

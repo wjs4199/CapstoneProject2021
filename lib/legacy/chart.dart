@@ -40,6 +40,8 @@ class PieChartState extends State {
             const SizedBox(
               height: 18,
             ),
+            /*
+
             Expanded(
               child: AspectRatio(
                 aspectRatio: 1,
@@ -69,6 +71,8 @@ class PieChartState extends State {
                 ),
               ),
             ),
+
+             */
             Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -215,6 +219,7 @@ class PieChart2State extends State {
             const SizedBox(
               height: 18,
             ),
+            /*
             Expanded(
               child: AspectRatio(
                 aspectRatio: 1,
@@ -245,6 +250,11 @@ class PieChart2State extends State {
                 ),
               ),
             ),
+
+
+             */
+
+
           ],
         ),
       ),
