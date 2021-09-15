@@ -176,11 +176,11 @@ class _AddPageState extends State<AddPage> {
                   ),
                   title: widget.giveOrTake == 'give'
                       ? Text('나눔 글쓰기', style: TextStyle(
-                        fontFamily: 'NanumSquareRoundR',
-                        fontWeight: FontWeight.bold,),)
+                    fontFamily: 'NanumSquareRoundR',
+                    fontWeight: FontWeight.bold,),)
                       : Text('나눔요청 글쓰기', style: TextStyle(
-                        fontFamily: 'NanumSquareRoundR',
-                        fontWeight: FontWeight.bold,),),
+                    fontFamily: 'NanumSquareRoundR',
+                    fontWeight: FontWeight.bold,),),
                   centerTitle: true,
                   actions: <Widget>[
                     IconButton(
