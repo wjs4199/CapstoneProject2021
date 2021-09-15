@@ -34,6 +34,9 @@ dependencies:
   multi_image_picker: ^4.7.14
   flutter_absolute_path: ^1.0.6
   simple_speed_dial: ^0.1.3
+  carousel_pro: ^1.0.0 #added 예은
+  carousel_slider: ^4.0.0 #added 예은
+
 
 dev_dependencies:
   flutter_test:
@@ -47,6 +50,8 @@ flutter:
     - assets/hgu.png
     - assets/logo.png
     - assets/userDefault.png
+    - assets/userDefaultImage.png
+    - assets/defaultPhoto.png
     - assets/sample.jpg
     - images/img_not_available.jpeg
     - images/mimi1.gif

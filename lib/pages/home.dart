@@ -39,12 +39,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
 
   /// bool isLoading = false; handleSign을 위한 변수
-
   /// 시스템 함수에 PageView 기능 반영 처리(1) +@
   @override
   void initState() {
@@ -82,7 +81,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                   /// _selectedIndex 값에 따른 페이지(상응 위젯) 출력
                   children:
-                      _buildWidgetOptions(context, appState, _selectedIndex),
+                  _buildWidgetOptions(context, appState, _selectedIndex),
                 ),
               ),
             ),
@@ -274,7 +273,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     setState(() {
       isLoading = true;
     });
-
      */
 
     await FirebaseAuth.instance.signOut();
@@ -284,12 +282,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     setState(() {
       isLoading = false;
     });
-
-
  */
     await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
-        (Route<dynamic> route) => false);
+            (Route<dynamic> route) => false);
   }
 
   ///* ---------------- BottomNavigationBar, PageView 관련 ----------------- *///
@@ -310,7 +306,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
-  ///* -------------------------------------------------------------------- *///
+///* -------------------------------------------------------------------- *///
 }
 
 /// PostTileMaker - 각 게시글 별 postTile Listview.builder(separated) 사용해 자동 생성
@@ -356,12 +352,12 @@ class PostTileMaker extends StatelessWidget {
       onTap: () {
         if (_giveOrTake) {
           Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'giveProducts');
+              .detailPageUid(_product.id, 'giveProducts',_product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/giveProducts');
         } else {
           Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'takeProducts');
+              .detailPageUid(_product.id, 'takeProducts',_product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/takeProducts');
         }
