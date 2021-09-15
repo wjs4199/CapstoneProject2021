@@ -33,9 +33,10 @@ dependencies:
   intl: ^0.17.0 #added
   multi_image_picker: ^4.7.14
   flutter_absolute_path: ^1.0.6
+  simple_speed_dial: ^0.1.3
   carousel_pro: ^1.0.0 #added 예은
   carousel_slider: ^4.0.0 #added 예은
-  simple_speed_dial: ^0.1.3 #added 예은
+
 
 dev_dependencies:
   flutter_test:
