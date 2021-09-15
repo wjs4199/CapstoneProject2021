@@ -102,13 +102,15 @@ class ApplicationState extends ChangeNotifier {
   String orderBy;
   String uid;
   String detailGiveOrTake;
+  int photo;
 
   // comment와 like를 collection안에 어떤 구조로 넣을 것인가?
   // 원래 하던대로 상품 uid통해 찾으려면 이미 init한 상품 리스트들을 돌면서
   // datail페이지에 필요한 내용을 찾아내는 형식으로 해야할까?
-  void detailPageUid(String uid, String detailGiveOrTake) {
+  void detailPageUid(String uid, String detailGiveOrTake, int photo) {
     this.uid = uid;
     this.detailGiveOrTake = detailGiveOrTake;
+    this.photo = photo;
     print('detail page uid -> ' + uid);
     init();
   }
@@ -152,8 +154,6 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: document.data()['like'],
-            hits: document.data()['hits'],
-            photo: document.data()['photo'],
           ));
         });
         notifyListeners();
@@ -178,8 +178,6 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: document.data()['like'],
-            hits: document.data()['hits'],
-            photo: document.data()['photo'],
           ));
         });
         notifyListeners();
@@ -206,8 +204,6 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: null,
-            hits: document.data()['hits'],
-            photo: document.data()['photo'],
           ));
         });
         notifyListeners();
@@ -231,8 +227,6 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             uid: document.data()['uid'],
             likes: null,
-            hits: document.data()['hits'],
-            photo: document.data()['photo'],
           ));
         });
         notifyListeners();

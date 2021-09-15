@@ -2,13 +2,14 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:giveandtake/pages/login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:intl/intl.dart';
+import 'package:simple_speed_dial/simple_speed_dial.dart';
+
 import '../main.dart';
 import '../model/product.dart';
 import '../components/postTile.dart';
@@ -177,72 +178,52 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return _widgetOptions;
   }
 
-  /// FloatingActionButton 생성기 (버튼 2개로 수정)
-  Widget buildFAB() {
-    if (_selectedIndex == 0 || _selectedIndex == 1 || _selectedIndex == 2) {
-      return Container(
-        height: 60,
-        width: 60,
-        color: Colors.transparent,
-        child: SpeedDial(
-          icon: Icons.add,
-          animatedIconTheme: IconThemeData(size: 30),
-          activeIcon: Icons.close,
-          backgroundColor: Color(0xfffc7174),
-          childPadding: EdgeInsets.all(5),
-          spacing: 10,
-          visible: true,
-          elevation: 10.0,
-          curve: Curves.bounceIn,
-          animationSpeed: 120,
-          overlayOpacity: 0.7,
-          children: [
-            // FAB 1
-            SpeedDialChild(
-              child: Icon(Icons.accessibility, size: 27, color: Colors.white,),
-              backgroundColor: Color(0xfffc7174),
-              onTap: () {
-                Navigator.pushNamed(context, '/giveadd');
-              },
-              label: '나눔',
-              labelStyle: TextStyle(
-                  fontFamily: 'NanumSquareRoundrR',
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 16.0),
-              labelBackgroundColor:Color(0xfffc7174),),
-            // FAB 2
-            SpeedDialChild(
-              child: Icon(Icons.accessibility_new, size: 27, color: Colors.white,),
-              backgroundColor: Color(0xfffc7174),
-              onTap: () {
-                Navigator.pushNamed(context, '/takeadd');
-              },
-              label: '나눔 요청',
-              labelStyle: TextStyle(
-                  fontFamily: 'NanumSquareRoundR',
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 16.0),
-              labelBackgroundColor: Color(0xfffc7174),)
-          ],
+  /// FloatingActionButton 생성기
+  dynamic buildFAB() {
+    if (_selectedIndex == 0) {
+      return SpeedDial(
+        closedForegroundColor: Colors.white,
+        openForegroundColor: Colors.white60,
+        closedBackgroundColor: Color(0xfffc7174),
+        openBackgroundColor: Color(0xffeb6859),
+        labelsStyle: TextStyle(
+          fontFamily: 'NanumSquareRoundR',
+          fontWeight: FontWeight.bold,
+          // color: Colors.black87,
         ),
+        // controller: /* Your custom animation controller goes here */
+        speedDialChildren: <SpeedDialChild>[
+          SpeedDialChild(
+            child: Icon(Icons.accessibility),
+            foregroundColor: Colors.white,
+            backgroundColor: Color(0xfffc8862),
+            label: '나눔',
+            onPressed: () {
+              Navigator.pushNamed(context, '/add');
+            },
+            // closeSpeedDialOnPressed: false,
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.accessibility_new),
+            foregroundColor: Colors.white,
+            backgroundColor: Color(0xfffda26b),
+            label: '나눔요청',
+            onPressed: () {
+              Navigator.pushNamed(context, '/add');
+            },
+          ),
+        ],
+        child: Icon(Icons.mode_edit),
       );
-
-
-      /*FloatingActionButton(
+    } else if (_selectedIndex == 1 || _selectedIndex == 2) {
+      return FloatingActionButton(
         onPressed: () {
-          setState(() {
-            _getFAB();
-          });
-
-          //Navigator.pushNamed(context, '/add');
+          Navigator.pushNamed(context, '/add');
         },
-        backgroundColor: Colors.cyan,
-        child: Icon(Icons.add),
-      );*/
+        backgroundColor: Color(0xfffc7174),
+        child: Icon(Icons.mode_edit),
+      );
     }
-    ;
     return null;
   }
 
@@ -371,12 +352,12 @@ class PostTileMaker extends StatelessWidget {
       onTap: () {
         if (_giveOrTake) {
           Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'giveProducts');
+              .detailPageUid(_product.id, 'giveProducts',_product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/giveProducts');
         } else {
           Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'takeProducts');
+              .detailPageUid(_product.id, 'takeProducts',_product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/takeProducts');
         }

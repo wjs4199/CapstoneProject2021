@@ -12,13 +12,16 @@ import '../main.dart';
 import '../pages/comment.dart';
 
 class DetailPage extends StatefulWidget {
-  DetailPage({this.productId, this.detailGiveOrTake});
+  DetailPage({this.productId, this.detailGiveOrTake, this.photoNum});
 
   /// route 생성 시에 사용되는 product ID
   final String productId;
 
   /// giveProducts / takeProducts collection 중 어디서 가져와야하는 지 표시
   final String detailGiveOrTake;
+
+  /// 저장된 photo 갯수
+  final int photoNum;
 
   @override
   _DetailPageState createState() => _DetailPageState();
@@ -658,7 +661,7 @@ class _DetailPageState extends State<DetailPage> {
                                     Provider.of<ApplicationState>(context,
                                         listen: false)
                                         .detailPageUid(widget.productId,
-                                        widget.detailGiveOrTake);
+                                        widget.detailGiveOrTake,widget.photoNum);
                                     print('clear!');
                                   }
                                 });
