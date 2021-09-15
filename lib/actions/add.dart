@@ -26,7 +26,6 @@ class _AddPageState extends State<AddPage> {
 
 
   ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
-
   /// Firebase Storage 참조 간략화
   FirebaseStorage storage = FirebaseStorage.instance;
 
@@ -87,7 +86,6 @@ class _AddPageState extends State<AddPage> {
 
 
   ///**************** 게시글 저장과 관련된 변수/ 함수들 ***************///
-
   /// 현재 유저의 이름 참조 간략화
   var user = FirebaseAuth.instance.currentUser;
   var name;
@@ -113,6 +111,7 @@ class _AddPageState extends State<AddPage> {
       'userName': name,
       'hits': 1,
       'photo': numberOfImages,
+      'user_photoURL' : user.photoURL,
     }).then((value) async {
       if (images.isNotEmpty) {
         await uploadFile(value.id);
@@ -134,7 +133,8 @@ class _AddPageState extends State<AddPage> {
       'modified': FieldValue.serverTimestamp(),
       'userName': name,
       'hits': 1,
-      'photo': numberOfImages
+      'photo': numberOfImages,
+      'user_photoURL' : user.photoURL,
     }).then((value) {
       if (images.isNotEmpty) uploadFile(value.id);
     }).catchError((error) => print('Error: $error'));
@@ -142,7 +142,6 @@ class _AddPageState extends State<AddPage> {
 
 
   ///**************** UI 구성에 필요한 변수들(하단의 위젯함수 내부에서 사용되는 것들도 포함) ***************///
-
   /// Add 페이지 내에서 give/take 중 무엇을 선택했는지를 담고 있는 변수
   String giveOrTakeCategory;
 
