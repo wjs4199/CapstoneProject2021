@@ -5,7 +5,6 @@ import 'package:giveandtake/pages/chat.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:carousel_pro/carousel_pro.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../model/product.dart';
 import '../main.dart';
@@ -39,13 +38,16 @@ class _DetailPageState extends State<DetailPage> {
   /// appbar 아이콘의 컬러를 사진 여부에 따라 다르게 표시하기 위해 필요한 변수
   bool appbarIconColor = false;
 
+  //Crousel_slider 밑의 dot list 를 위한 변수 및 컨트롤러
+  var _current = 0;
+  final carouselController = CarouselController();
+
 
   @override
-  build(BuildContext context) {
-
-    //var photoNum = widget.photoNum;
+  Widget build(BuildContext context) {
 
     ///************ ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ************///
+
     /// DetailPage() 호출시 받는 매개변수 참조
     var productId = widget.productId;
     var detailGiveOrTake = widget.detailGiveOrTake;
@@ -89,6 +91,7 @@ class _DetailPageState extends State<DetailPage> {
 
 
     ///************************ 게시글 삭제 및  지난 시간 계산 함수들 ************************///
+
     /// 게시물 자체 삭제 기능 (왼쪽 상단 휴지통 버튼)
     Future<void> deleteProduct() async {
       try {
@@ -210,6 +213,7 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     ///************************ like 기능 구현부분 (수정필요) ************************///
+
     /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
     CollectionReference likes;
     if (detailGiveOrTake == 'giveProducts') {
@@ -267,13 +271,11 @@ class _DetailPageState extends State<DetailPage> {
           .catchError((error) => print('Failed to add a comment: $error'));
     }
 
-
     ///************************* 사진 띄우는 부분 관련 변수/ 함수들*************************///
+
     /// Firebase Storage 참조 간략화
     var storage = firebase_storage.FirebaseStorage.instance;
 
-    /// multi image들의 url을 담아서 저장하는 리스트
-    ////var imageUrls = [];
     /// ProductID에 따라 해당하는 image url 다운로드
     Future<String> downloadURL(String id, int num)  async {
       try {
@@ -288,24 +290,6 @@ class _DetailPageState extends State<DetailPage> {
       }
     }
 
-    /// 게시글 자체에 저장된 photoNum의 개수만큼만 이미지 url다운받아서 carousel slider에 전달하고 싶은데
-    /// 여러시도 해봐도 잘 안됨 ㅠㅠ
-    Future<List> futureList() async{
-      var List= [];
-      for(var i = 0; i < widget.photoNum; i++){
-        List[i] = await downloadURL(productId,i);
-      }
-      return List;
-    }
-
-    //var list = await futureList();
-
-    List list;
-    Future<void> wait() async {
-      list = await futureList();
-    }
-
-
     /// Add 페이지 화면 구성
     return Scaffold(
       body: SafeArea(
@@ -318,8 +302,7 @@ class _DetailPageState extends State<DetailPage> {
                         Consumer<ApplicationState>(
                           builder: (context, appState, _) =>
                               FutureBuilder(
-                                future: wait(),
-                                /*future:Future.wait([
+                                future: Future.wait([
                                   downloadURL(productId,0),
                                   downloadURL(productId,1),
                                   downloadURL(productId,2),
@@ -330,12 +313,17 @@ class _DetailPageState extends State<DetailPage> {
                                   downloadURL(productId,7),
                                   downloadURL(productId,8),
                                   downloadURL(productId,9),
-                                ]),*/
+                                ]),
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState == ConnectionState.waiting) {
-                                    return Column(
+                                    return Stack(
                                       children: [
-                                        Center(child: CircularProgressIndicator()),
+                                        Container(
+                                          height: MediaQuery.of(context).size.height * 0.5,
+                                          width: MediaQuery.of(context).size.width,
+                                          color: Color(0xffced3d0),
+                                          child: Center(child: CircularProgressIndicator()),
+                                        )
                                       ],
                                     );
                                   } else {
@@ -348,28 +336,56 @@ class _DetailPageState extends State<DetailPage> {
                                             color: Color(0xffced3d0),
                                           ),
                                           CarouselSlider(
+                                            carouselController: carouselController,
                                             options: CarouselOptions(
                                               autoPlay: false,
                                               enlargeCenterPage: false,
                                               viewportFraction: 1.0,
                                               aspectRatio: 1.0,
                                               height: MediaQuery.of(context).size.height* 0.5,
+                                              initialPage: _current,
+                                                onPageChanged: (index, reason) {
+                                                  setState(() {
+                                                    _current = index;
+                                                  });
+                                                }
                                             ),
-                                            items: list.map<Widget>((item) {
-                                              if(item != null) {
+                                            items: snapshot.data.where((e) => e != null).map<Widget>((item) {
                                                 return Container(
                                                   child: Image.network(item,
                                                       fit: BoxFit.cover,
-                                                      width: 1000),
-                                                );
-                                              } else {
-                                                return Container(
-                                                  child: Image.asset('assets/defaultPhoto.png',
-                                                      fit: BoxFit.cover,
-                                                      width: 1000),
-                                                );
-                                              }
+                                                      width: 1000));
                                             }).toList(),
+                                          ),
+                                          /// 사진 밑의 dot Row
+                                          Column(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              SizedBox(height: MediaQuery.of(context).size.height* 0.46,),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                crossAxisAlignment: CrossAxisAlignment.end,
+                                                children: snapshot.data.where((e) => e != null).toList().asMap().entries.map<Widget>((entry){
+                                                  return GestureDetector(
+                                                    onTap: () {
+                                                      carouselController.animateToPage(entry.key);
+                                                      print('entry key -> ${entry.key}');
+                                                    },
+                                                    child: Container(
+                                                      width: 12.0,
+                                                      height: 12.0,
+                                                      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                                                      decoration: BoxDecoration(
+                                                          shape: BoxShape.circle,
+                                                          color: (Theme.of(context).brightness == Brightness.dark
+                                                              ? Colors.white
+                                                              : Colors.black)
+                                                              .withOpacity(_current == entry.key ? 1.0 : 0.4)),
+                                                    ),
+                                                  );
+                                                }).toList(),
+                                              )
+                                            ],
                                           )
                                         ],
                                       );

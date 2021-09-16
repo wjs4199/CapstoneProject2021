@@ -1,12 +1,8 @@
-import 'dart:io' as prefix;
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -203,8 +199,6 @@ class _EditPageState extends State<EditPage> {
       }).then((value) {
         if (images.isNotEmpty) uploadFile(productId);
       }).catchError((error) => print('Error: $error'));
-      /*if (_image != null) uploadFile(_image, productId);
-      }).catchError((error) => print('Error: $error'));*/
     }
 
     Widget savedImages(List<String> data) {
