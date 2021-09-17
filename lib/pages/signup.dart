@@ -1,14 +1,17 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../main.dart';
 import 'home.dart';
 
 
 
 
-final _formKey = GlobalKey<FormState>();
+
 TextEditingController textEditingController1 = TextEditingController();
+
 
 class SignUp extends StatefulWidget {
   @override
@@ -17,18 +20,23 @@ class SignUp extends StatefulWidget {
 
 class SignUpState extends State<SignUp> {
 
+  final _formKey = GlobalKey<FormState>();
+
   CollectionReference users =
   FirebaseFirestore.instance.collection('users');
 
 
-
-
   @override
   Widget build(BuildContext context) {
+    var isDuplicated = true;
 
+    final snackBar1 = SnackBar(content: Text('중복이 존재합니다'));
+    final snackBar2 = SnackBar(content: Text('사용해도 좋습니다'));
+    final snackBar3 = SnackBar(content: Text('중복체크를 다시 해주세요'));
+    
 
-    return Material(
-      child: Form(
+    return Scaffold(
+      body: Form(
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.only(top: 200.0),
@@ -40,13 +48,13 @@ class SignUpState extends State<SignUp> {
                 child: TextFormField(
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter some text';
+                      return 'Please enter Nickname';
                     }
                     return null;
                   },
                   controller: textEditingController1,
                   decoration: InputDecoration(
-                    hintText: ("UserName"),
+                    hintText: ('Nickname'),
                     fillColor: Colors.white30,
                     filled: true,
                   ),
@@ -65,27 +73,86 @@ class SignUpState extends State<SignUp> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
+                      onPressed: ()   async {
+                    //   checkName().then((value) => ScaffoldMessenger.of(context).showSnackBar(snackBar2));
+
+                      await for (var snapshot in FirebaseFirestore.instance.collection('users').snapshots())
+                      {
+                           for(var users in snapshot.docs){
+
+                    if(textEditingController1.text == users.get('nickname')) {
+                      //isDuplicated = true;
+                      print('중복이 존재합니다');
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+                      break;
+                    }
+                           }
+
+                      };
+                      /// 중복체크 눌렀을 때 중복이 존재하지 않으면 사용해도 된다는 snackbar 추가
+                       /// 중복체크를 하지 않거나, 중복이 있음에도 불구하고 시작하기 누르면 그냥 로그인 되는 현상 해결
+
+
+
+
+
+                      //ScaffoldMessenger.of(context).showSnackBar(snackBar2);
+
+                      },
+
+                      style: ElevatedButton.styleFrom(
+                          primary: Color(0xfffc7174),
+                          textStyle: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          )),
+                      child: Text(
+                        '중복확인',
+                      ),
+                    ),
+                    Container(
+                      width: 20,
+                    ),
+
+                    ElevatedButton(
                       onPressed: () async {
-                        print("click actionbutton");
+                        /// 중복체크를 하지 않거나, 중복이 있음에도 불구하고 시작하기 누르면 그냥 로그인 되는 현상 해결
+/*
+                        if(isDuplicated == true)
+                          {
 
-                        await FirebaseFirestore.instance.collection('users')
-                            .doc(FirebaseAuth.instance.currentUser.uid)
-                            .set({
-                          'username': FirebaseAuth.instance.currentUser.displayName,
-                          'photoUrl': FirebaseAuth.instance.currentUser.photoURL,
-                          'id': FirebaseAuth.instance.currentUser.uid,
-                          'createdAt': DateTime
-                              .now()
-                              .millisecondsSinceEpoch
-                              .toString(),
-                          'nickname': textEditingController1.text,
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+                          }
 
-                        }).then((value) async {
-                          await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => HomePage()));
-                        }).catchError((error) => print('Error: $error'));
+ */
+                      //else{
+
+                          if(_formKey.currentState.validate()) {
+
+                            await FirebaseFirestore.instance.collection('users')
+                                .doc(FirebaseAuth.instance.currentUser.uid) /// document ID 를 uid 로 설정하는 부분
+                                .set({
+                              'username': FirebaseAuth.instance.currentUser
+                                  .displayName,
+                              'photoUrl': FirebaseAuth.instance.currentUser
+                                  .photoURL,
+                              'id': FirebaseAuth.instance.currentUser.uid,
+                              'createdAt': DateTime
+                                  .now()
+                                  .millisecondsSinceEpoch
+                                  .toString(),
+                              'nickname': textEditingController1.text,
+                            }).then((value) {
+
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => HomePage()));
+                            }).catchError((error) => print('Error: $error'));
+                          }
+
+                    //   }
 
 
 
@@ -111,6 +178,28 @@ class SignUpState extends State<SignUp> {
     );
   }
 }
+
+Future<bool> checkName() async {
+  var isDuplicated = true;
+
+  await for (var snapshot in FirebaseFirestore.instance.collection('users').snapshots()) {
+    for(var users in snapshot.docs){
+      //print(users.get('nickname'));
+
+      if(textEditingController1.text == users.get('nickname')) {
+
+        print('중복이 존재합니다');
+      // isDuplicated = true;
+      break;
+      }
+    }
+  }
+
+}
+
+
+
+
 
 
 
