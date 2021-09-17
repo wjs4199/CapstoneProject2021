@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
 
@@ -81,7 +81,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                   /// _selectedIndex 값에 따른 페이지(상응 위젯) 출력
                   children:
-                  _buildWidgetOptions(context, appState, _selectedIndex),
+                      _buildWidgetOptions(context, appState, _selectedIndex),
                 ),
               ),
             ),
@@ -293,7 +293,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
  */
     await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
-            (Route<dynamic> route) => false);
+        (Route<dynamic> route) => false);
   }
 
   ///* ---------------- BottomNavigationBar, PageView 관련 ----------------- *///
@@ -314,7 +314,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
-///* -------------------------------------------------------------------- *///
+  ///* -------------------------------------------------------------------- *///
 }
 
 /// PostTileMaker - 각 게시글 별 postTile Listview.builder(separated) 사용해 자동 생성
@@ -335,7 +335,7 @@ class PostTileMaker extends StatelessWidget {
       return await storage
           .ref() //스토리지 참조
           .child('images')
-          .child('$id.png') //차일드로 가져오고
+          .child('$id\0.png') //차일드로 가져오고
           .getDownloadURL(); //url 다운로드
     } on Exception {
       return null;
@@ -360,12 +360,12 @@ class PostTileMaker extends StatelessWidget {
       onTap: () {
         if (_giveOrTake) {
           Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'giveProducts',_product.photo);
+              .detailPageUid(_product.id, 'giveProducts', _product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/giveProducts');
         } else {
           Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'takeProducts',_product.photo);
+              .detailPageUid(_product.id, 'takeProducts', _product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/takeProducts');
         }
