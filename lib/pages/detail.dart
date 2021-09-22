@@ -301,7 +301,7 @@ class _DetailPageState extends State<DetailPage> {
                       children: [
                         Consumer<ApplicationState>(
                           builder: (context, appState, _) =>
-                              FutureBuilder(
+                            FutureBuilder(
                                 future: Future.wait([
                                   downloadURL(productId,0),
                                   downloadURL(productId,1),
