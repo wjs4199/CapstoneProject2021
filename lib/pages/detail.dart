@@ -96,7 +96,6 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
 
     ///************ ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ************///
-
     /// DetailPage() 호출시 받는 매개변수 참조
     var productId = widget.productId;
     var detailGiveOrTake = widget.detailGiveOrTake;
@@ -138,7 +137,6 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     ///************************ 게시글 삭제 및  지난 시간 계산 함수들 ************************///
-
     /// 게시물 자체 삭제 기능 (왼쪽 상단 휴지통 버튼)
     Future<void> deleteProduct() async {
       try {
@@ -230,7 +228,6 @@ class _DetailPageState extends State<DetailPage> {
 
 
     ///************************ like 기능 구현부분 (수정필요) ************************///
-
     /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
     CollectionReference likes;
     if (detailGiveOrTake == 'giveProducts') {
@@ -314,83 +311,83 @@ class _DetailPageState extends State<DetailPage> {
                             }
                             /// 사진 로딩 후
                             else {
-                                return Stack(
-                                  children: [
-                                    /// imageList에 데이터가 있으면 CarouselSlider보여줌
-                                    if(imageList.isNotEmpty)
-                                      Stack(
-                                        children: [
-                                          Container(
-                                            height: MediaQuery.of(context).size.height * 0.5,
-                                            width: MediaQuery.of(context).size.width,
-                                            color: Color(0xffced3d0),
-                                          ),
-                                          CarouselSlider(
-                                            carouselController: carouselController,
-                                            options: CarouselOptions(
+                              return Stack(
+                                children: [
+                                  /// imageList에 데이터가 있으면 CarouselSlider보여줌
+                                  if(imageList.isNotEmpty)
+                                    Stack(
+                                      children: [
+                                        Container(
+                                          height: MediaQuery.of(context).size.height * 0.5,
+                                          width: MediaQuery.of(context).size.width,
+                                          color: Color(0xffced3d0),
+                                        ),
+                                        CarouselSlider(
+                                          carouselController: carouselController,
+                                          options: CarouselOptions(
                                               autoPlay: false,
                                               enlargeCenterPage: false,
                                               viewportFraction: 1.0,
                                               aspectRatio: 1.0,
                                               height: MediaQuery.of(context).size.height* 0.5,
-                                                initialPage: 0,
-                                                onPageChanged: (index, reason) {
-                                                  carouselIndexChange.add(index);
-                                                }
-                                            ),
-                                            items: imageList.map<Widget>((item) {
-                                              return Container(
-                                                child: Image.network(item,
-                                                    fit: BoxFit.cover,
-                                                    width: 1000),
-                                              );
-                                            }).toList(),
+                                              initialPage: 0,
+                                              onPageChanged: (index, reason) {
+                                                carouselIndexChange.add(index);
+                                              }
                                           ),
-                                          /// 사진 밑의 dot Row
-                                          StreamBuilder<int>(
-                                              stream: carouselIndexChange.stream,
-                                              initialData: 0,
-                                              builder: (context, snapshot) {
-                                                return Column(
-                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(height: MediaQuery.of(context).size.height* 0.46,),
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                                      children: imageList.asMap().entries.map<Widget>((entry){
-                                                        return GestureDetector(
-                                                          onTap: () {
-                                                            carouselController.animateToPage(entry.key);
-                                                            print('entry key -> ${entry.key}');
-                                                          },
-                                                          child: Container(
-                                                            width: 12.0,
-                                                            height: 12.0,
-                                                            margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                                                            decoration: BoxDecoration(
-                                                                shape: BoxShape.circle,
-                                                                color: (Theme.of(context).brightness == Brightness.dark
-                                                                    ? Colors.white
-                                                                    : Colors.black)
-                                                                    .withOpacity(snapshot.data  == entry.key ? 1.0 : 0.4)),
-                                                          ),
-                                                        );
-                                                      }).toList(),
-                                                    )
-                                                  ],
-                                                );
-                                          }),
-                                        ],
-                                      )
-                                    /// imageList에 데이터가 없으면 사진란 아예 없앰
-                                    else
-                                      Container(
-                                        height: 50,
-                                        width: MediaQuery.of(context).size.width,
-                                      ),
-                                  ],
-                                );
+                                          items: imageList.map<Widget>((item) {
+                                            return Container(
+                                              child: Image.network(item,
+                                                  fit: BoxFit.cover,
+                                                  width: 1000),
+                                            );
+                                          }).toList(),
+                                        ),
+                                        /// 사진 밑의 dot Row
+                                        StreamBuilder<int>(
+                                            stream: carouselIndexChange.stream,
+                                            initialData: 0,
+                                            builder: (context, snapshot) {
+                                              return Column(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(height: MediaQuery.of(context).size.height* 0.46,),
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                                    children: imageList.asMap().entries.map<Widget>((entry){
+                                                      return GestureDetector(
+                                                        onTap: () {
+                                                          carouselController.animateToPage(entry.key);
+                                                          print('entry key -> ${entry.key}');
+                                                        },
+                                                        child: Container(
+                                                          width: 12.0,
+                                                          height: 12.0,
+                                                          margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                                                          decoration: BoxDecoration(
+                                                              shape: BoxShape.circle,
+                                                              color: (Theme.of(context).brightness == Brightness.dark
+                                                                  ? Colors.white
+                                                                  : Colors.black)
+                                                                  .withOpacity(snapshot.data  == entry.key ? 1.0 : 0.4)),
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                                  )
+                                                ],
+                                              );
+                                            }),
+                                      ],
+                                    )
+                                  /// imageList에 데이터가 없으면 사진란 아예 없앰
+                                  else
+                                    Container(
+                                      height: 50,
+                                      width: MediaQuery.of(context).size.width,
+                                    ),
+                                ],
+                              );
                             }
                           },
                         ),
@@ -736,8 +733,6 @@ class _DetailPageState extends State<DetailPage> {
             ],
           )
       ),
-
-
     );
   }
 }
