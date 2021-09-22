@@ -9,6 +9,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import '../model/product.dart';
 import '../main.dart';
 import '../pages/comment.dart';
+import 'dart:async';
 
 class DetailPage extends StatefulWidget {
 
@@ -38,9 +39,57 @@ class _DetailPageState extends State<DetailPage> {
   /// appbar 아이콘의 컬러를 사진 여부에 따라 다르게 표시하기 위해 필요한 변수
   bool appbarIconColor = false;
 
-  //Crousel_slider 밑의 dot list 를 위한 변수 및 컨트롤러
-  var _current = 0;
+
+
+  ///************************* 사진 띄우는 부분 관련 변수/ 함수들*************************///
+  /// Firebase Storage 참조 간략화
+  var storage = firebase_storage.FirebaseStorage.instance;
+
+  /// Carousel_slider 페이지 이동을 인식하기 위한 컨트롤러
   final carouselController = CarouselController();
+
+  /// Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
+  StreamController<int> carouselIndexChange = StreamController<int>();
+
+  /// storage 에서 다운로드한 이미지 url 들이 저장될 정적 저장소
+  var imageList = [];
+
+  /// ProductID에 따라 해당하는 image url 다운로드
+  Future<String> downloadURL(String id, int num)  async {
+    try {
+      return await storage
+          .ref()
+          .child('images')
+          .child('$id$num.png')
+          .getDownloadURL();
+    } on Exception {
+      return null;
+    }
+  }
+
+  /// 다운로드한 url 들 중 null 이 아닌 것들만을 imageList 에 저장시킨는 함수
+  Future<void> makeUrlList() async {
+    imageList = await Future.wait([
+      downloadURL(widget.productId,0),
+      downloadURL(widget.productId,1),
+      downloadURL(widget.productId,2),
+      downloadURL(widget.productId,3),
+      downloadURL(widget.productId,4),
+      downloadURL(widget.productId,5),
+      downloadURL(widget.productId,6),
+      downloadURL(widget.productId,7),
+      downloadURL(widget.productId,8),
+      downloadURL(widget.productId,9),]);
+
+    imageList = imageList.where((e) => e != null).toList();
+  }
+
+  /// Stream 삭제 위해서 필요
+  /*@override
+  void dispose() {
+    carouselIndexChange.close();
+    super.dispose();
+  }*/
 
 
   @override
@@ -88,8 +137,6 @@ class _DetailPageState extends State<DetailPage> {
       );
     }
 
-
-
     ///************************ 게시글 삭제 및  지난 시간 계산 함수들 ************************///
 
     /// 게시물 자체 삭제 기능 (왼쪽 상단 휴지통 버튼)
@@ -104,53 +151,37 @@ class _DetailPageState extends State<DetailPage> {
       }
     }
 
+    /// 현재 시간
+    var nowTime = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+        DateTime.now().hour,
+        DateTime.now().minute,
+        DateTime.now().second
+    );
+
+    /// 상품에 저장된 최근에 수정된 시간
+    var productTime = DateTime(
+        product.modified.toDate().year,
+        product.modified.toDate().month,
+        product.modified.toDate().day,
+        product.modified.toDate().hour,
+        product.modified.toDate().minute,
+        product.modified.toDate().second);
+
     /// 현재시간 - 게시글 마지막 수정 시간 계산하여 내보내는 위젯
     String calculateTime() {
-      var time =
-          DateTime(
-              DateTime.now().year,
-              DateTime.now().month,
-              DateTime.now().day).difference(
-              DateTime(
-                  product.modified.toDate().year,
-                  product.modified.toDate().month,
-                  product.modified.toDate().day)
-          ).inDays;
-
+      var time = nowTime.difference(productTime).inDays;
       /// 하루가 안지났을 때
       if(time < 1) {
-        time = DateTime(
-            DateTime.now().year,
-            DateTime.now().month,
-            DateTime.now().day).difference(
-            DateTime(
-                product.modified.toDate().year,
-                product.modified.toDate().month,
-                product.modified.toDate().day)
-        ).inHours;
+        time = nowTime.difference(productTime).inHours;
         /// 한시간도 안지났을 때
         if(time< 1){
-          time = DateTime(
-              DateTime.now().year,
-              DateTime.now().month,
-              DateTime.now().day).difference(
-              DateTime(
-                  product.modified.toDate().year,
-                  product.modified.toDate().month,
-                  product.modified.toDate().day)
-          ).inMinutes;
+          time = nowTime.difference(productTime).inMinutes;
           /// 1분도 안지났을 때
           if(time<1){
-            time = DateTime(
-                DateTime.now().year,
-                DateTime.now().month,
-                DateTime.now().day).difference(
-                DateTime(
-                    product.modified.toDate().year,
-                    product.modified.toDate().month,
-                    product.modified.toDate().day)
-            ).inSeconds;
-            return '$time초 전';
+            return '방금';
           } else {
             return '$time분 전';
           }
@@ -163,15 +194,7 @@ class _DetailPageState extends State<DetailPage> {
       }
       /// 일주일 이상 지났고 한달 미만의 시간이 지났을 떄
       else if(time >= 7 && time < 30) {
-        time = DateTime(
-            DateTime.now().year,
-            DateTime.now().month,
-            DateTime.now().day).difference(
-            DateTime(
-                product.modified.toDate().year,
-                product.modified.toDate().month,
-                product.modified.toDate().day)
-        ).inDays;
+        time = nowTime.difference(productTime).inDays;
         if(time < 14){
           return '1주 전';
         } else if(time < 21){
@@ -183,15 +206,7 @@ class _DetailPageState extends State<DetailPage> {
         }
       } /// 한달이상 지났을 때
       else if (time >= 30) {
-        time = DateTime(
-            DateTime.now().year,
-            DateTime.now().month,
-            DateTime.now().day).difference(
-            DateTime(
-                product.modified.toDate().year,
-                product.modified.toDate().month,
-                product.modified.toDate().day)
-        ).inDays;
+        time = nowTime.difference(productTime).inDays;
         if(time <= 60) {
           return '한달 전';
         } else if (time <= 90) {
@@ -210,7 +225,9 @@ class _DetailPageState extends State<DetailPage> {
       } else {
         return '오래 된 글';
       }
+      return '오래 된 글';
     }
+
 
     ///************************ like 기능 구현부분 (수정필요) ************************///
 
@@ -252,8 +269,6 @@ class _DetailPageState extends State<DetailPage> {
        }
      }*/
 
-
-
     /// 'comments' Collection 참조
     CollectionReference comments = FirebaseFirestore.instance
         .collection('giveProducts/' + productId + '/comment');
@@ -271,24 +286,7 @@ class _DetailPageState extends State<DetailPage> {
           .catchError((error) => print('Failed to add a comment: $error'));
     }
 
-    ///************************* 사진 띄우는 부분 관련 변수/ 함수들*************************///
 
-    /// Firebase Storage 참조 간략화
-    var storage = firebase_storage.FirebaseStorage.instance;
-
-    /// ProductID에 따라 해당하는 image url 다운로드
-    Future<String> downloadURL(String id, int num)  async {
-      try {
-        return await storage
-            .ref()
-            .child('images')
-        //.child('$id.png')
-            .child('$id$num.png')
-            .getDownloadURL();
-      } on Exception {
-        return null;
-      }
-    }
 
     /// Add 페이지 화면 구성
     return Scaffold(
@@ -299,36 +297,28 @@ class _DetailPageState extends State<DetailPage> {
                   children: [
                     Stack(
                       children: [
-                        Consumer<ApplicationState>(
-                          builder: (context, appState, _) =>
-                            FutureBuilder(
-                                future: Future.wait([
-                                  downloadURL(productId,0),
-                                  downloadURL(productId,1),
-                                  downloadURL(productId,2),
-                                  downloadURL(productId,3),
-                                  downloadURL(productId,4),
-                                  downloadURL(productId,5),
-                                  downloadURL(productId,6),
-                                  downloadURL(productId,7),
-                                  downloadURL(productId,8),
-                                  downloadURL(productId,9),
-                                ]),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
-                                    return Stack(
-                                      children: [
-                                        Container(
-                                          height: MediaQuery.of(context).size.height * 0.5,
-                                          width: MediaQuery.of(context).size.width,
-                                          color: Color(0xffced3d0),
-                                          child: Center(child: CircularProgressIndicator()),
-                                        )
-                                      ],
-                                    );
-                                  } else {
-                                    if (snapshot.hasData) {
-                                      return Stack(
+                        FutureBuilder(
+                          future: makeUrlList(),
+                          builder: (context, snapshot) {
+                            /// 시진 로딩중일 때
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Column(
+                                children: [
+                                  Container(
+                                    height: MediaQuery.of(context).size.height * 0.5,
+                                    width: MediaQuery.of(context).size.width,
+                                    child: Center(child: CircularProgressIndicator()),
+                                  )
+                                ],
+                              );
+                            }
+                            /// 사진 로딩 후
+                            else {
+                                return Stack(
+                                  children: [
+                                    /// imageList에 데이터가 있으면 CarouselSlider보여줌
+                                    if(imageList.isNotEmpty)
+                                      Stack(
                                         children: [
                                           Container(
                                             height: MediaQuery.of(context).size.height * 0.5,
@@ -343,63 +333,66 @@ class _DetailPageState extends State<DetailPage> {
                                               viewportFraction: 1.0,
                                               aspectRatio: 1.0,
                                               height: MediaQuery.of(context).size.height* 0.5,
-                                              initialPage: _current,
+                                                initialPage: 0,
                                                 onPageChanged: (index, reason) {
-                                                  setState(() {
-                                                    _current = index;
-                                                  });
+                                                  carouselIndexChange.add(index);
                                                 }
                                             ),
-                                            items: snapshot.data.where((e) => e != null).map<Widget>((item) {
-                                                return Container(
-                                                  child: Image.network(item,
-                                                      fit: BoxFit.cover,
-                                                      width: 1000));
+                                            items: imageList.map<Widget>((item) {
+                                              return Container(
+                                                child: Image.network(item,
+                                                    fit: BoxFit.cover,
+                                                    width: 1000),
+                                              );
                                             }).toList(),
                                           ),
                                           /// 사진 밑의 dot Row
-                                          Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              SizedBox(height: MediaQuery.of(context).size.height* 0.46,),
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                crossAxisAlignment: CrossAxisAlignment.end,
-                                                children: snapshot.data.where((e) => e != null).toList().asMap().entries.map<Widget>((entry){
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      carouselController.animateToPage(entry.key);
-                                                      print('entry key -> ${entry.key}');
-                                                    },
-                                                    child: Container(
-                                                      width: 12.0,
-                                                      height: 12.0,
-                                                      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                                                      decoration: BoxDecoration(
-                                                          shape: BoxShape.circle,
-                                                          color: (Theme.of(context).brightness == Brightness.dark
-                                                              ? Colors.white
-                                                              : Colors.black)
-                                                              .withOpacity(_current == entry.key ? 1.0 : 0.4)),
-                                                    ),
-                                                  );
-                                                }).toList(),
-                                              )
-                                            ],
-                                          )
+                                          StreamBuilder<int>(
+                                              stream: carouselIndexChange.stream,
+                                              initialData: 0,
+                                              builder: (context, snapshot) {
+                                                return Column(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  children: [
+                                                    SizedBox(height: MediaQuery.of(context).size.height* 0.46,),
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                                      children: imageList.asMap().entries.map<Widget>((entry){
+                                                        return GestureDetector(
+                                                          onTap: () {
+                                                            carouselController.animateToPage(entry.key);
+                                                            print('entry key -> ${entry.key}');
+                                                          },
+                                                          child: Container(
+                                                            width: 12.0,
+                                                            height: 12.0,
+                                                            margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                                                            decoration: BoxDecoration(
+                                                                shape: BoxShape.circle,
+                                                                color: (Theme.of(context).brightness == Brightness.dark
+                                                                    ? Colors.white
+                                                                    : Colors.black)
+                                                                    .withOpacity(snapshot.data  == entry.key ? 1.0 : 0.4)),
+                                                          ),
+                                                        );
+                                                      }).toList(),
+                                                    )
+                                                  ],
+                                                );
+                                          }),
                                         ],
-                                      );
-                                    } else if (snapshot.hasData == false) {
-
-                                      return Container(height: 35,);
-                                    } else {
-                                      return Container(
-                                        child: Text('Snapshot Error!'),
-                                      );
-                                    }
-                                  }
-                                },
-                              ),
+                                      )
+                                    /// imageList에 데이터가 없으면 사진란 아예 없앰
+                                    else
+                                      Container(
+                                        height: 50,
+                                        width: MediaQuery.of(context).size.width,
+                                      ),
+                                  ],
+                                );
+                            }
+                          },
                         ),
                         AppBar(
                           foregroundColor: Colors.transparent,
