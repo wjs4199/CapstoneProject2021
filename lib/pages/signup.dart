@@ -117,15 +117,14 @@ class SignUpState extends State<SignUp> {
                     ElevatedButton(
                       onPressed: () async {
                         /// 중복체크를 하지 않거나, 중복이 있음에도 불구하고 시작하기 누르면 그냥 로그인 되는 현상 해결
-/*
                         if(isDuplicated == true)
                           {
 
                             ScaffoldMessenger.of(context).showSnackBar(snackBar3);
                           }
 
- */
-                      //else{
+
+                      else{
 
                           if(_formKey.currentState.validate()) {
 
@@ -151,7 +150,7 @@ class SignUpState extends State<SignUp> {
                             }).catchError((error) => print('Error: $error'));
                           }
 
-                    //   }
+                     }
 
 
 
