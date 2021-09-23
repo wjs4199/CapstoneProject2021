@@ -34,7 +34,7 @@ class SignUpState extends State<SignUp> {
 
     final snackBar1 = SnackBar(content: Text('중복이 존재합니다'));
     final snackBar2 = SnackBar(content: Text('사용해도 좋습니다'));
-    final snackBar3 = SnackBar(content: Text('중복체크를 다시 해주세요'));
+    final snackBar3 = SnackBar(content: Text('중복체크를 해주세요'));
     
 
     return Scaffold(
@@ -77,6 +77,7 @@ class SignUpState extends State<SignUp> {
                     ElevatedButton(
                       onPressed: ()   async {
                     //   checkName().then((value) => ScaffoldMessenger.of(context).showSnackBar(snackBar2));
+                        checkLoop = true;
                         isDuplicated = false;
                       await for (var snapshot in FirebaseFirestore.instance.collection('users').snapshots())
                       {
@@ -90,8 +91,6 @@ class SignUpState extends State<SignUp> {
                                 break;
                               }
                            }
-
-                           //ScaffoldMessenger.of(context).showSnackBar(snackBar2);
                            break;
                       };
                       if(isDuplicated == false) {
@@ -117,15 +116,12 @@ class SignUpState extends State<SignUp> {
                     ElevatedButton(
                       onPressed: () async {
                         /// 중복체크를 하지 않거나, 중복이 있음에도 불구하고 시작하기 누르면 그냥 로그인 되는 현상 해결
-                        if(isDuplicated == true)
+                        if(isDuplicated || checkLoop == false)
                           {
-
                             ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+
                           }
-
-
-                      else{
-
+                        else{
                           if(_formKey.currentState.validate()) {
 
                             await FirebaseFirestore.instance.collection('users')
