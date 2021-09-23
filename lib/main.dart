@@ -101,6 +101,7 @@ class ApplicationState extends ChangeNotifier {
 
   String orderBy;
   String uid;
+  String nickname;
   String detailGiveOrTake;
   int photo;
 
@@ -112,6 +113,11 @@ class ApplicationState extends ChangeNotifier {
     this.detailGiveOrTake = detailGiveOrTake;
     this.photo = photo;
     print('detail page uid -> ' + uid);
+    init();
+  }
+
+  void checkNickname(String nickname) {
+    this.nickname = nickname;
     init();
   }
 
@@ -127,6 +133,7 @@ class ApplicationState extends ChangeNotifier {
   List<Like> _likeList = [];
   int likeCount = 0;
   List<Users> _userName = [];
+  List<Users> _users = [];
 
   /// added
   Stream<QuerySnapshot> currentStream;
@@ -309,6 +316,23 @@ class ApplicationState extends ChangeNotifier {
       });
       notifyListeners();
     });
+
+    FirebaseFirestore.instance
+        .collection('users')
+        .snapshots()
+        .listen((snapshot) {
+      _users = [];
+      snapshot.docs.forEach((document) {
+        _users.add(Users(
+          createdAt: document.data()['createdAt'],
+          id: document.data()['id'],
+          nickname: document.data()['nick'],
+          photoUrl: document.data()['photoUrl'],
+          username: document.data()['username'],
+        ));
+      });
+      notifyListeners();
+    });
   }
 
   List<Product> get giveProducts => _giveProducts;
@@ -316,6 +340,7 @@ class ApplicationState extends ChangeNotifier {
   List<Comment> get commentContext => _commentContext;
   List<Like> get likeList => _likeList;
   List<Users> get username => _userName;
+  List<Users> get users => _users;
 
 /// added
 }

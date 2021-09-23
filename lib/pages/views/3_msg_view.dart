@@ -121,6 +121,7 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
           onPressed: () {
             Navigator.push(
               context,
+
               MaterialPageRoute(
                 builder: (context) => Chat(
                   peerId: userChat.id,
