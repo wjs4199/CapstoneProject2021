@@ -52,9 +52,11 @@ class Comment {
 class Like {
   Like({
     @required this.uid,
+    @required this.id,
   });
 
   final String uid;
+  final String id;
 }
 
 class Users {

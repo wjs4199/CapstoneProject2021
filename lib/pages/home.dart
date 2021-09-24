@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -39,7 +40,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
 
@@ -81,7 +82,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                   /// _selectedIndex 값에 따른 페이지(상응 위젯) 출력
                   children:
-                      _buildWidgetOptions(context, appState, _selectedIndex),
+                  _buildWidgetOptions(context, appState, _selectedIndex),
                 ),
               ),
             ),
@@ -293,7 +294,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
  */
     await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
-        (Route<dynamic> route) => false);
+            (Route<dynamic> route) => false);
   }
 
   ///* ---------------- BottomNavigationBar, PageView 관련 ----------------- *///
@@ -314,7 +315,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
-  ///* -------------------------------------------------------------------- *///
+///* -------------------------------------------------------------------- *///
 }
 
 /// PostTileMaker - 각 게시글 별 postTile Listview.builder(separated) 사용해 자동 생성
@@ -356,6 +357,13 @@ class PostTileMaker extends StatelessWidget {
       }
     }
 
+    /// 사용자가 게시글 눌러 들어갈 때마다 조회수 올리는 함수
+    Future<void> editProductHits(String GiveOrTake) {
+      return FirebaseFirestore.instance.collection(GiveOrTake).doc(_product.id).update({
+        'hits': _product.hits + 1,
+      });
+    }
+
     return InkWell(
       onTap: () {
         if (_giveOrTake) {
@@ -363,11 +371,13 @@ class PostTileMaker extends StatelessWidget {
               .detailPageUid(_product.id, 'giveProducts', _product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/giveProducts');
+          editProductHits('giveProducts');
         } else {
           Provider.of<ApplicationState>(context, listen: false)
               .detailPageUid(_product.id, 'takeProducts', _product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/takeProducts');
+          editProductHits('giveProducts');
         }
       },
 
