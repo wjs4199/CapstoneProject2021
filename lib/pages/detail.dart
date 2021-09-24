@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -49,13 +51,16 @@ class _DetailPageState extends State<DetailPage> {
   final carouselController = CarouselController();
 
   /// Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
-  StreamController<int> carouselIndexChange = StreamController<int>();
+  StreamController<int> carouselIndexChange = StreamController<int>.broadcast();
+
+  /// Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
+  StreamController<bool> pushLikeButton = StreamController<bool>();
 
   /// storage 에서 다운로드한 이미지 url 들이 저장될 정적 저장소
-  var imageList = [];
+  var imageUrlList = [];
 
   /// ProductID에 따라 해당하는 image url 다운로드
-  Future<String> downloadURL(String id, int num)  async {
+  Future<String> downloadURL(String id, int num) async {
     try {
       return await storage
           .ref()
@@ -67,9 +72,9 @@ class _DetailPageState extends State<DetailPage> {
     }
   }
 
-  /// 다운로드한 url 들 중 null 이 아닌 것들만을 imageList 에 저장시킨는 함수
+  /// 다운로드한 url 들 중 null 이 아닌 것들만을 imageUrlList 에 저장시킨는 함수
   Future<void> makeUrlList() async {
-    imageList = await Future.wait([
+    imageUrlList = await Future.wait([
       downloadURL(widget.productId,0),
       downloadURL(widget.productId,1),
       downloadURL(widget.productId,2),
@@ -81,7 +86,20 @@ class _DetailPageState extends State<DetailPage> {
       downloadURL(widget.productId,8),
       downloadURL(widget.productId,9),]);
 
-    imageList = imageList.where((e) => e != null).toList();
+    imageUrlList = imageUrlList.where((e) => e != null).toList();
+
+    //future안에서 for문이 안돌아서 정적 리스트에 들어가는 것을 확인하기 위해 이렇게 해둠
+    print('imageURL 리스트의 길이는  => ${imageUrlList.length}');
+    print('0 번째 imageUrlList 주소는 => ${imageUrlList[0]}');
+    print('1 번째 imageUrlList 주소는 => ${imageUrlList[1]}');
+    print('2 번째 imageUrlList 주소는 => ${imageUrlList[2]}');
+    print('3 번째 imageUrlList 주소는 => ${imageUrlList[3]}');
+    print('4 번째 imageUrlList 주소는 => ${imageUrlList[4]}');
+    print('5 번째 imageUrlList 주소는 => ${imageUrlList[5]}');
+    print('6 번째 imageUrlList 주소는 => ${imageUrlList[6]}');
+    print('7 번째 imageUrlList 주소는 => ${imageUrlList[7]}');
+    print('8 번째 imageUrlList 주소는 => ${imageUrlList[8]}');
+    print('9 번째 imageUrlList 주소는 => ${imageUrlList[9]}');
   }
 
   /// Stream 삭제 위해서 필요
@@ -228,6 +246,13 @@ class _DetailPageState extends State<DetailPage> {
 
 
     ///************************ like 기능 구현부분 (수정필요) ************************///
+
+    var likeList =
+        Provider.of<ApplicationState>(context, listen: false).likeList;
+
+    var likeCount =
+        Provider.of<ApplicationState>(context, listen: false).likeCount;
+
     /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
     CollectionReference likes;
     if (detailGiveOrTake == 'giveProducts') {
@@ -238,33 +263,53 @@ class _DetailPageState extends State<DetailPage> {
           .collection('takeProducts/' + productId + '/like');
     }
 
+    // OK
+    var likeFound = false;
+    for (var eachLike in likeList){
+      if(eachLike.uid == userId){
+        likeFound = true;
+        break;
+      }
+    }
+    print('likeFound의 초기 상태 => $likeFound');
+
     /// 현재는 하트버튼 누르면 사용자가 이미 눌렀든 말든 간에 계속 숫자 올라감 ㅋㅎ (수정필요)
     /// 현재 사용자가 이미 좋아요를 누른 경우를 분별하는 함수
-    bool isLiked(AsyncSnapshot<QuerySnapshot> snapshot) {
-      snapshot.data.docs.forEach((document) {
-        if (document['uid'] == userId) {
+    bool isLiked(){
+      for (var eachLike in likeList){
+        if(eachLike.uid == userId){
+          print('좋아요는 현재 true 상태!!');
           return true;
         }
-      });
+      }
+      print('좋아요는 현재 false 상태ㅠㅠ');
       return false;
     }
 
     /// 사용자가 하트 누른 경우 좋아요 추가하는 기능
-    Future<void> addLike() {
-      return likes
+    Future<void> addLike() async {
+      return await likes
           .add({'uid': userId})
-          .then((value) => print('LIKED!'))
+          .then((value) => print('LIKE 추가됨!'))
           .catchError((error) => print('Failed to add a like: $error'));
     }
 
-    /// 좋아요 취소기능 (구현이 안됨 -> 다시 짜기)
-    /* Future<void> deleteLike() async {
+    /// 좋아요 취소기능
+    Future<void> deleteLike(userId) async {
        try {
-         return likes.doc(userId).delete();
+         for (var eachLike in likeList){
+           if(eachLike.uid == userId){
+             await likes
+                 .doc(eachLike.id)
+                 .delete()
+                 .then((value) => print('LIKE 취소됨! 취소된 uid 는 ${eachLike.id}'))
+                 .catchError((error) => print('Failed to add a like: $error'));
+           }
+         }
        } on Exception {
          return null;
        }
-     }*/
+    }
 
     /// 'comments' Collection 참조
     CollectionReference comments = FirebaseFirestore.instance
@@ -274,7 +319,6 @@ class _DetailPageState extends State<DetailPage> {
     Future<void> addComments(String comment) {
       return comments
           .add({
-
         'userName': FirebaseAuth.instance.currentUser.displayName,
         'comment': comment,
         'created': FieldValue.serverTimestamp(),
@@ -313,8 +357,8 @@ class _DetailPageState extends State<DetailPage> {
                             else {
                               return Stack(
                                 children: [
-                                  /// imageList에 데이터가 있으면 CarouselSlider보여줌
-                                  if(imageList.isNotEmpty)
+                                  /// imageUrlList 데이터가 있으면 CarouselSlider보여줌
+                                  if(imageUrlList.isNotEmpty)
                                     Stack(
                                       children: [
                                         Container(
@@ -335,7 +379,7 @@ class _DetailPageState extends State<DetailPage> {
                                                 carouselIndexChange.add(index);
                                               }
                                           ),
-                                          items: imageList.map<Widget>((item) {
+                                          items: imageUrlList.map<Widget>((item) {
                                             return Container(
                                               child: Image.network(item,
                                                   fit: BoxFit.cover,
@@ -355,7 +399,7 @@ class _DetailPageState extends State<DetailPage> {
                                                   Row(
                                                     mainAxisAlignment: MainAxisAlignment.center,
                                                     crossAxisAlignment: CrossAxisAlignment.end,
-                                                    children: imageList.asMap().entries.map<Widget>((entry){
+                                                    children: imageUrlList.asMap().entries.map<Widget>((entry){
                                                       return GestureDetector(
                                                         onTap: () {
                                                           carouselController.animateToPage(entry.key);
@@ -380,7 +424,7 @@ class _DetailPageState extends State<DetailPage> {
                                             }),
                                       ],
                                     )
-                                  /// imageList에 데이터가 없으면 사진란 아예 없앰
+                                  /// imageUrlList 데이터가 없으면 사진란 아예 없앰
                                   else
                                     Container(
                                       height: 50,
@@ -593,29 +637,15 @@ class _DetailPageState extends State<DetailPage> {
                                     height: 1.5,
                                   ),
                                 ),
-                                StreamBuilder<QuerySnapshot>(
-                                  stream: likes.snapshots(),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<QuerySnapshot> snapshot) {
-                                    if (snapshot.hasError) {
-                                      return Text('Error!');
-                                    }
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return Text('Loading');
-                                    }
-                                    var count = snapshot.data.size;
-                                    return Text(
-                                      '\n\n조회 ${product.hits}회 · 좋아요 $count회',
-                                      style: TextStyle(
-                                        fontFamily: 'Roboto_Bold',
-                                        color: Colors.grey,
-                                        //fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                        height: 1,
-                                      ),
-                                    );
-                                  },
+                                Text(
+                                  '\n\n조회 ${product.hits}회 · 좋아요 $likeCount회',
+                                  style: TextStyle(
+                                    fontFamily: 'Roboto_Bold',
+                                    color: Colors.grey,
+                                    //fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    height: 1,
+                                  ),
                                 ),
                                 SizedBox(height: 9.0),
                                 Divider(thickness: 1.0),
@@ -656,31 +686,51 @@ class _DetailPageState extends State<DetailPage> {
                         key: _commentFormKey,
                         child: Row(
                           children: [
-                            StreamBuilder<QuerySnapshot>(
-                              stream: likes.snapshots(),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                                if (snapshot.hasError) {
-                                  return Text('Error!');
-                                }
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Text('Loading');
-                                }
-                                return IconButton(
-                                  icon: Icon(
-                                    (isLiked(snapshot))
-                                        ? Icons.favorite
-                                        : Icons.favorite_outlined,
-                                    color: Colors.red,
-                                    semanticLabel: 'like',
-                                  ),
-                                  onPressed: () => (isLiked(snapshot))
-                                      ? print('You can only like once!')
-                                      : addLike(),
-                                );
-                              },
-                            ),
+                            StreamBuilder<bool>(
+                                stream: pushLikeButton.stream,
+                                initialData: likeFound,
+                                builder: (context, snapshot) {
+                                  return IconButton(
+                                      icon: likeFound
+                                          ? Icon(Icons.favorite,
+                                        color: Colors.red,
+                                        semanticLabel: 'like',
+                                      )
+                                          : Icon(Icons.favorite_border_outlined,
+                                        color: Colors.red,
+                                        semanticLabel: 'like',
+                                      ),
+                                      onPressed: () {
+                                        if(likeFound) {
+                                          print('좋아요를 취소합니다!');
+                                          deleteLike(userId)
+                                              .then((value) {
+                                            print('like delete');
+                                            //context.watch<ApplicationState>().init();
+                                            //likeList = context.watch<ApplicationState>().likeList;
+                                          }).catchError((error) => null)
+                                              .whenComplete(() {
+                                            //pushLikeButton.add(isLiked());
+                                            //print('likeFound는 현재 $likeFound');
+                                          });
+                                        } else {
+                                          print('좋아요 버튼을 눌렀습니다!');
+                                          addLike().then((value) {
+                                            print('like add');
+                                            //context.watch<ApplicationState>().init();
+                                            //likeList = context.watch<ApplicationState>().likeList;
+                                          }).catchError((error) => null)
+                                              .whenComplete(() {
+                                                //pushLikeButton.add(isLiked());
+                                                //print('likeFound는 현재 $likeFound');
+                                            /*setState(() {
+                                              likeFound = isLiked();
+                                            });*/
+                                          });
+                                        }
+                                      }
+                                  );
+                                }),
                             Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),

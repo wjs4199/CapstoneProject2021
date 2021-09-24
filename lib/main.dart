@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:giveandtake/pages/views/3_msg_view.dart';
 import 'package:provider/provider.dart';
@@ -252,7 +253,7 @@ class ApplicationState extends ChangeNotifier {
     // 함수 내에 있을 게 아니라 다른 함수로 빼줘야하지 않을 까요?
     if (uid != 'null') {
       FirebaseFirestore.instance
-          .collection('giveProducts/' + uid + '/comment')
+          .collection(detailGiveOrTake + '/' + uid + '/comment')
 
       ///edited
           .orderBy('created', descending: true)
@@ -282,6 +283,7 @@ class ApplicationState extends ChangeNotifier {
         snapshot.docs.forEach((document) {
           _likeList.add(Like(
             uid: document.data()['uid'],
+            id : document.id,
           ));
         });
         likeCount = _likeList.length;

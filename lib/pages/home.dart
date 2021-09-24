@@ -377,7 +377,7 @@ class PostTileMaker extends StatelessWidget {
               .detailPageUid(_product.id, 'takeProducts', _product.photo);
           Navigator.pushNamed(
               context, '/detail/' + _product.id + '/takeProducts');
-          editProductHits('takeProducts');
+          editProductHits('giveProducts');
         }
       },
 
