@@ -37,6 +37,7 @@ class Comment {
     @required this.userName,
     @required this.comment,
     @required this.created,
+    @required this.id,
     // @required this.isDeleted,
 
 
@@ -45,6 +46,7 @@ class Comment {
   final String userName;
   final String comment;
   final Timestamp created;
+  final String id;
 // final bool isDeleted;
 
 }

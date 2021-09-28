@@ -55,31 +55,19 @@ class _CommentBookState extends State<CommentBook> {
 
     /// 'comments' Collection 참조
     CollectionReference comments = FirebaseFirestore.instance
-        .collection('comments/' + productId + '/commentList');
+        .collection('${widget.detailGiveOrTake}/$productId/comment');
 
     /// 해당 productId에 부합하는 게시물에 담긴 comment 들을 가져와 담을 변수
     var commentsList =
         Provider.of<ApplicationState>(context, listen: false).commentContext;
 
-    /// comment 추가 기능
-    Future<void> addComments(String comment) {
-      return comments
-          .add({
-        'userName': FirebaseAuth.instance.currentUser.displayName,
-        'comment': comment,
-        'time': FieldValue.serverTimestamp(),
-      })
-          .then((value) => print('add comment!'))
-          .catchError((error) => print('Failed to add a comment: $error'));
-    }
-/*
-    /// comment 삭제기능 (구현이 안됨 -> 다시 짜기)
+    /// comment 삭제기능
     Future<void> deleteComments(Comment comment) async {
       try {
         for (var eachComment in commentsList){
           if(eachComment.id == comment.id){
             return await FirebaseFirestore.instance
-                .collection('comments/$productId/commentList')
+                .collection('${widget.detailGiveOrTake}/$productId/comment')
                 .doc(comment.id)
                 .delete();
           }
@@ -89,12 +77,9 @@ class _CommentBookState extends State<CommentBook> {
       }
     }
 
- */
     /// ToggleButtons 내의 대댓글, 좋아요, 삭제 버튼의 상태를 표시하기 위해 필요한 리스트 변수
     var _selections = List<bool>.generate(3, (_) => false);
 
-    /// 보기 쉽게 빼려고 하였으나 deleteComments() 함수 아래에 있어야해서...여기로 옴...
-    /// 왜 ToggleButtons 매개변수로 deleteComments()가 전달시키면 가능!(나는 실패..)
     /// ToggleButtons 위젯(대댓글, 좋아요, 삭제)
     ToggleButtons _buildCommentToggleButtons(
         BuildContext context, ApplicationState appState, Comment comment) {
@@ -137,10 +122,9 @@ class _CommentBookState extends State<CommentBook> {
                         CupertinoDialogAction(
                           onPressed: () {
                             Navigator.pop(context);
-                           // deleteComments(comment)
-                           //     .then((value) => appState.init())
-                             //   .catchError((error) => null);
-
+                           deleteComments(comment)
+                            .then((value) => appState.init())
+                               .catchError((error) => null);
                           },
                           child: Text('Yes'),
                         ),
@@ -282,7 +266,9 @@ class _CommentBookState extends State<CommentBook> {
                           ]))
                 ],
               )),
-          Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+          Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
             SizedBox(width: 10.0),
             RichText(
                 text: TextSpan(
@@ -291,7 +277,10 @@ class _CommentBookState extends State<CommentBook> {
                       TextSpan(text: eachComment.comment + '\n'),
                     ])),
           ]),
-          Divider(thickness: 1.0),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(11, 0, 11, 0),
+            child: Divider(thickness: 1.0),
+          ),
         ])
     ]);
   }

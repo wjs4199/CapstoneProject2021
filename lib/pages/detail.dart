@@ -13,6 +13,8 @@ import '../main.dart';
 import '../pages/comment.dart';
 import 'dart:async';
 
+import 'home.dart';
+
 class DetailPage extends StatefulWidget {
 
   DetailPage({this.productId, this.detailGiveOrTake, this.photoNum});
@@ -23,7 +25,7 @@ class DetailPage extends StatefulWidget {
   /// giveProducts / takeProducts collection 중 어디서 가져와야하는 지 표시
   final String detailGiveOrTake;
 
-  ///
+  /// 저장된 photo의 개수
   final int photoNum;
 
   @override
@@ -31,6 +33,20 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
+
+  /// detail 페이지 실행시 인자로 전달되는 변수들
+  String productId ; // product ID
+  String detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
+  int photoNum; // 저장된 photo 의 개수
+
+  @override
+  void initState() {
+    super.initState();
+
+    productId = widget.productId; // product ID
+    detailGiveOrTake = widget.detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
+    photoNum = widget.photoNum; // 저장된 photo 의 개수
+  }
 
   /// comment 적는 텍스트 칸이 빈칸인지 아닌지 분별할 때 사용됨
   final _commentFormKey = GlobalKey<FormState>(debugLabel: '_CommentState');
@@ -55,6 +71,12 @@ class _DetailPageState extends State<DetailPage> {
 
   /// Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
   StreamController<bool> pushLikeButton = StreamController<bool>();
+
+  /// Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
+  StreamController<int> changeLikeCount = StreamController<int>();
+
+  // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
+  StreamController<Icon> changeFavoriteButton = StreamController<Icon>();
 
   /// storage 에서 다운로드한 이미지 url 들이 저장될 정적 저장소
   var imageUrlList = [];
@@ -119,9 +141,10 @@ class _DetailPageState extends State<DetailPage> {
     var detailGiveOrTake = widget.detailGiveOrTake;
 
     /// detailGiveOrTake 가 담고 있는 collection 이름에 따라 그 collection 담긴 내용 가져오기
+    // 시작하자마자 이부분에서 build가 2번 되길래 watch에서 read로 바꿈
     var products = detailGiveOrTake == 'giveProducts'
-        ? context.watch<ApplicationState>().giveProducts
-        : context.watch<ApplicationState>().takeProducts;
+        ? context.read<ApplicationState>().giveProducts
+        : context.read<ApplicationState>().takeProducts;
 
     /// 현재 유저의 아이디와 이름 간략화
     var userId = FirebaseAuth.instance.currentUser.uid;
@@ -247,21 +270,17 @@ class _DetailPageState extends State<DetailPage> {
 
     ///************************ like 기능 구현부분 (수정필요) ************************///
 
-    var likeList =
-        Provider.of<ApplicationState>(context, listen: false).likeList;
+    var likeList = [];
+    likeList = context.read<ApplicationState>().likeList;
 
-    var likeCount =
-        Provider.of<ApplicationState>(context, listen: false).likeCount;
+    var likeCount = likeList.length;
+        //context.read<ApplicationState>().likeCount;
+    // changeLikeCount.add(likeCount);
 
     /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
-    CollectionReference likes;
-    if (detailGiveOrTake == 'giveProducts') {
-      likes = FirebaseFirestore.instance
-          .collection('giveProducts/' + productId + '/like');
-    } else {
-      likes = FirebaseFirestore.instance
-          .collection('takeProducts/' + productId + '/like');
-    }
+    CollectionReference likes = FirebaseFirestore.instance
+          .collection('${widget.detailGiveOrTake}/' + productId + '/like');
+
 
     // OK
     var likeFound = false;
@@ -278,10 +297,11 @@ class _DetailPageState extends State<DetailPage> {
     bool isLiked(){
       for (var eachLike in likeList){
         if(eachLike.uid == userId){
-          print('좋아요는 현재 true 상태!!');
+          print('좋아요는 지금 true 상태!!');
           return true;
         }
       }
+
       print('좋아요는 현재 false 상태ㅠㅠ');
       return false;
     }
@@ -296,19 +316,19 @@ class _DetailPageState extends State<DetailPage> {
 
     /// 좋아요 취소기능
     Future<void> deleteLike(userId) async {
-       try {
-         for (var eachLike in likeList){
-           if(eachLike.uid == userId){
-             await likes
-                 .doc(eachLike.id)
-                 .delete()
-                 .then((value) => print('LIKE 취소됨! 취소된 uid 는 ${eachLike.id}'))
-                 .catchError((error) => print('Failed to add a like: $error'));
-           }
-         }
-       } on Exception {
-         return null;
-       }
+      try {
+        for (var eachLike in likeList){
+          if(eachLike.uid == userId){
+            await likes
+                .doc(eachLike.id)
+                .delete()
+                .then((value) => print('LIKE 취소됨! 취소된 uid 는 ${eachLike.id}'))
+                .catchError((error) => print('Failed to add a like: $error'));
+          }
+        }
+      } on Exception {
+        return null;
+      }
     }
 
     /// 'comments' Collection 참조
@@ -447,7 +467,13 @@ class _DetailPageState extends State<DetailPage> {
                               semanticLabel: 'back',
                             ),
                             onPressed: () {
-                              Navigator.pop(context);
+                              // add FAB누르고 detail로 넘어갔을 때 뒤로가기 하면 FAB가 누른 그대로 있어서 pop에서 이렇게 바꿈
+                              Navigator.pushAndRemoveUntil<dynamic>(
+                                context,
+                                MaterialPageRoute<dynamic>(builder: (context) => HomePage(),),
+                                    (Route<dynamic> route) => false,
+                              );
+                              //Navigator.pop(context);
                             },
                           ),
                           actions: <Widget>[
@@ -586,7 +612,6 @@ class _DetailPageState extends State<DetailPage> {
                                     ),
                                   ],
                                 ),
-
                                 SizedBox(height: 9.0),
                                 Divider(thickness: 1.0),
                                 SizedBox(height: 9.0),
@@ -637,15 +662,21 @@ class _DetailPageState extends State<DetailPage> {
                                     height: 1.5,
                                   ),
                                 ),
-                                Text(
-                                  '\n\n조회 ${product.hits}회 · 좋아요 $likeCount회',
-                                  style: TextStyle(
-                                    fontFamily: 'Roboto_Bold',
-                                    color: Colors.grey,
-                                    //fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                    height: 1,
-                                  ),
+                                StreamBuilder<int>(
+                                    stream: changeLikeCount.stream,
+                                    initialData: likeCount,
+                                    builder: (context, snapshot) {
+                                      return Text(
+                                        '\n\n조회 ${product.hits}회 · 좋아요 ${snapshot.data}회',
+                                        style: TextStyle(
+                                          fontFamily: 'Roboto_Bold',
+                                          color: Colors.grey,
+                                          //fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          height: 1,
+                                        ),
+                                      );
+                                    }
                                 ),
                                 SizedBox(height: 9.0),
                                 Divider(thickness: 1.0),
@@ -661,6 +692,10 @@ class _DetailPageState extends State<DetailPage> {
                           detailGiveOrTake: detailGiveOrTake,
                           productId: productId,
                         )
+                    ),
+                    // 고정된 댓글 창과 겹치지 않게하는 sizedbox
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.038,
                     )
                   ]
               ),
@@ -686,51 +721,55 @@ class _DetailPageState extends State<DetailPage> {
                         key: _commentFormKey,
                         child: Row(
                           children: [
-                            StreamBuilder<bool>(
-                                stream: pushLikeButton.stream,
-                                initialData: likeFound,
-                                builder: (context, snapshot) {
+                            StreamBuilder <Icon> (
+                                stream: changeFavoriteButton.stream,
+                                initialData: isLiked()
+                                    ? Icon(Icons.favorite,
+                                  color: Colors.red,
+                                  semanticLabel: 'like',
+                                )
+                                    : Icon(Icons.favorite_border_outlined,
+                                  color: Colors.red,
+                                  semanticLabel: 'like',
+                                ),
+                                builder: (context, snapshot2) {
+                                  /// changeFavoriteButton 스트림 컨트롤러에 새 데이터가 들어올때마다 부분적으로 빌드됨
                                   return IconButton(
-                                      icon: likeFound
-                                          ? Icon(Icons.favorite,
-                                        color: Colors.red,
-                                        semanticLabel: 'like',
-                                      )
-                                          : Icon(Icons.favorite_border_outlined,
-                                        color: Colors.red,
-                                        semanticLabel: 'like',
-                                      ),
+                                    /// 아이콘의 snapshot2 => changeFavoriteButton 스트림으로 건네준 아이콘
+                                      icon: snapshot2.data,
                                       onPressed: () {
-                                        if(likeFound) {
-                                          print('좋아요를 취소합니다!');
+                                        /// 이미 좋아요가 눌러져 있었을 떄
+                                        if(isLiked()) {
                                           deleteLike(userId)
-                                              .then((value) {
-                                            print('like delete');
-                                            //context.watch<ApplicationState>().init();
-                                            //likeList = context.watch<ApplicationState>().likeList;
-                                          }).catchError((error) => null)
+                                              .catchError((error) => null)
                                               .whenComplete(() {
-                                            //pushLikeButton.add(isLiked());
-                                            //print('likeFound는 현재 $likeFound');
+                                            print('버튼 눌렀을 때  likeList 길이 => ${context.read<ApplicationState>().likeList.length}');
+                                            /// 좋아요 리스트 업데이트하고
+                                            likeList = context.read<ApplicationState>().likeList;
+                                            ///변경된 하트 아이콘 스트림으로 보내줌
+                                            changeFavoriteButton.add(Icon(Icons.favorite_border_outlined,
+                                              color: Colors.red, semanticLabel: 'like',));
+                                            ///변경된 likeList의 길이를 다시 read하여 스트림으로 보내줌
+                                            changeLikeCount.add(context.read<ApplicationState>().likeCount);
                                           });
-                                        } else {
-                                          print('좋아요 버튼을 눌렀습니다!');
-                                          addLike().then((value) {
-                                            print('like add');
-                                            //context.watch<ApplicationState>().init();
-                                            //likeList = context.watch<ApplicationState>().likeList;
-                                          }).catchError((error) => null)
+                                        }
+                                        /// 위의 if문과 같은 방법으로 동작
+                                        else {
+                                          addLike()
+                                              .catchError((error) => null)
                                               .whenComplete(() {
-                                                //pushLikeButton.add(isLiked());
-                                                //print('likeFound는 현재 $likeFound');
-                                            /*setState(() {
-                                              likeFound = isLiked();
-                                            });*/
+                                            print('버튼 눌렀을 때  likeList 길이 => ${context.read<ApplicationState>().likeList.length}');
+                                            likeList = context.read<ApplicationState>().likeList;
+                                            changeFavoriteButton.add(Icon(Icons.favorite,
+                                              color: Colors.red, semanticLabel: 'like',));
+                                            print('현재 likeList의 길이는 -> ${likeList.length}');
+                                            changeLikeCount.add(context.read<ApplicationState>().likeCount);
                                           });
                                         }
                                       }
                                   );
-                                }),
+                                }
+                            ),
                             Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
