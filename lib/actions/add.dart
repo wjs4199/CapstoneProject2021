@@ -28,6 +28,7 @@ class AddPage extends StatefulWidget {
 }
 
 class _AddPageState extends State<AddPage> {
+
   ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
   /// Firebase Storage 참조 간략화
   FirebaseStorage storage = FirebaseStorage.instance;
@@ -196,6 +197,7 @@ class _AddPageState extends State<AddPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Consumer<ApplicationState>(
         builder: (context, appState, _) => Scaffold(
             appBar: AppBar(
@@ -284,6 +286,8 @@ class _AddPageState extends State<AddPage> {
                                             disabledBorder: InputBorder.none,
                                             hintText: '제목',
                                             hintStyle: TextStyle(
+                                                fontFamily: 'NanumSquareRoundR',
+                                                fontWeight: FontWeight.bold,
                                                 height: 1.5,
                                                 fontSize: 18.0,
                                                 color: Color(0xffced3d0)),
@@ -291,6 +295,7 @@ class _AddPageState extends State<AddPage> {
                                                 0, 10.0, 0, 10.0),
                                           ),
                                           style: TextStyle(
+                                            fontFamily: 'NanumSquareRoundR',
                                             fontSize: 18,
                                             height: 1.5,
                                           ),
@@ -316,39 +321,10 @@ class _AddPageState extends State<AddPage> {
                                 /// 카테고리 드롭다운 버튼과 원해요/나눠요 토글 버튼 있는 Row
                                 Row(
                                   children: [
-                                    Expanded(
-                                        flex: 7,
-                                        child: DropdownButtonHideUnderline(
-                                          child: DropdownButton<String>(
-                                            isExpanded: true,
-                                            value: _selectedFilter,
-                                            items: _filter.map(
-                                              (value) {
-                                                return DropdownMenuItem(
-                                                  value: value,
-                                                  child: Center(
-                                                    child: Text(
-                                                      value,
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      style: TextStyle(
-                                                        fontSize: 18,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ).toList(),
-                                            onChanged: (value) {
-                                              if (value != _selectedFilter) {
-                                                _selectedFilter = value;
-                                              }
-                                              setState(() {
-                                                _selectedFilter = value;
-                                              });
-                                            },
-                                          ),
-                                        )),
+                                    if(widget.giveOrTake == 'give')
+                                      _buildGiveCategoryToggleButtons()
+                                    else
+                                      _buildTakeCategoryToggleButtons()
                                   ],
                                 ),
                                 Divider(thickness: 1),
@@ -361,21 +337,25 @@ class _AddPageState extends State<AddPage> {
                                         keyboardType: TextInputType.multiline,
                                         maxLines: null,
                                         controller: _contentController,
-                                        decoration: const InputDecoration(
+                                        decoration: InputDecoration(
                                           border: InputBorder.none,
                                           focusedBorder: InputBorder.none,
                                           enabledBorder: InputBorder.none,
                                           errorBorder: InputBorder.none,
                                           disabledBorder: InputBorder.none,
                                           hintMaxLines: 3,
-                                          hintText:
-                                              '당신이 나눔할 내용을 입력해주세요. 재사용이 불가능하거나 판매금지품목인 경우 게시가 제한될 수 있어요.',
+                                          hintText: widget.giveOrTake == 'give'
+                                              ? '당신이 나눔할 내용을 입력해주세요. 재사용이 불가능하거나 판매금지품목인 경우 게시가 제한될 수 있어요.'
+                                              : '당신에게 필요한 나눔에 대해 입력해주세요. 너무 고가의 물건이거나 판매금지품목인 경우 게시가 제한될 수 있어요.',
                                           hintStyle: TextStyle(
+                                              fontFamily: 'NanumSquareRoundR',
+                                              fontWeight: FontWeight.w400,
                                               height: 1.5,
                                               fontSize: 18.0,
                                               color: Color(0xffced3d0)),
                                         ),
                                         style: TextStyle(
+                                          fontFamily: 'NanumSquareRoundR',
                                           fontSize: 18,
                                           height: 1.5,
                                         ),
@@ -401,6 +381,121 @@ class _AddPageState extends State<AddPage> {
               ]),
             )));
   }
+
+  /// 나눔페이지의 add페이지 내에서 ToggleButtons 내의 물건, 재능 버튼의 상태를 표시하기 위해 필요한 리스트 변수
+  final _selectionsOfGive = List<bool>.generate(2, (_) => false);
+
+  /// 나눔페이지의 add페이지 내에서의 ToggleButtons 위젯(물건, 재능)
+  ToggleButtons _buildGiveCategoryToggleButtons() {
+    return ToggleButtons(
+      color: Colors.black.withOpacity(0.60),
+      constraints: BoxConstraints(
+        minWidth: MediaQuery.of(context).size.width *0.461,
+        minHeight: 50,
+      ),
+      selectedBorderColor: Color(0xffeb6859),
+      selectedColor: Color(0xffeb6859),
+      fillColor: Color(0xffeb6859).withOpacity(0.10),
+      borderRadius: BorderRadius.circular(4.0),
+      isSelected: _selectionsOfGive,
+      onPressed: (int index) {
+        setState(() {
+          if (index == 0) {
+            print('물건 선택!');
+            _selectedFilter = '물건';
+            _selectionsOfGive[0] = true;
+            _selectionsOfGive[1] = false;
+          } else {
+            print('재능 선택!');
+            _selectedFilter = '재능';
+            _selectionsOfGive[0] = false;
+            _selectionsOfGive[1] = true;
+          }
+        });
+      },
+      children: [
+        Text(
+          '물건',
+          textAlign:
+          TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'NanumSquareRoundR',
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        Text(
+          '재능',
+          textAlign:
+          TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'NanumSquareRoundR',
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        )
+      ],
+    );
+  }
+
+  ///단체 후원 카테고리 추가할 가능성이 있어서 give / take 다른 위젯으로 만들어놓음 (현재 ui는 같은 상태)
+  ///
+  /// 나눔요청 페이지의 add페이지 내에서 ToggleButtons 내의 물건, 재능 버튼의 상태를 표시하기 위해 필요한 리스트 변수
+  final _selectionsOfTake = List<bool>.generate(2, (_) => false);
+
+  /// 나눔요청 페이지의 add페이지 내에서의 ToggleButtons 위젯(물건, 재능)
+  ToggleButtons _buildTakeCategoryToggleButtons() {
+    return ToggleButtons(
+      color: Colors.black.withOpacity(0.60),
+      constraints: BoxConstraints(
+        minWidth: MediaQuery.of(context).size.width *0.461,
+        minHeight: 50,
+      ),
+      selectedBorderColor: Color(0xffeb6859),
+      selectedColor: Color(0xffeb6859),
+      fillColor: Color(0xffeb6859).withOpacity(0.10),
+      borderRadius: BorderRadius.circular(4.0),
+      isSelected: _selectionsOfTake,
+      onPressed: (int index) {
+        setState(() {
+          if (index == 0) {
+            print('물건 선택!');
+            _selectedFilter = '물건';
+            _selectionsOfTake[0] = true;
+            _selectionsOfTake[1] = false;
+          } else {
+            print('재능 선택!');
+            _selectedFilter = '재능';
+            _selectionsOfTake[0] = false;
+            _selectionsOfTake[1] = true;
+          }
+        });
+      },
+      children: [
+        Text(
+          '물건',
+          textAlign:
+          TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'NanumSquareRoundR',
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        Text(
+          '재능',
+          textAlign:
+          TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'NanumSquareRoundR',
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        )
+      ],
+    );
+  }
+
 
   /// 상단 사진업로드하는 위젯
   Widget imageUpLoadWidget() {
