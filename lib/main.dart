@@ -109,12 +109,12 @@ class ApplicationState extends ChangeNotifier {
   // comment와 like를 collection안에 어떤 구조로 넣을 것인가?
   // 원래 하던대로 상품 uid통해 찾으려면 이미 init한 상품 리스트들을 돌면서
   // datail페이지에 필요한 내용을 찾아내는 형식으로 해야할까?
-  void detailPageUid(String uid, String detailGiveOrTake, int photo) {
+  Future<void> detailPageUid(String uid, String detailGiveOrTake, int photo) async{
     this.uid = uid;
     this.detailGiveOrTake = detailGiveOrTake;
     this.photo = photo;
-    print('detail page uid -> ' + uid);
-    init();
+    print('main 에서 불려짐! detail page uid -> ' + uid);
+    await init().whenComplete(() => print('detailPageUid 에서 likeCount => ${likeList.length}'));
   }
 
   void checkNickname(String nickname) {
@@ -139,10 +139,9 @@ class ApplicationState extends ChangeNotifier {
   /// added
   Stream<QuerySnapshot> currentStream;
 
-  //collection 'giveProducts' 파이어베이스에서 불러오기
   Future<void> init() async {
-    // FirebaseFirestore.instance
 
+    ///************************* giveProducts / takeProducts 가져오는 부분 *************************///
     if (orderBy != 'All') {
       FirebaseFirestore.instance
           .collection('giveProducts')
@@ -253,16 +252,10 @@ class ApplicationState extends ChangeNotifier {
       });
     }
 
-    // comment 컬랙션을 따로 만들었기 때문에 comment 컬랙션 내에서 상품 uid를 또또찾고,
-    // 그 후에 해당 상품에 달린 comments들을 찾아오는 게 필요해진 것 같은데,
-    // comments들을 하위 콜랙션으로 만들면 더 편해지지 않을 까요?
-    // 그리고 comments는 댓글 달릴 때마다 업데이트 시켜줘야하는 부분이니까 지금처럼 init()
-    // 함수 내에 있을 게 아니라 다른 함수로 빼줘야하지 않을 까요?
+    ///************************* commentList 가져오는 부분 *************************///
     if (uid != 'null') {
       FirebaseFirestore.instance
           .collection(detailGiveOrTake + '/' + uid + '/comment')
-
-      ///edited
           .orderBy('created', descending: true)
           .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
           .listen((snapshot) {
@@ -272,7 +265,7 @@ class ApplicationState extends ChangeNotifier {
             userName: document.data()['userName'],
             comment: document.data()['comment'],
             created: document.data()['time'],
-
+            id: document.id,
             ///edited
             //   isDeleted: document.data()['idDeleted'],
           ));
@@ -280,8 +273,7 @@ class ApplicationState extends ChangeNotifier {
         notifyListeners();
       });
 
-      //like는 이부분 만들어놓기만 했지 제대로 collection에서 못가져와서 사용안했던 거 같아요!
-      // 없애고 새로 만들어도 될듯...
+      ///************************* likeList 가져오는 부분 *************************///
       FirebaseFirestore.instance
           .collection(detailGiveOrTake + '/' + uid + '/like')
           .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
@@ -298,8 +290,8 @@ class ApplicationState extends ChangeNotifier {
       });
     }
 
-    ///UserName
-    ///added
+
+    ///************************* UserName 가져오는 부분 *************************///
     FirebaseFirestore.instance
         .collection('UserName')
         .snapshots()
@@ -335,6 +327,8 @@ class ApplicationState extends ChangeNotifier {
       });
       notifyListeners();
     });
+
+    print('main에서 likeCount => ${likeList.length}');
   }
 
   List<Product> get giveProducts => _giveProducts;

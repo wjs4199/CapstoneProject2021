@@ -1,5 +1,7 @@
 import 'dart:async';
-
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -10,7 +12,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:provider/provider.dart';
-import 'dart:io';
+
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+
+import 'package:image/image.dart' as Im;
+import 'dart:math' as Math;
 import '../main.dart';
 
 class AddPage extends StatefulWidget {
@@ -43,7 +49,7 @@ class _AddPageState extends State<AddPage> {
   Future<void> getMultiImage(int index) async {
     List<Asset> resultList;
     resultList = await MultiImagePicker.pickImages(
-        maxImages: index, enableCamera: true, selectedAssets: images);
+        maxImages: index, enableCamera: true, selectedAssets: images, );
 
     setState(() {
       images = resultList;
@@ -57,6 +63,21 @@ class _AddPageState extends State<AddPage> {
 
     /// 받아온 이미지를 File 타입으로 변환
     await getImageFileFromAssets();
+
+  }
+
+  Future<Uint8List> testCompressFile(File file) async {
+    var result = await FlutterImageCompress.compressWithFile(
+      file.absolute.path,
+      minWidth: 1000,
+      minHeight: 1000,
+      quality: 85,
+    );
+
+    print(file.lengthSync());
+    print(result.length);
+
+    return result;
   }
 
   /// image 리스트에 들어있는 Asset 타입 이미지들을 File 타입으로 변환시키는 함수(storage 저장 위해)
@@ -66,7 +87,15 @@ class _AddPageState extends State<AddPage> {
           await FlutterAbsolutePath.getAbsolutePath(imageAsset.identifier);
       var tempFile = File(filePath);
 
-      file.add(tempFile);
+
+      //var image = Im.decodeImage(tempFile.readAsBytesSync());
+      var image = Im.decodeImage(await testCompressFile(tempFile));
+      print('1차완료!');
+     // var smallerImage = Im.copyResize(image, width: 1000, height: 1000); // choose the size here, it will maintain aspect ratio
+      //print('2차완료!');
+      var compressedImage = File('$filePath')..writeAsBytesSync(Im.encodeJpg(image, quality: 90));
+      print('3차완료!');
+      file.add(compressedImage);
     });
   }
 

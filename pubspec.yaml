@@ -35,7 +35,8 @@ dependencies:
   flutter_absolute_path: ^1.0.6 #added 예은
   simple_speed_dial: ^0.1.3
   carousel_slider: ^4.0.0 #added 예은
-
+  flutter_image_compress: ^1.0.0 #added 예은
+  image: ^3.0.0 #added 예은
 
 dev_dependencies:
   flutter_test:

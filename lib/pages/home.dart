@@ -370,17 +370,17 @@ class PostTileMaker extends StatelessWidget {
     return InkWell(
       onTap: () {
         if (_giveOrTake) {
-          Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'giveProducts', _product.photo);
-          Navigator.pushNamed(
-              context, '/detail/' + _product.id + '/giveProducts');
           editProductHits('giveProducts');
+          Provider.of<ApplicationState>(context, listen: false)
+              .detailPageUid(_product.id, 'giveProducts', _product.photo)
+              .then((value) => Navigator.pushNamed(
+              context, '/detail/' + _product.id + '/giveProducts'));
         } else {
-          Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'takeProducts', _product.photo);
-          Navigator.pushNamed(
-              context, '/detail/' + _product.id + '/takeProducts');
           editProductHits('giveProducts');
+          Provider.of<ApplicationState>(context, listen: false)
+              .detailPageUid(_product.id, 'takeProducts', _product.photo)
+              .then((value) => Navigator.pushNamed(
+              context, '/detail/' + _product.id + '/takeProducts'));
         }
       },
 
