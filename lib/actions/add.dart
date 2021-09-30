@@ -16,7 +16,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import 'package:image/image.dart' as Im;
-import 'dart:math' as Math;
 import '../main.dart';
 
 class AddPage extends StatefulWidget {
