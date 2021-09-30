@@ -9,7 +9,7 @@ import '../home.dart';
 Widget HomeView(BuildContext context, ApplicationState appState) {
   return CustomScrollView(
     physics:
-    const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
     slivers: <Widget>[
       SliverAppBar(
         backgroundColor: Color(0xfffc7174),
@@ -58,28 +58,28 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
         //   ),
         // ],
       ),
-      SliverStickyHeader(
-        header: Container(
-          alignment: Alignment.centerLeft,
-          height: 35,
-          color: Color(0x80fda26b),
-          padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
-          child: Text(
-            '공지사항',
-            style: TextStyle(
-              fontFamily: 'NanumSquareRoundR',
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-        sliver: SliverList(
-          delegate: SliverChildListDelegate(
-            [HeaderTile()],
-          ),
-        ),
-      ),
+      // SliverStickyHeader(
+      //   header: Container(
+      //     alignment: Alignment.centerLeft,
+      //     height: 35,
+      //     color: Color(0x80fda26b),
+      //     padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
+      //     child: Text(
+      //       '공지사항',
+      //       style: TextStyle(
+      //         fontFamily: 'NanumSquareRoundR',
+      //         fontSize: 16.0,
+      //         fontWeight: FontWeight.bold,
+      //         color: Colors.black87,
+      //       ),
+      //     ),
+      //   ),
+      //   sliver: SliverList(
+      //     delegate: SliverChildListDelegate(
+      //       [HeaderTile()],
+      //     ),
+      //   ),
+      // ),
       SliverStickyHeader(
         header: Container(
           height: 35,
@@ -106,7 +106,7 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
         ),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
+            (BuildContext context, int index) {
               return Column(
                 children: [
                   SizedBox(height: 5),
@@ -161,7 +161,7 @@ Widget HomeView(BuildContext context, ApplicationState appState) {
         ),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
+            (BuildContext context, int index) {
               return Column(
                 children: [
                   SizedBox(height: 5),
