@@ -707,7 +707,7 @@ class _DetailPageState extends State<DetailPage> {
                                         return Text('',style: TextStyle(fontSize: 13, height: 1,));
                                       }
                                       var count = snapshot.data.size;
-                                        return StreamBuilder<int>(
+                                        return  StreamBuilder<int>(
                                             stream: changeLikeCount.stream.asBroadcastStream(),
                                             initialData: count,
                                             builder: (context, snapshot2) {
