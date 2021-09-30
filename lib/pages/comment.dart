@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:intl/intl.dart';
 
 import '../model/product.dart';
@@ -28,20 +31,20 @@ class _CommentBookState extends State<CommentBook> {
 
   /// 현재 유저의 이름 간략화
   var userName = FirebaseAuth.instance.currentUser.displayName;
+  var userId = FirebaseAuth.instance.currentUser.uid;
 
-  /// comment 적는 텍스트 칸이 빈칸인지 아닌지 분별할 때 사용됨
-  final _commentFormKey = GlobalKey<FormState>(debugLabel: '_CommentState');
+  /// 유저의 닉네임을 찾아서 보여주는 함수
+  String findNickname( AsyncSnapshot<QuerySnapshot> snapshot, String name){
+    var nickName = 'null';
+    snapshot.data.docs.forEach((document) {
+      if (document['username'] == name){
+        nickName = document['nickname'];
+      }
+    });
 
-  /// comment 를 적는 텍스트 상자의 상태를 control 할 때 사용
-  final _commentController = TextEditingController();
+    print('찾은 닉네임은 $nickName!!');
 
-  /// 해당 댓글이 달린 Timestamp 형식의 시간을 UI에 표기 가능한 형식으로 바꾸는 함수
-  Future<String> convertDateTime(Timestamp time) async {
-    try {
-      return DateFormat('MM.dd HH:mm').format(time.toDate());
-    } on Exception {
-      return null;
-    }
+    return nickName;
   }
 
 
@@ -52,6 +55,10 @@ class _CommentBookState extends State<CommentBook> {
 
     /// comment 가 어느 게시물 밑에 달린 것인지 알기 위해 필요한 Product ID
     var productId = widget.productId;
+
+
+    CollectionReference users = FirebaseFirestore.instance
+        .collection('users');
 
     /// 'comments' Collection 참조
     CollectionReference comments = FirebaseFirestore.instance
@@ -124,7 +131,12 @@ class _CommentBookState extends State<CommentBook> {
                             Navigator.pop(context);
                            deleteComments(comment)
                             .then((value) => appState.init())
-                               .catchError((error) => null);
+                            .catchError((error) => null)
+                            .whenComplete(() {
+                              setState(() {
+                                //
+                              });
+                           });
                           },
                           child: Text('Yes'),
                         ),
@@ -155,51 +167,6 @@ class _CommentBookState extends State<CommentBook> {
 
     /// comments 나열된 화면 구성
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      /*Form(
-        key: _commentFormKey,
-        child: Row(
-          children: [
-            Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
-                  child: TextFormField(
-                    controller: _commentController,
-                    decoration: const InputDecoration(
-                      hintText: 'Leave a comment',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Enter your message to continue';
-                      }
-                      return null;
-                    },
-                  ),
-                )),
-            SizedBox(width: 3),
-            IconButton(
-              icon: const Icon(Icons.comment),
-              iconSize: 38,
-              color: Colors.cyan,
-              onPressed: () async {
-                var currentFocus = FocusScope.of(context);
-                currentFocus.unfocus();
-                setState(() {
-                  if (_commentFormKey.currentState.validate()) {
-                    addComments(_commentController.text)
-                        .then((value) => print('add comment ok!'));
-                    _commentController.clear();
-                    Provider.of<ApplicationState>(context, listen: false)
-                        .detailPageUid(
-                        widget.productId, widget.detailGiveOrTake);
-                    print('clear!');
-                  }
-                });
-              },
-            ),
-          ],
-        ),
-      ),*/
-
       for (var eachComment in commentsList)
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Padding(
@@ -208,49 +175,37 @@ class _CommentBookState extends State<CommentBook> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   /// 사용자의 구글 이메일 프로필 사진으로 바꾸는 작업 필요
-                  CircleAvatar(
-                    backgroundColor: Colors.lightBlue,
-                    radius: 15,
-                    child: Image.asset('assets/userDefault.png'),
+                  SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: Image.asset('assets/userDefaultImage.png'),
                   ),
-                  SizedBox(width: 7.0),
-                  FutureBuilder(
-                    /// 지금은 댓글 단 시간이 안들어가 있지만 원래 시간도 댓글마다 표기하려 했으므로 futrue에 사용됨
-                    future: convertDateTime(eachComment.created),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Column(
-                          children: [
-                            SizedBox(
-                                width: 5,
-                                height: 5,
-                                child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.grey),
-                                  strokeWidth: 1.0,
-                                )),
-                          ],
-                        );
-                      } else {
-                        if (snapshot.hasData) {
-                          return Text(eachComment.userName,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.black,
-                              ));
-                        } else if (snapshot.hasData == false) {
-                          return Text('알수없음',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey,
-                              ));
-                        } else {
-                          return Container(
-                            child: Text('Snapshot Error!'),
-                          );
-                        }
+                  SizedBox(width: 8.5),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: users.snapshots(),
+                    builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('x');
                       }
-                    },
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Text('');
+                      }
+                      return SizedBox(
+                        height: 30,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 5),
+                            Text(findNickname(snapshot, eachComment.userName),
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.black,)
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   ),
                   Expanded(
                       child: Row(
