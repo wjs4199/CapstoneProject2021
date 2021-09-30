@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -17,8 +18,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Chat extends StatelessWidget {
   final String peerId;
   final String peerAvatar;
+  final String peerNickname;
+  final String peerPhotoUrl;
 
-  Chat({Key key, @required this.peerId, @required this.peerAvatar})
+
+  Chat({Key key, @required this.peerId, @required this.peerAvatar, @required this.peerNickname, @required this.peerPhotoUrl})
       : super(key: key);
 
   @override
@@ -34,6 +38,8 @@ class Chat extends StatelessWidget {
       body: ChatScreen(
         peerId: peerId,
         peerAvatar: peerAvatar,
+        peerNickname: peerNickname,
+        peerPhotoUrl: peerPhotoUrl,
       ),
     );
   }
@@ -43,28 +49,33 @@ class Chat extends StatelessWidget {
 class ChatScreen extends StatefulWidget {
   final String peerId;
   final String peerAvatar;
+  final String peerNickname;
+  final String peerPhotoUrl;
 
-  ChatScreen({Key key, @required this.peerId, @required this.peerAvatar})
+  ChatScreen({Key key, @required this.peerId, @required this.peerAvatar, @required this.peerNickname, @required this.peerPhotoUrl})
       : super(key: key);
 
 
   ///파라미터로 받아온 peerId 와 peerAvatar 를 local 에 저장
   @override
   State createState() =>
-      ChatScreenState(peerId: peerId, peerAvatar: peerAvatar);
+      ChatScreenState(peerId: peerId, peerAvatar: peerAvatar, peerNickname: peerNickname, peerPhotoUrl: peerPhotoUrl);
 }
 
 class ChatScreenState extends State<ChatScreen> {
-  ChatScreenState({Key key, @required this.peerId, @required this.peerAvatar});
+  ChatScreenState({Key key, @required this.peerId, @required this.peerAvatar, @required this.peerNickname, @required this.peerPhotoUrl});
 
   String peerId;
   String peerAvatar;
-  String id;
+  String peerNickname;
+  final String peerPhotoUrl;
 
+  String id;
+  final currentUserId =  FirebaseAuth.instance.currentUser.uid;
   List<QueryDocumentSnapshot> listMessage = List.from([]);
   int _limit = 20;
   final int _limitIncrement = 20;
-  String groupChatId = "";
+  String groupChatId = '';
   SharedPreferences prefs;
 
   File imageFile;
@@ -166,33 +177,55 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 ///message 보내는 부분
-  void onSendMessage(String content, int type) {
+  void onSendMessage(String content, int type) async {
     /// 보내는 메시지 type: 0 = text, 1 = image(이모티콘, local에 있는 gif_추후에 추가), 2 = sticker
     if (content.trim() != '') {
       textEditingController.clear();
 
-      var documentReference = FirebaseFirestore.instance
+      var documentReference_chatRoom = FirebaseFirestore.instance
+          .collection('chatRoom')
+          .doc(groupChatId);
+
+      await  FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.set(
+          documentReference_chatRoom,
+          {
+            'timestamp': FieldValue.serverTimestamp(),
+            'idFrom': id,
+            'idTo': peerId,
+            'nickname': peerNickname,
+            'peerPhotoUrl': peerPhotoUrl,
+          },
+        );
+      });
+
+
+      var documentReference_message = FirebaseFirestore.instance
           .collection('messages')
           .doc(groupChatId)
           .collection(groupChatId)
           .doc(DateTime.now().millisecondsSinceEpoch.toString());
 
-      FirebaseFirestore.instance.runTransaction((transaction) async {
+    await  FirebaseFirestore.instance.runTransaction((transaction) async {
         transaction.set(
-          documentReference,
+          documentReference_message,
           {
             'idFrom': id,
             'idTo': peerId,
-            'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
+           // 'peerPhotoUrl': FirebaseAuth.instance.currentUser.photoURL,
+            //'nickname': 'nickname',
+            'timestamp': FieldValue.serverTimestamp(),
             'content': content,
             'type': type
           },
         );
       });
-      listScrollController.animateTo(0.0,
+
+
+      await listScrollController.animateTo(0.0,
           duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
-      Fluttertoast.showToast(
+      await Fluttertoast.showToast(
           msg: 'Nothing to send',
           backgroundColor: Colors.black,
           textColor: Colors.red);
@@ -247,7 +280,7 @@ class ChatScreenState extends State<ChatScreen> {
                                 BorderRadius.all(Radius.circular(8.0)),
                             clipBehavior: Clip.hardEdge,
                             child: Image.network(
-                              document.get("content"),
+                              document.get('content'),
                               loadingBuilder: (BuildContext context,
                                   Widget child,
                                   ImageChunkEvent loadingProgress) {
@@ -328,8 +361,9 @@ class ChatScreenState extends State<ChatScreen> {
                             Radius.circular(18.0),
                           ),
                           clipBehavior: Clip.hardEdge,
+                          /// 채팅방 안에서 상대방 프로필
                           child: Image.network(
-                            peerAvatar,
+                            peerPhotoUrl,
                             loadingBuilder: (BuildContext context, Widget child,
                                 ImageChunkEvent loadingProgress) {
                               if (loadingProgress == null) return child;

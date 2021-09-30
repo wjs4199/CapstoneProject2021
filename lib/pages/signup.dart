@@ -127,7 +127,7 @@ class SignUpState extends State<SignUp> {
                         /// 중복체크를 하지 않거나, 중복이 있음에도 불구하고 시작하기 누르면 그냥 로그인 되는 현상 해결
 
                         if(name == textEditingController1.text) {
-                          Navigator.push(
+                          await Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => HomePage()));

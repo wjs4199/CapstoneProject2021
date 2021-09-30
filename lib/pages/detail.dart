@@ -607,7 +607,8 @@ class _DetailPageState extends State<DetailPage> {
                                                             MaterialPageRoute(
                                                               builder: (context) => Chat(
                                                                 peerId: product.uid,
-                                                                peerAvatar: FirebaseAuth.instance.currentUser.photoURL,
+                                                                peerPhotoUrl: product.user_photoURL,
+                                                                peerNickname: product.userName,
                                                               ),
                                                             ),
                                                           );
@@ -632,12 +633,14 @@ class _DetailPageState extends State<DetailPage> {
                                     /// 채팅으로 넘어가는 버튼
                                     /*IconButton(
                                         onPressed: (){
+                                          //print('photoUrl:'+ product.user_photoURL);
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) => Chat(
                                                 peerId: product.uid,
-                                                peerAvatar: FirebaseAuth.instance.currentUser.photoURL,
+                                                peerPhotoUrl: product.user_photoURL,
+                                                peerNickname: product.userName,
                                               ),
                                             ),
                                           );
