@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -14,7 +15,8 @@ import 'package:provider/provider.dart';
 
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
-//import 'package:image/image.dart';
+import 'package:image/image.dart' as Im;
+import 'dart:math' as Math;
 import '../main.dart';
 
 class AddPage extends StatefulWidget {
@@ -64,6 +66,20 @@ class _AddPageState extends State<AddPage> {
 
   }
 
+  Future<Uint8List> testCompressFile(File file) async {
+    var result = await FlutterImageCompress.compressWithFile(
+      file.absolute.path,
+      minWidth: 1000,
+      minHeight: 1000,
+      quality: 85,
+    );
+
+    print(file.lengthSync());
+    print(result.length);
+
+    return result;
+  }
+
   /// image 리스트에 들어있는 Asset 타입 이미지들을 File 타입으로 변환시키는 함수(storage 저장 위해)
   Future<void> getImageFileFromAssets() async {
     images.forEach((imageAsset) async {
@@ -71,37 +87,15 @@ class _AddPageState extends State<AddPage> {
           await FlutterAbsolutePath.getAbsolutePath(imageAsset.identifier);
       var tempFile = File(filePath);
 
-      /*var result = await FlutterImageCompress.compressWithFile(
-        tempFile.absolute.path,
-        minWidth: 2300,
-        minHeight: 1500,
-        quality: 94,
-        rotate: 90,
-      );*/
 
-      // Create output file path
-      // eg:- "Volume/VM/abcd_out.jpeg"
-      final file_Path = tempFile.absolute.path;
-      final lastIndex = filePath.lastIndexOf(RegExp(r'.pn'));
-      final splitted = file_Path.substring(0, (lastIndex));
-      final outPath = '$splitted${file_Path.substring(lastIndex)}';
-      //final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
-      print('filePath -> ${filePath}');
-      print('file_path -> ${file_Path}');
-      print('lastIndex -> ${lastIndex}');
-      print('splitted -> ${splitted}');
-      print('outPath -> ${outPath}');
-      var result = await FlutterImageCompress.compressAndGetFile(
-        file_Path, outPath,
-        quality: 5,
-      ).then((value) {
-        print('result 확보 완료!');
-        file.add(value);
-      });
-      print('lengthSync는 => ${File(filePath).lengthSync()}');
-      //print('result length는 => ${result.length}');
-
-      //return File.fromRawPath(tempFile);
+      //var image = Im.decodeImage(tempFile.readAsBytesSync());
+      var image = Im.decodeImage(await testCompressFile(tempFile));
+      print('1차완료!');
+     // var smallerImage = Im.copyResize(image, width: 1000, height: 1000); // choose the size here, it will maintain aspect ratio
+      //print('2차완료!');
+      var compressedImage = File('$filePath')..writeAsBytesSync(Im.encodeJpg(image, quality: 90));
+      print('3차완료!');
+      file.add(compressedImage);
     });
   }
 
@@ -117,22 +111,6 @@ class _AddPageState extends State<AddPage> {
     } on Exception {
       return null;
     }
-  }
-
-  // 1. compress file and get Uint8List
-  Future<File> testCompressFile(File file) async {
-    var result = await FlutterImageCompress.compressWithFile(
-      file.absolute.path,
-      minWidth: 2000,
-      minHeight: 1200,
-      quality: 80,
-      rotate: 90,
-    );
-    print(file.lengthSync());
-    print(result.length);
-
-
-    return File.fromRawPath(result);
   }
 
   ///**************** 게시글 저장과 관련된 변수/ 함수들 ***************///
