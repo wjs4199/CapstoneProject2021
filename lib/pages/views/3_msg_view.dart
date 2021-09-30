@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -63,9 +62,9 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
                 ///chatting list 를 보여주는 container
                 Container(
                   child: StreamBuilder<QuerySnapshot>(
-                    /// data 를 가져오는 곳
                     stream: FirebaseFirestore.instance
-                        .collection('chatRoom')
+                        .collection('users')
+                        .limit(_limit)
                         .snapshots(),
                     builder: (BuildContext context,
                         AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -73,7 +72,8 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
                         return ListView.builder(
                           shrinkWrap: true,
                           padding: EdgeInsets.all(10.0),
-                          /// 가져온 데이터를 build
+
+                          /// data 를 가져오는 곳 buildItem 위젯
                           itemBuilder: (context, index) =>
                               buildItem(context, snapshot.data.docs[index]),
                           itemCount: snapshot.data.docs.length,
@@ -105,14 +105,13 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
   );
 }
 
+///
 Widget buildItem(BuildContext context, DocumentSnapshot document) {
   if (document != null) {
     var userChat = UserChat.fromDocument(document);
-    if (!document.id.contains(currentUserId)) {
+    if (userChat.id == currentUserId) {
       return SizedBox.shrink();
     } else {
-      print(userChat.nickname);
-      print(userChat.photoUrl);
       return Container(
         margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
 
@@ -120,14 +119,13 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
         child: TextButton(
           /// 각 사용자들의 list 를 누르면 채팅창으로 넘어간다
           onPressed: () {
-            print(userChat.peerPhotoUrl.toString());
             Navigator.push(
               context,
+
               MaterialPageRoute(
                 builder: (context) => Chat(
-                  peerId: userChat.idTo,
-                  peerAvatar: userChat.peerPhotoUrl,
-                  peerNickname: userChat.peerNickname,
+                  peerId: userChat.id,
+                  peerAvatar: userChat.photoUrl,
                 ),
               ),
             );
@@ -149,7 +147,9 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
               Material(
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
                 clipBehavior: Clip.hardEdge,
-                child: userChat.photoUrl.isNotEmpty /// empty 가 아니면 photoURL 을 가져온다
+                child: userChat.photoUrl.isNotEmpty
+
+                /// empty 가 아니면 photoURL 을 가져온다
                     ? Image.network(
                   userChat.photoUrl,
                   fit: BoxFit.cover,
@@ -214,6 +214,7 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
                           style: TextStyle(color: primaryColor),
                         ),
                       )
+
                      */
                     ],
                   ),
@@ -227,20 +228,25 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
   } else {
     return SizedBox.shrink();
   }
-
 }
 
 ///* -------------------------------------------------------------------- *///
+
 /*
+
 @override
 void initState() {
   //super.initState();
   registerNotification();
   configLocalNotification();
   listScrollController.addListener(scrollListener);
+
 }
+
+
 void registerNotification() {
   firebaseMessaging.requestPermission();
+
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print('onMessage: $message');
     if (message.notification != null) {
@@ -248,6 +254,7 @@ void registerNotification() {
     }
     return;
   });
+
   firebaseMessaging.getToken().then((token) {
     print('token: $token');
     FirebaseFirestore.instance.collection('UserName').doc(currentUserId).update({'pushToken': token});
@@ -255,6 +262,7 @@ void registerNotification() {
     Fluttertoast.showToast(msg: err.message.toString());
   });
 }
+
 void showNotification(RemoteNotification remoteNotification) async {
   var androidPlatformChannelSpecifics = AndroidNotificationDetails(
     Platform.isAndroid ? 'com.dfa.flutterchatdemo' : 'com.duytq.flutterchatdemo',
@@ -268,7 +276,9 @@ void showNotification(RemoteNotification remoteNotification) async {
   var iOSPlatformChannelSpecifics = IOSNotificationDetails();
   var platformChannelSpecifics =
   NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
+
   print(remoteNotification);
+
   await flutterLocalNotificationsPlugin.show(
     0,
     remoteNotification.title,
@@ -277,6 +287,7 @@ void showNotification(RemoteNotification remoteNotification) async {
     payload: null,
   );
 }
+
 void configLocalNotification() {
   var initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
   var initializationSettingsIOS = IOSInitializationSettings();
@@ -284,6 +295,7 @@ void configLocalNotification() {
   InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
   flutterLocalNotificationsPlugin.initialize(initializationSettings);
 }
+
 void scrollListener() {
   if (listScrollController.offset >= listScrollController.position.maxScrollExtent &&
       !listScrollController.position.outOfRange) {
@@ -292,10 +304,13 @@ void scrollListener() {
     });
   }
 }
+
+
 Future<bool> onBackPress() {
   openDialog();
   return Future.value(false);
 }
+
 Future<Null> openDialog() async {
   switch (await showDialog(
       context: context,
@@ -378,4 +393,5 @@ Future<Null> openDialog() async {
       exit(0);
   }
 }
+
  */

@@ -38,7 +38,8 @@ class _ApplicationState extends State<Application> {
             title: 'Give_N_Take',
             home: HomePage(),
             ///edited
-           initialRoute: '/login',
+            //isSignedIn(),
+            initialRoute: '/login',
             // Named Routes
             routes: {
               '/login': (context) => LoginPage(),

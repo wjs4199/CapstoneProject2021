@@ -80,6 +80,7 @@ class _LoginPageState extends State<LoginPage> {
         final List<DocumentSnapshot> documents = result.docs;
         if (documents.isEmpty) {
           /// Update data to firestore if new user
+
           // Write data to local
           // currentUser = firebaseUser;
           await prefs.setString('id', firebaseUser.uid);
@@ -102,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
           isLoading = false;
         });
 
-         await Navigator.push(
+        await Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) =>
@@ -133,6 +134,8 @@ class _LoginPageState extends State<LoginPage> {
           },
         ),
       );
+
+
  */
 //ScaffoldMessenger.of(context).showSnackBar(snackBar);
 

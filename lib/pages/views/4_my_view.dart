@@ -3,13 +3,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:giveandtake/pages/login.dart';
 import 'package:giveandtake/pages/signup.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../main.dart';
 import '3_msg_view.dart';
 
 /// 프로필 사진 url retrieve 용
-//String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
+String photoUrl = FirebaseAuth.instance.currentUser.photoURL;
 // String highResUrl = photoUrl.replaceAll('s96-c', 's400-c'); // 고해상도
 
 bool isLoading = false;
@@ -19,16 +18,13 @@ bool isLoading = false;
 Widget MyView(BuildContext context, ApplicationState appState) {
   ///logout
   Future<Null> handleSignOut() async {
-    final prefs = await SharedPreferences.getInstance();
     await FirebaseAuth.instance.signOut();
     await googleSignIn.disconnect();
     await googleSignIn.signOut();
-    await prefs.clear();
-
 
     await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
-        (Route<dynamic> route) => false);
+            (Route<dynamic> route) => false);
   }
 
   return CustomScrollView(
@@ -73,7 +69,7 @@ Widget MyView(BuildContext context, ApplicationState appState) {
                 CircleAvatar(
                   radius: 50.0,
                   backgroundImage:
-                      NetworkImage(FirebaseAuth.instance.currentUser.photoURL),
+                  NetworkImage(FirebaseAuth.instance.currentUser.photoURL),
                 ),
 
 
@@ -144,7 +140,7 @@ Widget MyView(BuildContext context, ApplicationState appState) {
                 ),
                 Card(
                   margin:
-                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
+                  EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
                   child: ListTile(
                     leading: Icon(
                       Icons.phone,
@@ -161,7 +157,7 @@ Widget MyView(BuildContext context, ApplicationState appState) {
                 ),
                 Card(
                   margin:
-                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
+                  EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
                   child: ListTile(
                     leading: Icon(
                       Icons.location_on,
