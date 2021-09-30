@@ -194,7 +194,7 @@ class ChatScreenState extends State<ChatScreen> {
             'idFrom': id,
             'idTo': peerId,
             'nickname': peerNickname,
-            'peerPhotoUrl': peerPhotoUrl,
+            'photoUrl': peerAvatar,
           },
         );
       });

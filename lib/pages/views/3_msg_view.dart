@@ -111,6 +111,8 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
     if (!document.id.contains(currentUserId)) {
       return SizedBox.shrink();
     } else {
+      print(userChat.nickname);
+      print(userChat.photoUrl);
       return Container(
         margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
 
@@ -124,7 +126,7 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
               MaterialPageRoute(
                 builder: (context) => Chat(
                   peerId: userChat.idTo,
-                  peerPhotoUrl: userChat.peerPhotoUrl,
+                  peerAvatar: userChat.peerPhotoUrl,
                   peerNickname: userChat.peerNickname,
                 ),
               ),
@@ -147,9 +149,9 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
               Material(
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
                 clipBehavior: Clip.hardEdge,
-                child: userChat.peerPhotoUrl.isNotEmpty /// empty 가 아니면 photoURL 을 가져온다
+                child: userChat.photoUrl.isNotEmpty /// empty 가 아니면 photoURL 을 가져온다
                     ? Image.network(
-                  userChat.peerPhotoUrl,
+                  userChat.photoUrl,
                   fit: BoxFit.cover,
                   width: 50.0,
                   height: 50.0,
@@ -198,8 +200,6 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
                         margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
                         child: Text(
                           'Nickname: ${userChat.nickname}',
-                          //${userChat.idTo}
-                          //${userChat.idTo}
                           maxLines: 1,
                           style: TextStyle(color: primaryColor),
                         ),
