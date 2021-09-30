@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -70,13 +68,13 @@ class _DetailPageState extends State<DetailPage> {
   StreamController<int> carouselIndexChange = StreamController<int>.broadcast();
 
   /// Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
-  StreamController<bool> pushLikeButton = StreamController<bool>();
+  StreamController<bool> pushLikeButton = StreamController<bool>.broadcast();
 
   /// Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
-  StreamController<int> changeLikeCount = StreamController<int>();
+  StreamController<int> changeLikeCount = StreamController<int>.broadcast();
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
-  StreamController<Icon> changeFavoriteButton = StreamController<Icon>();
+  StreamController<Icon> changeFavoriteButton = StreamController<Icon>.broadcast();
 
   /// storage 에서 다운로드한 이미지 url 들이 저장될 정적 저장소
   var imageUrlList = [];
@@ -124,14 +122,6 @@ class _DetailPageState extends State<DetailPage> {
     print('9 번째 imageUrlList 주소는 => ${imageUrlList[9]}');
   }
 
-  /// Stream 삭제 위해서 필요
-  /*@override
-  void dispose() {
-    carouselIndexChange.close();
-    super.dispose();
-  }*/
-
-
   @override
   Widget build(BuildContext context) {
 
@@ -146,9 +136,12 @@ class _DetailPageState extends State<DetailPage> {
         ? context.read<ApplicationState>().giveProducts
         : context.read<ApplicationState>().takeProducts;
 
+    CollectionReference users = FirebaseFirestore.instance
+        .collection('users');
+
     /// 현재 유저의 아이디와 이름 간략화
     var userId = FirebaseAuth.instance.currentUser.uid;
-    //var userName = FirebaseAuth.instance.currentUser.displayName;
+    var userName = FirebaseAuth.instance.currentUser.displayName;
 
     /// 컬랙션(products) 내에서 productId가 같은 제품을 찾아냈을 때 그 내용을 담을 변수
     Product product;
@@ -175,6 +168,20 @@ class _DetailPageState extends State<DetailPage> {
       return Scaffold(
         body: CircularProgressIndicator(),
       );
+    }
+
+    /// 유저의 닉네임을 찾아서 보여주는 함수
+    String findNickname( AsyncSnapshot<QuerySnapshot> snapshot, String name){
+      var nickName = 'null';
+      snapshot.data.docs.forEach((document) {
+        if (document['username'] == name){
+          nickName = document['nickname'];
+        }
+      });
+
+      print('찾은 닉네임은 $nickName!!');
+
+      return nickName;
     }
 
     ///************************ 게시글 삭제 및  지난 시간 계산 함수들 ************************///
@@ -270,40 +277,27 @@ class _DetailPageState extends State<DetailPage> {
 
     ///************************ like 기능 구현부분 (수정필요) ************************///
 
-    var likeList = [];
-    likeList = context.read<ApplicationState>().likeList;
-
-    var likeCount = likeList.length;
-        //context.read<ApplicationState>().likeCount;
-    // changeLikeCount.add(likeCount);
-
     /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
     CollectionReference likes = FirebaseFirestore.instance
           .collection('${widget.detailGiveOrTake}/' + productId + '/like');
 
-
-    // OK
-    var likeFound = false;
-    for (var eachLike in likeList){
-      if(eachLike.uid == userId){
-        likeFound = true;
-        break;
-      }
-    }
-    print('likeFound의 초기 상태 => $likeFound');
-
     /// 현재는 하트버튼 누르면 사용자가 이미 눌렀든 말든 간에 계속 숫자 올라감 ㅋㅎ (수정필요)
     /// 현재 사용자가 이미 좋아요를 누른 경우를 분별하는 함수
-    bool isLiked(){
-      for (var eachLike in likeList){
-        if(eachLike.uid == userId){
-          print('좋아요는 지금 true 상태!!');
-          return true;
+    bool isLiked( AsyncSnapshot<QuerySnapshot> snapshot){
+      var isLikeCheck = false;
+      snapshot.data.docs.forEach((document) {
+        if (document['uid'] == userId){
+          isLikeCheck = true;
         }
+      });
+
+      if(isLikeCheck){
+        print('isLiked에서 좋아요는 지금 true 상태!!');
+      } else{
+        print('isLiked에서 좋아요는 지금 false 상태ㅠㅠ');
       }
 
-      print('좋아요는 현재 false 상태ㅠㅠ');
-      return false;
+      return isLikeCheck;
     }
 
     /// 사용자가 하트 누른 경우 좋아요 추가하는 기능
@@ -317,7 +311,7 @@ class _DetailPageState extends State<DetailPage> {
     /// 좋아요 취소기능
     Future<void> deleteLike(userId) async {
       try {
-        for (var eachLike in likeList){
+        for (var eachLike in context.read<ApplicationState>().likeList){
           if(eachLike.uid == userId){
             await likes
                 .doc(eachLike.id)
@@ -347,8 +341,6 @@ class _DetailPageState extends State<DetailPage> {
           .catchError((error) => print('Failed to add a comment: $error'));
     }
 
-
-
     /// Add 페이지 화면 구성
     return Scaffold(
       body: SafeArea(
@@ -358,6 +350,7 @@ class _DetailPageState extends State<DetailPage> {
                   children: [
                     Stack(
                       children: [
+                        /// MultiImage를 보여주는 Carousel 위젯 부분
                         FutureBuilder(
                           future: makeUrlList(),
                           builder: (context, snapshot) {
@@ -559,44 +552,85 @@ class _DetailPageState extends State<DetailPage> {
                                     ),
                                     SizedBox(width: 10.0),
                                     SizedBox(
-                                      height: 40,
+                                      height: 42,
                                       child:
                                       /// 이름과 시간
-                                      RichText(
-                                        text: TextSpan(
-                                            style: TextStyle(
-                                              fontFamily: 'Roboto_Black',
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            children: <TextSpan>[
-                                              TextSpan(
-                                                text: '${product.userName}\n',
-                                                style: TextStyle(
-                                                  fontFamily: 'Roboto_Bold',
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18,
-                                                  height: 1,
-                                                ),
-                                              ),
-                                              TextSpan(
-                                                text: '${calculateTime()}',
-                                                style: TextStyle(
-                                                  fontFamily: 'Roboto_Bold',
-                                                  color: Colors.grey,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 13.55,
-                                                  height: 1.65,
-                                                ),
-                                              )
-                                            ]
-                                        ),
-                                        textAlign: TextAlign.start,
-                                      ),
+                                          StreamBuilder<QuerySnapshot>(
+                                              stream: users.snapshots(),
+                                              builder: (BuildContext context,
+                                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                                if (snapshot.hasError) {
+                                                  return Text('x');
+                                                }
+                                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                                  return Text('');
+                                                }
+                                                return Column(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    SizedBox(height: 2,),
+                                                    /// 이름
+                                                    SizedBox(
+                                                      //width: 10,
+                                                      height: 18,
+                                                      child: Text(
+                                                        ' ${findNickname(snapshot, product.userName)}\n',
+                                                        style: TextStyle(
+                                                          fontFamily: 'Roboto_Bold',
+                                                          color: Colors.black,
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: 15,
+                                                          height: 1,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      //width: 10,
+                                                      height: 22,
+                                                      child: TextButton(
+                                                        style: TextButton.styleFrom(
+                                                          padding: EdgeInsets.zero,
+                                                          alignment: Alignment.centerLeft,
+                                                          primary: Colors.grey,
+                                                          backgroundColor: Colors.transparent,
+                                                          textStyle: TextStyle(
+                                                            fontFamily: 'Roboto_Bold',
+                                                            fontWeight: FontWeight.bold,
+                                                            fontSize: 12.5,
+                                                            height: 1.2,
+                                                          ),
+                                                        ),
+                                                        onPressed: () {
+                                                          Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder: (context) => Chat(
+                                                                peerId: product.uid,
+                                                                peerAvatar: FirebaseAuth.instance.currentUser.photoURL,
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                        child: Row(
+                                                          mainAxisAlignment: MainAxisAlignment.start,
+                                                          children: [
+                                                            Text(' 채팅하기',
+                                                              textAlign: TextAlign.left,
+                                                            ),
+                                                            Icon(Icons.chat, size: 13.5,),
+                                                          ],
+                                                        )
+                                                      ),
+                                                    )
+                                                  ]
+                                                );
+                                              }
+                                          ),
+
                                     ),
                                     /// 채팅으로 넘어가는 버튼
-                                    IconButton(
+                                    /*IconButton(
                                         onPressed: (){
                                           Navigator.push(
                                             context,
@@ -609,7 +643,7 @@ class _DetailPageState extends State<DetailPage> {
                                           );
                                         },
                                         icon: Icon(Icons.chat)
-                                    ),
+                                    ),*/
                                   ],
                                 ),
                                 SizedBox(height: 9.0),
@@ -662,21 +696,35 @@ class _DetailPageState extends State<DetailPage> {
                                     height: 1.5,
                                   ),
                                 ),
-                                StreamBuilder<int>(
-                                    stream: changeLikeCount.stream,
-                                    initialData: likeCount,
-                                    builder: (context, snapshot) {
-                                      return Text(
-                                        '\n\n조회 ${product.hits}회 · 좋아요 ${snapshot.data}회',
-                                        style: TextStyle(
-                                          fontFamily: 'Roboto_Bold',
-                                          color: Colors.grey,
-                                          //fontWeight: FontWeight.bold,
-                                          fontSize: 13,
-                                          height: 1,
-                                        ),
-                                      );
-                                    }
+                                StreamBuilder<QuerySnapshot>(
+                                    stream: likes.snapshots().asBroadcastStream(),
+                                    builder: (BuildContext context,
+                                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                                      if (snapshot.hasError) {
+                                        return Text('x',style: TextStyle(fontSize: 13, height: 1,));
+                                      }
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Text('',style: TextStyle(fontSize: 13, height: 1,));
+                                      }
+                                      var count = snapshot.data.size;
+                                        return StreamBuilder<int>(
+                                            stream: changeLikeCount.stream.asBroadcastStream(),
+                                            initialData: count,
+                                            builder: (context, snapshot2) {
+                                              return Text(
+                                                '\n\n조회 ${product.hits}회 · 좋아요 ${snapshot2.data}회',
+                                                style: TextStyle(
+                                                  fontFamily: 'Roboto_Bold',
+                                                  color: Colors.grey,
+                                                  //fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                  height: 1,
+                                                ),
+                                              );
+                                            }
+                                        );
+                                    },
                                 ),
                                 SizedBox(height: 9.0),
                                 Divider(thickness: 1.0),
@@ -699,7 +747,7 @@ class _DetailPageState extends State<DetailPage> {
                     )
                   ]
               ),
-              /// 고정된 댓글 창
+              /// 고정된 댓글 창 위젯
               Container(
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
@@ -717,60 +765,73 @@ class _DetailPageState extends State<DetailPage> {
                         ],
                       ),
                       margin: EdgeInsets.fromLTRB(7.0, 7.0, 7.0, 0.0),
-                      child: Form(
-                        key: _commentFormKey,
-                        child: Row(
-                          children: [
-                            StreamBuilder <Icon> (
-                                stream: changeFavoriteButton.stream,
-                                initialData: isLiked()
-                                    ? Icon(Icons.favorite,
-                                  color: Colors.red,
-                                  semanticLabel: 'like',
-                                )
-                                    : Icon(Icons.favorite_border_outlined,
-                                  color: Colors.red,
-                                  semanticLabel: 'like',
-                                ),
-                                builder: (context, snapshot2) {
-                                  /// changeFavoriteButton 스트림 컨트롤러에 새 데이터가 들어올때마다 부분적으로 빌드됨
-                                  return IconButton(
-                                    /// 아이콘의 snapshot2 => changeFavoriteButton 스트림으로 건네준 아이콘
-                                      icon: snapshot2.data,
-                                      onPressed: () {
-                                        /// 이미 좋아요가 눌러져 있었을 떄
-                                        if(isLiked()) {
-                                          deleteLike(userId)
-                                              .catchError((error) => null)
-                                              .whenComplete(() {
-                                            print('버튼 눌렀을 때  likeList 길이 => ${context.read<ApplicationState>().likeList.length}');
-                                            /// 좋아요 리스트 업데이트하고
-                                            likeList = context.read<ApplicationState>().likeList;
-                                            ///변경된 하트 아이콘 스트림으로 보내줌
-                                            changeFavoriteButton.add(Icon(Icons.favorite_border_outlined,
-                                              color: Colors.red, semanticLabel: 'like',));
-                                            ///변경된 likeList의 길이를 다시 read하여 스트림으로 보내줌
-                                            changeLikeCount.add(context.read<ApplicationState>().likeCount);
-                                          });
-                                        }
-                                        /// 위의 if문과 같은 방법으로 동작
-                                        else {
-                                          addLike()
-                                              .catchError((error) => null)
-                                              .whenComplete(() {
-                                            print('버튼 눌렀을 때  likeList 길이 => ${context.read<ApplicationState>().likeList.length}');
-                                            likeList = context.read<ApplicationState>().likeList;
-                                            changeFavoriteButton.add(Icon(Icons.favorite,
-                                              color: Colors.red, semanticLabel: 'like',));
-                                            print('현재 likeList의 길이는 -> ${likeList.length}');
-                                            changeLikeCount.add(context.read<ApplicationState>().likeCount);
-                                          });
-                                        }
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 50,
+                            child: StreamBuilder<QuerySnapshot>(
+                                stream: likes.snapshots(),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                                  if (snapshot.hasError) {
+                                    return Text('x');
+                                  }
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Text('');
+                                  }
+                                  return StreamBuilder <Icon> (
+                                      stream: changeFavoriteButton.stream,
+                                      initialData: isLiked(snapshot)
+                                          ? Icon(Icons.favorite,
+                                        color: Colors.red,
+                                        semanticLabel: 'like',
+                                      )
+                                          : Icon(Icons.favorite_border_outlined,
+                                        color: Colors.red,
+                                        semanticLabel: 'like',
+                                      ),
+                                      builder: (context, snapshot2) {
+                                        /// changeFavoriteButton 스트림 컨트롤러에 새 데이터가 들어올때마다 부분적으로 빌드됨
+                                        return IconButton(
+                                          /// 아이콘의 snapshot2 => changeFavoriteButton 스트림으로 건네준 아이콘
+                                            icon: snapshot2.data,
+                                            onPressed: () async {
+                                              /// 이미 좋아요가 눌러져 있었을 떄
+                                              if(isLiked(snapshot)) {
+                                                await deleteLike(userId)
+                                                    .catchError((error) => null)
+                                                    .whenComplete(() {
+                                                  products = detailGiveOrTake == 'giveProducts'
+                                                      ? context.read<ApplicationState>().giveProducts
+                                                      : context.read<ApplicationState>().takeProducts;
+                                                  changeFavoriteButton.add(Icon(Icons.favorite_border_outlined,
+                                                    color: Colors.red, semanticLabel: 'like',));
+                                                  changeLikeCount.add(context.read<ApplicationState>().likeCount);
+                                                });
+                                              }
+                                              /// 좋아요가 눌러져 있지 않을 때
+                                              else {
+                                                await addLike()
+                                                    .catchError((error) => null)
+                                                    .whenComplete(() {
+                                                  products = detailGiveOrTake == 'giveProducts'
+                                                      ? context.read<ApplicationState>().giveProducts
+                                                      : context.read<ApplicationState>().takeProducts;
+                                                  changeFavoriteButton.add(Icon(Icons.favorite,
+                                                    color: Colors.red, semanticLabel: 'like',));
+                                                  changeLikeCount.add(context.read<ApplicationState>().likeCount);
+                                                });
+                                              }
+                                            }
+                                        );
                                       }
                                   );
-                                }
-                            ),
-                            Expanded(
+                                }),
+                          ),
+                          Form(
+                            key: _commentFormKey,
+                            child: Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
                                   child: TextFormField(
@@ -789,39 +850,39 @@ class _DetailPageState extends State<DetailPage> {
                                       return null;
                                     },
                                   ),
-                                )),
-                            SizedBox(width: 3),
-                            IconButton(
-                              icon: const Icon(Icons.send_outlined),
-                              iconSize: 27,
-                              color: Color(0xffc32323),
-                              onPressed: () async {
-                                var currentFocus = FocusScope.of(context);
-                                currentFocus.unfocus();
-                                setState(() {
-                                  if (_commentFormKey.currentState.validate()) {
-                                    addComments(_commentController.text)
-                                        .then((value) => print('add comment ok!'));
-                                    _commentController.clear();
-                                    Provider.of<ApplicationState>(context, listen: false)
-                                        .detailPageUid(
-                                        widget.productId, widget.detailGiveOrTake, widget.photoNum);
-                                    print('clear!');
-                                  }
-                                });
-                              },
+                                )
                             ),
-                          ],
-                        ),
+                          ),
+                          SizedBox(width: 3),
+                          IconButton(
+                            icon: const Icon(Icons.send_outlined),
+                            iconSize: 27,
+                            color: Color(0xffc32323),
+                            onPressed: () async {
+                              var currentFocus = FocusScope.of(context);
+                              currentFocus.unfocus();
+                                if (_commentFormKey.currentState.validate()) {
+                                  await addComments(_commentController.text)
+                                      .then((value) => print('add comment ok!'));
+                                  _commentController.clear();
+                                  products = detailGiveOrTake == 'giveProducts'
+                                      ? context.read<ApplicationState>().giveProducts
+                                      : context.read<ApplicationState>().takeProducts;
+                                  print('clear!');
+                                }
+                            },
+                          ),
+                        ],
                       ),
                     ),
 
                   ],
                 ),
-              )
+              ),
             ],
           )
       ),
     );
   }
 }
+
