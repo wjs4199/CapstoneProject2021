@@ -7,9 +7,6 @@ import '../main.dart';
 import 'home.dart';
 
 
-
-
-
 TextEditingController textEditingController1 = TextEditingController();
 
 
@@ -30,12 +27,26 @@ class SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     var isDuplicated = false;
     var checkLoop = false;
+    var name = "";
 
+    var currentUserId = FirebaseAuth.instance.currentUser.uid;
 
     final snackBar1 = SnackBar(content: Text('중복이 존재합니다'));
     final snackBar2 = SnackBar(content: Text('사용해도 좋습니다'));
     final snackBar3 = SnackBar(content: Text('중복체크를 해주세요'));
-    
+
+    _loadcurrentNickname() async {
+      await FirebaseFirestore.instance.collection('users').doc(currentUserId)
+          .get()
+          .then((DocumentSnapshot ds) {
+        name = ds['nickname'];
+        print('current NickName = ' + name);
+
+        return name;
+      });
+    }
+
+    _loadcurrentNickname();
 
     return Scaffold(
       body: Form(
@@ -76,7 +87,6 @@ class SignUpState extends State<SignUp> {
                   children: [
                     ElevatedButton(
                       onPressed: ()   async {
-                    //   checkName().then((value) => ScaffoldMessenger.of(context).showSnackBar(snackBar2));
                         checkLoop = true;
                         isDuplicated = false;
                       await for (var snapshot in FirebaseFirestore.instance.collection('users').snapshots())
@@ -84,7 +94,6 @@ class SignUpState extends State<SignUp> {
                            for(var users in snapshot.docs){
 
                               if(textEditingController1.text == users.get('nickname')) {
-                                //isDuplicated = true;
                                 print('중복이 존재합니다');
                                 ScaffoldMessenger.of(context).showSnackBar(snackBar1);
                                 isDuplicated = true;
@@ -116,12 +125,19 @@ class SignUpState extends State<SignUp> {
                     ElevatedButton(
                       onPressed: () async {
                         /// 중복체크를 하지 않거나, 중복이 있음에도 불구하고 시작하기 누르면 그냥 로그인 되는 현상 해결
-                        if(isDuplicated || checkLoop == false)
+
+                        if(name == textEditingController1.text) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => HomePage()));
+                        }
+                        else if(isDuplicated || checkLoop == false)
                           {
                             ScaffoldMessenger.of(context).showSnackBar(snackBar3);
 
                           }
-                        else{
+                        else {
                           if(_formKey.currentState.validate()) {
 
                             await FirebaseFirestore.instance.collection('users')
@@ -145,11 +161,7 @@ class SignUpState extends State<SignUp> {
                                       builder: (context) => HomePage()));
                             }).catchError((error) => print('Error: $error'));
                           }
-
                      }
-
-
-
                       },
                       style: ElevatedButton.styleFrom(
                           primary: Colors.grey,
@@ -173,23 +185,6 @@ class SignUpState extends State<SignUp> {
   }
 }
 
-Future<bool> checkName() async {
-  var isDuplicated = true;
-
-  await for (var snapshot in FirebaseFirestore.instance.collection('users').snapshots()) {
-    for(var users in snapshot.docs){
-      //print(users.get('nickname'));
-
-      if(textEditingController1.text == users.get('nickname')) {
-
-        print('중복이 존재합니다');
-      // isDuplicated = true;
-      break;
-      }
-    }
-  }
-
-}
 
 
 

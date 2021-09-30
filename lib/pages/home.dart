@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
 
@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                   /// _selectedIndex 값에 따른 페이지(상응 위젯) 출력
                   children:
-                  _buildWidgetOptions(context, appState, _selectedIndex),
+                      _buildWidgetOptions(context, appState, _selectedIndex),
                 ),
               ),
             ),
@@ -161,14 +161,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   List<Widget> _buildWidgetOptions(
       BuildContext context, ApplicationState appState, int selectedIndex) {
     var _widgetOptions = <Widget>[
-      /// 0(홈):
-      HomeView(context, appState),
-
-      /// 1(나눔):
+      /// 0(나눔):
       NanumView(context, appState, _tabController),
 
-      /// 2(나눔요청):
+      /// 1(나눔요청):
       RequestView(context, appState, _tabController),
+
+      /// 2(홈):
+      HomeView(context, appState),
 
       /// 3(메신저):
       MsgView(context, appState),
@@ -181,7 +181,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   /// FloatingActionButton 생성기
   Widget buildFAB() {
-    if (_selectedIndex == 0) {
+    if (_selectedIndex == 2) {
       return SpeedDial(
         closedForegroundColor: Colors.white,
         openForegroundColor: Colors.white60,
@@ -216,7 +216,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ],
         child: Icon(Icons.mode_edit),
       );
-    } else if (_selectedIndex == 1) {
+    } else if (_selectedIndex == 0) {
       return FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/giveadd');
@@ -224,7 +224,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         backgroundColor: Color(0xfffc7174),
         child: Icon(Icons.mode_edit),
       );
-    } else if (_selectedIndex == 2) {
+    } else if (_selectedIndex == 1) {
       return FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/takeadd');
@@ -250,16 +250,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
       items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: '홈',
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.accessibility),
           label: '나눔',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.accessibility_new),
           label: '나눔요청',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: '홈',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.messenger),
@@ -294,7 +294,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
  */
     await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
-            (Route<dynamic> route) => false);
+        (Route<dynamic> route) => false);
   }
 
   ///* ---------------- BottomNavigationBar, PageView 관련 ----------------- *///
@@ -315,7 +315,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
-///* -------------------------------------------------------------------- *///
+  ///* -------------------------------------------------------------------- *///
 }
 
 /// PostTileMaker - 각 게시글 별 postTile Listview.builder(separated) 사용해 자동 생성
@@ -359,7 +359,10 @@ class PostTileMaker extends StatelessWidget {
 
     /// 사용자가 게시글 눌러 들어갈 때마다 조회수 올리는 함수
     Future<void> editProductHits(String GiveOrTake) {
-      return FirebaseFirestore.instance.collection(GiveOrTake).doc(_product.id).update({
+      return FirebaseFirestore.instance
+          .collection(GiveOrTake)
+          .doc(_product.id)
+          .update({
         'hits': _product.hits + 1,
       });
     }
