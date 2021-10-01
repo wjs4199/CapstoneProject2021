@@ -78,7 +78,7 @@ class ChatScreenState extends State<ChatScreen> {
 
   _scrollListener() {
     if (listScrollController.offset >=
-            listScrollController.position.maxScrollExtent &&
+        listScrollController.position.maxScrollExtent &&
         !listScrollController.position.outOfRange) {
       setState(() {
         _limit += _limitIncrement;
@@ -121,7 +121,7 @@ class ChatScreenState extends State<ChatScreen> {
  */
     setState(() {});
   }
-/// 사용자의 핸드폰 내에 있는 갤러리의 사진을 가져오는 future
+  /// 사용자의 핸드폰 내에 있는 갤러리의 사진을 가져오는 future
   Future getImage() async {
     var imagePicker = ImagePicker();
     PickedFile pickedFile;
@@ -145,7 +145,7 @@ class ChatScreenState extends State<ChatScreen> {
       isShowSticker = !isShowSticker;
     });
   }
-/// getImage 에서 파일 업로드 하는 future
+  /// getImage 에서 파일 업로드 하는 future
   Future uploadFile() async {
     var fileName = DateTime.now().millisecondsSinceEpoch.toString();
     var reference = FirebaseStorage.instance.ref().child(fileName);
@@ -165,7 +165,7 @@ class ChatScreenState extends State<ChatScreen> {
       await Fluttertoast.showToast(msg: e.message ?? e.toString());
     }
   }
-///message 보내는 부분
+  ///message 보내는 부분
   void onSendMessage(String content, int type) {
     /// 보내는 메시지 type: 0 = text, 1 = image(이모티콘, local에 있는 gif_추후에 추가), 2 = sticker
     if (content.trim() != '') {
@@ -198,7 +198,7 @@ class ChatScreenState extends State<ChatScreen> {
           textColor: Colors.red);
     }
   }
-/// 채팅창 안에서 메시지, 이미지를 보내고 받고 하는 위젯 (메시지들을 화면에 빌드해주는 위젯)
+  /// 채팅창 안에서 메시지, 이미지를 보내고 받고 하는 위젯 (메시지들을 화면에 빌드해주는 위젯)
   Widget buildItem(int index, DocumentSnapshot document) {
     if (document != null) {
       if (document.get('idFrom') == id) {
@@ -207,110 +207,110 @@ class ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             document.get('type') == 0
-                // Text
+            // Text
                 ? Container(
-                    padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-                    width: 200.0,
-                    decoration: BoxDecoration(
-                        color: greyColor2,
-                        borderRadius: BorderRadius.circular(8.0)),
-                    margin: EdgeInsets.only(
-                        bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                        right: 10.0),
-                    child: Text(
-                      document.get('content'),
-                      style: TextStyle(color: primaryColor),
-                    ),
-                  )
+              padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+              width: 200.0,
+              decoration: BoxDecoration(
+                  color: greyColor2,
+                  borderRadius: BorderRadius.circular(8.0)),
+              margin: EdgeInsets.only(
+                  bottom: isLastMessageRight(index) ? 20.0 : 10.0,
+                  right: 10.0),
+              child: Text(
+                document.get('content'),
+                style: TextStyle(color: primaryColor),
+              ),
+            )
                 : document.get('type') == 1
-                    // Image
-                    ? Container(
-                        margin: EdgeInsets.only(
-                            bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                            right: 10.0),
-                        child: OutlinedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FullPhoto(
-                                  url: document.get('content'),
-                                ),
-                              ),
-                            );
-                          },
-                          style: ButtonStyle(
-                              padding: MaterialStateProperty.all<EdgeInsets>(
-                                  EdgeInsets.all(0))),
-                          child: Material(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(8.0)),
-                            clipBehavior: Clip.hardEdge,
-                            child: Image.network(
-                              document.get("content"),
-                              loadingBuilder: (BuildContext context,
-                                  Widget child,
-                                  ImageChunkEvent loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Container(
-                                  decoration: BoxDecoration(
-                                    color: greyColor2,
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(8.0),
-                                    ),
-                                  ),
-                                  width: 200.0,
-                                  height: 200.0,
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                      color: primaryColor,
-                                      value: loadingProgress
-                                                      .expectedTotalBytes !=
-                                                  null &&
-                                              loadingProgress
-                                                      .expectedTotalBytes !=
-                                                  null
-                                          ? loadingProgress
-                                                  .cumulativeBytesLoaded /
-                                              loadingProgress.expectedTotalBytes
-                                          : null,
-                                    ),
-                                  ),
-                                );
-                              },
-                              errorBuilder: (context, object, stackTrace) {
-                                return Material(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(8.0),
-                                  ),
-                                  clipBehavior: Clip.hardEdge,
-                                  child: Image.asset(
-                                    'images/img_not_available.jpeg',
-                                    width: 200.0,
-                                    height: 200.0,
-                                    fit: BoxFit.cover,
-                                  ),
-                                );
-                              },
-                              width: 200.0,
-                              height: 200.0,
-                              fit: BoxFit.cover,
-                            ),
+            // Image
+                ? Container(
+              margin: EdgeInsets.only(
+                  bottom: isLastMessageRight(index) ? 20.0 : 10.0,
+                  right: 10.0),
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullPhoto(
+                        url: document.get('content'),
+                      ),
+                    ),
+                  );
+                },
+                style: ButtonStyle(
+                    padding: MaterialStateProperty.all<EdgeInsets>(
+                        EdgeInsets.all(0))),
+                child: Material(
+                  borderRadius:
+                  BorderRadius.all(Radius.circular(8.0)),
+                  clipBehavior: Clip.hardEdge,
+                  child: Image.network(
+                    document.get("content"),
+                    loadingBuilder: (BuildContext context,
+                        Widget child,
+                        ImageChunkEvent loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: greyColor2,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(8.0),
                           ),
                         ),
-                      )
-                    // Sticker
-                    : Container(
-                        margin: EdgeInsets.only(
-                            bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                            right: 10.0),
+                        width: 200.0,
+                        height: 200.0,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: primaryColor,
+                            value: loadingProgress
+                                .expectedTotalBytes !=
+                                null &&
+                                loadingProgress
+                                    .expectedTotalBytes !=
+                                    null
+                                ? loadingProgress
+                                .cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes
+                                : null,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, object, stackTrace) {
+                      return Material(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(8.0),
+                        ),
+                        clipBehavior: Clip.hardEdge,
                         child: Image.asset(
-                          'images/${document.get('content')}.gif',
-                          width: 100.0,
-                          height: 100.0,
+                          'images/img_not_available.jpeg',
+                          width: 200.0,
+                          height: 200.0,
                           fit: BoxFit.cover,
                         ),
-                      ),
+                      );
+                    },
+                    width: 200.0,
+                    height: 200.0,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            )
+            // Sticker
+                : Container(
+              margin: EdgeInsets.only(
+                  bottom: isLastMessageRight(index) ? 20.0 : 10.0,
+                  right: 10.0),
+              child: Image.asset(
+                'images/${document.get('content')}.gif',
+                width: 100.0,
+                height: 100.0,
+                fit: BoxFit.cover,
+              ),
+            ),
           ],
         );
       } else {
@@ -324,158 +324,158 @@ class ChatScreenState extends State<ChatScreen> {
                 children: <Widget>[
                   isLastMessageLeft(index)
                       ? Material(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(18.0),
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(18.0),
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: Image.network(
+                      peerAvatar,
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: primaryColor,
+                            value: loadingProgress.expectedTotalBytes !=
+                                null &&
+                                loadingProgress.expectedTotalBytes !=
+                                    null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes
+                                : null,
                           ),
-                          clipBehavior: Clip.hardEdge,
-                          child: Image.network(
-                            peerAvatar,
-                            loadingBuilder: (BuildContext context, Widget child,
-                                ImageChunkEvent loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  color: primaryColor,
-                                  value: loadingProgress.expectedTotalBytes !=
-                                              null &&
-                                          loadingProgress.expectedTotalBytes !=
-                                              null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes
-                                      : null,
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, object, stackTrace) {
-                              return Icon(
-                                Icons.account_circle,
-                                size: 35,
-                                color: greyColor,
-                              );
-                            },
-                            width: 35,
-                            height: 35,
-                            fit: BoxFit.cover,
-                          ),
-                        )
+                        );
+                      },
+                      errorBuilder: (context, object, stackTrace) {
+                        return Icon(
+                          Icons.account_circle,
+                          size: 35,
+                          color: greyColor,
+                        );
+                      },
+                      width: 35,
+                      height: 35,
+                      fit: BoxFit.cover,
+                    ),
+                  )
                       : Container(width: 35.0),
                   document.get('type') == 0
                       ? Container(
-                          padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-                          width: 200.0,
-                          decoration: BoxDecoration(
-                              color: primaryColor,
-                              borderRadius: BorderRadius.circular(8.0)),
-                          margin: EdgeInsets.only(left: 10.0),
-                          child: Text(
-                            document.get('content'),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        )
+                    padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                    width: 200.0,
+                    decoration: BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: BorderRadius.circular(8.0)),
+                    margin: EdgeInsets.only(left: 10.0),
+                    child: Text(
+                      document.get('content'),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
                       : document.get('type') == 1
-                          ? Container(
-                              margin: EdgeInsets.only(left: 10.0),
-                              child: TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => FullPhoto(
-                                              url: document.get('content'))));
-                                },
-                                style: ButtonStyle(
-                                    padding:
-                                        MaterialStateProperty.all<EdgeInsets>(
-                                            EdgeInsets.all(0))),
-                                child: Material(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(8.0)),
-                                  clipBehavior: Clip.hardEdge,
-                                  child: Image.network(
-                                    document.get('content'),
-                                    loadingBuilder: (BuildContext context,
-                                        Widget child,
-                                        ImageChunkEvent loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Container(
-                                        decoration: BoxDecoration(
-                                          color: greyColor2,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(8.0),
-                                          ),
-                                        ),
-                                        width: 200.0,
-                                        height: 200.0,
-                                        child: Center(
-                                          child: CircularProgressIndicator(
-                                            color: primaryColor,
-                                            value: loadingProgress
-                                                            .expectedTotalBytes !=
-                                                        null &&
-                                                    loadingProgress
-                                                            .expectedTotalBytes !=
-                                                        null
-                                                ? loadingProgress
-                                                        .cumulativeBytesLoaded /
-                                                    loadingProgress
-                                                        .expectedTotalBytes
-                                                : null,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    errorBuilder:
-                                        (context, object, stackTrace) =>
-                                            Material(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(8.0),
-                                      ),
-                                      clipBehavior: Clip.hardEdge,
-                                      child: Image.asset(
-                                        'images/img_not_available.jpeg',
-                                        width: 200.0,
-                                        height: 200.0,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    width: 200.0,
-                                    height: 200.0,
-                                    fit: BoxFit.cover,
-                                  ),
+                      ? Container(
+                    margin: EdgeInsets.only(left: 10.0),
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => FullPhoto(
+                                    url: document.get('content'))));
+                      },
+                      style: ButtonStyle(
+                          padding:
+                          MaterialStateProperty.all<EdgeInsets>(
+                              EdgeInsets.all(0))),
+                      child: Material(
+                        borderRadius:
+                        BorderRadius.all(Radius.circular(8.0)),
+                        clipBehavior: Clip.hardEdge,
+                        child: Image.network(
+                          document.get('content'),
+                          loadingBuilder: (BuildContext context,
+                              Widget child,
+                              ImageChunkEvent loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: greyColor2,
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(8.0),
                                 ),
                               ),
-                            )
-                          : Container(
-                              margin: EdgeInsets.only(
-                                  bottom:
-                                      isLastMessageRight(index) ? 20.0 : 10.0,
-                                  right: 10.0),
-                              child: Image.asset(
-                                'images/${document.get('content')}.gif',
-                                width: 100.0,
-                                height: 100.0,
-                                fit: BoxFit.cover,
+                              width: 200.0,
+                              height: 200.0,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: primaryColor,
+                                  value: loadingProgress
+                                      .expectedTotalBytes !=
+                                      null &&
+                                      loadingProgress
+                                          .expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress
+                                      .cumulativeBytesLoaded /
+                                      loadingProgress
+                                          .expectedTotalBytes
+                                      : null,
+                                ),
                               ),
-                            ),
+                            );
+                          },
+                          errorBuilder:
+                              (context, object, stackTrace) =>
+                              Material(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(8.0),
+                                ),
+                                clipBehavior: Clip.hardEdge,
+                                child: Image.asset(
+                                  'images/img_not_available.jpeg',
+                                  width: 200.0,
+                                  height: 200.0,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                          width: 200.0,
+                          height: 200.0,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  )
+                      : Container(
+                    margin: EdgeInsets.only(
+                        bottom:
+                        isLastMessageRight(index) ? 20.0 : 10.0,
+                        right: 10.0),
+                    child: Image.asset(
+                      'images/${document.get('content')}.gif',
+                      width: 100.0,
+                      height: 100.0,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ],
               ),
 
               // Time
               isLastMessageLeft(index)
                   ? Container(
-                      margin:
-                          EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
-                      child: Text(
-                        DateFormat('dd MMM kk:mm').format(
-                            DateTime.fromMillisecondsSinceEpoch(
-                                int.parse(document.get('timestamp')))),
-                        style: TextStyle(
-                            color: greyColor,
-                            fontSize: 12.0,
-                            fontStyle: FontStyle.italic),
-                      ),
+                margin:
+                EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
+                child: Text(
+                  DateFormat('dd MMM kk:mm').format(
+                      DateTime.fromMillisecondsSinceEpoch(
+                          int.parse(document.get('timestamp')))),
+                  style: TextStyle(
+                      color: greyColor,
+                      fontSize: 12.0,
+                      fontStyle: FontStyle.italic),
+                ),
 
-                    )
+              )
                   : Container()
             ],
           ),
@@ -740,39 +740,39 @@ class ChatScreenState extends State<ChatScreen> {
     return Flexible(
       child: groupChatId.isNotEmpty
           ? StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('messages')
-                  .doc(groupChatId)
-                  .collection(groupChatId)
-                  .orderBy('timestamp', descending: true)
-                  .limit(_limit)
-                  .snapshots(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot.hasData) {
-                  listMessage.addAll(snapshot.data.docs);
-                  return ListView.builder(
-                    padding: EdgeInsets.all(10.0),
-                    itemBuilder: (context, index) =>
-                        buildItem(index, snapshot.data?.docs[index]),
-                    itemCount: snapshot.data?.docs.length,
-                    reverse: true,
-                    controller: listScrollController,
-                  );
-                } else {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-                    ),
-                  );
-                }
-              },
-            )
-          : Center(
+        stream: FirebaseFirestore.instance
+            .collection('messages')
+            .doc(groupChatId)
+            .collection(groupChatId)
+            .orderBy('timestamp', descending: true)
+            .limit(_limit)
+            .snapshots(),
+        builder: (BuildContext context,
+            AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasData) {
+            listMessage.addAll(snapshot.data.docs);
+            return ListView.builder(
+              padding: EdgeInsets.all(10.0),
+              itemBuilder: (context, index) =>
+                  buildItem(index, snapshot.data?.docs[index]),
+              itemCount: snapshot.data?.docs.length,
+              reverse: true,
+              controller: listScrollController,
+            );
+          } else {
+            return Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               ),
-            ),
+            );
+          }
+        },
+      )
+          : Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+        ),
+      ),
     );
   }
 }

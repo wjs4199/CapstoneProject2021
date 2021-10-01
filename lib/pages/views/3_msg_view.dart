@@ -15,7 +15,7 @@ import '../chat.dart';
 final String currentUserId = FirebaseAuth.instance.currentUser.uid;
 final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+FlutterLocalNotificationsPlugin();
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final ScrollController listScrollController = ScrollController();
 
@@ -57,47 +57,47 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
           [
             ///added
             Stack(
-                children: <Widget>[
-                  // List
-                  ///chatting list 를 보여주는 container
-                  Container(
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('users')
-                          .limit(_limit)
-                          .snapshots(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<QuerySnapshot> snapshot) {
-                        if (snapshot.hasData) {
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.all(10.0),
+              children: <Widget>[
+                // List
+                ///chatting list 를 보여주는 container
+                Container(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .limit(_limit)
+                        .snapshots(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.hasData) {
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          padding: EdgeInsets.all(10.0),
 
-                            /// data 를 가져오는 곳 buildItem 위젯
-                            itemBuilder: (context, index) =>
-                                buildItem(context, snapshot.data.docs[index]),
-                            itemCount: snapshot.data.docs.length,
-                            controller: listScrollController,
-                          );
-                        } else {
-                          /// data 가 없을 시
-                          return Center(
-                            child: CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(primaryColor),
-                            ),
-                          );
-                        }
-                      },
-                    ),
+                          /// data 를 가져오는 곳 buildItem 위젯
+                          itemBuilder: (context, index) =>
+                              buildItem(context, snapshot.data.docs[index]),
+                          itemCount: snapshot.data.docs.length,
+                          controller: listScrollController,
+                        );
+                      } else {
+                        /// data 가 없을 시
+                        return Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                            AlwaysStoppedAnimation<Color>(primaryColor),
+                          ),
+                        );
+                      }
+                    },
                   ),
+                ),
 
-                  // Loading
-                  Positioned(
-                    child: isLoading ? const Loading() : Container(),
-                  )
-                ],
-              ),
+                // Loading
+                Positioned(
+                  child: isLoading ? const Loading() : Container(),
+                )
+              ],
+            ),
           ],
         ),
       )
@@ -149,45 +149,45 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
                 clipBehavior: Clip.hardEdge,
                 child: userChat.photoUrl.isNotEmpty
 
-                    /// empty 가 아니면 photoURL 을 가져온다
+                /// empty 가 아니면 photoURL 을 가져온다
                     ? Image.network(
-                        userChat.photoUrl,
-                        fit: BoxFit.cover,
-                        width: 50.0,
-                        height: 50.0,
-                        loadingBuilder: (BuildContext context, Widget child,
-                            ImageChunkEvent loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            width: 50,
-                            height: 50,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: primaryColor,
-                                value: loadingProgress.expectedTotalBytes !=
-                                            null &&
-                                        loadingProgress.expectedTotalBytes !=
-                                            null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes
-                                    : null,
-                              ),
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, object, stackTrace) {
-                          return Icon(
-                            Icons.account_circle,
-                            size: 50.0,
-                            color: greyColor,
-                          );
-                        },
-                      )
-                    : Icon(
-                        Icons.account_circle,
-                        size: 50.0,
-                        color: greyColor,
+                  userChat.photoUrl,
+                  fit: BoxFit.cover,
+                  width: 50.0,
+                  height: 50.0,
+                  loadingBuilder: (BuildContext context, Widget child,
+                      ImageChunkEvent loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      width: 50,
+                      height: 50,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: primaryColor,
+                          value: loadingProgress.expectedTotalBytes !=
+                              null &&
+                              loadingProgress.expectedTotalBytes !=
+                                  null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes
+                              : null,
+                        ),
                       ),
+                    );
+                  },
+                  errorBuilder: (context, object, stackTrace) {
+                    return Icon(
+                      Icons.account_circle,
+                      size: 50.0,
+                      color: greyColor,
+                    );
+                  },
+                )
+                    : Icon(
+                  Icons.account_circle,
+                  size: 50.0,
+                  color: greyColor,
+                ),
               ),
               Flexible(
                 ///nickname 을 가져오는 container

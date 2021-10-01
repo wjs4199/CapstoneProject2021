@@ -136,8 +136,10 @@ class _DetailPageState extends State<DetailPage> {
         ? context.read<ApplicationState>().giveProducts
         : context.read<ApplicationState>().takeProducts;
 
+
     /// 현재 유저의 아이디와 이름 간략화
     var userId = FirebaseAuth.instance.currentUser.uid;
+    var userName = FirebaseAuth.instance.currentUser.displayName;
 
     /// 컬랙션(products) 내에서 productId가 같은 제품을 찾아냈을 때 그 내용을 담을 변수
     Product product;
@@ -278,7 +280,7 @@ class _DetailPageState extends State<DetailPage> {
 
     /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
     CollectionReference likes = FirebaseFirestore.instance
-          .collection('${widget.detailGiveOrTake}/' + productId + '/like');
+        .collection('${widget.detailGiveOrTake}/' + productId + '/like');
 
     /// 현재는 하트버튼 누르면 사용자가 이미 눌렀든 말든 간에 계속 숫자 올라감 ㅋㅎ (수정필요)
     /// 현재 사용자가 이미 좋아요를 누른 경우를 분별하는 함수
@@ -554,40 +556,40 @@ class _DetailPageState extends State<DetailPage> {
                                       height: 42,
                                       child:
                                       /// 이름과 시간
-                                          StreamBuilder<QuerySnapshot>(
-                                              stream: users.snapshots(),
-                                              builder: (BuildContext context,
-                                                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                                                if (snapshot.hasError) {
-                                                  return Text('x');
-                                                }
-                                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                                  return Text('');
-                                                }
-                                                return Column(
-                                                    mainAxisAlignment: MainAxisAlignment.start,
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(height: 2,),
-                                                    /// 이름
-                                                    SizedBox(
-                                                      //width: 10,
-                                                      height: 18,
-                                                      child: Text(
-                                                        ' ${findNickname(snapshot, product.userName)}\n',
-                                                        style: TextStyle(
-                                                          fontFamily: 'Roboto_Bold',
-                                                          color: Colors.black,
-                                                          fontWeight: FontWeight.bold,
-                                                          fontSize: 15,
-                                                          height: 1,
-                                                        ),
+                                      StreamBuilder<QuerySnapshot>(
+                                          stream: users.snapshots(),
+                                          builder: (BuildContext context,
+                                              AsyncSnapshot<QuerySnapshot> snapshot) {
+                                            if (snapshot.hasError) {
+                                              return Text('x');
+                                            }
+                                            if (snapshot.connectionState == ConnectionState.waiting) {
+                                              return Text('');
+                                            }
+                                            return Column(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(height: 2,),
+                                                  /// 이름
+                                                  SizedBox(
+                                                    //width: 10,
+                                                    height: 18,
+                                                    child: Text(
+                                                      ' ${findNickname(snapshot, product.userName)}\n',
+                                                      style: TextStyle(
+                                                        fontFamily: 'Roboto_Bold',
+                                                        color: Colors.black,
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 15,
+                                                        height: 1,
                                                       ),
                                                     ),
-                                                    SizedBox(
-                                                      //width: 10,
-                                                      height: 22,
-                                                      child: TextButton(
+                                                  ),
+                                                  SizedBox(
+                                                    //width: 10,
+                                                    height: 22,
+                                                    child: TextButton(
                                                         style: TextButton.styleFrom(
                                                           padding: EdgeInsets.zero,
                                                           alignment: Alignment.centerLeft,
@@ -620,12 +622,12 @@ class _DetailPageState extends State<DetailPage> {
                                                             Icon(Icons.chat, size: 13.5,),
                                                           ],
                                                         )
-                                                      ),
-                                                    )
-                                                  ]
-                                                );
-                                              }
-                                          ),
+                                                    ),
+                                                  )
+                                                ]
+                                            );
+                                          }
+                                      ),
 
                                     ),
                                     /// 채팅으로 넘어가는 버튼
@@ -696,34 +698,34 @@ class _DetailPageState extends State<DetailPage> {
                                   ),
                                 ),
                                 StreamBuilder<QuerySnapshot>(
-                                    stream: likes.snapshots().asBroadcastStream(),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                                      if (snapshot.hasError) {
-                                        return Text('x',style: TextStyle(fontSize: 13, height: 1,));
-                                      }
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return Text('',style: TextStyle(fontSize: 13, height: 1,));
-                                      }
-                                      var count = snapshot.data.size;
-                                        return  StreamBuilder<int>(
-                                            stream: changeLikeCount.stream.asBroadcastStream(),
-                                            initialData: count,
-                                            builder: (context, snapshot2) {
-                                              return Text(
-                                                '\n\n조회 ${product.hits}회 · 좋아요 ${snapshot2.data}회',
-                                                style: TextStyle(
-                                                  fontFamily: 'Roboto_Bold',
-                                                  color: Colors.grey,
-                                                  //fontWeight: FontWeight.bold,
-                                                  fontSize: 13,
-                                                  height: 1,
-                                                ),
-                                              );
-                                            }
-                                        );
-                                    },
+                                  stream: likes.snapshots().asBroadcastStream(),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    if (snapshot.hasError) {
+                                      return Text('x',style: TextStyle(fontSize: 13, height: 1,));
+                                    }
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return Text('',style: TextStyle(fontSize: 13, height: 1,));
+                                    }
+                                    var count = snapshot.data.size;
+                                    return StreamBuilder<int>(
+                                        stream: changeLikeCount.stream.asBroadcastStream(),
+                                        initialData: count,
+                                        builder: (context, snapshot2) {
+                                          return Text(
+                                            '\n\n조회 ${product.hits}회 · 좋아요 ${snapshot2.data}회',
+                                            style: TextStyle(
+                                              fontFamily: 'Roboto_Bold',
+                                              color: Colors.grey,
+                                              //fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                              height: 1,
+                                            ),
+                                          );
+                                        }
+                                    );
+                                  },
                                 ),
                                 SizedBox(height: 9.0),
                                 Divider(thickness: 1.0),
@@ -860,15 +862,15 @@ class _DetailPageState extends State<DetailPage> {
                             onPressed: () async {
                               var currentFocus = FocusScope.of(context);
                               currentFocus.unfocus();
-                                if (_commentFormKey.currentState.validate()) {
-                                  await addComments(_commentController.text)
-                                      .then((value) => print('add comment ok!'));
-                                  _commentController.clear();
-                                  products = detailGiveOrTake == 'giveProducts'
-                                      ? context.read<ApplicationState>().giveProducts
-                                      : context.read<ApplicationState>().takeProducts;
-                                  print('clear!');
-                                }
+                              if (_commentFormKey.currentState.validate()) {
+                                await addComments(_commentController.text)
+                                    .then((value) => print('add comment ok!'));
+                                _commentController.clear();
+                                products = detailGiveOrTake == 'giveProducts'
+                                    ? context.read<ApplicationState>().giveProducts
+                                    : context.read<ApplicationState>().takeProducts;
+                                print('clear!');
+                              }
                             },
                           ),
                         ],
@@ -884,4 +886,3 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 }
-

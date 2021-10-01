@@ -24,7 +24,7 @@ Widget MyView(BuildContext context, ApplicationState appState) {
 
     await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
-        (Route<dynamic> route) => false);
+            (Route<dynamic> route) => false);
   }
 
   return CustomScrollView(
@@ -69,7 +69,7 @@ Widget MyView(BuildContext context, ApplicationState appState) {
                 CircleAvatar(
                   radius: 50.0,
                   backgroundImage:
-                      NetworkImage(FirebaseAuth.instance.currentUser.photoURL),
+                  NetworkImage(FirebaseAuth.instance.currentUser.photoURL),
                 ),
 
 
@@ -140,7 +140,7 @@ Widget MyView(BuildContext context, ApplicationState appState) {
                 ),
                 Card(
                   margin:
-                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
+                  EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
                   child: ListTile(
                     leading: Icon(
                       Icons.phone,
@@ -157,7 +157,7 @@ Widget MyView(BuildContext context, ApplicationState appState) {
                 ),
                 Card(
                   margin:
-                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
+                  EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
                   child: ListTile(
                     leading: Icon(
                       Icons.location_on,

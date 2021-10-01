@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -89,22 +88,22 @@ class SignUpState extends State<SignUp> {
                       onPressed: ()   async {
                         checkLoop = true;
                         isDuplicated = false;
-                      await for (var snapshot in FirebaseFirestore.instance.collection('users').snapshots())
-                      {
-                           for(var users in snapshot.docs){
+                        await for (var snapshot in FirebaseFirestore.instance.collection('users').snapshots())
+                        {
+                          for(var users in snapshot.docs){
 
-                              if(textEditingController1.text == users.get('nickname')) {
-                                print('중복이 존재합니다');
-                                ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-                                isDuplicated = true;
-                                break;
-                              }
-                           }
-                           break;
-                      };
-                      if(isDuplicated == false) {
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar2);
-                      }
+                            if(textEditingController1.text == users.get('nickname')) {
+                              print('중복이 존재합니다');
+                              ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+                              isDuplicated = true;
+                              break;
+                            }
+                          }
+                          break;
+                        };
+                        if(isDuplicated == false) {
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar2);
+                        }
                       },
 
                       style: ElevatedButton.styleFrom(
@@ -133,10 +132,10 @@ class SignUpState extends State<SignUp> {
                                   builder: (context) => HomePage()));
                         }
                         else if(isDuplicated || checkLoop == false)
-                          {
-                            ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+                        {
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar3);
 
-                          }
+                        }
                         else {
                           if(_formKey.currentState.validate()) {
 
@@ -161,7 +160,7 @@ class SignUpState extends State<SignUp> {
                                       builder: (context) => HomePage()));
                             }).catchError((error) => print('Error: $error'));
                           }
-                     }
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                           primary: Colors.grey,
@@ -184,11 +183,3 @@ class SignUpState extends State<SignUp> {
     );
   }
 }
-
-
-
-
-
-
-
-
