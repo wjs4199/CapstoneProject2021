@@ -9,7 +9,6 @@ import 'package:giveandtake/model/const.dart';
 import 'package:giveandtake/components/full_photo.dart';
 import 'package:giveandtake/components/loading.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -17,8 +16,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Chat extends StatelessWidget {
   final String peerId;
   final String peerAvatar;
+  final String peerName;
+  final String myName;
+  final String myAvatar;
 
-  Chat({Key key, @required this.peerId, @required this.peerAvatar})
+  Chat({Key key, @required this.peerId, @required this.peerAvatar, @required this.peerName, @required this.myName, @required this.myAvatar})
       : super(key: key);
 
   @override
@@ -34,6 +36,9 @@ class Chat extends StatelessWidget {
       body: ChatScreen(
         peerId: peerId,
         peerAvatar: peerAvatar,
+        peerName: peerName,
+        myName : myName,
+        myAvatar : myAvatar,
       ),
     );
   }
@@ -43,22 +48,29 @@ class Chat extends StatelessWidget {
 class ChatScreen extends StatefulWidget {
   final String peerId;
   final String peerAvatar;
+  final String peerName;
+  final String myName;
+  final String myAvatar;
 
-  ChatScreen({Key key, @required this.peerId, @required this.peerAvatar})
+
+  ChatScreen({Key key, @required this.peerId, @required this.peerAvatar, @required this.peerName, @required this.myName, @required this.myAvatar})
       : super(key: key);
 
 
   ///파라미터로 받아온 peerId 와 peerAvatar 를 local 에 저장
   @override
   State createState() =>
-      ChatScreenState(peerId: peerId, peerAvatar: peerAvatar);
+      ChatScreenState(peerId: peerId, peerAvatar: peerAvatar, peerName: peerName, myName: myName, myAvatar: myAvatar);
 }
 
 class ChatScreenState extends State<ChatScreen> {
-  ChatScreenState({Key key, @required this.peerId, @required this.peerAvatar});
+  ChatScreenState({Key key, @required this.peerId, @required this.peerAvatar, @required this.peerName, @required this.myName, @required this.myAvatar});
 
   String peerId;
   String peerAvatar;
+  String peerName;
+  String myName;
+  String myAvatar;
   String id;
 
   List<QueryDocumentSnapshot> listMessage = List.from([]);
@@ -166,10 +178,30 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
   ///message 보내는 부분
-  void onSendMessage(String content, int type) {
+  void onSendMessage(String content, int type) async {
     /// 보내는 메시지 type: 0 = text, 1 = image(이모티콘, local에 있는 gif_추후에 추가), 2 = sticker
     if (content.trim() != '') {
       textEditingController.clear();
+      var documentReference_chatRoom = FirebaseFirestore.instance
+          .collection('chatRoom')
+          .doc(groupChatId);
+
+      await  FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.set(
+          documentReference_chatRoom,
+          {
+            'timestamp': FieldValue.serverTimestamp(),
+            'idFrom': id,
+            'idTo': peerId,
+            'peerAvatar': peerAvatar,
+            'peerNickname' : peerName,
+            'myNickname' : myName,
+            'myAvatar' : myAvatar,
+          },
+        );
+      });
+
+
 
       var documentReference = FirebaseFirestore.instance
           .collection('messages')
@@ -177,7 +209,7 @@ class ChatScreenState extends State<ChatScreen> {
           .collection(groupChatId)
           .doc(DateTime.now().millisecondsSinceEpoch.toString());
 
-      FirebaseFirestore.instance.runTransaction((transaction) async {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
         transaction.set(
           documentReference,
           {
@@ -461,6 +493,7 @@ class ChatScreenState extends State<ChatScreen> {
               ),
 
               // Time
+              /*
               isLastMessageLeft(index)
                   ? Container(
                 margin:
@@ -477,6 +510,10 @@ class ChatScreenState extends State<ChatScreen> {
 
               )
                   : Container()
+
+
+               */
+
             ],
           ),
         );

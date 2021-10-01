@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:giveandtake/components/loading.dart';
 import 'package:giveandtake/model/const.dart';
-import 'package:giveandtake/model/user_chat.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../main.dart';
@@ -63,7 +62,7 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
                 Container(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
-                        .collection('users')
+                        .collection('chatRoom')
                         .limit(_limit)
                         .snapshots(),
                     builder: (BuildContext context,
@@ -105,106 +104,102 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
   );
 }
 
-///
-Widget buildItem(BuildContext context, DocumentSnapshot document) {
-  if (document != null) {
-    var userChat = UserChat.fromDocument(document);
-    if (userChat.id == currentUserId) {
-      return SizedBox.shrink();
-    } else {
-      return Container(
-        margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
+Container _buildSenderScreen(BuildContext context, DocumentSnapshot document){
+  return Container(
+    margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
 
-        /// 메신저 탭에서 각각 사용자들 list 를 클릭할 수 있게 만들어 놓은 text button
-        child: TextButton(
-          /// 각 사용자들의 list 를 누르면 채팅창으로 넘어간다
-          onPressed: () {
-            Navigator.push(
-              context,
-
-              MaterialPageRoute(
-                builder: (context) => Chat(
-                  peerId: userChat.id,
-                  peerAvatar: userChat.photoUrl,
-                ),
-              ),
-            );
-          },
-
-          ///위 text button 에 대한 style
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(greyColor2),
-            shape: MaterialStateProperty.all<OutlinedBorder>(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
-              ),
+    /// 메신저 탭에서 각각 사용자들 list 를 클릭할 수 있게 만들어 놓은 text button
+    child: TextButton(
+      /// 각 사용자들의 list 를 누르면 채팅창으로 넘어간다
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Chat(
+              peerId: document.get('idTo'),
+              peerAvatar: document.get('peerAvatar'),
+              peerName : document.get('peerNickname'),
+              myName: document.get('myNickname'),
+              myAvatar: document.get('myAvatar'),
+              // peerName: userChat.nickname,
             ),
           ),
+        );
+      },
 
-          /// 각 사용자에 대한 list 를 만드는 row
-          child: Row(
-            children: <Widget>[
-              Material(
-                borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                clipBehavior: Clip.hardEdge,
-                child: userChat.photoUrl.isNotEmpty
+      ///위 text button 에 대한 style
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all<Color>(greyColor2),
+        shape: MaterialStateProperty.all<OutlinedBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+        ),
+      ),
 
-                /// empty 가 아니면 photoURL 을 가져온다
-                    ? Image.network(
-                  userChat.photoUrl,
-                  fit: BoxFit.cover,
-                  width: 50.0,
-                  height: 50.0,
-                  loadingBuilder: (BuildContext context, Widget child,
-                      ImageChunkEvent loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      width: 50,
-                      height: 50,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: primaryColor,
-                          value: loadingProgress.expectedTotalBytes !=
-                              null &&
-                              loadingProgress.expectedTotalBytes !=
-                                  null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes
-                              : null,
-                        ),
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, object, stackTrace) {
-                    return Icon(
-                      Icons.account_circle,
-                      size: 50.0,
-                      color: greyColor,
-                    );
-                  },
-                )
-                    : Icon(
+      /// 각 사용자에 대한 list 를 만드는 row
+      child: Row(
+        children: <Widget>[
+          Material(
+            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+            clipBehavior: Clip.hardEdge,
+            child: document.get('peerAvatar').isNotEmpty
+            /// empty 가 아니면 photoURL 을 가져온다
+                ? Image.network(
+              document.get('peerAvatar'),
+              fit: BoxFit.cover,
+              width: 50.0,
+              height: 50.0,
+              loadingBuilder: (BuildContext context, Widget child,
+                  ImageChunkEvent loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  width: 50,
+                  height: 50,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: primaryColor,
+                      value: loadingProgress.expectedTotalBytes !=
+                          null &&
+                          loadingProgress.expectedTotalBytes !=
+                              null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes
+                          : null,
+                    ),
+                  ),
+                );
+              },
+              errorBuilder: (context, object, stackTrace) {
+                return Icon(
                   Icons.account_circle,
                   size: 50.0,
                   color: greyColor,
-                ),
-              ),
-              Flexible(
-                ///nickname 을 가져오는 container
-                child: Container(
-                  margin: EdgeInsets.only(left: 20.0),
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
-                        child: Text(
-                          'Nickname: ${userChat.nickname}',
-                          maxLines: 1,
-                          style: TextStyle(color: primaryColor),
-                        ),
-                      ),
-                      /*
+                );
+              },
+            )
+                : Icon(
+              Icons.account_circle,
+              size: 50.0,
+              color: greyColor,
+            ),
+          ),
+          Flexible(
+            ///nickname 을 가져오는 container
+            child: Container(
+              margin: EdgeInsets.only(left: 20.0),
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
+                    child: Text(
+                      'Nickname: ${document.get('peerNickname')}',
+                      maxLines: 1,
+                      style: TextStyle(color: primaryColor),
+                    ),
+                  ),
+                  /*
                       Container(
                         alignment: Alignment.centerLeft,
                         margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
@@ -216,18 +211,159 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
                       )
 
                      */
-                    ],
-                  ),
-                ),
+                ],
               ),
-            ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Container _buildReceiverScreen(BuildContext context, DocumentSnapshot document){
+  return Container(
+    margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
+
+    /// 메신저 탭에서 각각 사용자들 list 를 클릭할 수 있게 만들어 놓은 text button
+    child: TextButton(
+      /// 각 사용자들의 list 를 누르면 채팅창으로 넘어간다
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Chat(
+              peerId: document.get('idFrom'),
+              peerAvatar: document.get('myAvatar'),
+              peerName : document.get('myNickname'),
+              myName: document.get('peerNickname'),
+              myAvatar: document.get('peerAvatar'),
+              // peerName: userChat.nickname,
+            ),
+          ),
+        );
+      },
+
+      ///위 text button 에 대한 style
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all<Color>(greyColor2),
+        shape: MaterialStateProperty.all<OutlinedBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
         ),
-      );
+      ),
+
+      /// 각 사용자에 대한 list 를 만드는 row
+      child: Row(
+        children: <Widget>[
+          Material(
+            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+            clipBehavior: Clip.hardEdge,
+            child: document.get('myAvatar').isNotEmpty
+            /// empty 가 아니면 photoURL 을 가져온다
+                ? Image.network(
+              document.get('myAvatar'),
+              fit: BoxFit.cover,
+              width: 50.0,
+              height: 50.0,
+              loadingBuilder: (BuildContext context, Widget child,
+                  ImageChunkEvent loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  width: 50,
+                  height: 50,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: primaryColor,
+                      value: loadingProgress.expectedTotalBytes !=
+                          null &&
+                          loadingProgress.expectedTotalBytes !=
+                              null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes
+                          : null,
+                    ),
+                  ),
+                );
+              },
+              errorBuilder: (context, object, stackTrace) {
+                return Icon(
+                  Icons.account_circle,
+                  size: 50.0,
+                  color: greyColor,
+                );
+              },
+            )
+                : Icon(
+              Icons.account_circle,
+              size: 50.0,
+              color: greyColor,
+            ),
+          ),
+          Flexible(
+            ///nickname 을 가져오는 container
+            child: Container(
+              margin: EdgeInsets.only(left: 20.0),
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
+                    child: Text(
+                      'Nickname: ${document.get('myNickname')}',
+                      maxLines: 1,
+                      style: TextStyle(color: primaryColor),
+                    ),
+                  ),
+                  /*
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                        child: Text(
+                          'About me: ${userChat.aboutMe}',
+                          maxLines: 1,
+                          style: TextStyle(color: primaryColor),
+                        ),
+                      )
+
+                     */
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+///
+Widget buildItem(BuildContext context, DocumentSnapshot document) {
+  if (document != null) {
+   // var userChat = UserChat.fromDocument(document);
+    //if (document.get('idTo') == FirebaseAuth.instance.currentUser.uid) {
+     // return SizedBox.shrink();
+    //}
+
+     if (document.id.contains(FirebaseAuth.instance.currentUser.uid))
+    {
+      if(document.get('idFrom') == FirebaseAuth.instance.currentUser.uid) ///내가 보내는 입장이면
+      {
+
+        return _buildSenderScreen(context, document);
+      }
+      else{
+        return  _buildReceiverScreen(context, document);
+
+      }
+
     }
   } else {
     return SizedBox.shrink();
   }
+
+
 }
 
 ///* -------------------------------------------------------------------- *///

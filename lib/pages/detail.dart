@@ -603,15 +603,26 @@ class _DetailPageState extends State<DetailPage> {
                                                           ),
                                                         ),
                                                         onPressed: () {
-                                                          Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                              builder: (context) => Chat(
-                                                                peerId: product.uid,
-                                                                peerAvatar: FirebaseAuth.instance.currentUser.photoURL,
+
+                                                          if(FirebaseAuth.instance.currentUser.uid == product.uid) {
+
+                                                          }
+                                                          else{
+                                                            Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder: (context) => Chat(
+                                                                  peerId: product.uid,
+                                                                  peerAvatar: product.user_photoURL,
+                                                                  peerName : product.userName,
+                                                                  myName: FirebaseAuth.instance.currentUser.displayName,
+                                                                  myAvatar: FirebaseAuth.instance.currentUser.photoURL,
+
+                                                                ),
                                                               ),
-                                                            ),
-                                                          );
+                                                            );
+                                                          }
+
                                                         },
                                                         child: Row(
                                                           mainAxisAlignment: MainAxisAlignment.start,
