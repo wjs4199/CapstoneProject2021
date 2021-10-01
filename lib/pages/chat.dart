@@ -237,116 +237,139 @@ class ChatScreenState extends State<ChatScreen> {
     if (document != null) {
       if (document.get('idFrom') == id) {
         // Right (my message)
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            document.get('type') == 0
-            /// Text
-                ? Container(
-              padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-              width: 200.0,
-              decoration: BoxDecoration(
-                  color: greyColor2,
-                  borderRadius: BorderRadius.circular(8.0)),
-              margin: EdgeInsets.only(
-                  bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                  right: 10.0),
-              child: Text(
-                document.get('content'),
-                style: TextStyle(color: primaryColor),
-              ),
-            )
-                : document.get('type') == 1
-            /// Image
-                ? Container(
-              margin: EdgeInsets.only(
-                  bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                  right: 10.0),
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FullPhoto(
-                        url: document.get('content'),
-                      ),
+        return Container(
+          margin: EdgeInsets.only(bottom: 10.0),
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children:<Widget> [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  document.get('type') == 0
+                  /// Text
+                      ? Container(
+                    padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                    width: 200.0,
+                    decoration: BoxDecoration(
+                        color: greyColor2,
+                        borderRadius: BorderRadius.circular(8.0)),
+                    margin: EdgeInsets.only(
+                        bottom: isLastMessageRight(index) ? 20.0 : 10.0,
+                        right: 10.0),
+                    child: Text(
+                      document.get('content'),
+                      style: TextStyle(color: primaryColor),
                     ),
-                  );
-                },
-                style: ButtonStyle(
-                    padding: MaterialStateProperty.all<EdgeInsets>(
-                        EdgeInsets.all(0))),
-                child: Material(
-                  borderRadius:
-                  BorderRadius.all(Radius.circular(8.0)),
-                  clipBehavior: Clip.hardEdge,
-                  child: Image.network(
-                    document.get('content'),
-                    loadingBuilder: (BuildContext context,
-                        Widget child,
-                        ImageChunkEvent loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: greyColor2,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(8.0),
+                  )
+                      : document.get('type') == 1
+                  /// Image
+                      ? Container(
+                    margin: EdgeInsets.only(
+                        bottom: isLastMessageRight(index) ? 20.0 : 10.0,
+                        right: 10.0),
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FullPhoto(
+                              url: document.get('content'),
+                            ),
                           ),
-                        ),
-                        width: 200.0,
-                        height: 200.0,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: primaryColor,
-                            value: loadingProgress
-                                .expectedTotalBytes !=
-                                null &&
-                                loadingProgress
-                                    .expectedTotalBytes !=
-                                    null
-                                ? loadingProgress
-                                .cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes
-                                : null,
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, object, stackTrace) {
-                      return Material(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(8.0),
-                        ),
+                        );
+                      },
+                      style: ButtonStyle(
+                          padding: MaterialStateProperty.all<EdgeInsets>(
+                              EdgeInsets.all(0))),
+                      child: Material(
+                        borderRadius:
+                        BorderRadius.all(Radius.circular(8.0)),
                         clipBehavior: Clip.hardEdge,
-                        child: Image.asset(
-                          'images/img_not_available.jpeg',
+                        child: Image.network(
+                          document.get('content'),
+                          loadingBuilder: (BuildContext context,
+                              Widget child,
+                              ImageChunkEvent loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: greyColor2,
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(8.0),
+                                ),
+                              ),
+                              width: 200.0,
+                              height: 200.0,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: primaryColor,
+                                  value: loadingProgress
+                                      .expectedTotalBytes !=
+                                      null &&
+                                      loadingProgress
+                                          .expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress
+                                      .cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes
+                                      : null,
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, object, stackTrace) {
+                            return Material(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(8.0),
+                              ),
+                              clipBehavior: Clip.hardEdge,
+                              child: Image.asset(
+                                'images/img_not_available.jpeg',
+                                width: 200.0,
+                                height: 200.0,
+                                fit: BoxFit.cover,
+                              ),
+                            );
+                          },
                           width: 200.0,
                           height: 200.0,
                           fit: BoxFit.cover,
                         ),
-                      );
-                    },
-                    width: 200.0,
-                    height: 200.0,
-                    fit: BoxFit.cover,
+                      ),
+                    ),
+                  )
+                  /// Sticker
+                      : Container(
+                    margin: EdgeInsets.only(
+                        bottom: isLastMessageRight(index) ? 20.0 : 10.0,
+                        right: 10.0),
+                    child: Image.asset(
+                      'images/${document.get('content')}.gif',
+                      width: 100.0,
+                      height: 100.0,
+                      fit: BoxFit.cover,
+                    ),
                   ),
+                ],
+              ),
+              Container(
+                child: Text(
+                  DateFormat('dd MMM kk:mm').format(
+                      DateTime.fromMillisecondsSinceEpoch(
+                          int.parse(document.get('timestamp')))),
+                  style: TextStyle(
+                      color: greyColor,
+                      fontSize: 12.0,
+                      fontStyle: FontStyle.italic),
                 ),
-              ),
-            )
-            /// Sticker
-                : Container(
-              margin: EdgeInsets.only(
-                  bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                  right: 10.0),
-              child: Image.asset(
-                'images/${document.get('content')}.gif',
-                width: 100.0,
-                height: 100.0,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ],
+
+              )
+            ],
+          ),
         );
+
+
       } else {
         // Left (peer message)
         return Container(
@@ -396,7 +419,7 @@ class ChatScreenState extends State<ChatScreen> {
                   document.get('type') == 0
                       ? Container(
                     padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-                    width: 200.0,
+                    width: 170.0,
                     decoration: BoxDecoration(
                         color: primaryColor,
                         borderRadius: BorderRadius.circular(8.0)),
@@ -546,13 +569,6 @@ class ChatScreenState extends State<ChatScreen> {
       });
     } else {
       Navigator.pop(context);
-      /*
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(id)
-          .update({'chattingWith': null});
-
-       */
     }
 
     return Future.value(false);

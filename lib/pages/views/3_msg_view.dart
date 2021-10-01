@@ -368,8 +368,8 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
 
 ///* -------------------------------------------------------------------- *///
 
-/*
 
+/*
 @override
 void initState() {
   //super.initState();
@@ -378,7 +378,6 @@ void initState() {
   listScrollController.addListener(scrollListener);
 
 }
-
 
 void registerNotification() {
   firebaseMessaging.requestPermission();
@@ -529,5 +528,6 @@ Future<Null> openDialog() async {
       exit(0);
   }
 }
+
 
  */
