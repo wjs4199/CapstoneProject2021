@@ -9,6 +9,7 @@ import 'package:giveandtake/model/const.dart';
 import 'package:giveandtake/components/full_photo.dart';
 import 'package:giveandtake/components/loading.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -221,10 +222,11 @@ class ChatScreenState extends State<ChatScreen> {
           },
         );
       });
-      listScrollController.animateTo(0.0,
+
+      await listScrollController.animateTo(0.0,
           duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
-      Fluttertoast.showToast(
+      await Fluttertoast.showToast(
           msg: 'Nothing to send',
           backgroundColor: Colors.black,
           textColor: Colors.red);
@@ -239,7 +241,7 @@ class ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             document.get('type') == 0
-            // Text
+            /// Text
                 ? Container(
               padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
               width: 200.0,
@@ -255,7 +257,7 @@ class ChatScreenState extends State<ChatScreen> {
               ),
             )
                 : document.get('type') == 1
-            // Image
+            /// Image
                 ? Container(
               margin: EdgeInsets.only(
                   bottom: isLastMessageRight(index) ? 20.0 : 10.0,
@@ -279,7 +281,7 @@ class ChatScreenState extends State<ChatScreen> {
                   BorderRadius.all(Radius.circular(8.0)),
                   clipBehavior: Clip.hardEdge,
                   child: Image.network(
-                    document.get("content"),
+                    document.get('content'),
                     loadingBuilder: (BuildContext context,
                         Widget child,
                         ImageChunkEvent loadingProgress) {
@@ -331,7 +333,7 @@ class ChatScreenState extends State<ChatScreen> {
                 ),
               ),
             )
-            // Sticker
+            /// Sticker
                 : Container(
               margin: EdgeInsets.only(
                   bottom: isLastMessageRight(index) ? 20.0 : 10.0,
@@ -492,10 +494,9 @@ class ChatScreenState extends State<ChatScreen> {
                 ],
               ),
 
-              // Time
-              /*
-              isLastMessageLeft(index)
-                  ? Container(
+              /// Time
+             isLastMessageLeft(index) ?
+              Container(
                 margin:
                 EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
                 child: Text(
@@ -509,10 +510,7 @@ class ChatScreenState extends State<ChatScreen> {
                 ),
 
               )
-                  : Container()
-
-
-               */
+                 : Container()
 
             ],
           ),
