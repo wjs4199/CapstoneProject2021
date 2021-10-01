@@ -136,8 +136,6 @@ class _DetailPageState extends State<DetailPage> {
         ? context.read<ApplicationState>().giveProducts
         : context.read<ApplicationState>().takeProducts;
 
-    CollectionReference users = FirebaseFirestore.instance
-        .collection('users');
 
     /// 현재 유저의 아이디와 이름 간략화
     var userId = FirebaseAuth.instance.currentUser.uid;
@@ -170,6 +168,11 @@ class _DetailPageState extends State<DetailPage> {
       );
     }
 
+    ///*** user collection 내에서 userName이 일치하는 doc의 nickname을 가져오는 부분 ****///
+
+    /// user collection 참조 간략화
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+
     /// 유저의 닉네임을 찾아서 보여주는 함수
     String findNickname( AsyncSnapshot<QuerySnapshot> snapshot, String name){
       var nickName = 'null';
@@ -178,9 +181,7 @@ class _DetailPageState extends State<DetailPage> {
           nickName = document['nickname'];
         }
       });
-
       print('찾은 닉네임은 $nickName!!');
-
       return nickName;
     }
 
