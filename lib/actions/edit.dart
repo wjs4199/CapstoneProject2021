@@ -24,7 +24,6 @@ class EditPage extends StatefulWidget {
 }
 
 class _EditPageState extends State<EditPage> {
-
   ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
 
   /// Firebase Storage 참조 간략화
@@ -57,15 +56,16 @@ class _EditPageState extends State<EditPage> {
         numberOfImagesTextColor = false;
       }
     });
+
     /// 받아온 이미지를 File 타입으로 변환
     await getImageFileFromAssets();
   }
 
   /// image 리스트에 들어있는 Asset 타입 이미지들을 File 타입으로 변환시키는 함수(storage 저장 위해)
   Future<void> getImageFileFromAssets() async {
-
     images.forEach((imageAsset) async {
-      final filePath = await FlutterAbsolutePath.getAbsolutePath(imageAsset.identifier);
+      final filePath =
+          await FlutterAbsolutePath.getAbsolutePath(imageAsset.identifier);
       var tempFile = File(filePath);
 
       file.add(tempFile);
@@ -78,7 +78,7 @@ class _EditPageState extends State<EditPage> {
       return await storage
           .ref()
           .child('images')
-      //.child('$id.png')
+          //.child('$id.png')
           .child('$id$num.png')
           .getDownloadURL();
     } on Exception {
@@ -94,9 +94,9 @@ class _EditPageState extends State<EditPage> {
 
   /// Firestore collection 참조 간략화
   CollectionReference giveProduct =
-  FirebaseFirestore.instance.collection('giveProducts');
+      FirebaseFirestore.instance.collection('giveProducts');
   CollectionReference takeProduct =
-  FirebaseFirestore.instance.collection('takeProducts');
+      FirebaseFirestore.instance.collection('takeProducts');
 
   ///**************** UI 구성에 필요한 변수들(하단의 위젯함수 내부에서 사용되는 것들도 포함) ***************///
 
@@ -112,15 +112,22 @@ class _EditPageState extends State<EditPage> {
   final _contentController = TextEditingController();
 
   /// 카테고리 설정하는 토글버튼과 관련된 함수
-  final _filter = ['카테고리', '여성 의류', '남성의류', '음식', '쿠폰', '전자제품', '책','학용품', '재능기부', '기타'];
+  final _filter = [
+    '카테고리',
+    '여성 의류',
+    '남성의류',
+    '음식',
+    '쿠폰',
+    '전자제품',
+    '책',
+    '학용품',
+    '재능기부',
+    '기타'
+  ];
   var _selectedFilter = '카테고리';
 
   @override
   Widget build(BuildContext context) {
-
-
-
-
     ///*********** ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ***********///
 
     /// EditPage 호출시 받는 매개변수 참조
@@ -173,8 +180,9 @@ class _EditPageState extends State<EditPage> {
     Future<void> uploadFile(String id) async {
       try {
         for (var num = 0; num < file.length; num++) {
-          print('file 저장 시작 -> ${num+1}');
-          await storage.ref('images/' + id + (product.photo + num).toString() + '.png')
+          print('file 저장 시작 -> ${num + 1}');
+          await storage
+              .ref('images/' + id + (product.photo + num).toString() + '.png')
               .putFile(file[num]);
         }
       } on Exception {
@@ -186,7 +194,7 @@ class _EditPageState extends State<EditPage> {
 
     /// giveProducts 또는 takeProducts 중 어디 컬랙션에 속한 게시물인지에 따라 참조할 path 결정
     CollectionReference target =
-    FirebaseFirestore.instance.collection(editGiveOrTake);
+        FirebaseFirestore.instance.collection(editGiveOrTake);
 
     /// 변경한 내용대로 게시물 업데이트 시키는 함수
     Future<void> editProduct(String category, String title, String content) {
@@ -195,7 +203,7 @@ class _EditPageState extends State<EditPage> {
         'content': content,
         'category': category,
         'modified': FieldValue.serverTimestamp(),
-        'photo' : product.photo + numberOfImages,
+        'photo': product.photo + numberOfImages,
       }).then((value) {
         if (images.isNotEmpty) uploadFile(productId);
       }).catchError((error) => print('Error: $error'));
@@ -205,8 +213,8 @@ class _EditPageState extends State<EditPage> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          for(var i=0; i<product.photo; i++)
-            if(data[i] != null)
+          for (var i = 0; i < product.photo; i++)
+            if (data[i] != null)
               Container(
                 height: 200,
                 width: 200,
@@ -224,7 +232,7 @@ class _EditPageState extends State<EditPage> {
     return Consumer<ApplicationState>(builder: (context, appState, _) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.cyan,
+          backgroundColor: Color(0xfffc7174),
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back,
@@ -273,17 +281,25 @@ class _EditPageState extends State<EditPage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             SizedBox(
-                              width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                              width: MediaQuery.of(context).size.height *
+                                  (0.11) *
+                                  0.12,
                             ),
                             Container(
-                              width: MediaQuery.of(context).size.height * (0.11) * 0.7,
-                              height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                              width: MediaQuery.of(context).size.height *
+                                  (0.11) *
+                                  0.7,
+                              height: MediaQuery.of(context).size.height *
+                                  (0.11) *
+                                  0.7,
                               child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
                                     primary: Colors.black,
                                     backgroundColor: Colors.transparent,
                                     textStyle: TextStyle(
-                                      color: numberOfImagesTextColor ? Colors.red : Colors.black,
+                                      color: numberOfImagesTextColor
+                                          ? Colors.red
+                                          : Colors.black,
                                       fontSize: 9,
                                     ),
                                     shape: RoundedRectangleBorder(
@@ -311,40 +327,45 @@ class _EditPageState extends State<EditPage> {
                                       Text(
                                         '$numberOfImages/10',
                                         style: TextStyle(
-                                          color:
-                                          numberOfImagesTextColor ? Colors.red : Colors.black,
+                                          color: numberOfImagesTextColor
+                                              ? Colors.red
+                                              : Colors.black,
                                         ),
                                       )
                                     ],
                                   )),
                             ),
                             SizedBox(
-                              width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                              width: MediaQuery.of(context).size.height *
+                                  (0.11) *
+                                  0.12,
                             ),
 
                             /// 업로드 된 사진들 가로 스크롤 가능
                             FutureBuilder(
-                              future:Future.wait([
-                                downloadURL(productId,0),
-                                downloadURL(productId,1),
-                                downloadURL(productId,2),
-                                downloadURL(productId,3),
-                                downloadURL(productId,4),
-                                downloadURL(productId,5),
-                                downloadURL(productId,6),
-                                downloadURL(productId,7),
-                                downloadURL(productId,8),
-                                downloadURL(productId,9),
+                              future: Future.wait([
+                                downloadURL(productId, 0),
+                                downloadURL(productId, 1),
+                                downloadURL(productId, 2),
+                                downloadURL(productId, 3),
+                                downloadURL(productId, 4),
+                                downloadURL(productId, 5),
+                                downloadURL(productId, 6),
+                                downloadURL(productId, 7),
+                                downloadURL(productId, 8),
+                                downloadURL(productId, 9),
                               ]),
-                              builder: (context, snapshot){
-                                if (snapshot.connectionState == ConnectionState.waiting) {
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
                                   return Column(
                                     children: [
-                                      Center(child: CircularProgressIndicator()),
+                                      Center(
+                                          child: CircularProgressIndicator()),
                                     ],
                                   );
-                                }  else {
-                                  if(snapshot.hasData) {
+                                } else {
+                                  if (snapshot.hasData) {
                                     return /*ListView(
                                   scrollDirection: Axis.horizontal,
                                   children: [
@@ -371,24 +392,36 @@ class _EditPageState extends State<EditPage> {
                                   ],
                                 );*/
 
-
-                                      Row(
-                                          children: [
-                                            //savedImages(snapshot.data),
-                                            images.isEmpty ? Container() : Container(
-                                              height: MediaQuery.of(context).size.height * (0.11) * 0.7,
-                                              width: MediaQuery.of(context).size.height * (0.35),
+                                        Row(children: [
+                                      //savedImages(snapshot.data),
+                                      images.isEmpty
+                                          ? Container()
+                                          : Container(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  (0.11) *
+                                                  0.7,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  (0.35),
                                               child: ListView.builder(
-                                                  scrollDirection: Axis.horizontal,
+                                                  scrollDirection:
+                                                      Axis.horizontal,
                                                   itemCount: images.length,
-                                                  itemBuilder: (BuildContext context, int index) {
+                                                  itemBuilder:
+                                                      (BuildContext context,
+                                                          int index) {
                                                     var asset = images[index];
                                                     return Row(
                                                       children: [
                                                         Stack(
                                                           children: [
                                                             Row(
-                                                              mainAxisAlignment: MainAxisAlignment.start,
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .start,
                                                               children: [
                                                                 //savedImages(snapshot.data),
                                                                 AssetThumb(
@@ -397,8 +430,18 @@ class _EditPageState extends State<EditPage> {
                                                                   width: 200,
                                                                 ),
                                                                 SizedBox(
-                                                                  height: MediaQuery.of(context).size.height * (0.11) * 0.7,
-                                                                  width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                                                                  height: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .height *
+                                                                      (0.11) *
+                                                                      0.7,
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .height *
+                                                                      (0.11) *
+                                                                      0.12,
                                                                 ),
                                                               ],
                                                             ),
@@ -410,9 +453,11 @@ class _EditPageState extends State<EditPage> {
                                                     );
                                                   }),
                                             )
-                                          ]);
+                                    ]);
                                   } else if (snapshot.hasData == false) {
-                                    return Container(height: 35,);
+                                    return Container(
+                                      height: 35,
+                                    );
                                   } else {
                                     return Container(
                                       child: Text('Snapshot Error!'),
@@ -421,11 +466,9 @@ class _EditPageState extends State<EditPage> {
                                 }
                               },
                             ),
-
                           ]),
                     ],
-                  )
-              ),
+                  )),
               Row(
                 children: [
                   SizedBox(width: 14),
@@ -439,8 +482,9 @@ class _EditPageState extends State<EditPage> {
                             children: [
                               /// 제목 입력하는 부분
                               SizedBox(
-                                height: MediaQuery.of(context).size.height * (0.06) ,
-                                child:  Column(
+                                height:
+                                    MediaQuery.of(context).size.height * (0.06),
+                                child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Expanded(
@@ -456,26 +500,33 @@ class _EditPageState extends State<EditPage> {
                                           hintStyle: TextStyle(
                                               height: 1.5,
                                               fontSize: 18.0,
-                                              color: Color(0xffced3d0)
-                                          ),
-                                          contentPadding: EdgeInsets.fromLTRB(0, 10.0, 0, 10.0),
+                                              color: Color(0xffced3d0)),
+                                          contentPadding: EdgeInsets.fromLTRB(
+                                              0, 10.0, 0, 10.0),
                                         ),
-                                        style: TextStyle(fontSize: 18, height: 1.5, ),
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          height: 1.5,
+                                        ),
                                         enableSuggestions: false,
                                         autocorrect: false,
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            _titleController.text = product.title;
+                                            _titleController.text =
+                                                product.title;
                                           }
                                           return null;
                                         },
                                       ),
                                     ),
-                                    SizedBox(height: 5,)
+                                    SizedBox(
+                                      height: 5,
+                                    )
                                   ],
                                 ),
                               ),
                               Divider(thickness: 1),
+
                               /// 카테고리 드롭다운 버튼과 원해요/나눠요 토글 버튼 있는 Row
                               Row(
                                 children: [
@@ -486,11 +537,12 @@ class _EditPageState extends State<EditPage> {
                                           isExpanded: true,
                                           value: _selectedFilter,
                                           items: _filter.map(
-                                                (value) {
+                                            (value) {
                                               return DropdownMenuItem(
                                                 value: value,
                                                 child: Center(
-                                                  child: Text(value,
+                                                  child: Text(
+                                                    value,
                                                     textAlign: TextAlign.center,
                                                     style: TextStyle(
                                                       fontSize: 18,
@@ -501,24 +553,28 @@ class _EditPageState extends State<EditPage> {
                                             },
                                           ).toList(),
                                           onChanged: (value) {
-                                            if (value != _selectedFilter)
-                                            { _selectedFilter= value;}
+                                            if (value != _selectedFilter) {
+                                              _selectedFilter = value;
+                                            }
                                             setState(() {
                                               _selectedFilter = value;
                                             });
                                           },
                                         ),
-                                      )
+                                      )),
+                                  SizedBox(
+                                    width: 10,
                                   ),
-                                  SizedBox(width: 10,),
                                   Expanded(
                                     flex: 6,
+
                                     /// 게시물 올릴 카테고리 (give 또는 take) 정하는 토글버튼
                                     child: _buildToggleButtons(context),
                                   )
                                 ],
                               ),
                               Divider(thickness: 1),
+
                               /// 게시글 내용 입력하는 부분
                               Row(
                                 children: [
@@ -535,9 +591,15 @@ class _EditPageState extends State<EditPage> {
                                         disabledBorder: InputBorder.none,
                                         hintMaxLines: 3,
                                         hintText: product.content,
-                                        hintStyle: TextStyle(height: 1.5, fontSize: 18.0, color: Color(0xffced3d0)),
+                                        hintStyle: TextStyle(
+                                            height: 1.5,
+                                            fontSize: 18.0,
+                                            color: Color(0xffced3d0)),
                                       ),
-                                      style: TextStyle(fontSize: 18, height: 1.5,),
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        height: 1.5,
+                                      ),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
                                           _contentController.text =
@@ -576,96 +638,104 @@ class _EditPageState extends State<EditPage> {
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.016,
             ),
-            Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.height * (0.11) * 0.12,
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.height * (0.11) * 0.7,
-                    height: MediaQuery.of(context).size.height * (0.11) * 0.7,
-                    child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          primary: Colors.black,
-                          backgroundColor: Colors.transparent,
-                          textStyle: TextStyle(
-                            color: numberOfImagesTextColor ? Colors.red : Colors.black,
-                            fontSize: 9,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
+            Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+              ),
+              Container(
+                width: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      primary: Colors.black,
+                      backgroundColor: Colors.transparent,
+                      textStyle: TextStyle(
+                        color:
+                            numberOfImagesTextColor ? Colors.red : Colors.black,
+                        fontSize: 9,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        getMultiImage(10);
+                        if (numberOfImages < 10) {
+                          numberOfImagesTextColor = false;
+                        } else {
+                          numberOfImagesTextColor = true;
+                        }
+                      });
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.camera_alt_rounded,
+                          semanticLabel: 'Image upload',
+                          color: Colors.grey,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            getMultiImage(10);
-                            if (numberOfImages < 10) {
-                              numberOfImagesTextColor = false;
-                            } else {
-                              numberOfImagesTextColor = true;
-                            }
-                          });
-                        },
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.camera_alt_rounded,
-                              semanticLabel: 'Image upload',
-                              color: Colors.grey,
-                            ),
-                            Text(
-                              '$numberOfImages/10',
-                              style: TextStyle(
-                                color:
-                                numberOfImagesTextColor ? Colors.red : Colors.black,
-                              ),
-                            )
-                          ],
-                        )),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.height * (0.11) * 0.12,
-                  ),
+                        Text(
+                          '$numberOfImages/10',
+                          style: TextStyle(
+                            color: numberOfImagesTextColor
+                                ? Colors.red
+                                : Colors.black,
+                          ),
+                        )
+                      ],
+                    )),
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+              ),
 
-                  /// 업로드 된 사진들 가로 스크롤 가능
-                  Row(children: [
-                    images.isEmpty ? Container() : Container(
-                      height: MediaQuery.of(context).size.height * (0.11) * 0.7,
-                      width: MediaQuery.of(context).size.height * (0.35),
-                      child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: images.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            var asset = images[index];
-                            return Stack(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    AssetThumb(
-                                      asset: asset,
-                                      height: 200,
-                                      width: 200,
-                                    ),
-                                    SizedBox(
-                                      height: MediaQuery.of(context).size.height * (0.11) * 0.7,
-                                      width: MediaQuery.of(context).size.height * (0.11) * 0.12,
-                                    ),
-                                  ],
-                                ),
+              /// 업로드 된 사진들 가로 스크롤 가능
+              Row(children: [
+                images.isEmpty
+                    ? Container()
+                    : Container(
+                        height:
+                            MediaQuery.of(context).size.height * (0.11) * 0.7,
+                        width: MediaQuery.of(context).size.height * (0.35),
+                        child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: images.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              var asset = images[index];
+                              return Stack(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      AssetThumb(
+                                        asset: asset,
+                                        height: 200,
+                                        width: 200,
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                (0.11) *
+                                                0.7,
+                                        width:
+                                            MediaQuery.of(context).size.height *
+                                                (0.11) *
+                                                0.12,
+                                      ),
+                                    ],
+                                  ),
 
-                                /// 여기서 삭제버튼 구현하다 관둠...
-                              ],
-                            );
-                          }),
-                    )
-                  ])
-                ]),
+                                  /// 여기서 삭제버튼 구현하다 관둠...
+                                ],
+                              );
+                            }),
+                      )
+              ])
+            ]),
           ],
-        )
-    );
+        ));
   }
 
   /// give or take 선택하는 토글 버튼
@@ -676,8 +746,8 @@ class _EditPageState extends State<EditPage> {
         minWidth: MediaQuery.of(context).size.width * 0.2,
         minHeight: 30,
       ),
-      selectedBorderColor: Colors.cyan,
-      selectedColor: Colors.cyan,
+      selectedBorderColor: Color(0xfffc7174),
+      selectedColor: Color(0xfffc7174),
       borderRadius: BorderRadius.circular(4.0),
       isSelected: _selectionsOfGiveOrTake,
       onPressed: (int index) {
@@ -699,5 +769,4 @@ class _EditPageState extends State<EditPage> {
       ],
     );
   }
-
 }
