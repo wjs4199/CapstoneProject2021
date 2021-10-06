@@ -76,6 +76,9 @@ class _DetailPageState extends State<DetailPage> {
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
   StreamController<Icon> changeFavoriteButton = StreamController<Icon>.broadcast();
 
+  // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
+  StreamController<String> changeTextField = StreamController<String>.broadcast();
+
   /// storage 에서 다운로드한 이미지 url 들이 저장될 정적 저장소
   var imageUrlList = [];
 
@@ -166,23 +169,6 @@ class _DetailPageState extends State<DetailPage> {
       return Scaffold(
         body: CircularProgressIndicator(),
       );
-    }
-
-    ///*** user collection 내에서 userName이 일치하는 doc의 nickname을 가져오는 부분 ****///
-
-    /// user collection 참조 간략화
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
-
-    /// 유저의 닉네임을 찾아서 보여주는 함수
-    String findNickname( AsyncSnapshot<QuerySnapshot> snapshot, String name){
-      var nickName = 'null';
-      snapshot.data.docs.forEach((document) {
-        if (document['username'] == name){
-          nickName = document['nickname'];
-        }
-      });
-      print('찾은 닉네임은 $nickName!!');
-      return nickName;
     }
 
     ///************************ 게시글 삭제 및  지난 시간 계산 함수들 ************************///
@@ -341,6 +327,8 @@ class _DetailPageState extends State<DetailPage> {
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
     }
+
+    var currentFocus = FocusScope.of(context);
 
     /// Add 페이지 화면 구성
     return Scaffold(
@@ -556,17 +544,7 @@ class _DetailPageState extends State<DetailPage> {
                                       height: 42,
                                       child:
                                       /// 이름과 시간
-                                      StreamBuilder<QuerySnapshot>(
-                                          stream: users.snapshots(),
-                                          builder: (BuildContext context,
-                                              AsyncSnapshot<QuerySnapshot> snapshot) {
-                                            if (snapshot.hasError) {
-                                              return Text('x');
-                                            }
-                                            if (snapshot.connectionState == ConnectionState.waiting) {
-                                              return Text('');
-                                            }
-                                            return Column(
+                                      Column(
                                                 mainAxisAlignment: MainAxisAlignment.start,
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
@@ -576,7 +554,7 @@ class _DetailPageState extends State<DetailPage> {
                                                     //width: 10,
                                                     height: 18,
                                                     child: Text(
-                                                      ' ${findNickname(snapshot, product.userName)}\n',
+                                                      '${product.nickName}\n',
                                                       style: TextStyle(
                                                         fontFamily: 'Roboto_Bold',
                                                         color: Colors.black,
@@ -625,26 +603,8 @@ class _DetailPageState extends State<DetailPage> {
                                                     ),
                                                   )
                                                 ]
-                                            );
-                                          }
-                                      ),
-
-                                    ),
-                                    /// 채팅으로 넘어가는 버튼
-                                    /*IconButton(
-                                        onPressed: (){
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => Chat(
-                                                peerId: product.uid,
-                                                peerAvatar: FirebaseAuth.instance.currentUser.photoURL,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        icon: Icon(Icons.chat)
-                                    ),*/
+                                            )
+                                    )
                                   ],
                                 ),
                                 SizedBox(height: 9.0),
@@ -732,7 +692,7 @@ class _DetailPageState extends State<DetailPage> {
                               ]),
                         ),
                         SizedBox(width: 20),
-                      ],///
+                      ],
                     ),
                     /// 게시물 내용 아래 댓글들
                     Container(
@@ -854,6 +814,31 @@ class _DetailPageState extends State<DetailPage> {
                                 )
                             ),
                           ),
+                          /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
+                          /*Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
+                                  child: TextField(
+                                    controller: _commentController,
+                                    decoration: const InputDecoration(
+                                      focusedBorder: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      errorBorder: InputBorder.none,
+                                      disabledBorder: InputBorder.none,
+                                      hintText: '댓글을 입력하세요',
+                                    ),
+                                    onSubmitted: (value) {
+                                      //if (value == null || value.isEmpty) {
+                                        //return '댓글을 입력하세요';
+                                      //}
+                                      //return null;
+                                    },
+                                    onChanged: (value) {
+                                      changeTextField.add(value);
+                                    }
+                                  ),
+                                )
+                            ),*/
                           SizedBox(width: 3),
                           IconButton(
                             icon: const Icon(Icons.send_outlined),
@@ -873,10 +858,29 @@ class _DetailPageState extends State<DetailPage> {
                               }
                             },
                           ),
+                          /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
+                          /*StreamBuilder(
+                            stream: changeTextField.stream,
+                            builder: (context, snapshot) {
+                              return IconButton(
+                                icon: const Icon(Icons.send_outlined),
+                                iconSize: 27,
+                                color: Color(0xffc32323),
+                                onPressed: ()  {
+                                  _commentController.clear();
+                                  currentFocus.unfocus();
+                                  addComments(snapshot.data)
+                                      .then((value) {
+                                        context.read<ApplicationState>().init();
+                                    print('add comment ok!');
+                                  });
+                                },
+                              );
+                            }
+                          ),*/
                         ],
                       ),
                     ),
-
                   ],
                 ),
               ),

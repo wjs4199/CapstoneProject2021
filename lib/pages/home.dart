@@ -369,21 +369,6 @@ class PostTileMaker extends StatelessWidget {
 
     ///*** user collection 내에서 userName이 일치하는 doc의 nickname을 가져오는 부분 ****///
 
-    /// user collection 참조 간략화
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
-
-    /// 유저의 닉네임을 찾아서 보여주는 함수
-    String findNickname( AsyncSnapshot<QuerySnapshot> snapshot, String name){
-      var nickName = 'null';
-      snapshot.data.docs.forEach((document) {
-        if (document['username'] == name){
-          nickName = document['nickname'];
-        }
-      });
-      print('찾은 닉네임은 $nickName!!');
-      return nickName;
-    }
-
     return InkWell(
       onTap: () {
         if (_giveOrTake) {
@@ -402,17 +387,7 @@ class PostTileMaker extends StatelessWidget {
       },
 
       /// Custom Tile 구조로 생성 (postTile.dart 구조 참조)
-      child: StreamBuilder<QuerySnapshot>(
-          stream: users.snapshots(),
-          builder: (BuildContext context,
-              AsyncSnapshot<QuerySnapshot> snapshotUser) {
-            if (snapshotUser.hasError) {
-              return Text('Error!');
-            }
-            if (snapshotUser.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            }
-            return FutureBuilder(
+      child: FutureBuilder(
               future: returnDate(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -421,7 +396,7 @@ class PostTileMaker extends StatelessWidget {
                   return CustomListItem(
                     title: _product.title,
                     subtitle: _product.content,
-                    author: findNickname(snapshotUser,_product.userName),
+                    author: _product.nickName,
                     publishDate: snapshot.data,
                     // category: _product.category,
                     likes: _product.likes,
@@ -448,9 +423,7 @@ class PostTileMaker extends StatelessWidget {
                   );
                 }
               },
-            );
-          }
-          )
+            )
     );
   }
 }
