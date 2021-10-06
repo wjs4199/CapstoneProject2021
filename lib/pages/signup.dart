@@ -151,7 +151,6 @@ class SignUpState extends State<SignUp> {
                                   .toString(),
                               'nickname': textEditingController1.text,
                             }).then((value) {
-
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(

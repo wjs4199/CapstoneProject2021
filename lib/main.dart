@@ -293,26 +293,7 @@ class ApplicationState extends ChangeNotifier {
     }
 
 
-    ///************************* UserName 가져오는 부분 *************************///
-    FirebaseFirestore.instance
-        .collection('UserName')
-        .snapshots()
-        .listen((snapshot) {
-      _userName = [];
-      snapshot.docs.forEach((document) {
-        _userName.add(Users(
-          chattingWith: document.data()['chattingWith'],
-          createdAt: document.data()['createdAt'],
-          id: document.data()['id'],
-          nickname: document.data()['nick'],
-          photoUrl: document.data()['photoUrl'],
-          username: document.data()['username'],
-
-        ));
-      });
-      notifyListeners();
-    });
-
+    ///************************* users 가져오는 부분 *************************///
     FirebaseFirestore.instance
         .collection('users')
         .snapshots()
