@@ -37,6 +37,7 @@ dependencies:
   carousel_slider: ^4.0.0 #added 예은
   flutter_image_compress: ^1.0.0 #added 예은
   image: ^3.0.0 #added 예은
+  flutter_screenutil: ^5.0.0+2 #added by 찬식
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +64,13 @@ flutter:
     - images/mimi7.gif
     - images/mimi8.gif
     - images/mimi9.gif
+    - assets/desktop.png
+    - assets/grow.png
+    - assets/idea.png
+    - assets/idea.png
+    - assets/mobile.png
+    - assets/social.png
+
 
   fonts:
     - family: Pacifico

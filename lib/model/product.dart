@@ -77,7 +77,7 @@ class Users {
   });
 
   final String chattingWith;
-  final Timestamp createdAt;
+  final String createdAt;
   final String id;
   final String nickname;
   final String photoUrl;

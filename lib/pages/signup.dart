@@ -26,7 +26,7 @@ class SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     var isDuplicated = false;
     var checkLoop = false;
-    var name = "";
+    var name = '';
 
     var currentUserId = FirebaseAuth.instance.currentUser.uid;
 
@@ -34,18 +34,16 @@ class SignUpState extends State<SignUp> {
     final snackBar2 = SnackBar(content: Text('사용해도 좋습니다'));
     final snackBar3 = SnackBar(content: Text('중복체크를 해주세요'));
 
-    _loadcurrentNickname() async {
+    _currentNickname() async {
       await FirebaseFirestore.instance.collection('users').doc(currentUserId)
           .get()
           .then((DocumentSnapshot ds) {
         name = ds['nickname'];
-        print('current NickName = ' + name);
-
         return name;
       });
     }
 
-    _loadcurrentNickname();
+    _currentNickname();
 
     return Scaffold(
       body: Form(
@@ -126,7 +124,7 @@ class SignUpState extends State<SignUp> {
                         /// 중복체크를 하지 않거나, 중복이 있음에도 불구하고 시작하기 누르면 그냥 로그인 되는 현상 해결
 
                         if(name == textEditingController1.text) {
-                          Navigator.push(
+                          await Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => HomePage()));
@@ -153,7 +151,6 @@ class SignUpState extends State<SignUp> {
                                   .toString(),
                               'nickname': textEditingController1.text,
                             }).then((value) {
-
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(

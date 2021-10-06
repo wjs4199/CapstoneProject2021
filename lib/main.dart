@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:giveandtake/pages/views/3_msg_view.dart';
+import 'package:giveandtake/pages/welcome.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,9 +40,10 @@ class _ApplicationState extends State<Application> {
             home: HomePage(),
             ///edited
             //isSignedIn(),
-            initialRoute: '/login',
+            initialRoute: '/welcome',
             // Named Routes
             routes: {
+              '/welcome': (context) => WelcomePage(),
               '/login': (context) => LoginPage(),
               '/home': (context) => HomePage(),
               '/giveadd': (context) => AddPage(giveOrTake: 'give'),
@@ -296,26 +298,7 @@ class ApplicationState extends ChangeNotifier {
     }
 
 
-    ///************************* UserName 가져오는 부분 *************************///
-    FirebaseFirestore.instance
-        .collection('UserName')
-        .snapshots()
-        .listen((snapshot) {
-      _userName = [];
-      snapshot.docs.forEach((document) {
-        _userName.add(Users(
-          chattingWith: document.data()['chattingWith'],
-          createdAt: document.data()['createdAt'],
-          id: document.data()['id'],
-          nickname: document.data()['nick'],
-          photoUrl: document.data()['photoUrl'],
-          username: document.data()['username'],
-
-        ));
-      });
-      notifyListeners();
-    });
-
+    ///************************* users 가져오는 부분 *************************///
     FirebaseFirestore.instance
         .collection('users')
         .snapshots()
