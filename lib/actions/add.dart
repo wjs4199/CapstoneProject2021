@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -28,7 +29,6 @@ class AddPage extends StatefulWidget {
 }
 
 class _AddPageState extends State<AddPage> {
-
   ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
   /// Firebase Storage 참조 간략화
   FirebaseStorage storage = FirebaseStorage.instance;
@@ -49,7 +49,10 @@ class _AddPageState extends State<AddPage> {
   Future<void> getMultiImage(int index) async {
     List<Asset> resultList;
     resultList = await MultiImagePicker.pickImages(
-        maxImages: index, enableCamera: true, selectedAssets: images, );
+      maxImages: index,
+      enableCamera: true,
+      selectedAssets: images,
+    );
 
     setState(() {
       images = resultList;
@@ -61,12 +64,12 @@ class _AddPageState extends State<AddPage> {
       }
     });
 
-    /// 받아온 이미지를 File 타입으로 변환
+    /// 받아온 Asset타입의 이미지를 File 타입으로 변환시키는 함수 호출
     await getImageFileFromAssets();
-
   }
 
-  Future<Uint8List> testCompressFile(File file) async {
+  /// 이미지를 압축해서 Uint8List 형식으로 내보내는 함수
+  Future<Uint8List> CompressFile(File file) async {
     var result = await FlutterImageCompress.compressWithFile(
       file.absolute.path,
       minWidth: 1000,
@@ -80,21 +83,22 @@ class _AddPageState extends State<AddPage> {
     return result;
   }
 
-  /// image 리스트에 들어있는 Asset 타입 이미지들을 File 타입으로 변환시키는 함수(storage 저장 위해)
+  /// image 리스트에 들어있는 Asset 타입 이미지들을 압축시킨 뒤 File 타입으로 변환시키는 함수(storage 저장 위해)
   Future<void> getImageFileFromAssets() async {
     images.forEach((imageAsset) async {
+      /// Asset 형식의 파일을 File 형식으로 바꿈
       final filePath =
           await FlutterAbsolutePath.getAbsolutePath(imageAsset.identifier);
       var tempFile = File(filePath);
 
+      /// Uint8List 형식의 이미지 파일을 Image형식으로 변환함
+      var image = Im.decodeImage(await CompressFile(tempFile));
 
-      //var image = Im.decodeImage(tempFile.readAsBytesSync());
-      var image = Im.decodeImage(await testCompressFile(tempFile));
-      print('1차완료!');
-     // var smallerImage = Im.copyResize(image, width: 1000, height: 1000); // choose the size here, it will maintain aspect ratio
-      //print('2차완료!');
-      var compressedImage = File('$filePath')..writeAsBytesSync(Im.encodeJpg(image, quality: 90));
-      print('3차완료!');
+      /// 퀄리티 재설정 하면서 .jpg 형태의 File형식으로 변환함
+      var compressedImage = File('$filePath')
+        ..writeAsBytesSync(Im.encodeJpg(image, quality: 90));
+
+      /// 최종 압축된 File 형식의 이미지를 file list 에 넣음
       file.add(compressedImage);
     });
   }
@@ -113,19 +117,19 @@ class _AddPageState extends State<AddPage> {
     }
   }
 
-
-  _currentNickname() async {
-    await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser.uid)
+  Future<String> _currentNickName() async {
+    var resultName;
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser.uid)
         .get()
         .then((DocumentSnapshot ds) {
       name = ds['nickname'];
       print('current NickName = ' + name);
+    }).then((value) => resultName);
 
-      return name;
-    });
+    return resultName;
   }
-
-
 
   ///**************** 게시글 저장과 관련된 변수/ 함수들 ***************///
   /// 현재 유저의 이름 참조 간략화
@@ -154,7 +158,8 @@ class _AddPageState extends State<AddPage> {
       'hits': 1,
       'photo': numberOfImages,
       'user_photoURL': user.photoURL,
-      'user_nickname' : _currentNickname(), /// for chatting
+      'nickName': 'gg'//_currentNickName(),
+      /// for chatting
     }).then((value) async {
       if (images.isNotEmpty) {
         await uploadFile(value.id);
@@ -178,7 +183,9 @@ class _AddPageState extends State<AddPage> {
       'hits': 1,
       'photo': numberOfImages,
       'user_photoURL': user.photoURL,
-      'user_nickname' : _currentNickname(), /// for chatting
+      'user_nickname': _currentNickName(),
+
+      /// for chatting
     }).then((value) {
       if (images.isNotEmpty) uploadFile(value.id);
     }).catchError((error) => print('Error: $error'));
@@ -196,24 +203,10 @@ class _AddPageState extends State<AddPage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
-  /// 카테고리 설정하는 토글버튼과 관련된 함수
-  final _filter = [
-    '카테고리',
-    '여성 의류',
-    '남성의류',
-    '음식',
-    '쿠폰',
-    '전자제품',
-    '책',
-    '학용품',
-    '재능기부',
-    '기타'
-  ];
-  var _selectedFilter = '카테고리';
+  var _selectedFilter = '물건';
 
   @override
   Widget build(BuildContext context) {
-
     return Consumer<ApplicationState>(
         builder: (context, appState, _) => Scaffold(
             appBar: AppBar(
@@ -250,15 +243,14 @@ class _AddPageState extends State<AddPage> {
                       semanticLabel: '저장',
                     ),
                     onPressed: () {
-                      if (_formKey.currentState.validate()) {
                         if (widget.giveOrTake == 'give') {
-                          addGiveProduct(
+                           addGiveProduct(
                             _titleController.text,
                             _contentController.text,
                             _selectedFilter,
                           );
                         } else {
-                          addTakeProduct(
+                           addTakeProduct(
                             _titleController.text,
                             _contentController.text,
                             _selectedFilter,
@@ -266,7 +258,6 @@ class _AddPageState extends State<AddPage> {
                         }
                         Navigator.pop(context);
                         appState.orderByFilter('All');
-                      }
                     }),
               ],
             ),
@@ -337,7 +328,7 @@ class _AddPageState extends State<AddPage> {
                                 /// 카테고리 드롭다운 버튼과 원해요/나눠요 토글 버튼 있는 Row
                                 Row(
                                   children: [
-                                    if(widget.giveOrTake == 'give')
+                                    if (widget.giveOrTake == 'give')
                                       _buildGiveCategoryToggleButtons()
                                     else
                                       _buildTakeCategoryToggleButtons()
@@ -406,7 +397,7 @@ class _AddPageState extends State<AddPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width *0.461,
+        minWidth: MediaQuery.of(context).size.width * 0.461,
         minHeight: 50,
       ),
       selectedBorderColor: Color(0xffeb6859),
@@ -432,8 +423,7 @@ class _AddPageState extends State<AddPage> {
       children: [
         Text(
           '물건',
-          textAlign:
-          TextAlign.center,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'NanumSquareRoundR',
             fontWeight: FontWeight.bold,
@@ -442,8 +432,7 @@ class _AddPageState extends State<AddPage> {
         ),
         Text(
           '재능',
-          textAlign:
-          TextAlign.center,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'NanumSquareRoundR',
             fontWeight: FontWeight.bold,
@@ -464,7 +453,7 @@ class _AddPageState extends State<AddPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width *0.461,
+        minWidth: MediaQuery.of(context).size.width * 0.461,
         minHeight: 50,
       ),
       selectedBorderColor: Color(0xffeb6859),
@@ -490,8 +479,7 @@ class _AddPageState extends State<AddPage> {
       children: [
         Text(
           '물건',
-          textAlign:
-          TextAlign.center,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'NanumSquareRoundR',
             fontWeight: FontWeight.bold,
@@ -500,8 +488,7 @@ class _AddPageState extends State<AddPage> {
         ),
         Text(
           '재능',
-          textAlign:
-          TextAlign.center,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'NanumSquareRoundR',
             fontWeight: FontWeight.bold,
@@ -512,13 +499,12 @@ class _AddPageState extends State<AddPage> {
     );
   }
 
-
   /// 상단 사진업로드하는 위젯
   Widget imageUpLoadWidget() {
     return Container(
         color: Colors.transparent,
         width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height * (0.1),
+        height: MediaQuery.of(context).size.height * (0.11),
         child: Column(
           children: [
             SizedBox(
@@ -580,42 +566,119 @@ class _AddPageState extends State<AddPage> {
               /// 업로드 된 사진들 가로 스크롤 가능
               Row(children: [
                 images.isEmpty
-                    ? Container()
+                    ? Container(
+                      height: MediaQuery.of(context).size.height * (0.11) * 0.77,
+                      width: MediaQuery.of(context).size.height * (0.35),
+                    )
                     : Container(
-                        height:
-                            MediaQuery.of(context).size.height * (0.11) * 0.7,
+                        height: MediaQuery.of(context).size.height * (0.11) * 0.77,
                         width: MediaQuery.of(context).size.height * (0.35),
                         child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: images.length,
                             itemBuilder: (BuildContext context, int index) {
                               var asset = images[index];
-                              return Stack(
+                              return Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      AssetThumb(
-                                        asset: asset,
-                                        height: 200,
-                                        width: 200,
-                                      ),
+                                  Stack(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Stack(children: [
+                                          Container(
+                                              height: MediaQuery.of(context).size.height * (0.11) * 0.77,
+                                              width: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                    height: MediaQuery.of(context).size.height * (0.11) * 0.045,
+                                                  ),
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Container(
+                                                        height: 67,
+                                                        width: 67,
+                                                        child: ClipRRect(
+                                                          borderRadius: BorderRadius.circular(5.0),
+                                                          child: AssetThumb(
+                                                            asset: asset,
+                                                            height: 200,
+                                                            width: 200,
+                                                          ),
+                                                        )
+                                                      )
+                                                    ],
+                                                  )
+                                                ],
+                                            )
+                                          ),
+                                          Container(
+                                            height: MediaQuery.of(context).size.height * (0.11) * 0.76,
+                                            width: MediaQuery.of(context).size.height * (0.11) * 0.73,
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              children: [
+                                                Container(
+                                                  height: MediaQuery.of(context).size.height * (0.11) * 0.65,
+                                                  width: MediaQuery.of(context).size.height * (0.11) * 0.73,
+                                                  child: Row(
+                                                      mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                      crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                      children: [
+                                                        Container(
+                                                          width: 53,
+                                                        ),
+                                                        Expanded(
+                                                          child: Container(
+                                                            width: 20,
+                                                            height: 20,
+                                                            child: InkWell(
+                                                              onTap: () {
+                                                                setState(() {
+                                                                  images.remove(asset);
+                                                                  numberOfImages = images.length;
+                                                                });
+                                                              },
+                                                              child: Icon(
+                                                                Icons.cancel,
+                                                                size: 18,
+                                                                color: Color(0x00000000).withOpacity(0.5),
+                                                              ),
+                                                            )
+                                                          ),)
+                                                      ]),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                      ]),
                                       SizedBox(
                                         height:
-                                            MediaQuery.of(context).size.height *
-                                                (0.11) *
-                                                0.7,
+                                        MediaQuery.of(context).size.height *
+                                            (0.11) *
+                                            0.7,
                                         width:
-                                            MediaQuery.of(context).size.height *
-                                                (0.11) *
-                                                0.12,
+                                        MediaQuery.of(context).size.height *
+                                            (0.11) *
+                                            0.12,
                                       ),
                                     ],
                                   ),
 
                                   /// 여기서 삭제버튼 구현하다 관둠...
                                 ],
+                              )
+                                ],
                               );
+
+
                             }),
                       )
               ])
