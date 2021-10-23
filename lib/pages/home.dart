@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   ///* ------------------------------ 수정 -------------------------------- *////
   /// _HomePageState 클래스 밑에 바로 build 가 보이도록,
   /// home.dart 에 정의 필요 없는것들 전부 main.dart 로
-  _HomePageState({Key key, @required this.currentUserId});
+  _HomePageState({@required this.currentUserId});
 
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
@@ -150,6 +150,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               // - Each menu should be navigated by Named Routes
               /// 오류수정
               handleSignOut();
+            },
+          ),
+          ListTile(
+            title: Text('Manual'),
+            // - The Menu Icons should be placed in the leading position
+            leading: Icon(
+              Icons.book
+            ),
+            onTap: () {
+              Navigator.pushNamed(context, '/welcome');
             },
           ),
         ],
