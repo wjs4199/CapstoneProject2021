@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giveandtake/model/welcome_item.dart';
-import 'package:giveandtake/pages/login.dart';
+import 'package:giveandtake/pages/home.dart';
 
 
-class WelcomePage extends StatefulWidget {
+class ManualPage extends StatefulWidget {
   @override
-  _WelcomePageState createState() => _WelcomePageState();
+  _ManualPageState createState() => _ManualPageState();
 }
 
-class _WelcomePageState extends State<WelcomePage> {
+class _ManualPageState extends State<ManualPage> {
 
   final _pageViewController = PageController(initialPage: 0);
   @override
@@ -33,7 +33,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => LoginPage()));
+                        builder: (context) => HomePage()));
               },
               child: Text(
                 'Skip',
@@ -123,7 +123,7 @@ class _WelcomePageState extends State<WelcomePage> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => LoginPage()));
+                                      builder: (context) => HomePage()));
                             }
                           },
                           color: index != 3

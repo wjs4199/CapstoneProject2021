@@ -1,20 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:giveandtake/components/loading.dart';
 import 'package:giveandtake/model/const.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-
-import '../../main.dart';
+import 'package:google_sign_in/google_sign_in.dart';import '../../main.dart';
 import '../chat.dart';
 
-final String currentUserId = FirebaseAuth.instance.currentUser.uid;
-final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final ScrollController listScrollController = ScrollController();
 
@@ -37,19 +30,6 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
         pinned: true,
         snap: false,
         floating: true,
-        // expandedHeight: 140.0,
-        // flexibleSpace: const FlexibleSpaceBar(
-        //   background: FlutterLogo(),
-        // ),
-        // actions: <Widget>[
-        //   IconButton(
-        //     icon: Icon(
-        //       Icons.location_on,
-        //       semanticLabel: 'location',
-        //     ),
-        //     onPressed: () {},
-        //   ),
-        // ],
       ),
       SliverList(
         delegate: SliverChildListDelegate(
@@ -338,7 +318,6 @@ Container _buildReceiverScreen(BuildContext context, DocumentSnapshot document){
   );
 }
 
-///
 Widget buildItem(BuildContext context, DocumentSnapshot document) {
   if (document != null) {
    // var userChat = UserChat.fromDocument(document);
@@ -368,166 +347,3 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
 
 ///* -------------------------------------------------------------------- *///
 
-
-/*
-@override
-void initState() {
-  //super.initState();
-  registerNotification();
-  configLocalNotification();
-  listScrollController.addListener(scrollListener);
-
-}
-
-void registerNotification() {
-  firebaseMessaging.requestPermission();
-
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('onMessage: $message');
-    if (message.notification != null) {
-      showNotification(message.notification);
-    }
-    return;
-  });
-
-  firebaseMessaging.getToken().then((token) {
-    print('token: $token');
-    FirebaseFirestore.instance.collection('UserName').doc(currentUserId).update({'pushToken': token});
-  }).catchError((err) {
-    Fluttertoast.showToast(msg: err.message.toString());
-  });
-}
-
-void showNotification(RemoteNotification remoteNotification) async {
-  var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-    Platform.isAndroid ? 'com.dfa.flutterchatdemo' : 'com.duytq.flutterchatdemo',
-    'Flutter chat demo',
-    'your channel description',
-    playSound: true,
-    enableVibration: true,
-    importance: Importance.max,
-    priority: Priority.high,
-  );
-  var iOSPlatformChannelSpecifics = IOSNotificationDetails();
-  var platformChannelSpecifics =
-  NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
-
-  print(remoteNotification);
-
-  await flutterLocalNotificationsPlugin.show(
-    0,
-    remoteNotification.title,
-    remoteNotification.body,
-    platformChannelSpecifics,
-    payload: null,
-  );
-}
-
-void configLocalNotification() {
-  var initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
-  var initializationSettingsIOS = IOSInitializationSettings();
-  var initializationSettings =
-  InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-  flutterLocalNotificationsPlugin.initialize(initializationSettings);
-}
-
-void scrollListener() {
-  if (listScrollController.offset >= listScrollController.position.maxScrollExtent &&
-      !listScrollController.position.outOfRange) {
-    setState(() {
-      _limit += _limitIncrement;
-    });
-  }
-}
-
-
-Future<bool> onBackPress() {
-  openDialog();
-  return Future.value(false);
-}
-
-Future<Null> openDialog() async {
-  switch (await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
-          children: <Widget>[
-            Container(
-              color: themeColor,
-              margin: EdgeInsets.all(0.0),
-              padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
-              height: 100.0,
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(bottom: 10.0),
-                    child: Icon(
-                      Icons.exit_to_app,
-                      size: 30.0,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    'Exit app',
-                    style: TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    'Are you sure to exit app?',
-                    style: TextStyle(color: Colors.white70, fontSize: 14.0),
-                  ),
-                ],
-              ),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context, 0);
-              },
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(right: 10.0),
-                    child: Icon(
-                      Icons.cancel,
-                      color: primaryColor,
-                    ),
-                  ),
-                  Text(
-                    'CANCEL',
-                    style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context, 1);
-              },
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(right: 10.0),
-                    child: Icon(
-                      Icons.check_circle,
-                      color: primaryColor,
-                    ),
-                  ),
-                  Text(
-                    'YES',
-                    style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
-            ),
-          ],
-        );
-      })) {
-    case 0:
-      break;
-    case 1:
-      exit(0);
-  }
-}
-
-
- */

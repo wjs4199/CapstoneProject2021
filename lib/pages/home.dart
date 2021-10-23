@@ -159,7 +159,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Icons.book
             ),
             onTap: () {
-              Navigator.pushNamed(context, '/welcome');
+              Navigator.pushNamed(context, '/manual');
             },
           ),
         ],
