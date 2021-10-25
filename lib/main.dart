@@ -57,7 +57,7 @@ class _ApplicationState extends State<Application> {
           return MaterialApp(
             title: 'Give_N_Take',
             //home: _decideMainPage() == true ? HomePage() : LoginPage(),
-            initialRoute: _decideMainPage() != null ? '/home' : '/login',
+            initialRoute: _decideMainPage() == null ? '/home' : '/login',
             // Named Routes
             routes: {
               '/manual': (context) => ManualPage(),
