@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_speed_dial/simple_speed_dial.dart';
 
 import '../main.dart';
@@ -23,7 +24,7 @@ import 'views/4_my_view.dart';
 // Home
 class HomePage extends StatefulWidget {
   ///* ------------------------------ 수정 -------------------------------- *////
-  final String currentUserId; // main 에 정의되어도 됨
+  final SharedPreferences currentUserId; // main 에 정의되어도 됨
   HomePage({Key key, @required this.currentUserId}) : super(key: key); // 필요X
 
   ///* ------------------------------------------------------------------ *////
@@ -37,7 +38,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   /// home.dart 에 정의 필요 없는것들 전부 main.dart 로
   _HomePageState({@required this.currentUserId});
 
-  final String currentUserId;
+  final SharedPreferences currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -147,8 +148,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Icons.logout,
             ),
             onTap: () {
-              // - Each menu should be navigated by Named Routes
-              /// 오류수정
               handleSignOut();
             },
           ),
@@ -181,7 +180,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       HomeView(context, appState),
 
       /// 3(메신저):
-      MsgView(context, appState),
+      MessagePage(),
+      //MsgView(context, appState),
 
       /// 4(MyPage):
       MyView(context, appState)
@@ -297,6 +297,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     await FirebaseAuth.instance.signOut();
     await googleSignIn.disconnect();
     await googleSignIn.signOut();
+    await currentUserId.clear();
 /*
     setState(() {
       isLoading = false;

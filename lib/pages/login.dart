@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
         context,
         MaterialPageRoute(
             builder: (context) =>
-                HomePage(currentUserId: prefs.getString('id'))),
+                HomePage(currentUserId: prefs)),
       );
     }
 
@@ -106,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    HomePage(currentUserId: firebaseUser.uid)));
+                    HomePage(currentUserId: prefs)));
       } else {
         await Fluttertoast.showToast(msg: 'Sign in fail');
         setState(() {

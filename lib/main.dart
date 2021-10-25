@@ -3,7 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:giveandtake/pages/manual.dart';
+import 'package:giveandtake/pages/views/3_msg_view.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/home.dart';
 import 'pages/login.dart';
 import 'pages/detail.dart';
@@ -26,6 +29,25 @@ class Application extends StatefulWidget {
   _ApplicationState createState() => _ApplicationState();
 }
 class _ApplicationState extends State<Application> {
+  SharedPreferences prefs;
+  bool isLoading = false;
+  bool isLoggedIn = false;
+
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+
+  Future<bool> _decideMainPage() async {
+    isLoggedIn = await googleSignIn.isSignedIn();
+    if (isLoggedIn) {
+      print('Login true');
+      return true;
+    }
+    else{
+      print('Login false');
+      return false;
+    }
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -34,9 +56,8 @@ class _ApplicationState extends State<Application> {
         if (snapshot.connectionState == ConnectionState.done) {
           return MaterialApp(
             title: 'Give_N_Take',
-            home: HomePage(),
-           // initialRoute: '/welcome',
-
+            //home: _decideMainPage() == true ? HomePage() : LoginPage(),
+            initialRoute: _decideMainPage() != null ? '/home' : '/login',
             // Named Routes
             routes: {
               '/manual': (context) => ManualPage(),
@@ -44,6 +65,7 @@ class _ApplicationState extends State<Application> {
               '/home': (context) => HomePage(),
               '/giveadd': (context) => AddPage(giveOrTake: 'give'),
               '/takeadd': (context) => AddPage(giveOrTake: 'take'),
+              '/message': (context) => MessagePage(),
               '/map': (context) => MapPage(),
             },
 

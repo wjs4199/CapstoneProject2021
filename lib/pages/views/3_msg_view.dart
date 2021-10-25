@@ -2,18 +2,178 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:giveandtake/components/loading.dart';
 import 'package:giveandtake/model/const.dart';
-import 'package:google_sign_in/google_sign_in.dart';import '../../main.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../chat.dart';
 
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final ScrollController listScrollController = ScrollController();
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+
 bool isLoading = false;
 int _limit = 20;
+var _flutterLocalNotificationsPlugin;
 
+Future _showNotification() async {
+  var android = AndroidNotificationDetails(
+      'your channel id', 'your channel name', channelDescription:  'your channel description',
+      importance: Importance.max, priority: Priority.high);
+
+  var ios = IOSNotificationDetails();
+  var detail = NotificationDetails(android: android, iOS: ios);
+
+  await _flutterLocalNotificationsPlugin.show(
+    0,
+    '새로운 메시지가 도착했습니다',
+    '메신저 텝을 눌러주세요',
+    detail,
+    payload: 'Hello Flutter',
+  );
+}
+
+
+class MessagePage extends StatefulWidget {
+  
+  @override
+  _MessagePageState createState() => _MessagePageState();
+}
+
+class _MessagePageState extends State<MessagePage> {
+
+
+  @override
+  void initState(){
+    super.initState();
+    var initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    //ios 알림 설정 : 소리, 뱃지 등
+    var initializationSettingsIOS = IOSInitializationSettings();
+
+    var initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+
+    _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    //onSelectNotification의 경우 알림을 눌렀을때 어플에서 실행되는 행동을 설정
+    _flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: onSelectNotification);
+  }
+
+  Future onSelectNotification(String payload) async {
+    print('payload : $payload');
+/*
+    await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text('Well done'),
+          content: Text('Payload: $payload'),
+        ));
+
+ */
+    /*
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MessagePage(),
+      ),
+    );
+
+     */
+  }
+
+  //await _flutterLocalNotificationPlugin.~ 에서 payload부분은 모두 설정하여 주지 않아도 됩니다.
+//버튼을 눌렀을때 한번 알림이 뜨게 해주는 방법입니다.
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              title: Text(
+                '메신저',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontFamily: 'NanumSquareRoundR',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              leading: IconButton(
+                  onPressed: (){
+                    _showNotification();
+                  },
+                  icon: Icon(Icons.notification_important)),
+
+
+              backgroundColor: Color(0xfffc7174),
+              pinned: true,
+              snap: false,
+              floating: true,
+            ),
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  ///added
+                  Stack(
+                    children: <Widget>[
+                      // List
+                      ///chatting list 를 보여주는 container
+                      Container(
+                        child: StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('chatRoom')
+                              .limit(_limit)
+                              .snapshots(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (snapshot.hasData) {
+                              return ListView.builder(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.all(10.0),
+
+                                /// data 를 가져오는 곳 buildItem 위젯
+                                itemBuilder: (context, index) =>
+                                    buildItem(context, snapshot.data.docs[index]),
+                                itemCount: snapshot.data.docs.length,
+                                controller: listScrollController,
+                              );
+                            } else {
+                              /// data 가 없을 시
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  valueColor:
+                                  AlwaysStoppedAnimation<Color>(primaryColor),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+
+                      // Loading
+                      Positioned(
+                        child: isLoading ? const Loading() : Container(),
+                      )
+                    ],
+                  ),
+
+                ],
+              ),
+            )
+          ],
+        ),
+
+    );
+  }
+
+}
+/*
 Widget MsgView(BuildContext context, ApplicationState appState) {
   return CustomScrollView(
     slivers: <Widget>[
@@ -84,8 +244,17 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
   );
 }
 
+
+ */
+
+
+
 Container _buildSenderScreen(BuildContext context, DocumentSnapshot document){
-  return Container(
+  return
+
+
+
+    Container(
     margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
 
     /// 메신저 탭에서 각각 사용자들 list 를 클릭할 수 있게 만들어 놓은 text button
@@ -296,6 +465,12 @@ Container _buildReceiverScreen(BuildContext context, DocumentSnapshot document){
                       style: TextStyle(color: primaryColor),
                     ),
                   ),
+                  Icon(
+                      Icons.add_alert,
+                      color: Colors.deepOrangeAccent,
+
+
+                  ),
                   /*
                       Container(
                         alignment: Alignment.centerLeft,
@@ -333,6 +508,7 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
         return _buildSenderScreen(context, document);
       }
       else{
+        _showNotification();
         return  _buildReceiverScreen(context, document);
 
       }
