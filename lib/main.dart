@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:giveandtake/pages/manual.dart';
+import 'package:giveandtake/pages/splash.dart';
 import 'package:giveandtake/pages/views/3_msg_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +35,7 @@ class _ApplicationState extends State<Application> {
   bool isLoggedIn = false;
 
   final GoogleSignIn googleSignIn = GoogleSignIn();
-
+/*
   Future<bool> _decideMainPage() async {
     isLoggedIn = await googleSignIn.isSignedIn();
     if (isLoggedIn) {
@@ -48,6 +49,8 @@ class _ApplicationState extends State<Application> {
 
   }
 
+ */
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -56,8 +59,11 @@ class _ApplicationState extends State<Application> {
         if (snapshot.connectionState == ConnectionState.done) {
           return MaterialApp(
             title: 'Give_N_Take',
+            home: SplashPage(),
             //home: _decideMainPage() == true ? HomePage() : LoginPage(),
-            initialRoute: _decideMainPage() == null ? '/home' : '/login',
+            //initialRoute: _decideMainPage() == null ? '/home' : '/login',
+            debugShowCheckedModeBanner: false,
+
             // Named Routes
             routes: {
               '/manual': (context) => ManualPage(),
