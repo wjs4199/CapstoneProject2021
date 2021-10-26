@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:giveandtake/pages/manual.dart';
+import 'package:giveandtake/pages/splash.dart';
 import 'package:giveandtake/pages/views/3_msg_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
