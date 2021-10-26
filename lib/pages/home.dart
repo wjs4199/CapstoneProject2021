@@ -26,14 +26,16 @@ class HomePage extends StatefulWidget {
   ///* ------------------------------ 수정 -------------------------------- *////
   final SharedPreferences currentUserId;
   var nickname; // main 에 정의되어도 됨
-  HomePage({Key key, @required this.currentUserId,  @required this.nickname}) : super(key: key); // 필요X
+  HomePage({Key key, @required this.currentUserId, @required this.nickname})
+      : super(key: key); // 필요X
 
   ///* ------------------------------------------------------------------ *////
   @override
-  State createState() => _HomePageState(currentUserId: currentUserId, nickname : nickname);
+  State createState() =>
+      _HomePageState(currentUserId: currentUserId, nickname: nickname);
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   ///* ------------------------------ 수정 -------------------------------- *////
   /// _HomePageState 클래스 밑에 바로 build 가 보이도록,
   /// home.dart 에 정의 필요 없는것들 전부 main.dart 로
@@ -347,7 +349,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => AddPage(giveOrTake: 'give', nickname : nickname)));
+                      builder: (context) =>
+                          AddPage(giveOrTake: 'give', nickname: nickname)));
               //Navigator.pushNamed(context, '/giveadd');
             },
             // closeSpeedDialOnPressed: false,
@@ -360,11 +363,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
             labelStyle: TextStyle(
                 fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
             onTap: () {
-
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => AddPage(giveOrTake: 'take', nickname : nickname)));
+                      builder: (context) =>
+                          AddPage(giveOrTake: 'take', nickname: nickname)));
               //Navigator.pushNamed(context, '/takeadd');
             },
           ),
@@ -408,7 +411,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
       // showUnselectedLabels: false,
       currentIndex: _selectedIndex,
       elevation: 0,
-      backgroundColor: Theme.of(context).bottomAppBarColor.withAlpha(200),
+      backgroundColor: Theme.of(context).bottomAppBarColor.withAlpha(220),
       selectedItemColor: Theme.of(context).primaryColor,
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
@@ -520,16 +523,17 @@ class PostTileMaker extends StatelessWidget {
       });
     }
 
-    String findNickname( AsyncSnapshot<QuerySnapshot> snapshot, String name){
-      var nickName = 'null';
-      snapshot.data.docs.forEach((document) {
-        if (document['username'] == name){
-          nickName = document['nickname'];
-        }
-      });
-      print('찾은 닉네임은 $nickName!!');
-      return nickName;
-    }
+    /// findNickname add.dart 에 정의되어 있는데 왜 여기 또있는지?
+    // String findNickname(AsyncSnapshot<QuerySnapshot> snapshot, String name) {
+    //   var nickName = 'null';
+    //   snapshot.data.docs.forEach((document) {
+    //     if (document['username'] == name) {
+    //       nickName = document['nickname'];
+    //     }
+    //   });
+    //   print('찾은 닉네임은 $nickName!!');
+    //   return nickName;
+    // }
 
     ///*** user collection 내에서 userName이 일치하는 doc의 nickname을 가져오는 부분 ****///
 
