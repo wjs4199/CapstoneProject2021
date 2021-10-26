@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:giveandtake/actions/add.dart';
 import 'package:giveandtake/pages/login.dart';
 import 'package:giveandtake/pages/views/2_request_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -23,21 +24,23 @@ import 'views/3_msg_view.dart';
 // Home
 class HomePage extends StatefulWidget {
   ///* ------------------------------ 수정 -------------------------------- *////
-  final SharedPreferences currentUserId; // main 에 정의되어도 됨
-  HomePage({Key key, @required this.currentUserId}) : super(key: key); // 필요X
+  final SharedPreferences currentUserId;
+  var nickname; // main 에 정의되어도 됨
+  HomePage({Key key, @required this.currentUserId,  @required this.nickname}) : super(key: key); // 필요X
 
   ///* ------------------------------------------------------------------ *////
   @override
-  State createState() => _HomePageState(currentUserId: currentUserId);
+  State createState() => _HomePageState(currentUserId: currentUserId, nickname : nickname);
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
   ///* ------------------------------ 수정 -------------------------------- *////
   /// _HomePageState 클래스 밑에 바로 build 가 보이도록,
   /// home.dart 에 정의 필요 없는것들 전부 main.dart 로
-  _HomePageState({@required this.currentUserId});
+  _HomePageState({@required this.currentUserId, @required this.nickname});
 
   final SharedPreferences currentUserId;
+  final String nickname;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -341,7 +344,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             labelStyle: TextStyle(
                 fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
             onTap: () {
-              Navigator.pushNamed(context, '/giveadd');
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => AddPage(giveOrTake: 'give', nickname : nickname)));
+              //Navigator.pushNamed(context, '/giveadd');
             },
             // closeSpeedDialOnPressed: false,
           ),
@@ -353,7 +360,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             labelStyle: TextStyle(
                 fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
             onTap: () {
-              Navigator.pushNamed(context, '/takeadd');
+
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => AddPage(giveOrTake: 'take', nickname : nickname)));
+              //Navigator.pushNamed(context, '/takeadd');
             },
           ),
         ],
@@ -508,6 +520,17 @@ class PostTileMaker extends StatelessWidget {
       });
     }
 
+    String findNickname( AsyncSnapshot<QuerySnapshot> snapshot, String name){
+      var nickName = 'null';
+      snapshot.data.docs.forEach((document) {
+        if (document['username'] == name){
+          nickName = document['nickname'];
+        }
+      });
+      print('찾은 닉네임은 $nickName!!');
+      return nickName;
+    }
+
     ///*** user collection 내에서 userName이 일치하는 doc의 nickname을 가져오는 부분 ****///
 
     return InkWell(
@@ -540,7 +563,7 @@ class PostTileMaker extends StatelessWidget {
               return CustomListItem(
                 title: _product.title,
                 subtitle: _product.content,
-                author: _product.nickName,
+                author: _product.nickname,
                 publishDate: snapshot.data,
                 // category: _product.category,
                 likes: _product.likes,
