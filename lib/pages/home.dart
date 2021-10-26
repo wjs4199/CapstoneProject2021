@@ -281,6 +281,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (_selectedIndex == 0) {
       return FloatingActionButton(
         onPressed: () {
+          print("add눌러짐!");
           Navigator.pushNamed(context, '/giveadd');
         },
         backgroundColor: Theme.of(context).primaryColor,

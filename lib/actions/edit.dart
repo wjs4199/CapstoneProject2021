@@ -284,7 +284,7 @@ class _EditPageState extends State<EditPage> {
         'content': content,
         'category': category,
         'modified': FieldValue.serverTimestamp(),
-        'photo': product.photo + numberOfImages,
+        'photo': alreadySavedList.length + willBeSavedFileList.length,
       }).then((value) {
         if (images.isNotEmpty) uploadFile(productId);
       }).catchError((error) => print('Error: $error'));
@@ -353,7 +353,7 @@ class _EditPageState extends State<EditPage> {
                                     color: Colors.grey,
                                   ),
                                   Text(
-                                    '${numberOfImages + alreadySavedList.length}/10',
+                                    '${willBeSavedFileList.length + alreadySavedList.length}/10',
                                     style: TextStyle(
                                       color: numberOfImagesTextColor
                                           ? Colors.red
@@ -468,6 +468,8 @@ class _EditPageState extends State<EditPage> {
                                                                             images.remove(asset);
                                                                           }
                                                                           numberOfImages = willBeSavedFileList.length;
+                                                                          print('willsaved 길이 : ${willBeSavedFileList.length}\n'
+                                                                              'alreadsaved 길이 : ${alreadySavedList.length}');
 
                                                                           /// 삭제해서 선택한 사진이 10개 아래이면 다시 색깔 검정으로
                                                                           if (numberOfImages + alreadySavedList.length >= 10) {
