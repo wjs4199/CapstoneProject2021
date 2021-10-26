@@ -62,6 +62,7 @@ class _ApplicationState extends State<Application> {
             title: 'Give_N_Take',
             theme: ThemeData(
               primaryColor: Color(0xfffc7174),
+              focusColor: Colors.black12,
               backgroundColor: Colors.white,
               // bottomAppBarColor: Color(0xffF0F1F5),
             ),

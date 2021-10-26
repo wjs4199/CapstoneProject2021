@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 import '../main.dart';
 import '../model/product.dart';
@@ -108,7 +109,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 height: 36.0,
                                 width: double.infinity,
                                 child: CupertinoTextField(
+                                  focusNode: _focusNode,
                                   keyboardType: TextInputType.text,
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontFamily: 'NanumSquareRoundR',
+                                  ),
                                   placeholder: '검색',
                                   placeholderStyle: TextStyle(
                                     color: Color(0xffC4C6CC),
@@ -236,7 +242,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Navigator.pushNamed(context, '/signup');
             },
           ),
-
           ListTile(
             title: Text('Manual'),
             // - The Menu Icons should be placed in the leading position
@@ -286,12 +291,37 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   /// FloatingActionButton 생성기
   Widget buildFAB() {
     if (_selectedIndex == 0) {
-      return FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/giveadd');
-        },
+      return SpeedDial(
+        icon: Icons.edit,
+        activeIcon: Icons.close,
         backgroundColor: Theme.of(context).primaryColor,
-        child: Icon(Icons.edit),
+        spacing: 10,
+        spaceBetweenChildren: 5,
+        children: [
+          SpeedDialChild(
+            child: Icon(Icons.accessibility),
+            foregroundColor: Colors.white,
+            backgroundColor: Color(0xfffc8862),
+            label: '나눔',
+            labelStyle: TextStyle(
+                fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
+            onTap: () {
+              Navigator.pushNamed(context, '/giveadd');
+            },
+            // closeSpeedDialOnPressed: false,
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.accessibility_new),
+            foregroundColor: Colors.white,
+            backgroundColor: Color(0xfffda26b),
+            label: '나눔요청',
+            labelStyle: TextStyle(
+                fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
+            onTap: () {
+              Navigator.pushNamed(context, '/takeadd');
+            },
+          ),
+        ],
       );
     } else if (_selectedIndex == 1) {
       return FloatingActionButton(
