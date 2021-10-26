@@ -449,10 +449,6 @@ Container _buildReceiverScreen(
                       style: TextStyle(color: primaryColor),
                     ),
                   ),
-                  Icon(
-                    Icons.add_alert,
-                    color: Colors.deepOrangeAccent,
-                  ),
                   /*
                       Container(
                         alignment: Alignment.centerLeft,
@@ -468,6 +464,10 @@ Container _buildReceiverScreen(
                 ],
               ),
             ),
+          ),
+          Icon(
+            Icons.add_alert,
+            color: Colors.deepOrangeAccent,
           ),
         ],
       ),
