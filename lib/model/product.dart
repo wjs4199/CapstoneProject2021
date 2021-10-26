@@ -41,8 +41,6 @@ class Comment {
     @required this.id,
     @required this.nickName,
     // @required this.isDeleted,
-
-
   });
 
   final String userName;
@@ -65,7 +63,6 @@ class Like {
 }
 
 class Users {
-
   Users({
     @required this.chattingWith,
     @required this.createdAt,
@@ -73,7 +70,6 @@ class Users {
     @required this.nickname,
     @required this.photoUrl,
     @required this.username,
-
   });
 
   final String chattingWith;
@@ -82,6 +78,4 @@ class Users {
   final String nickname;
   final String photoUrl;
   final String username;
-
-
 }

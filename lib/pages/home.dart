@@ -297,6 +297,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         backgroundColor: Theme.of(context).primaryColor,
         spacing: 10,
         spaceBetweenChildren: 5,
+        elevation: 10,
+        animationSpeed: 200,
         children: [
           SpeedDialChild(
             child: Icon(Icons.accessibility),
@@ -328,6 +330,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         onPressed: () {
           /// 메시지 작성 기능(페이지) 호출
         },
+        elevation: 10,
         backgroundColor: Theme.of(context).primaryColor,
         child: Icon(Icons.send),
       );

@@ -166,6 +166,9 @@ class _AddPageState extends State<AddPage> {
       'user_photoURL': user.photoURL,
       'nickName': _currentNickName(),
       /// for chatting
+      // 'user_nickname': _currentNickname(),
+
+      /// for chatting
     }).then((value) async {
       if (images.isNotEmpty) {
         await uploadFile(value.id);
@@ -190,6 +193,9 @@ class _AddPageState extends State<AddPage> {
       'photo': numberOfImages,
       'user_photoURL': user.photoURL,
       'nickName': _currentNickName(),
+
+      /// for chatting
+      // 'user_nickname': _currentNickname(),
 
       /// for chatting
     }).then((value) {
