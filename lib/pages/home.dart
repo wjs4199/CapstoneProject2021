@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:giveandtake/pages/login.dart';
@@ -9,7 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:intl/intl.dart';
-import 'package:simple_speed_dial/simple_speed_dial.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';
 import '../model/product.dart';
@@ -23,7 +24,7 @@ import 'views/4_my_view.dart';
 // Home
 class HomePage extends StatefulWidget {
   ///* ------------------------------ 수정 -------------------------------- *////
-  final String currentUserId; // main 에 정의되어도 됨
+  final SharedPreferences currentUserId; // main 에 정의되어도 됨
   HomePage({Key key, @required this.currentUserId}) : super(key: key); // 필요X
 
   ///* ------------------------------------------------------------------ *////
@@ -35,9 +36,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   ///* ------------------------------ 수정 -------------------------------- *////
   /// _HomePageState 클래스 밑에 바로 build 가 보이도록,
   /// home.dart 에 정의 필요 없는것들 전부 main.dart 로
-  _HomePageState({Key key, @required this.currentUserId});
+  _HomePageState({@required this.currentUserId});
 
-  final String currentUserId;
+  final SharedPreferences currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -49,41 +50,125 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
     _pageController = PageController();
     _tabController = TabController(length: 2, vsync: this);
+    _focusNode = FocusNode();
   }
 
   /// 시스템 함수에 PageView 기능 반영 처리(2)
   @override
   void dispose() {
+    _scrollController.dispose();
     _pageController.dispose();
     _tabController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       key: _scaffoldKey,
       // appBar: buildAppBar(context), /// SliverUI 사용으로 appBar 미사용
-      drawer: buildDrawer(context),
+      endDrawer: buildDrawer(context),
       body: Consumer<ApplicationState>(
-        builder: (context, appState, _) => Container(
-          color: Color(0xfffc7174),
-          child: SafeArea(
-            child: Container(
-              color: Colors.white,
-              child: SizedBox.expand(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() => _selectedIndex = index);
-                  },
+        builder: (context, appState, _) => SafeArea(
+          child: Container(
+            color: Colors.white,
+            child: NestedScrollView(
+              controller: _scrollController,
+              headerSliverBuilder:
+                  (BuildContext context, bool innerBoxIsScrolled) {
+                if (_selectedIndex == 0 || _selectedIndex == 1) {
+                  return <Widget>[
+                    SliverAppBar(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      pinned: true,
+                      snap: true,
+                      floating: true,
+                      expandedHeight: 118.0,
+                      iconTheme: IconThemeData(color: Colors.black),
+                      title: Text(
+                        'Pelag',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 28,
+                          fontFamily: 'NanumSquareRoundR',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: Column(
+                          children: <Widget>[
+                            SizedBox(height: 60.0),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  16.0, 6.0, 16.0, 16.0),
+                              child: Container(
+                                height: 36.0,
+                                width: double.infinity,
+                                child: CupertinoTextField(
+                                  keyboardType: TextInputType.text,
+                                  placeholder: '검색',
+                                  placeholderStyle: TextStyle(
+                                    color: Color(0xffC4C6CC),
+                                    fontSize: 16.0,
+                                    fontFamily: 'NanumSquareRoundR',
+                                  ),
+                                  prefix: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        9.0, 6.0, 9.0, 6.0),
+                                    child: Icon(
+                                      Icons.search,
+                                      color: Color(0xffC4C6CC),
+                                    ),
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    color: Color(0xffF0F1F5),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ];
+                } else {
+                  return <Widget>[
+                    SliverAppBar(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      pinned: true,
+                      snap: true,
+                      floating: true,
+                      iconTheme: IconThemeData(color: Colors.black),
+                      title: Text(
+                        'Pelag',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 28,
+                          fontFamily: 'NanumSquareRoundR',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ];
+                }
+              },
+              body: PageView(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() => _selectedIndex = index);
+                },
 
-                  /// _selectedIndex 값에 따른 페이지(상응 위젯) 출력
-                  children:
-                      _buildWidgetOptions(context, appState, _selectedIndex),
-                ),
+                /// _selectedIndex 값에 따른 페이지(상응 위젯) 출력
+                children:
+                    _buildWidgetOptions(context, appState, _selectedIndex),
               ),
             ),
           ),
@@ -97,9 +182,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ],
           ),
-          child: buildNavBar(context)),
+          child: buildNavAppBar(context)),
+      // bottomNavigationBar: buildNavAppBar(context),
       floatingActionButton: buildFAB(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
     //);
   }
@@ -119,7 +205,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: Text(
-                  /// 작업중
                   '-Drawer-\n프로필, 레밸 등 배치',
                   style: TextStyle(
                     fontSize: 24,
@@ -141,15 +226,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             },
           ),
           ListTile(
+            title: Text('My Page'),
+            // - The Menu Icons should be placed in the leading position
+            leading: Icon(Icons.account_circle),
+            onTap: () {},
+          ),
+          ListTile(
             title: Text('Sign Out'),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(
               Icons.logout,
             ),
             onTap: () {
-              // - Each menu should be navigated by Named Routes
-              /// 오류수정
               handleSignOut();
+            },
+          ),
+          ListTile(
+            title: Text('Manual'),
+            // - The Menu Icons should be placed in the leading position
+            leading: Icon(Icons.book),
+            onTap: () {
+              Navigator.pushNamed(context, '/manual');
             },
           ),
         ],
@@ -165,82 +262,68 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       NanumView(context, appState, _tabController),
 
       /// 1(나눔요청):
-      RequestView(context, appState, _tabController),
+      // RequestView(context, appState, _tabController),
 
       /// 2(홈):
-      HomeView(context, appState),
+      // HomeView(context, appState),
 
       /// 3(메신저):
-      MsgView(context, appState),
+      MessagePage(),
 
       /// 4(MyPage):
-      MyView(context, appState)
+      // MyView(context, appState)
     ];
     return _widgetOptions;
   }
 
   /// FloatingActionButton 생성기
   Widget buildFAB() {
-    if (_selectedIndex == 2) {
-      return SpeedDial(
-        closedForegroundColor: Colors.white,
-        openForegroundColor: Colors.white60,
-        closedBackgroundColor: Color(0xfffc7174),
-        openBackgroundColor: Color(0xffeb6859),
-        labelsStyle: TextStyle(
-          fontFamily: 'NanumSquareRoundR',
-          fontWeight: FontWeight.bold,
-          // color: Colors.black87,
-        ),
-        // controller: /* Your custom animation controller goes here */
-        speedDialChildren: <SpeedDialChild>[
-          SpeedDialChild(
-            child: Icon(Icons.accessibility),
-            foregroundColor: Colors.white,
-            backgroundColor: Color(0xfffc8862),
-            label: '나눔',
-            onPressed: () {
-              Navigator.pushNamed(context, '/giveadd');
-            },
-            // closeSpeedDialOnPressed: false,
-          ),
-          SpeedDialChild(
-            child: Icon(Icons.accessibility_new),
-            foregroundColor: Colors.white,
-            backgroundColor: Color(0xfffda26b),
-            label: '나눔요청',
-            onPressed: () {
-              Navigator.pushNamed(context, '/takeadd');
-            },
-          ),
-        ],
-        child: Icon(Icons.mode_edit),
-      );
-    } else if (_selectedIndex == 0) {
+    if (_selectedIndex == 0) {
       return FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/giveadd');
         },
-        backgroundColor: Color(0xfffc7174),
-        child: Icon(Icons.mode_edit),
+        backgroundColor: Theme.of(context).primaryColor,
+        child: Icon(Icons.edit),
       );
     } else if (_selectedIndex == 1) {
       return FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/takeadd');
+          /// 메시지 작성 기능(페이지) 호출
         },
-        backgroundColor: Color(0xfffc7174),
-        child: Icon(Icons.mode_edit),
+        backgroundColor: Theme.of(context).primaryColor,
+        child: Icon(Icons.send),
       );
     }
+    // else if (_selectedIndex == 1) {
+    //   return FloatingActionButton(
+    //     onPressed: () {
+    //       Navigator.pushNamed(context, '/takeadd');
+    //     },
+    //     backgroundColor: Color(0xfffc7174),
+    //     child: Icon(Icons.mode_edit),
+    //   );
+    // }
     return null;
   }
 
   /// Builder Widget for Bottom Navigation Bar
+  BottomAppBar buildNavAppBar(BuildContext context) {
+    return BottomAppBar(
+      shape: CircularNotchedRectangle(),
+      color: Theme.of(context).bottomAppBarColor.withAlpha(255),
+      elevation: 0,
+      child: buildNavBar(context),
+    );
+  }
+
   BottomNavigationBar buildNavBar(BuildContext context) {
     return BottomNavigationBar(
+      showSelectedLabels: true,
+      showUnselectedLabels: false,
       currentIndex: _selectedIndex,
       elevation: 0,
+      backgroundColor: Theme.of(context).bottomAppBarColor.withAlpha(200),
       selectedItemColor: Color(0xfffc7174),
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
@@ -250,25 +333,33 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
       items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.accessibility),
+          icon: Icon(
+            Icons.accessibility,
+            size: 30,
+          ),
           label: '나눔',
         ),
+        // BottomNavigationBarItem(
+        //   icon: Icon(
+        //     Icons.accessibility_new,
+        //     size: 30,
+        //   ),
+        //   label: '나눔요청',
+        // ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.accessibility_new),
-          label: '나눔요청',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: '홈',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.messenger),
+          icon: Icon(
+            Icons.forum,
+            size: 30,
+          ),
           label: '메신저',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.account_circle),
-          label: 'My',
-        )
+        // BottomNavigationBarItem(
+        //   icon: Icon(
+        //     Icons.account_circle,
+        //     size: 25,
+        //   ),
+        //   label: 'My',
+        // )
       ],
     );
   }
@@ -287,6 +378,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     await FirebaseAuth.instance.signOut();
     await googleSignIn.disconnect();
     await googleSignIn.signOut();
+    await currentUserId.clear();
 /*
     setState(() {
       isLoading = false;
@@ -301,6 +393,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   /// PaveView 용 controller
   PageController _pageController;
   TabController _tabController;
+  ScrollController _scrollController;
+  FocusNode _focusNode;
 
   /// 현재 선택된 인덱스값 (첫번째 인덱스로 초기화)
   int _selectedIndex = 0;
@@ -370,60 +464,66 @@ class PostTileMaker extends StatelessWidget {
     ///*** user collection 내에서 userName이 일치하는 doc의 nickname을 가져오는 부분 ****///
 
     return InkWell(
-      onTap: () {
-        if (_giveOrTake) {
-          editProductHits('giveProducts');
-          Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'giveProducts', _product.photo)
-              .then((value) => Navigator.pushNamed(
-              context, '/detail/' + _product.id + '/giveProducts'));
-        } else {
-          editProductHits('giveProducts');
-          Provider.of<ApplicationState>(context, listen: false)
-              .detailPageUid(_product.id, 'takeProducts', _product.photo)
-              .then((value) => Navigator.pushNamed(
-              context, '/detail/' + _product.id + '/takeProducts'));
-        }
-      },
+        onTap: () {
+          if (_giveOrTake) {
+            editProductHits('giveProducts');
+            Provider.of<ApplicationState>(context, listen: false)
+                .detailPageUid(_product.id, 'giveProducts', _product.photo)
+                .then((value) => Navigator.pushNamed(
+                    context, '/detail/' + _product.id + '/giveProducts'));
+          } else {
+            editProductHits('giveProducts');
+            Provider.of<ApplicationState>(context, listen: false)
+                .detailPageUid(_product.id, 'takeProducts', _product.photo)
+                .then((value) => Navigator.pushNamed(
+                    context, '/detail/' + _product.id + '/takeProducts'));
+          }
+        },
 
-      /// Custom Tile 구조로 생성 (postTile.dart 구조 참조)
-      child: FutureBuilder(
-              future: returnDate(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else {
-                  return CustomListItem(
-                    title: _product.title,
-                    subtitle: _product.content,
-                    author: _product.nickName,
-                    publishDate: snapshot.data,
-                    // category: _product.category,
-                    likes: _product.likes,
-                    thumbnail: FutureBuilder(
-                      future: downloadURL(_product.id),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
-                        } else {
-                          if (snapshot.hasData) {
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: Image.network(snapshot.data.toString(),
-                                  fit: BoxFit.fitWidth),
-                            );
-                          } else if (snapshot.hasData == false) {
-                            return Container();
-                          } else {
-                            return Center(child: CircularProgressIndicator());
-                          }
-                        }
-                      },
-                    ),
-                  );
-                }
-              },
-            )
-    );
+        /// Custom Tile 구조로 생성 (postTile.dart 구조 참조)
+        child: FutureBuilder(
+          future: returnDate(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                  child: CircularProgressIndicator(
+                color: Theme.of(context).primaryColor,
+              ));
+            } else {
+              return CustomListItem(
+                title: _product.title,
+                subtitle: _product.content,
+                author: _product.nickName,
+                publishDate: snapshot.data,
+                // category: _product.category,
+                likes: _product.likes,
+                thumbnail: FutureBuilder(
+                  future: downloadURL(_product.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                          child: CircularProgressIndicator(
+                              color: Theme.of(context).primaryColor));
+                    } else {
+                      if (snapshot.hasData) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.network(snapshot.data.toString(),
+                              fit: BoxFit.fitWidth),
+                        );
+                      } else if (snapshot.hasData == false) {
+                        return Container();
+                      } else {
+                        return Center(
+                            child: CircularProgressIndicator(
+                                color: Theme.of(context).primaryColor));
+                      }
+                    }
+                  },
+                ),
+              );
+            }
+          },
+        ));
   }
 }

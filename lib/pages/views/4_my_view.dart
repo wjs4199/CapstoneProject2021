@@ -24,40 +24,40 @@ Widget MyView(BuildContext context, ApplicationState appState) {
 
     await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
-            (Route<dynamic> route) => false);
+        (Route<dynamic> route) => false);
   }
 
   return CustomScrollView(
     slivers: <Widget>[
-      SliverAppBar(
-        title: Text(
-          'My',
-          style: TextStyle(
-            fontSize: 18,
-            fontFamily: 'NanumSquareRoundR',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Color(0xfffc7174),
-        pinned: true,
-        snap: false,
-        floating: true,
-        // expandedHeight: 140.0,
-        // flexibleSpace: const FlexibleSpaceBar(
-        //   background: FlutterLogo(),
-        // ),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.logout,
-              //semanticLabel: 'location',
-            ),
-            onPressed: () {
-              handleSignOut();
-            },
-          ),
-        ],
-      ),
+      // SliverAppBar(
+      //   title: Text(
+      //     'My',
+      //     style: TextStyle(
+      //       fontSize: 18,
+      //       fontFamily: 'NanumSquareRoundR',
+      //       fontWeight: FontWeight.bold,
+      //     ),
+      //   ),
+      //   backgroundColor: Color(0xfffc7174),
+      //   pinned: true,
+      //   snap: false,
+      //   floating: true,
+      //   // expandedHeight: 140.0,
+      //   // flexibleSpace: const FlexibleSpaceBar(
+      //   //   background: FlutterLogo(),
+      //   // ),
+      //   actions: <Widget>[
+      //     IconButton(
+      //       icon: Icon(
+      //         Icons.logout,
+      //         //semanticLabel: 'location',
+      //       ),
+      //       onPressed: () {
+      //         handleSignOut();
+      //       },
+      //     ),
+      //   ],
+      // ),
       SliverList(
         delegate: SliverChildListDelegate(
           [
@@ -65,14 +65,11 @@ Widget MyView(BuildContext context, ApplicationState appState) {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(height: 20.0),
-
                 CircleAvatar(
                   radius: 50.0,
                   backgroundImage:
-                  NetworkImage(FirebaseAuth.instance.currentUser.photoURL),
+                      NetworkImage(FirebaseAuth.instance.currentUser.photoURL),
                 ),
-
-
                 SizedBox(height: 10.0),
                 Padding(
                   padding: const EdgeInsets.only(left: 40.0),
@@ -140,7 +137,7 @@ Widget MyView(BuildContext context, ApplicationState appState) {
                 ),
                 Card(
                   margin:
-                  EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
                   child: ListTile(
                     leading: Icon(
                       Icons.phone,
@@ -157,7 +154,7 @@ Widget MyView(BuildContext context, ApplicationState appState) {
                 ),
                 Card(
                   margin:
-                  EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
                   child: ListTile(
                     leading: Icon(
                       Icons.location_on,

@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giveandtake/model/welcome_item.dart';
-import 'package:giveandtake/pages/login.dart';
-
-class WelcomePage extends StatelessWidget {
-  final _pageViewController = new PageController(initialPage: 0);
+import 'package:giveandtake/pages/home.dart';
 
 
+class ManualPage extends StatefulWidget {
+  @override
+  _ManualPageState createState() => _ManualPageState();
+}
+
+class _ManualPageState extends State<ManualPage> {
+
+  final _pageViewController = PageController(initialPage: 0);
   @override
   Widget build(BuildContext context) {
    // ScreenUtil.init(context, width: 375, height: 812, allowFontScaling: false);
@@ -28,7 +33,7 @@ class WelcomePage extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => LoginPage()));
+                        builder: (context) => HomePage()));
               },
               child: Text(
                 'Skip',
@@ -118,7 +123,7 @@ class WelcomePage extends StatelessWidget {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => LoginPage()));
+                                      builder: (context) => HomePage()));
                             }
                           },
                           color: index != 3

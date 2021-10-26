@@ -20,13 +20,11 @@ class _LoginPageState extends State<LoginPage> {
   SharedPreferences prefs;
   bool isLoading = false;
   bool isLoggedIn = false;
-  // User currentUser;
 
   @override
   void initState() {
     super.initState();
     isSignedIn();
-
     ///자동로그인 호출
   }
 
@@ -34,16 +32,15 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       isLoading = true;
     });
-
     prefs = await SharedPreferences.getInstance();
 
     isLoggedIn = await googleSignIn.isSignedIn();
     if (isLoggedIn && prefs?.getString('id') != null) {
-      await Navigator.pushReplacement(
+       await Navigator.pushReplacement(
         context,
         MaterialPageRoute(
             builder: (context) =>
-                HomePage(currentUserId: prefs.getString('id'))),
+                HomePage(currentUserId: prefs)),
       );
     }
 
@@ -52,7 +49,9 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  Future handleSignIn() async {
+
+
+  Future<Null> handleSignIn() async {
     var googleUser = await googleSignIn.signIn();
     var googleAuth = await googleUser.authentication;
 
@@ -103,11 +102,11 @@ class _LoginPageState extends State<LoginPage> {
           isLoading = false;
         });
 
-        await Navigator.push(
+         await Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    HomePage(currentUserId: firebaseUser.uid)));
+                    HomePage(currentUserId: prefs)));
       } else {
         await Fluttertoast.showToast(msg: 'Sign in fail');
         setState(() {

@@ -2,11 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:giveandtake/pages/manual.dart';
+import 'package:giveandtake/pages/splash.dart';
 import 'package:giveandtake/pages/views/3_msg_view.dart';
-import 'package:giveandtake/pages/welcome.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'pages/home.dart';
 import 'pages/login.dart';
 import 'pages/detail.dart';
@@ -14,6 +15,7 @@ import 'legacy/map.dart';
 import 'model/product.dart';
 import 'actions/add.dart';
 import 'actions/edit.dart';
+import 'pages/splash.dart';
 
 void main() {
   runApp(
@@ -28,7 +30,27 @@ class Application extends StatefulWidget {
   @override
   _ApplicationState createState() => _ApplicationState();
 }
+
 class _ApplicationState extends State<Application> {
+  SharedPreferences prefs;
+  bool isLoading = false;
+  bool isLoggedIn = false;
+
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+
+  // Future<bool> _decideMainPage() async {
+  //   isLoggedIn = await googleSignIn.isSignedIn();
+  //   if (isLoggedIn) {
+  //     print('Login true');
+  //     return true;
+  //   }
+  //   else{
+  //     print('Login false');
+  //     return false;
+  //   }
+  //
+  // }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -37,17 +59,25 @@ class _ApplicationState extends State<Application> {
         if (snapshot.connectionState == ConnectionState.done) {
           return MaterialApp(
             title: 'Give_N_Take',
-            home: HomePage(),
-            ///edited
-            //isSignedIn(),
-            initialRoute: '/welcome',
+            theme: ThemeData(
+              primaryColor: Color(0xfffc7174),
+              backgroundColor: Colors.white,
+              // bottomAppBarColor: Color(0xffF0F1F5),
+            ),
+
+            home: SplashPage(),
+            //home: _decideMainPage() == true ? HomePage() : LoginPage(),
+            //initialRoute: _decideMainPage() == null ? '/home' : '/login',
+            debugShowCheckedModeBanner: false,
+
             // Named Routes
             routes: {
-              '/welcome': (context) => WelcomePage(),
+              '/manual': (context) => ManualPage(),
               '/login': (context) => LoginPage(),
               '/home': (context) => HomePage(),
               '/giveadd': (context) => AddPage(giveOrTake: 'give'),
               '/takeadd': (context) => AddPage(giveOrTake: 'take'),
+              '/message': (context) => MessagePage(),
               '/map': (context) => MapPage(),
             },
 
@@ -111,12 +141,14 @@ class ApplicationState extends ChangeNotifier {
   // comment와 like를 collection안에 어떤 구조로 넣을 것인가?
   // 원래 하던대로 상품 uid통해 찾으려면 이미 init한 상품 리스트들을 돌면서
   // datail페이지에 필요한 내용을 찾아내는 형식으로 해야할까?
-  Future<void> detailPageUid(String uid, String detailGiveOrTake, int photo) async{
+  Future<void> detailPageUid(
+      String uid, String detailGiveOrTake, int photo) async {
     this.uid = uid;
     this.detailGiveOrTake = detailGiveOrTake;
     this.photo = photo;
     print('main 에서 불려짐! detail page uid -> ' + uid);
-    await init().whenComplete(() => print('detailPageUid 에서 likeCount => ${likeList.length}'));
+    await init().whenComplete(
+        () => print('detailPageUid 에서 likeCount => ${likeList.length}'));
   }
 
   void checkNickname(String nickname) {
@@ -142,7 +174,6 @@ class ApplicationState extends ChangeNotifier {
   Stream<QuerySnapshot> currentStream;
 
   Future<void> init() async {
-
     ///************************* giveProducts / takeProducts 가져오는 부분 *************************///
     if (orderBy != 'All') {
       FirebaseFirestore.instance
@@ -273,6 +304,7 @@ class ApplicationState extends ChangeNotifier {
             created: document.data()['time'],
             id: document.id,
             nickName: document.data()['nickName'],
+
             ///edited
             //   isDeleted: document.data()['idDeleted'],
           ));
@@ -289,14 +321,13 @@ class ApplicationState extends ChangeNotifier {
         snapshot.docs.forEach((document) {
           _likeList.add(Like(
             uid: document.data()['uid'],
-            id : document.id,
+            id: document.id,
           ));
         });
         likeCount = _likeList.length;
         notifyListeners();
       });
     }
-
 
     ///************************* users 가져오는 부분 *************************///
     FirebaseFirestore.instance
@@ -326,5 +357,5 @@ class ApplicationState extends ChangeNotifier {
   List<Users> get username => _userName;
   List<Users> get users => _users;
 
-/// added
+  /// added
 }

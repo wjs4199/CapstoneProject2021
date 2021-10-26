@@ -1,26 +1,170 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:giveandtake/components/loading.dart';
 import 'package:giveandtake/model/const.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
-import '../../main.dart';
 import '../chat.dart';
 
-final String currentUserId = FirebaseAuth.instance.currentUser.uid;
-final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final ScrollController listScrollController = ScrollController();
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
 bool isLoading = false;
 int _limit = 20;
+var _flutterLocalNotificationsPlugin;
 
+Future _showNotification() async {
+  var android = AndroidNotificationDetails(
+      'your channel id', 'your channel name',
+      channelDescription: 'your channel description',
+      importance: Importance.max,
+      priority: Priority.high);
+
+  var ios = IOSNotificationDetails();
+  var detail = NotificationDetails(android: android, iOS: ios);
+
+  await _flutterLocalNotificationsPlugin.show(
+    0,
+    '새로운 메시지가 도착했습니다',
+    '메신저 텝을 눌러주세요',
+    detail,
+    payload: 'Hello Flutter',
+  );
+}
+
+class MessagePage extends StatefulWidget {
+  @override
+  _MessagePageState createState() => _MessagePageState();
+}
+
+class _MessagePageState extends State<MessagePage> {
+  @override
+  void initState() {
+    super.initState();
+    var initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    //ios 알림 설정 : 소리, 뱃지 등
+    var initializationSettingsIOS = IOSInitializationSettings();
+
+    var initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+
+    _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    //onSelectNotification의 경우 알림을 눌렀을때 어플에서 실행되는 행동을 설정
+    _flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: onSelectNotification);
+  }
+
+  Future onSelectNotification(String payload) async {
+    print('payload : $payload');
+/*
+    await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text('Well done'),
+          content: Text('Payload: $payload'),
+        ));
+
+ */
+    /*
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MessagePage(),
+      ),
+    );
+
+     */
+  }
+
+  //await _flutterLocalNotificationPlugin.~ 에서 payload부분은 모두 설정하여 주지 않아도 됩니다.
+//버튼을 눌렀을때 한번 알림이 뜨게 해주는 방법입니다.
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text(
+              '메신저',
+              style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'NanumSquareRoundR',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            leading: IconButton(
+                onPressed: () {
+                  _showNotification();
+                },
+                icon: Icon(Icons.notification_important)),
+            backgroundColor: Theme.of(context).primaryColor,
+            pinned: true,
+            snap: false,
+            floating: true,
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                ///added
+                Stack(
+                  children: <Widget>[
+                    // List
+                    ///chatting list 를 보여주는 container
+                    Container(
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('chatRoom')
+                            .limit(_limit)
+                            .snapshots(),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<QuerySnapshot> snapshot) {
+                          if (snapshot.hasData) {
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.all(10.0),
+
+                              /// data 를 가져오는 곳 buildItem 위젯
+                              itemBuilder: (context, index) =>
+                                  buildItem(context, snapshot.data.docs[index]),
+                              itemCount: snapshot.data.docs.length,
+                              controller: listScrollController,
+                            );
+                          } else {
+                            /// data 가 없을 시
+                            return Center(
+                              child: CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(primaryColor),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+
+                    // Loading
+                    Positioned(
+                      child: isLoading ? const Loading() : Container(),
+                    )
+                  ],
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+/*
 Widget MsgView(BuildContext context, ApplicationState appState) {
   return CustomScrollView(
     slivers: <Widget>[
@@ -37,19 +181,6 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
         pinned: true,
         snap: false,
         floating: true,
-        // expandedHeight: 140.0,
-        // flexibleSpace: const FlexibleSpaceBar(
-        //   background: FlutterLogo(),
-        // ),
-        // actions: <Widget>[
-        //   IconButton(
-        //     icon: Icon(
-        //       Icons.location_on,
-        //       semanticLabel: 'location',
-        //     ),
-        //     onPressed: () {},
-        //   ),
-        // ],
       ),
       SliverList(
         delegate: SliverChildListDelegate(
@@ -104,7 +235,10 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
   );
 }
 
-Container _buildSenderScreen(BuildContext context, DocumentSnapshot document){
+
+ */
+
+Container _buildSenderScreen(BuildContext context, DocumentSnapshot document) {
   return Container(
     margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
 
@@ -118,7 +252,7 @@ Container _buildSenderScreen(BuildContext context, DocumentSnapshot document){
             builder: (context) => Chat(
               peerId: document.get('idTo'),
               peerAvatar: document.get('peerAvatar'),
-              peerName : document.get('peerNickname'),
+              peerName: document.get('peerNickname'),
               myName: document.get('myNickname'),
               myAvatar: document.get('myAvatar'),
               // peerName: userChat.nickname,
@@ -144,45 +278,44 @@ Container _buildSenderScreen(BuildContext context, DocumentSnapshot document){
             borderRadius: BorderRadius.all(Radius.circular(25.0)),
             clipBehavior: Clip.hardEdge,
             child: document.get('peerAvatar').isNotEmpty
-            /// empty 가 아니면 photoURL 을 가져온다
+
+                /// empty 가 아니면 photoURL 을 가져온다
                 ? Image.network(
-              document.get('peerAvatar'),
-              fit: BoxFit.cover,
-              width: 50.0,
-              height: 50.0,
-              loadingBuilder: (BuildContext context, Widget child,
-                  ImageChunkEvent loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Container(
-                  width: 50,
-                  height: 50,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: primaryColor,
-                      value: loadingProgress.expectedTotalBytes !=
-                          null &&
-                          loadingProgress.expectedTotalBytes !=
-                              null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes
-                          : null,
-                    ),
-                  ),
-                );
-              },
-              errorBuilder: (context, object, stackTrace) {
-                return Icon(
-                  Icons.account_circle,
-                  size: 50.0,
-                  color: greyColor,
-                );
-              },
-            )
+                    document.get('peerAvatar'),
+                    fit: BoxFit.cover,
+                    width: 50.0,
+                    height: 50.0,
+                    loadingBuilder: (BuildContext context, Widget child,
+                        ImageChunkEvent loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        width: 50,
+                        height: 50,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: primaryColor,
+                            value: loadingProgress.expectedTotalBytes != null &&
+                                    loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes
+                                : null,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, object, stackTrace) {
+                      return Icon(
+                        Icons.account_circle,
+                        size: 50.0,
+                        color: greyColor,
+                      );
+                    },
+                  )
                 : Icon(
-              Icons.account_circle,
-              size: 50.0,
-              color: greyColor,
-            ),
+                    Icons.account_circle,
+                    size: 50.0,
+                    color: greyColor,
+                  ),
           ),
           Flexible(
             ///nickname 을 가져오는 container
@@ -221,7 +354,8 @@ Container _buildSenderScreen(BuildContext context, DocumentSnapshot document){
   );
 }
 
-Container _buildReceiverScreen(BuildContext context, DocumentSnapshot document){
+Container _buildReceiverScreen(
+    BuildContext context, DocumentSnapshot document) {
   return Container(
     margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
 
@@ -235,7 +369,7 @@ Container _buildReceiverScreen(BuildContext context, DocumentSnapshot document){
             builder: (context) => Chat(
               peerId: document.get('idFrom'),
               peerAvatar: document.get('myAvatar'),
-              peerName : document.get('myNickname'),
+              peerName: document.get('myNickname'),
               myName: document.get('peerNickname'),
               myAvatar: document.get('peerAvatar'),
               // peerName: userChat.nickname,
@@ -261,45 +395,44 @@ Container _buildReceiverScreen(BuildContext context, DocumentSnapshot document){
             borderRadius: BorderRadius.all(Radius.circular(25.0)),
             clipBehavior: Clip.hardEdge,
             child: document.get('myAvatar').isNotEmpty
-            /// empty 가 아니면 photoURL 을 가져온다
+
+                /// empty 가 아니면 photoURL 을 가져온다
                 ? Image.network(
-              document.get('myAvatar'),
-              fit: BoxFit.cover,
-              width: 50.0,
-              height: 50.0,
-              loadingBuilder: (BuildContext context, Widget child,
-                  ImageChunkEvent loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Container(
-                  width: 50,
-                  height: 50,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: primaryColor,
-                      value: loadingProgress.expectedTotalBytes !=
-                          null &&
-                          loadingProgress.expectedTotalBytes !=
-                              null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes
-                          : null,
-                    ),
-                  ),
-                );
-              },
-              errorBuilder: (context, object, stackTrace) {
-                return Icon(
-                  Icons.account_circle,
-                  size: 50.0,
-                  color: greyColor,
-                );
-              },
-            )
+                    document.get('myAvatar'),
+                    fit: BoxFit.cover,
+                    width: 50.0,
+                    height: 50.0,
+                    loadingBuilder: (BuildContext context, Widget child,
+                        ImageChunkEvent loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        width: 50,
+                        height: 50,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: primaryColor,
+                            value: loadingProgress.expectedTotalBytes != null &&
+                                    loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes
+                                : null,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, object, stackTrace) {
+                      return Icon(
+                        Icons.account_circle,
+                        size: 50.0,
+                        color: greyColor,
+                      );
+                    },
+                  )
                 : Icon(
-              Icons.account_circle,
-              size: 50.0,
-              color: greyColor,
-            ),
+                    Icons.account_circle,
+                    size: 50.0,
+                    color: greyColor,
+                  ),
           ),
           Flexible(
             ///nickname 을 가져오는 container
@@ -332,202 +465,37 @@ Container _buildReceiverScreen(BuildContext context, DocumentSnapshot document){
               ),
             ),
           ),
+          Icon(
+            Icons.add_alert,
+            color: Colors.deepOrangeAccent,
+          ),
         ],
       ),
     ),
   );
 }
 
-///
 Widget buildItem(BuildContext context, DocumentSnapshot document) {
   if (document != null) {
-   // var userChat = UserChat.fromDocument(document);
+    // var userChat = UserChat.fromDocument(document);
     //if (document.get('idTo') == FirebaseAuth.instance.currentUser.uid) {
-     // return SizedBox.shrink();
+    // return SizedBox.shrink();
     //}
 
-     if (document.id.contains(FirebaseAuth.instance.currentUser.uid))
-    {
-      if(document.get('idFrom') == FirebaseAuth.instance.currentUser.uid) ///내가 보내는 입장이면
+    if (document.id.contains(FirebaseAuth.instance.currentUser.uid)) {
+      if (document.get('idFrom') == FirebaseAuth.instance.currentUser.uid)
+
+      ///내가 보내는 입장이면
       {
-
         return _buildSenderScreen(context, document);
+      } else {
+        _showNotification();
+        return _buildReceiverScreen(context, document);
       }
-      else{
-        return  _buildReceiverScreen(context, document);
-
-      }
-
     }
   } else {
     return SizedBox.shrink();
   }
-
-
 }
 
 ///* -------------------------------------------------------------------- *///
-
-
-/*
-@override
-void initState() {
-  //super.initState();
-  registerNotification();
-  configLocalNotification();
-  listScrollController.addListener(scrollListener);
-
-}
-
-void registerNotification() {
-  firebaseMessaging.requestPermission();
-
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('onMessage: $message');
-    if (message.notification != null) {
-      showNotification(message.notification);
-    }
-    return;
-  });
-
-  firebaseMessaging.getToken().then((token) {
-    print('token: $token');
-    FirebaseFirestore.instance.collection('UserName').doc(currentUserId).update({'pushToken': token});
-  }).catchError((err) {
-    Fluttertoast.showToast(msg: err.message.toString());
-  });
-}
-
-void showNotification(RemoteNotification remoteNotification) async {
-  var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-    Platform.isAndroid ? 'com.dfa.flutterchatdemo' : 'com.duytq.flutterchatdemo',
-    'Flutter chat demo',
-    'your channel description',
-    playSound: true,
-    enableVibration: true,
-    importance: Importance.max,
-    priority: Priority.high,
-  );
-  var iOSPlatformChannelSpecifics = IOSNotificationDetails();
-  var platformChannelSpecifics =
-  NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
-
-  print(remoteNotification);
-
-  await flutterLocalNotificationsPlugin.show(
-    0,
-    remoteNotification.title,
-    remoteNotification.body,
-    platformChannelSpecifics,
-    payload: null,
-  );
-}
-
-void configLocalNotification() {
-  var initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
-  var initializationSettingsIOS = IOSInitializationSettings();
-  var initializationSettings =
-  InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-  flutterLocalNotificationsPlugin.initialize(initializationSettings);
-}
-
-void scrollListener() {
-  if (listScrollController.offset >= listScrollController.position.maxScrollExtent &&
-      !listScrollController.position.outOfRange) {
-    setState(() {
-      _limit += _limitIncrement;
-    });
-  }
-}
-
-
-Future<bool> onBackPress() {
-  openDialog();
-  return Future.value(false);
-}
-
-Future<Null> openDialog() async {
-  switch (await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
-          children: <Widget>[
-            Container(
-              color: themeColor,
-              margin: EdgeInsets.all(0.0),
-              padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
-              height: 100.0,
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(bottom: 10.0),
-                    child: Icon(
-                      Icons.exit_to_app,
-                      size: 30.0,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    'Exit app',
-                    style: TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    'Are you sure to exit app?',
-                    style: TextStyle(color: Colors.white70, fontSize: 14.0),
-                  ),
-                ],
-              ),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context, 0);
-              },
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(right: 10.0),
-                    child: Icon(
-                      Icons.cancel,
-                      color: primaryColor,
-                    ),
-                  ),
-                  Text(
-                    'CANCEL',
-                    style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context, 1);
-              },
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(right: 10.0),
-                    child: Icon(
-                      Icons.check_circle,
-                      color: primaryColor,
-                    ),
-                  ),
-                  Text(
-                    'YES',
-                    style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
-            ),
-          ],
-        );
-      })) {
-    case 0:
-      break;
-    case 1:
-      exit(0);
-  }
-}
-
-
- */
