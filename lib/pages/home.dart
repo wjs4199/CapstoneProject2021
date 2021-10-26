@@ -364,7 +364,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       currentIndex: _selectedIndex,
       elevation: 0,
       backgroundColor: Theme.of(context).bottomAppBarColor.withAlpha(200),
-      selectedItemColor: Color(0xfffc7174),
+      selectedItemColor: Theme.of(context).primaryColor,
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
       selectedLabelStyle: TextStyle(
@@ -379,13 +379,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           label: '나눔',
         ),
-        // BottomNavigationBarItem(
-        //   icon: Icon(
-        //     Icons.accessibility_new,
-        //     size: 30,
-        //   ),
-        //   label: '나눔요청',
-        // ),
         BottomNavigationBarItem(
           icon: Icon(
             Icons.forum,
@@ -393,13 +386,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           label: '메신저',
         ),
-        // BottomNavigationBarItem(
-        //   icon: Icon(
-        //     Icons.account_circle,
-        //     size: 25,
-        //   ),
-        //   label: 'My',
-        // )
       ],
     );
   }
@@ -409,24 +395,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   /// Sign Out (call on null 오류)
   Future<Null> handleSignOut() async {
-    /*
-    setState(() {
-      isLoading = true;
-    });
-     */
-
     await FirebaseAuth.instance.signOut();
     await googleSignIn.disconnect();
-    await googleSignIn.signOut();
-    //await currentUserId.clear();
-/*
-    setState(() {
-      isLoading = false;
-    });
- */
-    await Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => LoginPage()),
-        (Route<dynamic> route) => false);
+    await googleSignIn.signOut().then((value) => Navigator.of(context)
+        .pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => LoginPage()),
+            (Route<dynamic> route) => false));
   }
 
   ///* ---------------- BottomNavigationBar, PageView 관련 ----------------- *///
