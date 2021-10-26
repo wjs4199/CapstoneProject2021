@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               controller: _scrollController,
               headerSliverBuilder:
                   (BuildContext context, bool innerBoxIsScrolled) {
-                if (_selectedIndex == 0 || _selectedIndex == 1) {
+                if (_selectedIndex == 0) {
                   return <Widget>[
                     SliverAppBar(
                       backgroundColor: Colors.white,
@@ -359,8 +359,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   BottomNavigationBar buildNavBar(BuildContext context) {
     return BottomNavigationBar(
-      showSelectedLabels: true,
-      showUnselectedLabels: false,
+      // showSelectedLabels: true,
+      // showUnselectedLabels: false,
       currentIndex: _selectedIndex,
       elevation: 0,
       backgroundColor: Theme.of(context).bottomAppBarColor.withAlpha(200),
