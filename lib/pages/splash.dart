@@ -1,9 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:giveandtake/pages/home.dart';
 import 'package:giveandtake/pages/login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
 
@@ -15,7 +13,6 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-
   @override
   void initState() {
     super.initState();
@@ -26,7 +23,7 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   void checkSignedIn() async {
-   var isLoggedIn = await googleSignIn.isSignedIn();
+    var isLoggedIn = await googleSignIn.isSignedIn();
     //AuthProvider authProvider = context.read<AuthProvider>();
     //bool isLoggedIn = await authProvider.isLoggedIn();
     if (isLoggedIn) {
@@ -41,7 +38,6 @@ class _SplashPageState extends State<SplashPage> {
       MaterialPageRoute(builder: (context) => LoginPage()),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +55,8 @@ class _SplashPageState extends State<SplashPage> {
             Container(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(color: Colors.amber),
+              child: CircularProgressIndicator(
+                  color: Theme.of(context).primaryColor),
             ),
           ],
         ),
