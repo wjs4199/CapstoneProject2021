@@ -37,6 +37,7 @@ dependencies:
   flutter_image_compress: ^1.0.0 #added 예은
   image: ^3.0.0 #added 예은
   flutter_screenutil: ^5.0.0+2 #added by 찬식
+  flutter_speed_dial: ^4.5.0 # JM
 
 
 dev_dependencies:

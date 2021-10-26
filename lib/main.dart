@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:giveandtake/pages/manual.dart';
+import 'package:giveandtake/pages/signup.dart';
 import 'package:giveandtake/pages/splash.dart';
 import 'package:giveandtake/pages/views/3_msg_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -61,6 +62,7 @@ class _ApplicationState extends State<Application> {
             title: 'Give_N_Take',
             theme: ThemeData(
               primaryColor: Color(0xfffc7174),
+              focusColor: Colors.black12,
               backgroundColor: Colors.white,
               // bottomAppBarColor: Color(0xffF0F1F5),
             ),
@@ -73,6 +75,7 @@ class _ApplicationState extends State<Application> {
             // Named Routes
             routes: {
               '/manual': (context) => ManualPage(),
+              '/signup': (context) => SignUp(),
               '/login': (context) => LoginPage(),
               '/home': (context) => HomePage(),
               '/giveadd': (context) => AddPage(giveOrTake: 'give'),
