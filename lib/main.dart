@@ -340,7 +340,7 @@ class ApplicationState extends ChangeNotifier {
       _users = [];
       snapshot.docs.forEach((document) {
         _users.add(Users(
-          createdAt: document.data()['createdAt'],
+          createdAt: document.data()['createdAt'].toString(),
           id: document.data()['id'],
           nickname: document.data()['nick'],
           photoUrl: document.data()['photoUrl'],
