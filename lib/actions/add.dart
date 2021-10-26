@@ -158,7 +158,7 @@ class _AddPageState extends State<AddPage> {
       'hits': 1,
       'photo': numberOfImages,
       'user_photoURL': user.photoURL,
-      'nickName': 'gg'//_currentNickName(),
+      'nickName': _currentNickName(),
       /// for chatting
     }).then((value) async {
       if (images.isNotEmpty) {
@@ -183,7 +183,7 @@ class _AddPageState extends State<AddPage> {
       'hits': 1,
       'photo': numberOfImages,
       'user_photoURL': user.photoURL,
-      'user_nickname': _currentNickName(),
+      'nickName': _currentNickName(),
 
       /// for chatting
     }).then((value) {
