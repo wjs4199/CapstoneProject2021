@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
@@ -87,15 +88,20 @@ class _AddPageState extends State<AddPage> {
   Future<void> getImageFileFromAssets() async {
     images.forEach((imageAsset) async {
       /// Asset 형식의 파일을 File 형식으로 바꿈
-      final filePath =
-          await FlutterAbsolutePath.getAbsolutePath(imageAsset.identifier);
-      var tempFile = File(filePath);
+      final byteData = await imageAsset.getByteData();
+      //final filePath =
+        //  await FlutterAbsolutePath.getAbsolutePath(imageAsset.identifier);
+      var tempFile = File('${(await getTemporaryDirectory()).path}/${imageAsset.name}');
+      // File(filePath);
+      final resultFile = await tempFile.writeAsBytes(
+        byteData.buffer
+            .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),);
 
       /// Uint8List 형식의 이미지 파일을 Image형식으로 변환함
-      var image = Im.decodeImage(await CompressFile(tempFile));
+      var image = Im.decodeImage(await CompressFile(resultFile));
 
       /// 퀄리티 재설정 하면서 .jpg 형태의 File형식으로 변환함
-      var compressedImage = File('$filePath')
+      var compressedImage = resultFile
         ..writeAsBytesSync(Im.encodeJpg(image, quality: 90));
 
       /// 최종 압축된 File 형식의 이미지를 file list 에 넣음
