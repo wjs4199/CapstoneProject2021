@@ -8,12 +8,11 @@ import 'package:giveandtake/model/const.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../chat.dart';
 
-
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final ScrollController listScrollController = ScrollController();
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin();
 
 bool isLoading = false;
 int _limit = 20;
@@ -21,8 +20,10 @@ var _flutterLocalNotificationsPlugin;
 
 Future _showNotification() async {
   var android = AndroidNotificationDetails(
-      'your channel id', 'your channel name', channelDescription:  'your channel description',
-      importance: Importance.max, priority: Priority.high);
+      'your channel id', 'your channel name',
+      channelDescription: 'your channel description',
+      importance: Importance.max,
+      priority: Priority.high);
 
   var ios = IOSNotificationDetails();
   var detail = NotificationDetails(android: android, iOS: ios);
@@ -36,20 +37,17 @@ Future _showNotification() async {
   );
 }
 
-
 class MessagePage extends StatefulWidget {
-  
   @override
   _MessagePageState createState() => _MessagePageState();
 }
 
 class _MessagePageState extends State<MessagePage> {
-
-
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    var initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     //ios 알림 설정 : 소리, 뱃지 등
     var initializationSettingsIOS = IOSInitializationSettings();
 
@@ -88,90 +86,83 @@ class _MessagePageState extends State<MessagePage> {
   //await _flutterLocalNotificationPlugin.~ 에서 payload부분은 모두 설정하여 주지 않아도 됩니다.
 //버튼을 눌렀을때 한번 알림이 뜨게 해주는 방법입니다.
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: CustomScrollView(
-          slivers: <Widget>[
-            SliverAppBar(
-              title: Text(
-                '메신저',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontFamily: 'NanumSquareRoundR',
-                  fontWeight: FontWeight.bold,
-                ),
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text(
+              '메신저',
+              style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'NanumSquareRoundR',
+                fontWeight: FontWeight.bold,
               ),
-              leading: IconButton(
-                  onPressed: (){
-                    _showNotification();
-                  },
-                  icon: Icon(Icons.notification_important)),
-
-
-              backgroundColor: Color(0xfffc7174),
-              pinned: true,
-              snap: false,
-              floating: true,
             ),
-            SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  ///added
-                  Stack(
-                    children: <Widget>[
-                      // List
-                      ///chatting list 를 보여주는 container
-                      Container(
-                        child: StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance
-                              .collection('chatRoom')
-                              .limit(_limit)
-                              .snapshots(),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<QuerySnapshot> snapshot) {
-                            if (snapshot.hasData) {
-                              return ListView.builder(
-                                shrinkWrap: true,
-                                padding: EdgeInsets.all(10.0),
+            leading: IconButton(
+                onPressed: () {
+                  _showNotification();
+                },
+                icon: Icon(Icons.notification_important)),
+            backgroundColor: Theme.of(context).primaryColor,
+            pinned: true,
+            snap: false,
+            floating: true,
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                ///added
+                Stack(
+                  children: <Widget>[
+                    // List
+                    ///chatting list 를 보여주는 container
+                    Container(
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('chatRoom')
+                            .limit(_limit)
+                            .snapshots(),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<QuerySnapshot> snapshot) {
+                          if (snapshot.hasData) {
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.all(10.0),
 
-                                /// data 를 가져오는 곳 buildItem 위젯
-                                itemBuilder: (context, index) =>
-                                    buildItem(context, snapshot.data.docs[index]),
-                                itemCount: snapshot.data.docs.length,
-                                controller: listScrollController,
-                              );
-                            } else {
-                              /// data 가 없을 시
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  valueColor:
-                                  AlwaysStoppedAnimation<Color>(primaryColor),
-                                ),
-                              );
-                            }
-                          },
-                        ),
+                              /// data 를 가져오는 곳 buildItem 위젯
+                              itemBuilder: (context, index) =>
+                                  buildItem(context, snapshot.data.docs[index]),
+                              itemCount: snapshot.data.docs.length,
+                              controller: listScrollController,
+                            );
+                          } else {
+                            /// data 가 없을 시
+                            return Center(
+                              child: CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(primaryColor),
+                              ),
+                            );
+                          }
+                        },
                       ),
+                    ),
 
-                      // Loading
-                      Positioned(
-                        child: isLoading ? const Loading() : Container(),
-                      )
-                    ],
-                  ),
-
-                ],
-              ),
-            )
-          ],
-        ),
-
+                    // Loading
+                    Positioned(
+                      child: isLoading ? const Loading() : Container(),
+                    )
+                  ],
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
-
 }
 /*
 Widget MsgView(BuildContext context, ApplicationState appState) {
@@ -247,14 +238,8 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
 
  */
 
-
-
-Container _buildSenderScreen(BuildContext context, DocumentSnapshot document){
-  return
-
-
-
-    Container(
+Container _buildSenderScreen(BuildContext context, DocumentSnapshot document) {
+  return Container(
     margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
 
     /// 메신저 탭에서 각각 사용자들 list 를 클릭할 수 있게 만들어 놓은 text button
@@ -267,7 +252,7 @@ Container _buildSenderScreen(BuildContext context, DocumentSnapshot document){
             builder: (context) => Chat(
               peerId: document.get('idTo'),
               peerAvatar: document.get('peerAvatar'),
-              peerName : document.get('peerNickname'),
+              peerName: document.get('peerNickname'),
               myName: document.get('myNickname'),
               myAvatar: document.get('myAvatar'),
               // peerName: userChat.nickname,
@@ -293,45 +278,44 @@ Container _buildSenderScreen(BuildContext context, DocumentSnapshot document){
             borderRadius: BorderRadius.all(Radius.circular(25.0)),
             clipBehavior: Clip.hardEdge,
             child: document.get('peerAvatar').isNotEmpty
-            /// empty 가 아니면 photoURL 을 가져온다
+
+                /// empty 가 아니면 photoURL 을 가져온다
                 ? Image.network(
-              document.get('peerAvatar'),
-              fit: BoxFit.cover,
-              width: 50.0,
-              height: 50.0,
-              loadingBuilder: (BuildContext context, Widget child,
-                  ImageChunkEvent loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Container(
-                  width: 50,
-                  height: 50,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: primaryColor,
-                      value: loadingProgress.expectedTotalBytes !=
-                          null &&
-                          loadingProgress.expectedTotalBytes !=
-                              null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes
-                          : null,
-                    ),
-                  ),
-                );
-              },
-              errorBuilder: (context, object, stackTrace) {
-                return Icon(
-                  Icons.account_circle,
-                  size: 50.0,
-                  color: greyColor,
-                );
-              },
-            )
+                    document.get('peerAvatar'),
+                    fit: BoxFit.cover,
+                    width: 50.0,
+                    height: 50.0,
+                    loadingBuilder: (BuildContext context, Widget child,
+                        ImageChunkEvent loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        width: 50,
+                        height: 50,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: primaryColor,
+                            value: loadingProgress.expectedTotalBytes != null &&
+                                    loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes
+                                : null,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, object, stackTrace) {
+                      return Icon(
+                        Icons.account_circle,
+                        size: 50.0,
+                        color: greyColor,
+                      );
+                    },
+                  )
                 : Icon(
-              Icons.account_circle,
-              size: 50.0,
-              color: greyColor,
-            ),
+                    Icons.account_circle,
+                    size: 50.0,
+                    color: greyColor,
+                  ),
           ),
           Flexible(
             ///nickname 을 가져오는 container
@@ -370,7 +354,8 @@ Container _buildSenderScreen(BuildContext context, DocumentSnapshot document){
   );
 }
 
-Container _buildReceiverScreen(BuildContext context, DocumentSnapshot document){
+Container _buildReceiverScreen(
+    BuildContext context, DocumentSnapshot document) {
   return Container(
     margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
 
@@ -384,7 +369,7 @@ Container _buildReceiverScreen(BuildContext context, DocumentSnapshot document){
             builder: (context) => Chat(
               peerId: document.get('idFrom'),
               peerAvatar: document.get('myAvatar'),
-              peerName : document.get('myNickname'),
+              peerName: document.get('myNickname'),
               myName: document.get('peerNickname'),
               myAvatar: document.get('peerAvatar'),
               // peerName: userChat.nickname,
@@ -410,45 +395,44 @@ Container _buildReceiverScreen(BuildContext context, DocumentSnapshot document){
             borderRadius: BorderRadius.all(Radius.circular(25.0)),
             clipBehavior: Clip.hardEdge,
             child: document.get('myAvatar').isNotEmpty
-            /// empty 가 아니면 photoURL 을 가져온다
+
+                /// empty 가 아니면 photoURL 을 가져온다
                 ? Image.network(
-              document.get('myAvatar'),
-              fit: BoxFit.cover,
-              width: 50.0,
-              height: 50.0,
-              loadingBuilder: (BuildContext context, Widget child,
-                  ImageChunkEvent loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Container(
-                  width: 50,
-                  height: 50,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: primaryColor,
-                      value: loadingProgress.expectedTotalBytes !=
-                          null &&
-                          loadingProgress.expectedTotalBytes !=
-                              null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes
-                          : null,
-                    ),
-                  ),
-                );
-              },
-              errorBuilder: (context, object, stackTrace) {
-                return Icon(
-                  Icons.account_circle,
-                  size: 50.0,
-                  color: greyColor,
-                );
-              },
-            )
+                    document.get('myAvatar'),
+                    fit: BoxFit.cover,
+                    width: 50.0,
+                    height: 50.0,
+                    loadingBuilder: (BuildContext context, Widget child,
+                        ImageChunkEvent loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        width: 50,
+                        height: 50,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: primaryColor,
+                            value: loadingProgress.expectedTotalBytes != null &&
+                                    loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes
+                                : null,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, object, stackTrace) {
+                      return Icon(
+                        Icons.account_circle,
+                        size: 50.0,
+                        color: greyColor,
+                      );
+                    },
+                  )
                 : Icon(
-              Icons.account_circle,
-              size: 50.0,
-              color: greyColor,
-            ),
+                    Icons.account_circle,
+                    size: 50.0,
+                    color: greyColor,
+                  ),
           ),
           Flexible(
             ///nickname 을 가져오는 container
@@ -466,10 +450,8 @@ Container _buildReceiverScreen(BuildContext context, DocumentSnapshot document){
                     ),
                   ),
                   Icon(
-                      Icons.add_alert,
-                      color: Colors.deepOrangeAccent,
-
-
+                    Icons.add_alert,
+                    color: Colors.deepOrangeAccent,
                   ),
                   /*
                       Container(
@@ -495,31 +477,25 @@ Container _buildReceiverScreen(BuildContext context, DocumentSnapshot document){
 
 Widget buildItem(BuildContext context, DocumentSnapshot document) {
   if (document != null) {
-   // var userChat = UserChat.fromDocument(document);
+    // var userChat = UserChat.fromDocument(document);
     //if (document.get('idTo') == FirebaseAuth.instance.currentUser.uid) {
-     // return SizedBox.shrink();
+    // return SizedBox.shrink();
     //}
 
-     if (document.id.contains(FirebaseAuth.instance.currentUser.uid))
-    {
-      if(document.get('idFrom') == FirebaseAuth.instance.currentUser.uid) ///내가 보내는 입장이면
+    if (document.id.contains(FirebaseAuth.instance.currentUser.uid)) {
+      if (document.get('idFrom') == FirebaseAuth.instance.currentUser.uid)
+
+      ///내가 보내는 입장이면
       {
-
         return _buildSenderScreen(context, document);
-      }
-      else{
+      } else {
         _showNotification();
-        return  _buildReceiverScreen(context, document);
-
+        return _buildReceiverScreen(context, document);
       }
-
     }
   } else {
     return SizedBox.shrink();
   }
-
-
 }
 
 ///* -------------------------------------------------------------------- *///
-
