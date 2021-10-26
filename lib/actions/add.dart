@@ -123,8 +123,7 @@ class _AddPageState extends State<AddPage> {
     }
   }
 
-  Future<String> _currentNickName() async {
-    var resultName;
+  _currentNickname() async {
     await FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser.uid)
@@ -132,10 +131,11 @@ class _AddPageState extends State<AddPage> {
         .then((DocumentSnapshot ds) {
       name = ds['nickname'];
       print('current NickName = ' + name);
-    }).then((value) => resultName);
 
-    return resultName;
+      return name;
+    });
   }
+
 
   ///**************** 게시글 저장과 관련된 변수/ 함수들 ***************///
   /// 현재 유저의 이름 참조 간략화
@@ -164,7 +164,7 @@ class _AddPageState extends State<AddPage> {
       'hits': 1,
       'photo': numberOfImages,
       'user_photoURL': user.photoURL,
-      'nickName': _currentNickName(),
+      'nickName': _currentNickname(),
       /// for chatting
       // 'user_nickname': _currentNickname(),
 
@@ -192,7 +192,7 @@ class _AddPageState extends State<AddPage> {
       'hits': 1,
       'photo': numberOfImages,
       'user_photoURL': user.photoURL,
-      'nickName': _currentNickName(),
+      'nickName': _currentNickname(),
 
       /// for chatting
       // 'user_nickname': _currentNickname(),
