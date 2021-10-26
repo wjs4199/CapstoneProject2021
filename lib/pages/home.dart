@@ -15,11 +15,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import '../model/product.dart';
 import '../components/postTile.dart';
-import 'views/0_home_view.dart';
 import 'views/1_nanum_view.dart';
-import 'views/2_request_view.dart';
 import 'views/3_msg_view.dart';
-import 'views/4_my_view.dart';
 
 // Home
 class HomePage extends StatefulWidget {
@@ -232,6 +229,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             onTap: () {},
           ),
           ListTile(
+            title: Text('Change Nickname'),
+            // - The Menu Icons should be placed in the leading position
+            leading: Icon(Icons.change_circle),
+            onTap: () {
+              Navigator.pushNamed(context, '/signup');
+            },
+          ),
+
+          ListTile(
+            title: Text('Manual'),
+            // - The Menu Icons should be placed in the leading position
+            leading: Icon(Icons.book),
+            onTap: () {
+              Navigator.pushNamed(context, '/manual');
+            },
+          ),
+          ListTile(
             title: Text('Sign Out'),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(
@@ -239,14 +253,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
             onTap: () {
               handleSignOut();
-            },
-          ),
-          ListTile(
-            title: Text('Manual'),
-            // - The Menu Icons should be placed in the leading position
-            leading: Icon(Icons.book),
-            onTap: () {
-              Navigator.pushNamed(context, '/manual');
+              Navigator.pushNamed(context, '/login');
             },
           ),
         ],
@@ -378,7 +385,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     await FirebaseAuth.instance.signOut();
     await googleSignIn.disconnect();
     await googleSignIn.signOut();
-    await currentUserId.clear();
+    //await currentUserId.clear();
 /*
     setState(() {
       isLoading = false;
