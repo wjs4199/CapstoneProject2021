@@ -1,12 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 import '../../main.dart';
 import '../home.dart';
 
-Widget RequestView(BuildContext context, ApplicationState appState,
-    TabController tabController) {
+Widget RequestView(BuildContext context, ApplicationState appState) {
   return ListView.builder(
     itemCount: appState.takeProducts.length,
     itemBuilder: (BuildContext context, int index) {

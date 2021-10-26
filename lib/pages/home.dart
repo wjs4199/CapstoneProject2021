@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:giveandtake/pages/login.dart';
+import 'package:giveandtake/pages/views/2_request_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -69,116 +70,142 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: Colors.white,
       key: _scaffoldKey,
-      // appBar: buildAppBar(context), /// SliverUI 사용으로 appBar 미사용
       endDrawer: buildDrawer(context),
       body: Consumer<ApplicationState>(
         builder: (context, appState, _) => SafeArea(
-          child: Container(
-            color: Colors.white,
-            child: NestedScrollView(
-              controller: _scrollController,
-              headerSliverBuilder:
-                  (BuildContext context, bool innerBoxIsScrolled) {
-                if (_selectedIndex == 0) {
-                  return <Widget>[
-                    SliverAppBar(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      pinned: true,
-                      snap: true,
-                      floating: true,
-                      expandedHeight: 118.0,
-                      iconTheme: IconThemeData(color: Colors.black),
-                      title: Text(
-                        'Pelag',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 28,
-                          fontFamily: 'NanumSquareRoundR',
-                          fontWeight: FontWeight.bold,
-                        ),
+          child: NestedScrollView(
+            floatHeaderSlivers: true,
+            controller: _scrollController,
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+              if (_selectedIndex == 0) {
+                return <Widget>[
+                  // SliverOverlapAbsorber(
+                  //   handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                  //       context),
+                  //   sliver:
+                  SliverAppBar(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    pinned: true,
+                    snap: true,
+                    floating: true,
+                    expandedHeight: 108.0, // 118.0
+                    iconTheme: IconThemeData(color: Colors.black),
+                    title: Text(
+                      'Pelag',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 28,
+                        fontFamily: 'NanumSquareRoundR',
+                        fontWeight: FontWeight.bold,
                       ),
-                      flexibleSpace: FlexibleSpaceBar(
-                        background: Column(
-                          children: <Widget>[
-                            SizedBox(height: 60.0),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                  16.0, 6.0, 16.0, 16.0),
-                              child: Container(
-                                height: 36.0,
-                                width: double.infinity,
-                                child: CupertinoTextField(
-                                  focusNode: _focusNode,
-                                  keyboardType: TextInputType.text,
-                                  style: TextStyle(
-                                    fontSize: 16.0,
-                                    fontFamily: 'NanumSquareRoundR',
-                                  ),
-                                  placeholder: '검색',
-                                  placeholderStyle: TextStyle(
-                                    color: Color(0xffC4C6CC),
-                                    fontSize: 16.0,
-                                    fontFamily: 'NanumSquareRoundR',
-                                  ),
-                                  prefix: Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        9.0, 6.0, 9.0, 6.0),
-                                    child: Icon(
-                                      Icons.search,
-                                      color: Color(0xffC4C6CC),
-                                    ),
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    color: Color(0xffF0F1F5),
-                                  ),
-                                ),
-                              ),
+                    ),
+                    // flexibleSpace: FlexibleSpaceBar(
+                    //   background: Column(
+                    //     children: <Widget>[
+                    //       SizedBox(height: 60.0), // 60.0
+                    //       Padding(
+                    //         padding: const EdgeInsets.fromLTRB(
+                    //             16.0, 6.0, 16.0, 16.0),
+                    //         child: Container(
+                    //           height: 36.0,
+                    //           width: double.infinity,
+                    //           child: CupertinoTextField(
+                    //             focusNode: _focusNode,
+                    //             keyboardType: TextInputType.text,
+                    //             style: TextStyle(
+                    //               fontSize: 16.0,
+                    //               fontFamily: 'NanumSquareRoundR',
+                    //             ),
+                    //             placeholder: '검색',
+                    //             placeholderStyle: TextStyle(
+                    //               color: Color(0xffC4C6CC),
+                    //               fontSize: 16.0,
+                    //               fontFamily: 'NanumSquareRoundR',
+                    //             ),
+                    //             prefix: Padding(
+                    //               padding: const EdgeInsets.fromLTRB(
+                    //                   9.0, 6.0, 9.0, 6.0),
+                    //               child: Icon(
+                    //                 Icons.search,
+                    //                 color: Color(0xffC4C6CC),
+                    //               ),
+                    //             ),
+                    //             decoration: BoxDecoration(
+                    //               borderRadius: BorderRadius.circular(8.0),
+                    //               color: Color(0xffF0F1F5),
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    bottom: TabBar(
+                      controller: _tabController,
+                      indicatorColor: Theme.of(context).primaryColor,
+                      tabs: [
+                        Tab(
+                          child: Text(
+                            '나눔',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'NanumSquareRoundR',
                             ),
-                          ],
+                          ),
                         ),
+                        Tab(
+                          child: Text(
+                            '요청',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'NanumSquareRoundR',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // ),
+                ];
+              } else {
+                return <Widget>[
+                  SliverAppBar(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    pinned: true,
+                    snap: true,
+                    floating: true,
+                    iconTheme: IconThemeData(color: Colors.black),
+                    title: Text(
+                      'Pelag',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 28,
+                        fontFamily: 'NanumSquareRoundR',
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ];
-                } else {
-                  return <Widget>[
-                    SliverAppBar(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      pinned: true,
-                      snap: true,
-                      floating: true,
-                      iconTheme: IconThemeData(color: Colors.black),
-                      title: Text(
-                        'Pelag',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 28,
-                          fontFamily: 'NanumSquareRoundR',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ];
-                }
+                  ),
+                ];
+              }
+            },
+            body: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() => _selectedIndex = index);
               },
-              body: PageView(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() => _selectedIndex = index);
-                },
 
-                /// _selectedIndex 값에 따른 페이지(상응 위젯) 출력
-                children:
-                    _buildWidgetOptions(context, appState, _selectedIndex),
-              ),
+              /// _selectedIndex 값에 따른 페이지(상응 위젯) 출력
+              children: _buildWidgetOptions(context, appState, _selectedIndex),
             ),
           ),
         ),
       ),
       bottomNavigationBar: Container(
           decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.grey, width: 0.1)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black,
@@ -271,7 +298,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       BuildContext context, ApplicationState appState, int selectedIndex) {
     var _widgetOptions = <Widget>[
       /// 0(나눔):
-      NanumView(context, appState, _tabController),
+      TabBarView(
+        controller: _tabController,
+        children: [
+          NanumView(context, appState),
+          RequestView(context, appState),
+        ],
+      ),
 
       /// 1(나눔요청):
       // RequestView(context, appState, _tabController),
