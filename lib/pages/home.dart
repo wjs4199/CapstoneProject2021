@@ -485,7 +485,10 @@ class PostTileMaker extends StatelessWidget {
           future: returnDate(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return Center(
+                  child: CircularProgressIndicator(
+                color: Theme.of(context).primaryColor,
+              ));
             } else {
               return CustomListItem(
                 title: _product.title,
@@ -498,7 +501,9 @@ class PostTileMaker extends StatelessWidget {
                   future: downloadURL(_product.id),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
+                      return Center(
+                          child: CircularProgressIndicator(
+                              color: Theme.of(context).primaryColor));
                     } else {
                       if (snapshot.hasData) {
                         return ClipRRect(
@@ -509,7 +514,9 @@ class PostTileMaker extends StatelessWidget {
                       } else if (snapshot.hasData == false) {
                         return Container();
                       } else {
-                        return Center(child: CircularProgressIndicator());
+                        return Center(
+                            child: CircularProgressIndicator(
+                                color: Theme.of(context).primaryColor));
                       }
                     }
                   },

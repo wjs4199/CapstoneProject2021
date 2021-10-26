@@ -14,6 +14,7 @@ import 'legacy/map.dart';
 import 'model/product.dart';
 import 'actions/add.dart';
 import 'actions/edit.dart';
+import 'pages/splash.dart';
 
 void main() {
   runApp(
@@ -28,6 +29,7 @@ class Application extends StatefulWidget {
   @override
   _ApplicationState createState() => _ApplicationState();
 }
+
 class _ApplicationState extends State<Application> {
   SharedPreferences prefs;
   bool isLoading = false;
@@ -138,12 +140,14 @@ class ApplicationState extends ChangeNotifier {
   // comment와 like를 collection안에 어떤 구조로 넣을 것인가?
   // 원래 하던대로 상품 uid통해 찾으려면 이미 init한 상품 리스트들을 돌면서
   // datail페이지에 필요한 내용을 찾아내는 형식으로 해야할까?
-  Future<void> detailPageUid(String uid, String detailGiveOrTake, int photo) async{
+  Future<void> detailPageUid(
+      String uid, String detailGiveOrTake, int photo) async {
     this.uid = uid;
     this.detailGiveOrTake = detailGiveOrTake;
     this.photo = photo;
     print('main 에서 불려짐! detail page uid -> ' + uid);
-    await init().whenComplete(() => print('detailPageUid 에서 likeCount => ${likeList.length}'));
+    await init().whenComplete(
+        () => print('detailPageUid 에서 likeCount => ${likeList.length}'));
   }
 
   void checkNickname(String nickname) {
@@ -169,7 +173,6 @@ class ApplicationState extends ChangeNotifier {
   Stream<QuerySnapshot> currentStream;
 
   Future<void> init() async {
-
     ///************************* giveProducts / takeProducts 가져오는 부분 *************************///
     if (orderBy != 'All') {
       FirebaseFirestore.instance
@@ -300,6 +303,7 @@ class ApplicationState extends ChangeNotifier {
             created: document.data()['time'],
             id: document.id,
             nickName: document.data()['nickName'],
+
             ///edited
             //   isDeleted: document.data()['idDeleted'],
           ));
@@ -316,14 +320,13 @@ class ApplicationState extends ChangeNotifier {
         snapshot.docs.forEach((document) {
           _likeList.add(Like(
             uid: document.data()['uid'],
-            id : document.id,
+            id: document.id,
           ));
         });
         likeCount = _likeList.length;
         notifyListeners();
       });
     }
-
 
     ///************************* users 가져오는 부분 *************************///
     FirebaseFirestore.instance
@@ -353,5 +356,5 @@ class ApplicationState extends ChangeNotifier {
   List<Users> get username => _userName;
   List<Users> get users => _users;
 
-/// added
+  /// added
 }
