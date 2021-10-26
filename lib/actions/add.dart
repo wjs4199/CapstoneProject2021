@@ -28,7 +28,6 @@ class AddPage extends StatefulWidget {
 }
 
 class _AddPageState extends State<AddPage> {
-
   ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
   /// Firebase Storage 참조 간략화
   FirebaseStorage storage = FirebaseStorage.instance;
@@ -49,7 +48,10 @@ class _AddPageState extends State<AddPage> {
   Future<void> getMultiImage(int index) async {
     List<Asset> resultList;
     resultList = await MultiImagePicker.pickImages(
-        maxImages: index, enableCamera: true, selectedAssets: images, );
+      maxImages: index,
+      enableCamera: true,
+      selectedAssets: images,
+    );
 
     setState(() {
       images = resultList;
@@ -63,7 +65,6 @@ class _AddPageState extends State<AddPage> {
 
     /// 받아온 이미지를 File 타입으로 변환
     await getImageFileFromAssets();
-
   }
 
   Future<Uint8List> testCompressFile(File file) async {
@@ -87,13 +88,13 @@ class _AddPageState extends State<AddPage> {
           await FlutterAbsolutePath.getAbsolutePath(imageAsset.identifier);
       var tempFile = File(filePath);
 
-
       //var image = Im.decodeImage(tempFile.readAsBytesSync());
       var image = Im.decodeImage(await testCompressFile(tempFile));
       print('1차완료!');
-     // var smallerImage = Im.copyResize(image, width: 1000, height: 1000); // choose the size here, it will maintain aspect ratio
+      // var smallerImage = Im.copyResize(image, width: 1000, height: 1000); // choose the size here, it will maintain aspect ratio
       //print('2차완료!');
-      var compressedImage = File('$filePath')..writeAsBytesSync(Im.encodeJpg(image, quality: 90));
+      var compressedImage = File('$filePath')
+        ..writeAsBytesSync(Im.encodeJpg(image, quality: 90));
       print('3차완료!');
       file.add(compressedImage);
     });
@@ -113,9 +114,10 @@ class _AddPageState extends State<AddPage> {
     }
   }
 
-
   _currentNickname() async {
-    await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser.uid)
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser.uid)
         .get()
         .then((DocumentSnapshot ds) {
       name = ds['nickname'];
@@ -124,8 +126,6 @@ class _AddPageState extends State<AddPage> {
       return name;
     });
   }
-
-
 
   ///**************** 게시글 저장과 관련된 변수/ 함수들 ***************///
   /// 현재 유저의 이름 참조 간략화
@@ -154,7 +154,9 @@ class _AddPageState extends State<AddPage> {
       'hits': 1,
       'photo': numberOfImages,
       'user_photoURL': user.photoURL,
-      'user_nickname' : _currentNickname(), /// for chatting
+      // 'user_nickname': _currentNickname(),
+
+      /// for chatting
     }).then((value) async {
       if (images.isNotEmpty) {
         await uploadFile(value.id);
@@ -178,7 +180,9 @@ class _AddPageState extends State<AddPage> {
       'hits': 1,
       'photo': numberOfImages,
       'user_photoURL': user.photoURL,
-      'user_nickname' : _currentNickname(), /// for chatting
+      // 'user_nickname': _currentNickname(),
+
+      /// for chatting
     }).then((value) {
       if (images.isNotEmpty) uploadFile(value.id);
     }).catchError((error) => print('Error: $error'));
@@ -213,7 +217,6 @@ class _AddPageState extends State<AddPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Consumer<ApplicationState>(
         builder: (context, appState, _) => Scaffold(
             appBar: AppBar(
@@ -337,7 +340,7 @@ class _AddPageState extends State<AddPage> {
                                 /// 카테고리 드롭다운 버튼과 원해요/나눠요 토글 버튼 있는 Row
                                 Row(
                                   children: [
-                                    if(widget.giveOrTake == 'give')
+                                    if (widget.giveOrTake == 'give')
                                       _buildGiveCategoryToggleButtons()
                                     else
                                       _buildTakeCategoryToggleButtons()
@@ -406,7 +409,7 @@ class _AddPageState extends State<AddPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width *0.461,
+        minWidth: MediaQuery.of(context).size.width * 0.461,
         minHeight: 50,
       ),
       selectedBorderColor: Color(0xffeb6859),
@@ -432,8 +435,7 @@ class _AddPageState extends State<AddPage> {
       children: [
         Text(
           '물건',
-          textAlign:
-          TextAlign.center,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'NanumSquareRoundR',
             fontWeight: FontWeight.bold,
@@ -442,8 +444,7 @@ class _AddPageState extends State<AddPage> {
         ),
         Text(
           '재능',
-          textAlign:
-          TextAlign.center,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'NanumSquareRoundR',
             fontWeight: FontWeight.bold,
@@ -464,7 +465,7 @@ class _AddPageState extends State<AddPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width *0.461,
+        minWidth: MediaQuery.of(context).size.width * 0.461,
         minHeight: 50,
       ),
       selectedBorderColor: Color(0xffeb6859),
@@ -490,8 +491,7 @@ class _AddPageState extends State<AddPage> {
       children: [
         Text(
           '물건',
-          textAlign:
-          TextAlign.center,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'NanumSquareRoundR',
             fontWeight: FontWeight.bold,
@@ -500,8 +500,7 @@ class _AddPageState extends State<AddPage> {
         ),
         Text(
           '재능',
-          textAlign:
-          TextAlign.center,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'NanumSquareRoundR',
             fontWeight: FontWeight.bold,
@@ -511,7 +510,6 @@ class _AddPageState extends State<AddPage> {
       ],
     );
   }
-
 
   /// 상단 사진업로드하는 위젯
   Widget imageUpLoadWidget() {
