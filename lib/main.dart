@@ -159,6 +159,7 @@ class ApplicationState extends ChangeNotifier {
     init();
   }
 
+
   void orderByFilter(String orderBy) {
     this.orderBy = orderBy;
     print('filtering ->  ' + orderBy);
@@ -200,7 +201,7 @@ class ApplicationState extends ChangeNotifier {
             hits: document.data()['hits'],
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
-            nickName: document.data()['nickName'],
+            nickname: document.data()['nickname'],
           ));
         });
         notifyListeners();
@@ -228,7 +229,7 @@ class ApplicationState extends ChangeNotifier {
             hits: document.data()['hits'],
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
-            nickName: document.data()['nickName'],
+            nickname: document.data()['nickname'],
           ));
         });
         notifyListeners();
@@ -258,7 +259,7 @@ class ApplicationState extends ChangeNotifier {
             hits: document.data()['hits'],
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
-            nickName: document.data()['nickName'],
+            nickname: document.data()['nickname'],
           ));
         });
         notifyListeners();
@@ -285,7 +286,7 @@ class ApplicationState extends ChangeNotifier {
             hits: document.data()['hits'],
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
-            nickName: document.data()['nickName'],
+            nickname: document.data()['nickname'],
           ));
         });
         notifyListeners();
@@ -306,7 +307,7 @@ class ApplicationState extends ChangeNotifier {
             comment: document.data()['comment'],
             created: document.data()['time'],
             id: document.id,
-            nickName: document.data()['nickName'],
+            nickname: document.data()['nickname'],
 
             ///edited
             //   isDeleted: document.data()['idDeleted'],
@@ -342,7 +343,7 @@ class ApplicationState extends ChangeNotifier {
         _users.add(Users(
           createdAt: document.data()['createdAt'].toString(),
           id: document.data()['id'],
-          nickname: document.data()['nick'],
+          nickname: document.data()['nickname'],
           photoUrl: document.data()['photoUrl'],
           username: document.data()['username'],
         ));

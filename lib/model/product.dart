@@ -15,7 +15,7 @@ class Product {
     @required this.hits,
     @required this.photo,
     @required this.user_photoURL,
-    @required this.nickName,
+    @required this.nickname,
   });
 
   final String category;
@@ -30,7 +30,7 @@ class Product {
   final int hits;
   final int photo;
   final String user_photoURL;
-  final String nickName;
+  final String nickname;
 }
 
 class Comment {
@@ -39,7 +39,7 @@ class Comment {
     @required this.comment,
     @required this.created,
     @required this.id,
-    @required this.nickName,
+    @required this.nickname,
     // @required this.isDeleted,
   });
 
@@ -47,7 +47,7 @@ class Comment {
   final String comment;
   final Timestamp created;
   final String id;
-  final String nickName;
+  final String nickname;
 // final bool isDeleted;
 
 }
@@ -64,7 +64,6 @@ class Like {
 
 class Users {
   Users({
-    @required this.chattingWith,
     @required this.createdAt,
     @required this.id,
     @required this.nickname,
@@ -72,7 +71,6 @@ class Users {
     @required this.username,
   });
 
-  final String chattingWith;
   final String createdAt;
   final String id;
   final String nickname;

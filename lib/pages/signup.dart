@@ -6,7 +6,7 @@ import 'home.dart';
 
 
 TextEditingController textEditingController1 = TextEditingController();
-
+var nickname = '';
 
 class SignUp extends StatefulWidget {
   @override
@@ -38,6 +38,7 @@ class SignUpState extends State<SignUp> {
           .get()
           .then((DocumentSnapshot ds) {
         name = ds['nickname'];
+        nickname = name;
         return name;
       });
     }
@@ -126,7 +127,7 @@ class SignUpState extends State<SignUp> {
                           await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => HomePage()));
+                                  builder: (context) => HomePage(nickname : nickname)));
                         }
                         else if(isDuplicated || checkLoop == false)
                         {

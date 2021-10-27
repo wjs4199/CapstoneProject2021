@@ -88,76 +88,44 @@ class _MessagePageState extends State<MessagePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            title: Text(
-              '메신저',
-              style: TextStyle(
-                fontSize: 18,
-                fontFamily: 'NanumSquareRoundR',
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            leading: IconButton(
-                onPressed: () {
-                  _showNotification();
-                },
-                icon: Icon(Icons.notification_important)),
-            backgroundColor: Theme.of(context).primaryColor,
-            pinned: true,
-            snap: false,
-            floating: true,
-          ),
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                ///added
-                Stack(
-                  children: <Widget>[
-                    // List
-                    ///chatting list 를 보여주는 container
-                    Container(
-                      child: StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('chatRoom')
-                            .limit(_limit)
-                            .snapshots(),
-                        builder: (BuildContext context,
-                            AsyncSnapshot<QuerySnapshot> snapshot) {
-                          if (snapshot.hasData) {
-                            return ListView.builder(
-                              shrinkWrap: true,
-                              padding: EdgeInsets.all(10.0),
+    return SingleChildScrollView(
+      child: Stack(
+        children: <Widget>[
+          ///chatting list 를 보여주는 container
+          Container(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('chatRoom')
+                  .limit(_limit)
+                  .snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasData) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.all(10.0),
 
-                              /// data 를 가져오는 곳 buildItem 위젯
-                              itemBuilder: (context, index) =>
-                                  buildItem(context, snapshot.data.docs[index]),
-                              itemCount: snapshot.data.docs.length,
-                              controller: listScrollController,
-                            );
-                          } else {
-                            /// data 가 없을 시
-                            return Center(
-                              child: CircularProgressIndicator(
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(primaryColor),
-                              ),
-                            );
-                          }
-                        },
-                      ),
+                    /// data 를 가져오는 곳 buildItem 위젯
+                    itemBuilder: (context, index) =>
+                        buildItem(context, snapshot.data.docs[index]),
+                    itemCount: snapshot.data.docs.length,
+                    controller: listScrollController,
+                  );
+                } else {
+                  /// data 가 없을 시
+                  return Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                     ),
-
-                    // Loading
-                    Positioned(
-                      child: isLoading ? const Loading() : Container(),
-                    )
-                  ],
-                ),
-              ],
+                  );
+                }
+              },
             ),
+          ),
+
+          // Loading
+          Positioned(
+            child: isLoading ? const Loading() : Container(),
           )
         ],
       ),

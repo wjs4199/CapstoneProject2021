@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../home.dart';
 
-Widget NanumView(BuildContext context, ApplicationState appState,
-    TabController tabController) {
+Widget NanumView(
+  BuildContext context,
+  ApplicationState appState,
+) {
   return ListView.builder(
     itemCount: appState.giveProducts.length,
     itemBuilder: (BuildContext context, int index) {

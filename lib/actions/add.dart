@@ -19,15 +19,20 @@ import 'package:image/image.dart' as Im;
 import '../main.dart';
 
 class AddPage extends StatefulWidget {
-  AddPage({this.giveOrTake});
+  AddPage({this.giveOrTake, @required this.nickname});
 
   final String giveOrTake;
+  final String nickname;
 
   @override
-  _AddPageState createState() => _AddPageState();
+  _AddPageState createState() => _AddPageState(nickname: nickname);
 }
 
 class _AddPageState extends State<AddPage> {
+  _AddPageState({@required this.nickname});
+
+  final String nickname;
+
   ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
   /// Firebase Storage 참조 간략화
   FirebaseStorage storage = FirebaseStorage.instance;
@@ -111,18 +116,35 @@ class _AddPageState extends State<AddPage> {
     }
   }
 
-  _currentNickname() async {
+  ///닉네임 찾는 함수
+  Future _currentNickname() async {
+    String myNickName;
     await FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser.uid)
         .get()
         .then((DocumentSnapshot ds) {
-      name = ds['nickname'];
-      print('current NickName = ' + name);
-
-      return name;
+      myNickName = ds['nickname'];
+      print('current NickName = ' + myNickName);
     });
+    return myNickName;
   }
+
+  ///*** user collection 내에서 userName이 일치하는 doc의 nickname을 가져오는 부분 ****///
+  /// user collection 참조 간략화
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+  /// 유저의 닉네임을 찾아서 보여주는 함수
+  // String findNickname(AsyncSnapshot<QuerySnapshot> snapshot, String name) {
+  //   var nickName = 'null';
+  //   snapshot.data.docs.forEach((document) {
+  //     if (document['username'] == name) {
+  //       nickName = document['nickname'];
+  //     }
+  //   });
+  //   print('찾은 닉네임은 $nickName!!');
+  //   return nickName;
+  // }
 
   ///**************** 게시글 저장과 관련된 변수/ 함수들 ***************///
   /// 현재 유저의 이름 참조 간략화
@@ -135,24 +157,11 @@ class _AddPageState extends State<AddPage> {
   CollectionReference takeProduct =
   FirebaseFirestore.instance.collection('takeProducts');
 
-  ///*** user collection 내에서 userName이 일치하는 doc의 nickname을 가져오는 부분 ****///
-  /// user collection 참조 간략화
-  CollectionReference users = FirebaseFirestore.instance.collection('users');
-
-  /// 유저의 닉네임을 찾아서 보여주는 함수
-  String findNickname( AsyncSnapshot<QuerySnapshot> snapshot, String name){
-    var nickName = 'null';
-    snapshot.data.docs.forEach((document) {
-      if (document['username'] == name){
-        nickName = document['nickname'];
-      }
-    });
-    print('찾은 닉네임은 $nickName!!');
-    return nickName;
-  }
-
   /// 'giveProducts' collection 에 게시글 추가시키는 함수
-  Future<void> addGiveProduct(String title, String content, String category) {
+  Future<void> addGiveProduct(
+      String title, String content, String category) async {
+    var nickName = await _currentNickname();
+
     if (user != null) {
       name = user.displayName;
     }
@@ -167,7 +176,7 @@ class _AddPageState extends State<AddPage> {
       'hits': 1,
       'photo': numberOfImages,
       'user_photoURL': user.photoURL,
-       'nickname': _currentNickname(),
+      'nickname': nickName,
 
       /// for chatting
     }).then((value) async {
@@ -178,7 +187,10 @@ class _AddPageState extends State<AddPage> {
   }
 
   /// 'takeProducts' collection 에 게시글 추가시키는 함수
-  Future<void> addTakeProduct(String title, String content, String category) {
+  Future<void> addTakeProduct(
+      String title, String content, String category) async {
+    var nickName = await _currentNickname();
+
     if (user != null) {
       name = user.displayName;
     }
@@ -193,7 +205,7 @@ class _AddPageState extends State<AddPage> {
       'hits': 1,
       'photo': numberOfImages,
       'user_photoURL': user.photoURL,
-      'nickname': _currentNickname(),
+      'nickname': nickName,
 
       /// for chatting
     }).then((value) {

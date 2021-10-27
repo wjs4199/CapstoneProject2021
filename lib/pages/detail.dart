@@ -554,7 +554,7 @@ class _DetailPageState extends State<DetailPage> {
                                                     //width: 10,
                                                     height: 18,
                                                     child: Text(
-                                                      '${product.nickName}\n',
+                                                      '${product.nickname}\n',
                                                       style: TextStyle(
                                                         fontFamily: 'Roboto_Bold',
                                                         color: Colors.black,
@@ -592,7 +592,7 @@ class _DetailPageState extends State<DetailPage> {
                                                                 builder: (context) => Chat(
                                                                   peerId: product.uid,
                                                                   peerAvatar: product.user_photoURL,
-                                                                  peerName : product.userName,
+                                                                  peerName : product.nickname,
                                                                   myName: FirebaseAuth.instance.currentUser.displayName,
                                                                   myAvatar: FirebaseAuth.instance.currentUser.photoURL,
 
