@@ -4,13 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_absolute_path/flutter_absolute_path.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
-import 'package:image/image.dart' as Im;
+import 'package:image_picker/image_picker.dart';
 
 import '../main.dart';
 import '../model/product.dart';
@@ -46,7 +43,7 @@ class _EditPageState extends State<EditPage> {
   FirebaseStorage storage = FirebaseStorage.instance;
 
   /// multiImage Picker로 선택한 사진들이 담길 리스트 (Asset타입 - 사진 띄울 때 사용됨)
-  List<Asset> images = [];
+  List<XFile> images = [];
 
   /// multiImage Picker로 선택한 사진들이 담길 리스트 (File타입 - 사진 저장할 때 사용됨)
   List<File> willBeSavedFileList = [];
@@ -57,67 +54,36 @@ class _EditPageState extends State<EditPage> {
   /// 10개의 이미지 개수 제한에 다다랐을 때 true 로 변함(글자색 바꿀 때 사용)
   bool numberOfImagesTextColor = false;
 
+  /// 이미지 픽커 간략화
+  final ImagePicker _picker = ImagePicker();
 
   /// index 만큼의 이미지를 갤러리에서 선택한 후 image 리스트에 저장시키는 함수
-  Future<void> getMultiImage(int index) async {
-    List<Asset> resultList;
-    resultList = await MultiImagePicker.pickImages(
-        maxImages: index,
-        enableCamera: true,
-        selectedAssets: images
+  Future<void> getMultiImage() async {
+    //이미지 받아올 때 사이즈 압축 함
+    var pickedFileList = await _picker.pickMultiImage(
+      maxWidth: 1000,
+      maxHeight: 1000,
+      imageQuality: 85,
     );
-    images = resultList;
 
-    /// 받아온 이미지를 File 타입으로 변환
-    await getImageFileFromAssets();
-
+    /// pick된 사진이 10개 아래이면 바로 image list에 넣고(글씨 검정)
+    /// 10개이상이면 10개까지만 잘라서 image에 넣기(글씨 빨강)
     setState(() {
-      numberOfImages = images.length;
-      if (numberOfImages + alreadySavedList.length >= 10) {
-        numberOfImagesTextColor = true;
-      } else {
+      if(pickedFileList.length < 10 - numberOfImages){
+        numberOfImages += pickedFileList.length;
+        for(var i = 0 ; i<pickedFileList.length; i++){
+          images.add(pickedFileList[i]);
+        }
         numberOfImagesTextColor = false;
+      } else {
+        pickedFileList = pickedFileList.sublist(0, 10 - numberOfImages);
+        for(var i = 0 ; i< 10 - numberOfImages; i++){
+          images.add(pickedFileList[i]);
+        }
+        numberOfImages = 10;
+        numberOfImagesTextColor = true;
       }
     });
-  }
-
-  Future<Uint8List> testCompressFile(File file) async {
-    var result = await FlutterImageCompress.compressWithFile(
-      file.absolute.path,
-      minWidth: 1000,
-      minHeight: 1000,
-      quality: 85,
-    );
-
-    print(file.lengthSync());
-    print(result.length);
-
-    return result;
-  }
-
-  /// image 리스트에 들어있는 Asset 타입 이미지들을 File 타입으로 변환시키는 함수(storage 저장 위해)
-  Future<void> getImageFileFromAssets() async {
-    print('willBeSavedFileList.length: ${willBeSavedFileList.length}\nimages.length: ${images.length}');
-    for(var i = willBeSavedFileList.length; i<images.length; i++){
-
-      print('저장할 사진 주소 $i : ${(await getTemporaryDirectory()).path}/${images[i].name}');
-      var tempFile = File('${(await getTemporaryDirectory()).path}/${images[i].name}');
-
-      willBeSavedFileList.add(tempFile);
-    }
-    /*images.forEach((imageAsset) async {
-      //final byteData = await imageAsset.getByteData();
-      var tempFile = File('${(await getTemporaryDirectory()).path}/${imageAsset.name}');
-      //final resultFile = await tempFile.writeAsBytes(byteData.buffer
-        //  .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),);
-
-      //var image = Im.decodeImage(await testCompressFile(resultFile));
-     // var compressedImage = resultFile
-      //  ..writeAsBytesSync(Im.encodeJpg(image, quality: 90));
-
-      willBeSavedFileList.add(tempFile);
-      print('willBeSavedFileList의 추가 후 -> ${willBeSavedFileList.length}');
-    });*/
   }
 
   /// ProductID에 따라 해당하는 image url 다운로드
@@ -374,7 +340,7 @@ class _EditPageState extends State<EditPage> {
                               ),
                               onPressed: () {
                                 print('선택가능한 사진 수 -> ${10 - (numberOfImages+alreadySavedList.length)}');
-                                getMultiImage(10 - (numberOfImages + alreadySavedList.length) + numberOfImages);
+                                getMultiImage();
                               },
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
