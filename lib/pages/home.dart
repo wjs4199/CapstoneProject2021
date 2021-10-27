@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:giveandtake/actions/add.dart';
 import 'package:giveandtake/pages/login.dart';
 import 'package:giveandtake/pages/views/2_request_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -26,23 +28,23 @@ class HomePage extends StatefulWidget {
   ///* ------------------------------ 수정 -------------------------------- *////
   final SharedPreferences currentUserId;
   var nickname; // main 에 정의되어도 됨
-  HomePage({Key key, @required this.currentUserId, @required this.nickname})
-      : super(key: key); // 필요X
+  final bool messageState;
+  HomePage({Key key, @required this.currentUserId, @required this.messageState}) : super(key: key); // 필요X
 
   ///* ------------------------------------------------------------------ *////
   @override
-  State createState() =>
-      _HomePageState(currentUserId: currentUserId, nickname: nickname);
+  State createState() => _HomePageState(currentUserId: currentUserId, messageState : messageState);
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   ///* ------------------------------ 수정 -------------------------------- *////
   /// _HomePageState 클래스 밑에 바로 build 가 보이도록,
   /// home.dart 에 정의 필요 없는것들 전부 main.dart 로
-  _HomePageState({@required this.currentUserId, @required this.nickname});
+  _HomePageState({@required this.currentUserId, @required this.messageState});
+
 
   final SharedPreferences currentUserId;
-  final String nickname;
+  final bool messageState;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -54,10 +56,30 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _requestPermissions();
     _scrollController = ScrollController();
     _pageController = PageController();
     _tabController = TabController(length: 2, vsync: this);
     _focusNode = FocusNode();
+  }
+
+  void _requestPermissions() {
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        MacOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
   }
 
   /// 시스템 함수에 PageView 기능 반영 처리(2)
@@ -290,7 +312,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
             onTap: () {
               handleSignOut();
-              Navigator.pushNamed(context, '/login');
             },
           ),
         ],
@@ -312,7 +333,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
 
       /// 1(나눔요청):
-      // RequestView(context, appState, _tabController),
+      // RequestView(context, appState),
 
       /// 2(홈):
       // HomeView(context, appState),
@@ -346,12 +367,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             labelStyle: TextStyle(
                 fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          AddPage(giveOrTake: 'give', nickname: nickname)));
-              //Navigator.pushNamed(context, '/giveadd');
+              Navigator.pushNamed(context, '/giveadd');
             },
             // closeSpeedDialOnPressed: false,
           ),
@@ -363,12 +379,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             labelStyle: TextStyle(
                 fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          AddPage(giveOrTake: 'take', nickname: nickname)));
-              //Navigator.pushNamed(context, '/takeadd');
+              Navigator.pushNamed(context, '/takeadd');
             },
           ),
         ],
@@ -406,37 +417,42 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   BottomNavigationBar buildNavBar(BuildContext context) {
-    return BottomNavigationBar(
-      // showSelectedLabels: true,
-      // showUnselectedLabels: false,
-      currentIndex: _selectedIndex,
-      elevation: 0,
-      backgroundColor: Theme.of(context).bottomAppBarColor.withAlpha(220),
-      selectedItemColor: Theme.of(context).primaryColor,
-      onTap: _onItemTapped,
-      type: BottomNavigationBarType.fixed,
-      selectedLabelStyle: TextStyle(
-          fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
-      unselectedLabelStyle: TextStyle(
-          fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
-      items: [
-        BottomNavigationBarItem(
-          icon: Icon(
-            Icons.accessibility,
-            size: 30,
+
+      return BottomNavigationBar(
+        // showSelectedLabels: true,
+        // showUnselectedLabels: false,
+        currentIndex: _selectedIndex,
+        elevation: 0,
+        backgroundColor: Theme.of(context).bottomAppBarColor.withAlpha(220),
+        selectedItemColor: Theme.of(context).primaryColor,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedLabelStyle: TextStyle(
+            fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
+        unselectedLabelStyle: TextStyle(
+            fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.accessibility,
+              size: 30,
+            ),
+            label: '나눔',
           ),
-          label: '나눔',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(
-            Icons.forum,
-            size: 30,
+          BottomNavigationBarItem(
+            icon:
+                  Icon(
+                    Icons.forum,
+                    size: 30,
+                  ),
+            label: '메신저',
+
           ),
-          label: '메신저',
-        ),
-      ],
-    );
-  }
+        ],
+      );
+    }
+
+
 
   /// Drawer 관련 Scaffold Key
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -482,14 +498,14 @@ class PostTileMaker extends StatelessWidget {
   final bool _giveOrTake;
 
   /// Set name for Firebase Storage
-  final firebase_storage.FirebaseStorage storage =
+  final firebase_storage.FirebaseStorage _storage =
       firebase_storage.FirebaseStorage.instance;
 
   /// Download image url of each product based on id
   Future<String> downloadURL(String id) async {
-    await Future.delayed(Duration(seconds: 1));
+    // await Future.delayed(Duration(seconds: 1));
     try {
-      return await storage
+      return await _storage
           .ref() //스토리지 참조
           .child('images')
           .child('$id\0.png') //차일드로 가져오고
@@ -574,27 +590,36 @@ class PostTileMaker extends StatelessWidget {
                 thumbnail: FutureBuilder(
                   future: downloadURL(_product.id),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
+                    // if (snapshot.connectionState == ConnectionState.waiting) {
+                    //   return Center(
+                    //       child: CircularProgressIndicator(
+                    //           color: Theme.of(context).primaryColor));
+                    // } else {
+                    if (snapshot.hasData) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        // child: Image.network(snapshot.data.toString(),
+                        //     fit: BoxFit.fitWidth),
+                        child: CachedNetworkImage(
+                          imageUrl: snapshot.data,
+                          fit: BoxFit.fitWidth,
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                        ),
+                      );
+                    } else if (snapshot.hasData == false) {
+                      return Container();
+                    } else {
                       return Center(
                           child: CircularProgressIndicator(
                               color: Theme.of(context).primaryColor));
-                    } else {
-                      if (snapshot.hasData) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.network(snapshot.data.toString(),
-                              fit: BoxFit.fitWidth),
-                        );
-                      } else if (snapshot.hasData == false) {
-                        return Container();
-                      } else {
-                        return Center(
-                            child: CircularProgressIndicator(
-                                color: Theme.of(context).primaryColor));
-                      }
                     }
+                    // }
                   },
                 ),
+                // thumbnail: CachedNetworkImage(
+                //     // placeholder: CircularProgressIndicator(),
+                //     imageUrl: 'https://picsum.photos/250?image=7'),
               );
             }
           },

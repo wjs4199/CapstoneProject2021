@@ -9,11 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core : ^1.5.0
+  firebase_core : ^1.7.0
   cloud_firestore: ^2.2.0
   firebase_auth: ^3.0.1
   geolocator: ^7.0.3
-  firebase_storage: ^10.0.1
+  firebase_storage: ^10.0.5
   google_fonts: ^2.0.0
   google_sign_in: ^5.0.3
   provider: ^5.0.0
@@ -33,6 +33,8 @@ dependencies:
   carousel_slider: ^4.0.0 #added 예은
   flutter_screenutil: ^5.0.0+2 #added by 찬식
   flutter_speed_dial: ^4.5.0 # JM
+  flutter_cache_manager: ^3.1.2 # JM
+  cached_network_image: ^3.1.0 # JM
 
 
 dev_dependencies:

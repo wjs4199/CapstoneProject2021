@@ -11,7 +11,7 @@ Widget RequestView(BuildContext context, ApplicationState appState) {
       return Column(
         children: [
           SizedBox(height: 5),
-          PostTileMaker(appState.takeProducts[index], true),
+          PostTileMaker(appState.takeProducts[index], false),
           SizedBox(height: 5),
           Divider(
             height: 1,

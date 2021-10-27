@@ -14,19 +14,15 @@ import 'package:provider/provider.dart';
 import '../main.dart';
 
 class AddPage extends StatefulWidget {
-  AddPage({this.giveOrTake, @required this.nickname});
+  AddPage({this.giveOrTake});
 
   final String giveOrTake;
-  final String nickname;
 
   @override
-  _AddPageState createState() => _AddPageState(nickname: nickname);
+  _AddPageState createState() => _AddPageState();
 }
 
 class _AddPageState extends State<AddPage> {
-  _AddPageState({@required this.nickname});
-
-  final String nickname;
 
   ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
   /// Firebase Storage 참조 간략화
