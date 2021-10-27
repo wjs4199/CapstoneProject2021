@@ -43,13 +43,17 @@ class _EditPageState extends State<EditPage> {
   FirebaseStorage storage = FirebaseStorage.instance;
 
   /// multiImage Picker로 선택한 사진들이 담길 리스트 (Asset타입 - 사진 띄울 때 사용됨)
-  List<XFile> images = [];
+  List<File> uploadImages = [];
 
   /// multiImage Picker로 선택한 사진들이 담길 리스트 (File타입 - 사진 저장할 때 사용됨)
   List<File> willBeSavedFileList = [];
 
   /// 업로드 된 이미지의 개수
   int numberOfImages = 0;
+
+  List<File> alreadySavedList = [];
+
+  bool alreadyLoading = false;
 
   /// 10개의 이미지 개수 제한에 다다랐을 때 true 로 변함(글자색 바꿀 때 사용)
   bool numberOfImagesTextColor = false;
@@ -58,7 +62,7 @@ class _EditPageState extends State<EditPage> {
   final ImagePicker _picker = ImagePicker();
 
   /// index 만큼의 이미지를 갤러리에서 선택한 후 image 리스트에 저장시키는 함수
-  Future<void> getMultiImage() async {
+  Future<void> getMultiImage(int index) async {
     //이미지 받아올 때 사이즈 압축 함
     var pickedFileList = await _picker.pickMultiImage(
       maxWidth: 1000,
@@ -69,18 +73,18 @@ class _EditPageState extends State<EditPage> {
     /// pick된 사진이 10개 아래이면 바로 image list에 넣고(글씨 검정)
     /// 10개이상이면 10개까지만 잘라서 image에 넣기(글씨 빨강)
     setState(() {
-      if(pickedFileList.length < 10 - numberOfImages){
+      if(pickedFileList.length < 10 - numberOfImages - alreadySavedList.length){
         numberOfImages += pickedFileList.length;
         for(var i = 0 ; i<pickedFileList.length; i++){
-          images.add(pickedFileList[i]);
+          willBeSavedFileList.add(File(pickedFileList[i].path));
         }
         numberOfImagesTextColor = false;
       } else {
-        pickedFileList = pickedFileList.sublist(0, 10 - numberOfImages);
-        for(var i = 0 ; i< 10 - numberOfImages; i++){
-          images.add(pickedFileList[i]);
+        pickedFileList = pickedFileList.sublist(0, 10 - numberOfImages - alreadySavedList.length);
+        for(var i = 0 ; i< 10 - numberOfImages - alreadySavedList.length; i++){
+          willBeSavedFileList.add(File(pickedFileList[i].path));
         }
-        numberOfImages = 10;
+        numberOfImages += pickedFileList.length;
         numberOfImagesTextColor = true;
       }
     });
@@ -130,10 +134,6 @@ class _EditPageState extends State<EditPage> {
   int photoNum;
   int imageLoadCount =0;
 
-  var alreadySavedList = [];
-
-  bool alreadyLoading = false;
-
   Future<File> fileFromImageUrl(String url, int num) async {
     var response = await http.get(Uri.parse(url));
 
@@ -170,6 +170,10 @@ class _EditPageState extends State<EditPage> {
       /// image file으로 만들어서 따로 저장해줘야함
       for(var i=0; i<imageUrlList.length; i++) {
         alreadySavedList.add(await fileFromImageUrl(imageUrlList[i],i));
+      }
+
+      if(alreadySavedList.length == 10) {
+        numberOfImagesTextColor = true;
       }
 
       /// 이미 한번 로딩하여 가져온 경우 다시 안가져오도록 true로 바꿈
@@ -223,31 +227,6 @@ class _EditPageState extends State<EditPage> {
 
     photoNum = product.photo;
 
-    /// ProductID에 따라 해당하는 image url 다운로드
-    Future<String> downloadURL(String id, int num) async {
-      try {
-        return await storage
-            .ref()
-            .child('images')
-            .child('$id$num.png')
-            .getDownloadURL();
-      } on Exception {
-        return null;
-      }
-    }
-
-    Future<void> deleteURL(String id, int num) async {
-      try {
-        return await storage
-            .ref()
-            .child('images')
-            .child('$id$num.png')
-            .delete();
-      } on Exception {
-        return null;
-      }
-    }
-
     ///********************* 변경한 내용대로 게시물을 업데이트 *********************///
 
     /// giveProducts 또는 takeProducts 중 어디 컬랙션에 속한 게시물인지에 따라 참조할 path 결정
@@ -258,7 +237,6 @@ class _EditPageState extends State<EditPage> {
     /// 이미지 storage 에 저장할 때 productID 뒤에 숫자붙여서 저장시키는 함수
     Future<void> uploadFile(String id) async {
       try {
-        //alreadySavedList.length
         for (var num = 0; num < willBeSavedFileList.length; num++) {
           print('willBeSavedFileList 저장 시작 -> ${num + 1}');
           await storage
@@ -284,7 +262,8 @@ class _EditPageState extends State<EditPage> {
         'modified': FieldValue.serverTimestamp(),
         'photo': alreadySavedList.length + willBeSavedFileList.length,
       }).then((value) {
-        if (images.isNotEmpty) uploadFile(productId);
+        uploadImages = alreadySavedList + willBeSavedFileList;
+        if (uploadImages.isNotEmpty) uploadFile(productId);
       }).catchError((error) => print('Error: $error'));
     }
 
@@ -339,8 +318,10 @@ class _EditPageState extends State<EditPage> {
                                 ),
                               ),
                               onPressed: () {
-                                print('선택가능한 사진 수 -> ${10 - (numberOfImages+alreadySavedList.length)}');
-                                getMultiImage();
+                                print('선택가능한 사진 수 -> ${10 - (numberOfImages + alreadySavedList.length)}');
+                                if(!numberOfImagesTextColor){
+                                  getMultiImage(alreadySavedList.length);
+                                }
                               },
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -377,18 +358,17 @@ class _EditPageState extends State<EditPage> {
                             width: MediaQuery.of(context).size.height * (0.35),
                             child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                itemCount: images.length+alreadySavedList.length,
+                                itemCount: willBeSavedFileList.length + alreadySavedList.length,
                                 itemBuilder: (BuildContext context, int index) {
-                                  var asset;
-                                  var alreadySavedFile;
-                                  var f ;
                                   print('보여주기 전 alreadySavedList.length -> ${alreadySavedList.length}');
                                   print('보여주기 전 willBeSavedFileList.length -> ${willBeSavedFileList.length}');
+                                  print('보여주기 전 uploadImages.length -> ${uploadImages.length}');
+                                  var alreadyFile;
+                                  var willFile;
                                   if(index < alreadySavedList.length){
-                                    alreadySavedFile = alreadySavedList[index];
+                                    alreadyFile = alreadySavedList[index];
                                   } else {
-                                    f = willBeSavedFileList[index-alreadySavedList.length];
-                                    asset = images[index-alreadySavedList.length];
+                                    willFile = willBeSavedFileList[index-alreadySavedList.length];
                                   }
 
                                   return Column(
@@ -420,11 +400,11 @@ class _EditPageState extends State<EditPage> {
                                                                     borderRadius: BorderRadius.circular(5.0),
                                                                     child: index < alreadySavedList.length ?
                                                                     Image.file(
-                                                                      alreadySavedFile,
+                                                                      alreadyFile,
                                                                       fit: BoxFit.cover,
                                                                       width: 200,
                                                                     ): Image.file(
-                                                                      f,
+                                                                      willFile,
                                                                       fit: BoxFit.cover,
                                                                       width: 200,
                                                                     )
@@ -461,10 +441,9 @@ class _EditPageState extends State<EditPage> {
                                                                       onTap: () {
                                                                         setState(() {
                                                                           if(index < alreadySavedList.length){
-                                                                            alreadySavedList.remove(alreadySavedFile);
+                                                                            alreadySavedList.remove(alreadyFile);
                                                                           } else {
-                                                                            willBeSavedFileList.remove(f);
-                                                                            images.remove(asset);
+                                                                            willBeSavedFileList.remove(willFile);
                                                                           }
                                                                           numberOfImages = willBeSavedFileList.length;
                                                                           print('willsaved 길이 : ${willBeSavedFileList.length}\n'
@@ -532,10 +511,10 @@ class _EditPageState extends State<EditPage> {
             ),
             onPressed: () {
               alreadyLoading = false;
-              images.clear();
               numberOfImages = 0;
               alreadySavedList.clear();
               willBeSavedFileList.clear();
+              uploadImages.clear();
               photoNum =0;
               Navigator.pop(context);
             },
