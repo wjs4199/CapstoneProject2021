@@ -320,7 +320,7 @@ class _EditPageState extends State<EditPage> {
                   height: MediaQuery.of(context).size.height * (0.11) * 0.77,
                   width: MediaQuery.of(context).size.height * (0.35),
                   child: Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(color: Color(0xfffc7174)),
                   )
               );
             }
