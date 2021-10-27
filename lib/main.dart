@@ -39,19 +39,6 @@ class _ApplicationState extends State<Application> {
 
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
-  // Future<bool> _decideMainPage() async {
-  //   isLoggedIn = await googleSignIn.isSignedIn();
-  //   if (isLoggedIn) {
-  //     print('Login true');
-  //     return true;
-  //   }
-  //   else{
-  //     print('Login false');
-  //     return false;
-  //   }
-  //
-  // }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(

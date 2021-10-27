@@ -107,7 +107,7 @@ class CustomListItem extends StatelessWidget {
   final String subtitle;
   final String author;
   final String publishDate;
-  // final String category;
+ // final String category;
   final int likes;
 
   @override

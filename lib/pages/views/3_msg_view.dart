@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:giveandtake/components/loading.dart';
 import 'package:giveandtake/model/const.dart';
+import 'package:giveandtake/pages/home.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../chat.dart';
 
@@ -17,6 +18,13 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 bool isLoading = false;
 int _limit = 20;
 var _flutterLocalNotificationsPlugin;
+var _messageState = false;
+
+
+Future<void> _cancelAllNotifications() async {
+  await flutterLocalNotificationsPlugin.cancelAll();
+}
+
 
 Future _showNotification() async {
   var android = AndroidNotificationDetails(
@@ -70,8 +78,12 @@ class _MessagePageState extends State<MessagePage> {
           title: Text('Well done'),
           content: Text('Payload: $payload'),
         ));
+        //.then((value) => _cancelAllNotifications());
+
 
  */
+
+  // await Navigator.pushNamed(context, '/message');
     /*
     await Navigator.push(
       context,
@@ -81,6 +93,8 @@ class _MessagePageState extends State<MessagePage> {
     );
 
      */
+
+
   }
 
   //await _flutterLocalNotificationPlugin.~ 에서 payload부분은 모두 설정하여 주지 않아도 됩니다.
@@ -88,6 +102,7 @@ class _MessagePageState extends State<MessagePage> {
 
   @override
   Widget build(BuildContext context) {
+
     return SingleChildScrollView(
       child: Stack(
         children: <Widget>[
@@ -207,6 +222,7 @@ Widget MsgView(BuildContext context, ApplicationState appState) {
  */
 
 Container _buildSenderScreen(BuildContext context, DocumentSnapshot document) {
+
   return Container(
     margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
 
@@ -452,12 +468,14 @@ Widget buildItem(BuildContext context, DocumentSnapshot document) {
 
     if (document.id.contains(FirebaseAuth.instance.currentUser.uid)) {
       if (document.get('idFrom') == FirebaseAuth.instance.currentUser.uid)
-
       ///내가 보내는 입장이면
       {
+       // _messageState = true;
+       // HomePage(messageState: _messageState);
+        _showNotification();
         return _buildSenderScreen(context, document);
       } else {
-        _showNotification();
+
         return _buildReceiverScreen(context, document);
       }
     }
