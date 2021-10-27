@@ -127,7 +127,7 @@ class SignUpState extends State<SignUp> {
                           await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => HomePage(nickname : nickname)));
+                                  builder: (context) => HomePage()));
                         }
                         else if(isDuplicated || checkLoop == false)
                         {

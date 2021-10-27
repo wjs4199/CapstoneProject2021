@@ -316,10 +316,6 @@ Container _buildSenderScreen(BuildContext context, DocumentSnapshot document) {
               ),
             ),
           ),
-          Icon(
-            Icons.add_alert,
-            color: Colors.deepOrangeAccent,
-          ),
         ],
       ),
     ),
