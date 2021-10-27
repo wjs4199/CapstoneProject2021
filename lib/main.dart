@@ -44,12 +44,10 @@ class _ApplicationState extends State<Application> {
   //   if (isLoggedIn) {
   //     print('Login true');
   //     return true;
-  //   }
-  //   else{
+  //   } else {
   //     print('Login false');
   //     return false;
   //   }
-  //
   // }
 
   @override
@@ -68,7 +66,7 @@ class _ApplicationState extends State<Application> {
             ),
 
             home: SplashPage(),
-            //home: _decideMainPage() == true ? HomePage() : LoginPage(),
+            // home: _decideMainPage() == true ? HomePage() : LoginPage(),
             //initialRoute: _decideMainPage() == null ? '/home' : '/login',
             debugShowCheckedModeBanner: false,
 
@@ -81,7 +79,6 @@ class _ApplicationState extends State<Application> {
               '/giveadd': (context) => AddPage(giveOrTake: 'give'),
               '/takeadd': (context) => AddPage(giveOrTake: 'take'),
               '/message': (context) => MessagePage(),
-              '/map': (context) => MapPage(),
             },
 
             // 동적 경로할당
@@ -159,7 +156,6 @@ class ApplicationState extends ChangeNotifier {
     init();
   }
 
-
   void orderByFilter(String orderBy) {
     this.orderBy = orderBy;
     print('filtering ->  ' + orderBy);
@@ -202,6 +198,7 @@ class ApplicationState extends ChangeNotifier {
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
             nickname: document.data()['nickname'],
+            thumbnail: document.data()['thumbnailURL'],
           ));
         });
         notifyListeners();
@@ -230,6 +227,7 @@ class ApplicationState extends ChangeNotifier {
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
             nickname: document.data()['nickname'],
+            thumbnail: document.data()['thumbnailURL'],
           ));
         });
         notifyListeners();
@@ -260,6 +258,7 @@ class ApplicationState extends ChangeNotifier {
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
             nickname: document.data()['nickname'],
+            thumbnail: document.data()['thumbnailURL'],
           ));
         });
         notifyListeners();
@@ -287,6 +286,7 @@ class ApplicationState extends ChangeNotifier {
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
             nickname: document.data()['nickname'],
+            thumbnail: document.data()['thumbnailURL'],
           ));
         });
         notifyListeners();

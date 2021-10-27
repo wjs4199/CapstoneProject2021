@@ -14,12 +14,32 @@
       },
       "oauth_client": [
         {
-          "client_id": "704436127190-j19cqkirueje3sfp7e1dq6km0ef9h3gn.apps.googleusercontent.com",
+          "client_id": "704436127190-34o1fton6qa36rb0psj3jfrl2qjp6n2h.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.giveandtake",
-            "certificate_hash": "e69657af2aa53652deb7ae04e22162d34b334407"
+            "certificate_hash": "45ee6d6d9dbaf571910cb35eac7cba31dd2438b8"
           }
+        },
+        {
+          "client_id": "704436127190-6nkdfhhkf4843ncorjngt2tkdqhmklgv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.giveandtake",
+            "certificate_hash": "d2b2e187452aa59c193bc787ac0fa8f6b78867d1"
+          }
+        },
+        {
+          "client_id": "704436127190-uva7l64t1qtjct9u8ar1arrcpk8qa5so.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.giveandtake",
+            "certificate_hash": "0039b634062cc5aeda8f5e01d881bc5442d5d12f"
+          }
+        },
+        {
+          "client_id": "704436127190-oa1pieb5c0b03j6grr21mfd21790cvis.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [

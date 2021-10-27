@@ -28,7 +28,6 @@ class AddPage extends StatefulWidget {
 }
 
 class _AddPageState extends State<AddPage> {
-
   ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
   /// Firebase Storage 참조 간략화
   FirebaseStorage storage = FirebaseStorage.instance;
@@ -86,9 +85,12 @@ class _AddPageState extends State<AddPage> {
   Future<void> getImageFileFromAssets() async {
     images.forEach((imageAsset) async {
       final byteData = await imageAsset.getByteData();
-      var tempFile = File('${(await getTemporaryDirectory()).path}/${imageAsset.name}');
-      final resultFile = await tempFile.writeAsBytes(byteData.buffer
-            .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),);
+      var tempFile =
+          File('${(await getTemporaryDirectory()).path}/${imageAsset.name}');
+      final resultFile = await tempFile.writeAsBytes(
+        byteData.buffer
+            .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+      );
 
       var image = Im.decodeImage(await testCompressFile(resultFile));
       var compressedImage = resultFile
@@ -149,9 +151,23 @@ class _AddPageState extends State<AddPage> {
 
   /// Firestore collection 참조 간략화
   CollectionReference giveProduct =
-  FirebaseFirestore.instance.collection('giveProducts');
+      FirebaseFirestore.instance.collection('giveProducts');
   CollectionReference takeProduct =
-  FirebaseFirestore.instance.collection('takeProducts');
+      FirebaseFirestore.instance.collection('takeProducts');
+
+  /// ProductID에 따라 해당하는 thumbnail image url 다운로드
+  Future<String> thumbnailURL(String id) async {
+    try {
+      return await storage
+          .ref()
+          .child('images')
+          //.child('$id.png')
+          .child('$id\0.png')
+          .getDownloadURL();
+    } on Exception {
+      return null;
+    }
+  }
 
   /// 'giveProducts' collection 에 게시글 추가시키는 함수
   Future<void> addGiveProduct(
@@ -173,12 +189,11 @@ class _AddPageState extends State<AddPage> {
       'photo': numberOfImages,
       'user_photoURL': user.photoURL,
       'nickname': nickName,
-
-      /// for chatting
     }).then((value) async {
-      if (images.isNotEmpty) {
-        await uploadFile(value.id);
-      }
+      if (images.isNotEmpty) await uploadFile(value.id);
+      await giveProduct.doc(value.id).update({
+        'thumbnailURL': await thumbnailURL(value.id),
+      });
     }).catchError((error) => print('Error: $error'));
   }
 
@@ -204,8 +219,11 @@ class _AddPageState extends State<AddPage> {
       'nickname': nickName,
 
       /// for chatting
-    }).then((value) {
-      if (images.isNotEmpty) uploadFile(value.id);
+    }).then((value) async {
+      if (images.isNotEmpty) await uploadFile(value.id);
+      await takeProduct.doc(value.id).update({
+        'thumbnailURL': await thumbnailURL(value.id),
+      });
     }).catchError((error) => print('Error: $error'));
   }
 
@@ -253,19 +271,19 @@ class _AddPageState extends State<AddPage> {
               ),
               title: widget.giveOrTake == 'give'
                   ? Text(
-                '나눔 글쓰기',
-                style: TextStyle(
-                  fontFamily: 'NanumSquareRoundR',
-                  fontWeight: FontWeight.bold,
-                ),
-              )
+                      '나눔 글쓰기',
+                      style: TextStyle(
+                        fontFamily: 'NanumSquareRoundR',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
                   : Text(
-                '나눔요청 글쓰기',
-                style: TextStyle(
-                  fontFamily: 'NanumSquareRoundR',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+                      '나눔요청 글쓰기',
+                      style: TextStyle(
+                        fontFamily: 'NanumSquareRoundR',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
               centerTitle: true,
               actions: <Widget>[
                 IconButton(
@@ -430,7 +448,7 @@ class _AddPageState extends State<AddPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.461,
+        minWidth: MediaQuery.of(context).size.width * 0.46,
         minHeight: 50,
       ),
       selectedBorderColor: Color(0xffeb6859),
@@ -486,7 +504,7 @@ class _AddPageState extends State<AddPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.461,
+        minWidth: MediaQuery.of(context).size.width * 0.46,
         minHeight: 50,
       ),
       selectedBorderColor: Color(0xffeb6859),
@@ -556,7 +574,7 @@ class _AddPageState extends State<AddPage> {
                       backgroundColor: Colors.transparent,
                       textStyle: TextStyle(
                         color:
-                        numberOfImagesTextColor ? Colors.red : Colors.black,
+                            numberOfImagesTextColor ? Colors.red : Colors.black,
                         fontSize: 9,
                       ),
                       shape: RoundedRectangleBorder(
@@ -601,42 +619,42 @@ class _AddPageState extends State<AddPage> {
                 images.isEmpty
                     ? Container()
                     : Container(
-                  height:
-                  MediaQuery.of(context).size.height * (0.11) * 0.7,
-                  width: MediaQuery.of(context).size.height * (0.35),
-                  child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: images.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        var asset = images[index];
-                        return Stack(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                AssetThumb(
-                                  asset: asset,
-                                  height: 200,
-                                  width: 200,
-                                ),
-                                SizedBox(
-                                  height:
-                                  MediaQuery.of(context).size.height *
-                                      (0.11) *
-                                      0.7,
-                                  width:
-                                  MediaQuery.of(context).size.height *
-                                      (0.11) *
-                                      0.12,
-                                ),
-                              ],
-                            ),
+                        height:
+                            MediaQuery.of(context).size.height * (0.11) * 0.7,
+                        width: MediaQuery.of(context).size.height * (0.35),
+                        child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: images.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              var asset = images[index];
+                              return Stack(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      AssetThumb(
+                                        asset: asset,
+                                        height: 200,
+                                        width: 200,
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                (0.11) *
+                                                0.7,
+                                        width:
+                                            MediaQuery.of(context).size.height *
+                                                (0.11) *
+                                                0.12,
+                                      ),
+                                    ],
+                                  ),
 
-                            /// 여기서 삭제버튼 구현하다 관둠...
-                          ],
-                        );
-                      }),
-                )
+                                  /// 여기서 삭제버튼 구현하다 관둠...
+                                ],
+                              );
+                            }),
+                      )
               ])
             ]),
           ],

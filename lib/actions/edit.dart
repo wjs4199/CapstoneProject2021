@@ -16,7 +16,6 @@ import '../model/product.dart';
 import 'dart:io';
 import 'dart:ui';
 
-
 class EditPage extends StatefulWidget {
   EditPage({this.productId, this.editGiveOrTake});
 
@@ -34,11 +33,12 @@ class _EditPageState extends State<EditPage> {
   String productId;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
 
     productId = widget.productId;
   }
+
   ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
 
   /// Firebase Storage 참조 간략화
@@ -55,7 +55,6 @@ class _EditPageState extends State<EditPage> {
 
   /// 10개의 이미지 개수 제한에 다다랐을 때 true 로 변함(글자색 바꿀 때 사용)
   bool numberOfImagesTextColor = false;
-
 
   /// index 만큼의 이미지를 갤러리에서 선택한 후 image 리스트에 저장시키는 함수
   Future<void> getMultiImage(int index) async {
@@ -93,8 +92,9 @@ class _EditPageState extends State<EditPage> {
 
   /// image 리스트에 들어있는 Asset 타입 이미지들을 File 타입으로 변환시키는 함수(storage 저장 위해)
   Future<void> getImageFileFromAssets() async {
-    for(var i = willBeSavedFileList.length; i<images.length; i++){
-      var tempFile = File('${(await getTemporaryDirectory()).path}/${images[i].name}');
+    for (var i = willBeSavedFileList.length; i < images.length; i++) {
+      var tempFile =
+          File('${(await getTemporaryDirectory()).path}/${images[i].name}');
       willBeSavedFileList.add(tempFile);
     }
     /*images.forEach((imageAsset) async {
@@ -120,6 +120,20 @@ class _EditPageState extends State<EditPage> {
           .child('images')
           //.child('$id.png')
           .child('$id$num.png')
+          .getDownloadURL();
+    } on Exception {
+      return null;
+    }
+  }
+
+  /// ProductID에 따라 해당하는 thumbnail image url 다운로드
+  Future<String> thumbnailURL(String id) async {
+    try {
+      return await storage
+          .ref()
+          .child('images')
+          //.child('$id.png')
+          .child('$id\0.png')
           .getDownloadURL();
     } on Exception {
       return null;
@@ -154,7 +168,7 @@ class _EditPageState extends State<EditPage> {
   var _selectedFilter = '물건';
 
   int photoNum;
-  int imageLoadCount =0;
+  int imageLoadCount = 0;
 
   var alreadySavedList = [];
 
@@ -177,24 +191,27 @@ class _EditPageState extends State<EditPage> {
 
   /// 다운로드한 url 들 중 null 이 아닌 것들만을 imageUrlList 에 저장시킨는 함수
   Future<void> makeUrlList() async {
-    if(!alreadyLoading){
+    if (!alreadyLoading) {
       imageUrlList = await Future.wait([
-        downloadURL(widget.productId,0),
-        downloadURL(widget.productId,1),
-        downloadURL(widget.productId,2),
-        downloadURL(widget.productId,3),
-        downloadURL(widget.productId,4),
-        downloadURL(widget.productId,5),
-        downloadURL(widget.productId,6),
-        downloadURL(widget.productId,7),
-        downloadURL(widget.productId,8),
-        downloadURL(widget.productId,9),]);
+        downloadURL(widget.productId, 0),
+        downloadURL(widget.productId, 1),
+        downloadURL(widget.productId, 2),
+        downloadURL(widget.productId, 3),
+        downloadURL(widget.productId, 4),
+        downloadURL(widget.productId, 5),
+        downloadURL(widget.productId, 6),
+        downloadURL(widget.productId, 7),
+        downloadURL(widget.productId, 8),
+        downloadURL(widget.productId, 9),
+      ]);
 
       imageUrlList = imageUrlList.where((e) => e != null).toList();
-      print('for 돌기전 alreadySavedList 길이는 -> ${alreadySavedList.length}\nimageurlList의 길이는 ${imageUrlList.length}');
+      print(
+          'for 돌기전 alreadySavedList 길이는 -> ${alreadySavedList.length}\nimageurlList의 길이는 ${imageUrlList.length}');
+
       /// image file으로 만들어서 따로 저장해줘야함
-      for(var i=0; i<imageUrlList.length; i++) {
-        alreadySavedList.add(await fileFromImageUrl(imageUrlList[i],i));
+      for (var i = 0; i < imageUrlList.length; i++) {
+        alreadySavedList.add(await fileFromImageUrl(imageUrlList[i], i));
         print('alreadySavedList에 들어갈때 imageURL의 값: ${imageUrlList[i]}');
         print('for 돌면서 alreadySavedList 길이는 -> ${alreadySavedList.length}');
       }
@@ -207,10 +224,8 @@ class _EditPageState extends State<EditPage> {
     print('마지막으로 alreadySavedList 길이는 -> ${alreadySavedList.length}');
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     ///*********** ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ***********///
 
     /// EditPage 호출시 받는 매개변수 참조
@@ -292,7 +307,9 @@ class _EditPageState extends State<EditPage> {
               .ref('images/' + id + (product.photo + num).toString() + '.png')
               .putFile(willBeSavedFileList[num]);
         }
-        for (var num = willBeSavedFileList.length; num < willBeSavedFileList.length+alreadySavedList.length; num++) {
+        for (var num = willBeSavedFileList.length;
+            num < willBeSavedFileList.length + alreadySavedList.length;
+            num++) {
           print('alreadySavedList 저장 시작 -> ${num + 1}');
           await storage
               .ref('images/' + id + (product.photo + num).toString() + '.png')
@@ -310,8 +327,11 @@ class _EditPageState extends State<EditPage> {
         'category': category,
         'modified': FieldValue.serverTimestamp(),
         'photo': alreadySavedList.length + willBeSavedFileList.length,
-      }).then((value) {
-        if (images.isNotEmpty) uploadFile(productId);
+      }).then((value) async {
+        if (images.isNotEmpty) await uploadFile(productId);
+        await target
+            .doc(productId)
+            .update({'thumbnailURL': await thumbnailURL(productId)});
       }).catchError((error) => print('Error: $error'));
     }
 
@@ -331,9 +351,9 @@ class _EditPageState extends State<EditPage> {
                   width: MediaQuery.of(context).size.height * (0.35),
                   child: Center(
                     child: CircularProgressIndicator(),
-                  )
-              );
+                  ));
             }
+
             /// 사진 로딩 후
             else {
               return Container(
@@ -345,206 +365,291 @@ class _EditPageState extends State<EditPage> {
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.016,
                       ),
-                      Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.height * (0.11) * 0.12,
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.height * (0.11) * 0.7,
-                          height: MediaQuery.of(context).size.height * (0.11) * 0.7,
-                          child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                primary: Colors.black,
-                                backgroundColor: Colors.transparent,
-                                textStyle: TextStyle(
-                                  color:
-                                  numberOfImagesTextColor ? Colors.red : Colors.black,
-                                  fontSize: 9,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5.0),
-                                ),
-                              ),
-                              onPressed: () {
-                                print('선택가능한 사진 수 -> ${10 - (numberOfImages+alreadySavedList.length)}');
-                                getMultiImage(10 - (numberOfImages + alreadySavedList.length) + numberOfImages);
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.camera_alt_rounded,
-                                    semanticLabel: 'Image upload',
-                                    color: Colors.grey,
-                                  ),
-                                  Text(
-                                    '${willBeSavedFileList.length + alreadySavedList.length}/10',
-                                    style: TextStyle(
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.height *
+                                  (0.11) *
+                                  0.12,
+                            ),
+                            Container(
+                              width: MediaQuery.of(context).size.height *
+                                  (0.11) *
+                                  0.7,
+                              height: MediaQuery.of(context).size.height *
+                                  (0.11) *
+                                  0.7,
+                              child: OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    primary: Colors.black,
+                                    backgroundColor: Colors.transparent,
+                                    textStyle: TextStyle(
                                       color: numberOfImagesTextColor
                                           ? Colors.red
                                           : Colors.black,
+                                      fontSize: 9,
                                     ),
-                                  )
-                                ],
-                              )),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.height * (0.11) * 0.12,
-                        ),
-
-                        /// 업로드 된 사진들 가로 스크롤 가능
-                        Row(children: [
-                          alreadySavedList.isEmpty && willBeSavedFileList.isEmpty
-                              ? Container(
-                            height: MediaQuery.of(context).size.height * (0.11) * 0.77,
-                            width: MediaQuery.of(context).size.height * (0.35),
-                          )
-                              : Container(
-                            height: MediaQuery.of(context).size.height * (0.11) * 0.77,
-                            width: MediaQuery.of(context).size.height * (0.35),
-                            child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: images.length+alreadySavedList.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  var asset;
-                                  var alreadySavedFile;
-                                  var f ;
-                                  print('alreadySavedList.length -> ${alreadySavedList.length}');
-                                  print('willBeSavedFileList.length -> ${willBeSavedFileList.length}');
-                                  if(index < alreadySavedList.length){
-                                    alreadySavedFile = alreadySavedList[index];
-                                  } else {
-                                    f = willBeSavedFileList[index-alreadySavedList.length];
-                                    asset = images[index-alreadySavedList.length];
-                                  }
-
-                                  return Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    print(
+                                        '선택가능한 사진 수 -> ${10 - (numberOfImages + alreadySavedList.length)}');
+                                    getMultiImage(10 -
+                                        (numberOfImages +
+                                            alreadySavedList.length) +
+                                        numberOfImages);
+                                  },
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Stack(
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              Stack(children: [
-                                                Container(
-                                                    height: MediaQuery.of(context).size.height * (0.11) * 0.77,
-                                                    width: MediaQuery.of(context).size.height * (0.11) * 0.7,
-                                                    child: Column(
-                                                      mainAxisAlignment: MainAxisAlignment.start,
-                                                      children: [
-                                                        SizedBox(
-                                                          height: MediaQuery.of(context).size.height * (0.11) * 0.045,
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment: MainAxisAlignment.start,
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                          children: [
-                                                            Container(
-                                                                height: 67,
-                                                                width: 67,
-                                                                child: ClipRRect(
-                                                                    borderRadius: BorderRadius.circular(5.0),
-                                                                    child: index < alreadySavedList.length ?
-                                                                    Image.file(
-                                                                      alreadySavedFile,
-                                                                      fit: BoxFit.cover,
-                                                                      width: 200,
-                                                                    ): Image.file(
-                                                                      f,
-                                                                      fit: BoxFit.cover,
-                                                                      width: 200,
-                                                                    )
-                                                                )
-                                                            )
-                                                          ],
-                                                        )
-                                                      ],
-                                                    )
-                                                ),
-                                                Container(
-                                                  height: MediaQuery.of(context).size.height * (0.11) * 0.76,
-                                                  width: MediaQuery.of(context).size.height * (0.11) * 0.73,
-                                                  child: Column(
-                                                    mainAxisAlignment: MainAxisAlignment.start,
-                                                    children: [
-                                                      Container(
-                                                        height: MediaQuery.of(context).size.height * (0.11) * 0.65,
-                                                        width: MediaQuery.of(context).size.height * (0.11) * 0.73,
-                                                        child: Row(
-                                                            mainAxisAlignment:
-                                                            MainAxisAlignment.start,
-                                                            crossAxisAlignment:
-                                                            CrossAxisAlignment.start,
-                                                            children: [
-                                                              Container(
-                                                                width: 53,
-                                                              ),
-                                                              Expanded(
-                                                                child: Container(
-                                                                    width: 20,
-                                                                    height: 20,
-                                                                    child: InkWell(
-                                                                      onTap: () {
-                                                                        setState(() {
-                                                                          if(index < alreadySavedList.length){
-                                                                            alreadySavedList.remove(alreadySavedFile);
-                                                                          } else {
-                                                                            willBeSavedFileList.remove(f);
-                                                                            images.remove(asset);
-                                                                          }
-                                                                          numberOfImages = willBeSavedFileList.length;
-                                                                          print('willsaved 길이 : ${willBeSavedFileList.length}\n'
-                                                                              'alreadsaved 길이 : ${alreadySavedList.length}');
-
-                                                                          /// 삭제해서 선택한 사진이 10개 아래이면 다시 색깔 검정으로
-                                                                          if (numberOfImages + alreadySavedList.length >= 10) {
-                                                                            numberOfImagesTextColor = true;
-                                                                          } else {
-                                                                            numberOfImagesTextColor = false;
-                                                                          }
-                                                                        });
-                                                                      },
-                                                                      child: Icon(
-                                                                        Icons.cancel,
-                                                                        size: 18,
-                                                                        color: Color(0x00000000).withOpacity(0.5),
-                                                                      ),
-                                                                    )
-                                                                ),)
-                                                            ]),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                )
-                                              ]),
-                                              SizedBox(
-                                                height:
-                                                MediaQuery.of(context).size.height *
-                                                    (0.11) *
-                                                    0.7,
-                                                width:
-                                                MediaQuery.of(context).size.height *
-                                                    (0.11) *
-                                                    0.12,
-                                              ),
-                                            ],
-                                          ),
-
-                                          /// 여기서 삭제버튼 구현하다 관둠...
-                                        ],
+                                      Icon(
+                                        Icons.camera_alt_rounded,
+                                        semanticLabel: 'Image upload',
+                                        color: Colors.grey,
+                                      ),
+                                      Text(
+                                        '${willBeSavedFileList.length + alreadySavedList.length}/10',
+                                        style: TextStyle(
+                                          color: numberOfImagesTextColor
+                                              ? Colors.red
+                                              : Colors.black,
+                                        ),
                                       )
                                     ],
-                                  );
-                                }),
-                          )
-                        ]),
-                      ]),
+                                  )),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.height *
+                                  (0.11) *
+                                  0.12,
+                            ),
+
+                            /// 업로드 된 사진들 가로 스크롤 가능
+                            Row(children: [
+                              alreadySavedList.isEmpty &&
+                                      willBeSavedFileList.isEmpty
+                                  ? Container(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              (0.11) *
+                                              0.77,
+                                      width:
+                                          MediaQuery.of(context).size.height *
+                                              (0.35),
+                                    )
+                                  : Container(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              (0.11) *
+                                              0.77,
+                                      width:
+                                          MediaQuery.of(context).size.height *
+                                              (0.35),
+                                      child: ListView.builder(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: images.length +
+                                              alreadySavedList.length,
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            var asset;
+                                            var alreadySavedFile;
+                                            var f;
+                                            print(
+                                                'alreadySavedList.length -> ${alreadySavedList.length}');
+                                            print(
+                                                'willBeSavedFileList.length -> ${willBeSavedFileList.length}');
+                                            if (index <
+                                                alreadySavedList.length) {
+                                              alreadySavedFile =
+                                                  alreadySavedList[index];
+                                            } else {
+                                              f = willBeSavedFileList[index -
+                                                  alreadySavedList.length];
+                                              asset = images[index -
+                                                  alreadySavedList.length];
+                                            }
+
+                                            return Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                Stack(
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Stack(children: [
+                                                          Container(
+                                                              height: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .height *
+                                                                  (0.11) *
+                                                                  0.77,
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .height *
+                                                                  (0.11) *
+                                                                  0.7,
+                                                              child: Column(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  SizedBox(
+                                                                    height: MediaQuery.of(context)
+                                                                            .size
+                                                                            .height *
+                                                                        (0.11) *
+                                                                        0.045,
+                                                                  ),
+                                                                  Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .start,
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                      Container(
+                                                                          height:
+                                                                              67,
+                                                                          width:
+                                                                              67,
+                                                                          child: ClipRRect(
+                                                                              borderRadius: BorderRadius.circular(5.0),
+                                                                              child: index < alreadySavedList.length
+                                                                                  ? Image.file(
+                                                                                      alreadySavedFile,
+                                                                                      fit: BoxFit.cover,
+                                                                                      width: 200,
+                                                                                    )
+                                                                                  : Image.file(
+                                                                                      f,
+                                                                                      fit: BoxFit.cover,
+                                                                                      width: 200,
+                                                                                    )))
+                                                                    ],
+                                                                  )
+                                                                ],
+                                                              )),
+                                                          Container(
+                                                            height: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .height *
+                                                                (0.11) *
+                                                                0.76,
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .height *
+                                                                (0.11) *
+                                                                0.73,
+                                                            child: Column(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Container(
+                                                                  height: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .height *
+                                                                      (0.11) *
+                                                                      0.65,
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .height *
+                                                                      (0.11) *
+                                                                      0.73,
+                                                                  child: Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .start,
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        Container(
+                                                                          width:
+                                                                              53,
+                                                                        ),
+                                                                        Expanded(
+                                                                          child: Container(
+                                                                              width: 20,
+                                                                              height: 20,
+                                                                              child: InkWell(
+                                                                                onTap: () {
+                                                                                  setState(() {
+                                                                                    if (index < alreadySavedList.length) {
+                                                                                      alreadySavedList.remove(alreadySavedFile);
+                                                                                    } else {
+                                                                                      willBeSavedFileList.remove(f);
+                                                                                      images.remove(asset);
+                                                                                    }
+                                                                                    numberOfImages = willBeSavedFileList.length;
+                                                                                    print('willsaved 길이 : ${willBeSavedFileList.length}\n'
+                                                                                        'alreadsaved 길이 : ${alreadySavedList.length}');
+
+                                                                                    /// 삭제해서 선택한 사진이 10개 아래이면 다시 색깔 검정으로
+                                                                                    if (numberOfImages + alreadySavedList.length >= 10) {
+                                                                                      numberOfImagesTextColor = true;
+                                                                                    } else {
+                                                                                      numberOfImagesTextColor = false;
+                                                                                    }
+                                                                                  });
+                                                                                },
+                                                                                child: Icon(
+                                                                                  Icons.cancel,
+                                                                                  size: 18,
+                                                                                  color: Color(0x00000000).withOpacity(0.5),
+                                                                                ),
+                                                                              )),
+                                                                        )
+                                                                      ]),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          )
+                                                        ]),
+                                                        SizedBox(
+                                                          height: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .height *
+                                                              (0.11) *
+                                                              0.7,
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .height *
+                                                              (0.11) *
+                                                              0.12,
+                                                        ),
+                                                      ],
+                                                    ),
+
+                                                    /// 여기서 삭제버튼 구현하다 관둠...
+                                                  ],
+                                                )
+                                              ],
+                                            );
+                                          }),
+                                    )
+                            ]),
+                          ]),
                     ],
                   ));
             }
-          }
-      );
+          });
     }
 
     /// Edit 페이지 화면 구성
@@ -563,7 +668,7 @@ class _EditPageState extends State<EditPage> {
               numberOfImages = 0;
               alreadySavedList.clear();
               willBeSavedFileList.clear();
-              photoNum =0;
+              photoNum = 0;
               Navigator.pop(context);
             },
           ),
@@ -724,7 +829,7 @@ class _EditPageState extends State<EditPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.461,
+        minWidth: MediaQuery.of(context).size.width * 0.46,
         minHeight: 50,
       ),
       selectedBorderColor: Color(0xffeb6859),
@@ -780,7 +885,7 @@ class _EditPageState extends State<EditPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.461,
+        minWidth: MediaQuery.of(context).size.width * 0.46,
         minHeight: 50,
       ),
       selectedBorderColor: Color(0xffeb6859),
@@ -825,5 +930,4 @@ class _EditPageState extends State<EditPage> {
       ],
     );
   }
-
 }
