@@ -313,15 +313,18 @@ class _EditPageState extends State<EditPage> {
         'modified': FieldValue.serverTimestamp(),
         'photo': alreadySavedList.length + willBeSavedFileList.length,
       }).then((value) async {
-        await target
+        /*await target
             .doc(productId)
-            .update({'thumbnailURL': await thumbnailURL(productId)});
+            .update({'thumbnailURL': await thumbnailURL(productId)});*/
 
         /// storage에 올려진 사진 삭제 후 다시 업로드
         await deleteImages().whenComplete(() async {
           //await makeAlreadySavedList().then((value) async {
             uploadImages = alreadySavedList + willBeSavedFileList;
             if (uploadImages.isNotEmpty) await uploadFile(productId);
+            await target
+                .doc(productId)
+                .update({'thumbnailURL': await thumbnailURL(productId)});
          // });
         });
       }).catchError((error) => print('Error: $error'));
