@@ -1,17 +1,21 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_absolute_path/flutter_absolute_path.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
-//port 'package:path/path.dart';
+import 'package:image/image.dart' as Im;
 
 import '../main.dart';
 import '../model/product.dart';
 import 'dart:io';
+import 'dart:ui';
+
 
 class EditPage extends StatefulWidget {
   EditPage({this.productId, this.editGiveOrTake});
@@ -45,6 +49,7 @@ class _EditPageState extends State<EditPage> {
   /// 10개의 이미지 개수 제한에 다다랐을 때 true 로 변함(글자색 바꿀 때 사용)
   bool numberOfImagesTextColor = false;
 
+
   /// index 만큼의 이미지를 갤러리에서 선택한 후 image 리스트에 저장시키는 함수
   Future<void> getMultiImage(int index) async {
     List<Asset> resultList;
@@ -65,15 +70,40 @@ class _EditPageState extends State<EditPage> {
     await getImageFileFromAssets();
   }
 
+  Future<Uint8List> testCompressFile(File file) async {
+    var result = await FlutterImageCompress.compressWithFile(
+      file.absolute.path,
+      minWidth: 1000,
+      minHeight: 1000,
+      quality: 85,
+    );
+
+    print(file.lengthSync());
+    print(result.length);
+
+    return result;
+  }
+
   /// image 리스트에 들어있는 Asset 타입 이미지들을 File 타입으로 변환시키는 함수(storage 저장 위해)
   Future<void> getImageFileFromAssets() async {
-    images.forEach((imageAsset) async {
-      final filePath =
-          await FlutterAbsolutePath.getAbsolutePath(imageAsset.identifier);
-      var tempFile = File(filePath);
+    for(var i = willBeSavedFileList.length; i<images.length; i++){
+      var tempFile = File('${(await getTemporaryDirectory()).path}/${images[i].name}');
+      willBeSavedFileList.add(tempFile);
+      print('willBeSavedFileList의 추가 후 -> ${willBeSavedFileList.length}');
+    }
+    /*images.forEach((imageAsset) async {
+      //final byteData = await imageAsset.getByteData();
+      var tempFile = File('${(await getTemporaryDirectory()).path}/${imageAsset.name}');
+      //final resultFile = await tempFile.writeAsBytes(byteData.buffer
+        //  .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),);
+
+      //var image = Im.decodeImage(await testCompressFile(resultFile));
+     // var compressedImage = resultFile
+      //  ..writeAsBytesSync(Im.encodeJpg(image, quality: 90));
 
       willBeSavedFileList.add(tempFile);
-    });
+      print('willBeSavedFileList의 추가 후 -> ${willBeSavedFileList.length}');
+    });*/
   }
 
   /// ProductID에 따라 해당하는 image url 다운로드
@@ -385,6 +415,7 @@ class _EditPageState extends State<EditPage> {
                                   var alreadySavedFile;
                                   var f ;
                                   print('alreadySavedList.length -> ${alreadySavedList.length}');
+                                  print('willBeSavedFileList.length -> ${willBeSavedFileList.length}');
                                   if(index < alreadySavedList.length){
                                     alreadySavedFile = alreadySavedList[index];
                                   } else {
