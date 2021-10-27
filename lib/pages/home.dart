@@ -25,13 +25,11 @@ class HomePage extends StatefulWidget {
   ///* ------------------------------ 수정 -------------------------------- *////
   final SharedPreferences currentUserId;
   var nickname; // main 에 정의되어도 됨
-  HomePage({Key key, @required this.currentUserId})
-      : super(key: key); // 필요X
+  HomePage({Key key, @required this.currentUserId}) : super(key: key); // 필요X
 
   ///* ------------------------------------------------------------------ *////
   @override
-  State createState() =>
-      _HomePageState(currentUserId: currentUserId);
+  State createState() => _HomePageState(currentUserId: currentUserId);
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
@@ -344,7 +342,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             labelStyle: TextStyle(
                 fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
             onTap: () {
-
               Navigator.pushNamed(context, '/giveadd');
             },
             // closeSpeedDialOnPressed: false,
@@ -357,7 +354,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             labelStyle: TextStyle(
                 fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
             onTap: () {
-
               Navigator.pushNamed(context, '/takeadd');
             },
           ),
@@ -529,7 +525,6 @@ class PostTileMaker extends StatelessWidget {
 
     return InkWell(
         onTap: () {
-          // print(_giveOrTake);
           if (_giveOrTake) {
             editProductHits('giveProducts');
             Provider.of<ApplicationState>(context, listen: false)
