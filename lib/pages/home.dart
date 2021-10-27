@@ -312,7 +312,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
 
       /// 1(나눔요청):
-      // RequestView(context, appState, _tabController),
+      // RequestView(context, appState),
 
       /// 2(홈):
       // HomeView(context, appState),
@@ -487,7 +487,7 @@ class PostTileMaker extends StatelessWidget {
 
   /// Download image url of each product based on id
   Future<String> downloadURL(String id) async {
-    await Future.delayed(Duration(seconds: 1));
+    // await Future.delayed(Duration(seconds: 1));
     try {
       return await storage
           .ref() //스토리지 참조
@@ -539,6 +539,7 @@ class PostTileMaker extends StatelessWidget {
 
     return InkWell(
         onTap: () {
+          // print(_giveOrTake);
           if (_giveOrTake) {
             editProductHits('giveProducts');
             Provider.of<ApplicationState>(context, listen: false)
@@ -546,7 +547,7 @@ class PostTileMaker extends StatelessWidget {
                 .then((value) => Navigator.pushNamed(
                     context, '/detail/' + _product.id + '/giveProducts'));
           } else {
-            editProductHits('giveProducts');
+            editProductHits('takeProducts');
             Provider.of<ApplicationState>(context, listen: false)
                 .detailPageUid(_product.id, 'takeProducts', _product.photo)
                 .then((value) => Navigator.pushNamed(

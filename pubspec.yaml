@@ -9,16 +9,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core : ^1.5.0
+  firebase_core : ^1.7.0
   cloud_firestore: ^2.2.0
   firebase_auth: ^3.0.1
   geolocator: ^7.0.3
-  firebase_storage: ^10.0.1
+  firebase_storage: ^10.0.5
   google_fonts: ^2.0.0
   google_sign_in: ^5.0.3
   provider: ^5.0.0
   cupertino_icons: ^1.0.2
-  image_picker: ^0.8.0+1
+  image_picker: ^0.8.4+3
   url_launcher: ^6.0.6
   fl_chart: ^0.36.1 # 새로운 api 사용(1) flutter chart
   google_maps_flutter: ^2.0.6 # 새로운 api 사용 (3) google maps flutter
@@ -36,7 +36,6 @@ dependencies:
   image: ^3.0.0 #added 예은
   flutter_screenutil: ^5.0.0+2 #added by 찬식
   flutter_speed_dial: ^4.5.0 # JM
-
 
 dev_dependencies:
   flutter_test:
