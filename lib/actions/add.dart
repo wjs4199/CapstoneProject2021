@@ -9,9 +9,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
@@ -89,18 +89,15 @@ class _AddPageState extends State<AddPage> {
   /// image 리스트에 들어있는 Asset 타입 이미지들을 File 타입으로 변환시키는 함수(storage 저장 위해)
   Future<void> getImageFileFromAssets() async {
     images.forEach((imageAsset) async {
-      final filePath =
-          await FlutterAbsolutePath.getAbsolutePath(imageAsset.identifier);
-      var tempFile = File(filePath);
+      final byteData = await imageAsset.getByteData();
+      var tempFile = File('${(await getTemporaryDirectory()).path}/${imageAsset.name}');
+      final resultFile = await tempFile.writeAsBytes(byteData.buffer
+            .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),);
 
-      //var image = Im.decodeImage(tempFile.readAsBytesSync());
-      var image = Im.decodeImage(await testCompressFile(tempFile));
-      print('1차완료!');
-      // var smallerImage = Im.copyResize(image, width: 1000, height: 1000); // choose the size here, it will maintain aspect ratio
-      //print('2차완료!');
-      var compressedImage = File('$filePath')
+      var image = Im.decodeImage(await testCompressFile(resultFile));
+      var compressedImage = resultFile
         ..writeAsBytesSync(Im.encodeJpg(image, quality: 90));
-      print('3차완료!');
+
       file.add(compressedImage);
     });
   }
@@ -156,9 +153,9 @@ class _AddPageState extends State<AddPage> {
 
   /// Firestore collection 참조 간략화
   CollectionReference giveProduct =
-      FirebaseFirestore.instance.collection('giveProducts');
+  FirebaseFirestore.instance.collection('giveProducts');
   CollectionReference takeProduct =
-      FirebaseFirestore.instance.collection('takeProducts');
+  FirebaseFirestore.instance.collection('takeProducts');
 
   /// 'giveProducts' collection 에 게시글 추가시키는 함수
   Future<void> addGiveProduct(
@@ -260,19 +257,19 @@ class _AddPageState extends State<AddPage> {
               ),
               title: widget.giveOrTake == 'give'
                   ? Text(
-                      '나눔 글쓰기',
-                      style: TextStyle(
-                        fontFamily: 'NanumSquareRoundR',
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
+                '나눔 글쓰기',
+                style: TextStyle(
+                  fontFamily: 'NanumSquareRoundR',
+                  fontWeight: FontWeight.bold,
+                ),
+              )
                   : Text(
-                      '나눔요청 글쓰기',
-                      style: TextStyle(
-                        fontFamily: 'NanumSquareRoundR',
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                '나눔요청 글쓰기',
+                style: TextStyle(
+                  fontFamily: 'NanumSquareRoundR',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               centerTitle: true,
               actions: <Widget>[
                 IconButton(
@@ -563,7 +560,7 @@ class _AddPageState extends State<AddPage> {
                       backgroundColor: Colors.transparent,
                       textStyle: TextStyle(
                         color:
-                            numberOfImagesTextColor ? Colors.red : Colors.black,
+                        numberOfImagesTextColor ? Colors.red : Colors.black,
                         fontSize: 9,
                       ),
                       shape: RoundedRectangleBorder(
@@ -608,42 +605,42 @@ class _AddPageState extends State<AddPage> {
                 images.isEmpty
                     ? Container()
                     : Container(
-                        height:
-                            MediaQuery.of(context).size.height * (0.11) * 0.7,
-                        width: MediaQuery.of(context).size.height * (0.35),
-                        child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: images.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              var asset = images[index];
-                              return Stack(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      AssetThumb(
-                                        asset: asset,
-                                        height: 200,
-                                        width: 200,
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                (0.11) *
-                                                0.7,
-                                        width:
-                                            MediaQuery.of(context).size.height *
-                                                (0.11) *
-                                                0.12,
-                                      ),
-                                    ],
-                                  ),
+                  height:
+                  MediaQuery.of(context).size.height * (0.11) * 0.7,
+                  width: MediaQuery.of(context).size.height * (0.35),
+                  child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: images.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        var asset = images[index];
+                        return Stack(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                AssetThumb(
+                                  asset: asset,
+                                  height: 200,
+                                  width: 200,
+                                ),
+                                SizedBox(
+                                  height:
+                                  MediaQuery.of(context).size.height *
+                                      (0.11) *
+                                      0.7,
+                                  width:
+                                  MediaQuery.of(context).size.height *
+                                      (0.11) *
+                                      0.12,
+                                ),
+                              ],
+                            ),
 
-                                  /// 여기서 삭제버튼 구현하다 관둠...
-                                ],
-                              );
-                            }),
-                      )
+                            /// 여기서 삭제버튼 구현하다 관둠...
+                          ],
+                        );
+                      }),
+                )
               ])
             ]),
           ],
