@@ -42,28 +42,30 @@ class _EditPageState extends State<EditPage> {
   /// Firebase Storage 참조 간략화
   FirebaseStorage storage = FirebaseStorage.instance;
 
-  /// multiImage Picker로 선택한 사진들이 담길 리스트 (Asset타입 - 사진 띄울 때 사용됨)
+  /// 게시글에 저장되어 있던 사진들 + 저장될 사진들
   List<File> uploadImages = [];
 
   /// multiImage Picker로 선택한 사진들이 담길 리스트 (File타입 - 사진 저장할 때 사용됨)
   List<File> willBeSavedFileList = [];
 
-  /// 업로드 된 이미지의 개수
-  int numberOfImages = 0;
-
+  /// 게시글에 업로드 되어 있었던 사진들이 들어가는 리스트
   List<File> alreadySavedList = [];
 
+  /// 게시글에 업로드 되어 있었던 이미지들의 개수
+  int numberOfImages = 0;
+
+  /// 한번 storage에서 업로드 되어 있었던 이미지를 읽어들이면 true로 변함(여러번 다운로드 방지)
   bool alreadyLoading = false;
 
   /// 10개의 이미지 개수 제한에 다다랐을 때 true 로 변함(글자색 바꿀 때 사용)
   bool numberOfImagesTextColor = false;
 
-  /// 이미지 픽커 간략화
+  /// ImagePicker 간략화시켜 참조
   final ImagePicker _picker = ImagePicker();
 
   /// index 만큼의 이미지를 갤러리에서 선택한 후 image 리스트에 저장시키는 함수
   Future<void> getMultiImage(int index) async {
-    //이미지 받아올 때 사이즈 압축 함
+    //이미지 받아올 때 사이즈 압축
     var pickedFileList = await _picker.pickMultiImage(
       maxWidth: 1000,
       maxHeight: 1000,
@@ -96,7 +98,6 @@ class _EditPageState extends State<EditPage> {
       return await storage
           .ref()
           .child('images')
-          //.child('$id.png')
           .child('$id$num.png')
           .getDownloadURL();
     } on Exception {
@@ -121,9 +122,6 @@ class _EditPageState extends State<EditPage> {
   /// Add 페이지 내에서 give/take 중 무엇을 선택했는지를 담고 있는 변수
   String giveOrTakeCategory;
 
-  /// Give or Take 선택용 ToggleButtons - 각 버튼용 bool 리스트
-  final List<bool> _selectionsOfGiveOrTake = List.generate(2, (_) => false);
-
   /// 게시글 내용 입력과 관련된 key, controller 들
   final _formKey = GlobalKey<FormState>(debugLabel: '_EditPageState');
   final _titleController = TextEditingController();
@@ -146,8 +144,11 @@ class _EditPageState extends State<EditPage> {
     return file;
   }
 
-  /// storage 에서 다운로드한 이미지 url 들이 저장될 정적 저장소
+  /// storage 에서 다운로드한 이미지 url 들이 저장될 정적 저장소 (한 번 받고 나서 안변함)
   var imageUrlList = [];
+
+  /// storage 에서 다운로드한 이미지 url 들이 저장된 리스트 (삭제버튼 누르면 내용물이 변함)
+  var alreadyUrlList = [];
 
   /// 다운로드한 url 들 중 null 이 아닌 것들만을 imageUrlList 에 저장시킨는 함수
   Future<void> makeUrlList() async {
@@ -166,11 +167,16 @@ class _EditPageState extends State<EditPage> {
         downloadURL(widget.productId,9),]);
 
       imageUrlList = imageUrlList.where((e) => e != null).toList();
+      //alreadySavedList = imageUrlList;
 
+      /*if(alreadyUrlList.length == 10) {
+        numberOfImagesTextColor = true;
+      }*/
       /// image file으로 만들어서 따로 저장해줘야함
       for(var i=0; i<imageUrlList.length; i++) {
         alreadySavedList.add(await fileFromImageUrl(imageUrlList[i],i));
       }
+      print('alreadySavedList의 길이는 -> ${alreadySavedList.length}');
 
       if(alreadySavedList.length == 10) {
         numberOfImagesTextColor = true;
@@ -183,6 +189,16 @@ class _EditPageState extends State<EditPage> {
 
     print('makeUrlList에서 alreadySavedList 길이는 -> ${alreadySavedList.length}');
   }
+
+  /// edit한 게시글을 저장할 때 원래 저장되어 있던 이미지들의 url String 을 File 타입으로 바꿔주는 함수
+  /// (처음에 url 다운로드 할 때부터 File 타입으로 바꾸는 것으로 시도해보았으나 변환 시간이 오래 걸려서 이 방법으로 대체)
+  /*Future<void> makeAlreadySavedList() async {
+    for(var i=0; i<alreadyUrlList.length; i++) {
+      alreadySavedList.add(await fileFromImageUrl(alreadyUrlList[i],i));
+    }
+
+    print('alreadySavedList 길이는 -> ${alreadySavedList.length}');
+  }*/
 
 
   @override
@@ -219,7 +235,7 @@ class _EditPageState extends State<EditPage> {
     /// productId와 일치하는 게시물이 없을 경우 로딩 표시
     if (products == null || products.isEmpty || productFound == false) {
       return Scaffold(
-        body: CircularProgressIndicator(),
+        body: CircularProgressIndicator(color: Color(0xfffc7174),),
       );
     }
 
@@ -229,6 +245,32 @@ class _EditPageState extends State<EditPage> {
 
     ///********************* 변경한 내용대로 게시물을 업데이트 *********************///
 
+    Future<void> deleteOneImage(int num) async {
+      try {
+        print('사진 삭제 시작!');
+        return await storage
+            .refFromURL(imageUrlList[num])
+            .delete()
+            .whenComplete(() => print('$num번째 사진 삭제 완료!'));
+      } on Exception {
+        return null;
+      }
+    }
+
+    Future<void> deleteImages() async {
+      return await Future.wait([
+        deleteOneImage(0),
+        deleteOneImage(1),
+        deleteOneImage(2),
+        deleteOneImage(3),
+        deleteOneImage(4),
+        deleteOneImage(5),
+        deleteOneImage(6),
+        deleteOneImage(7),
+        deleteOneImage(8),
+        deleteOneImage(9),]);
+    }
+
     /// giveProducts 또는 takeProducts 중 어디 컬랙션에 속한 게시물인지에 따라 참조할 path 결정
     CollectionReference target =
         FirebaseFirestore.instance.collection(editGiveOrTake);
@@ -237,17 +279,11 @@ class _EditPageState extends State<EditPage> {
     /// 이미지 storage 에 저장할 때 productID 뒤에 숫자붙여서 저장시키는 함수
     Future<void> uploadFile(String id) async {
       try {
-        for (var num = 0; num < willBeSavedFileList.length; num++) {
-          print('willBeSavedFileList 저장 시작 -> ${num + 1}');
+        for (var num = 0; num < uploadImages.length; num++) {
+          print('uploadImages 저장 시작 -> ${num + 1}');
           await storage
-              .ref('images/' + id + (product.photo + num).toString() + '.png')
-              .putFile(willBeSavedFileList[num]);
-        }
-        for (var num = willBeSavedFileList.length; num < willBeSavedFileList.length+alreadySavedList.length; num++) {
-          print('alreadySavedList 저장 시작 -> ${num + 1}');
-          await storage
-              .ref('images/' + id + (product.photo + num).toString() + '.png')
-              .putFile(alreadySavedList[num]);
+              .ref('images/' + id + num.toString() + '.png')
+              .putFile(uploadImages[num]);
         }
       } on Exception {
         return null;
@@ -261,15 +297,17 @@ class _EditPageState extends State<EditPage> {
         'category': category,
         'modified': FieldValue.serverTimestamp(),
         'photo': alreadySavedList.length + willBeSavedFileList.length,
-      }).then((value) {
-        uploadImages = alreadySavedList + willBeSavedFileList;
-        if (uploadImages.isNotEmpty) uploadFile(productId);
+      }).then((value) async {
+        /// storage에 올려진 사진 삭제 후 다시 업로드
+        await deleteImages().whenComplete(() async {
+          //await makeAlreadySavedList().then((value) async {
+            uploadImages = alreadySavedList + willBeSavedFileList;
+            if (uploadImages.isNotEmpty) await uploadFile(productId);
+         // });
+        });
       }).catchError((error) => print('Error: $error'));
     }
 
-    /// 이미 저장되어 있는 이미지 갯수 가져오기
-    //photoNum은 계속 업데이트 시켜줘야함
-    //numberOfImages = photoNum;
 
     /// 상단 사진업로드하는 위젯
     Widget imageUpLoadWidget() {
@@ -364,8 +402,10 @@ class _EditPageState extends State<EditPage> {
                                   print('보여주기 전 willBeSavedFileList.length -> ${willBeSavedFileList.length}');
                                   print('보여주기 전 uploadImages.length -> ${uploadImages.length}');
                                   var alreadyFile;
+                                  //var alreadyURL;
                                   var willFile;
                                   if(index < alreadySavedList.length){
+                                    //alreadyURL = alreadySavedList[index];
                                     alreadyFile = alreadySavedList[index];
                                   } else {
                                     willFile = willBeSavedFileList[index-alreadySavedList.length];
@@ -442,6 +482,7 @@ class _EditPageState extends State<EditPage> {
                                                                         setState(() {
                                                                           if(index < alreadySavedList.length){
                                                                             alreadySavedList.remove(alreadyFile);
+                                                                            //alreadySavedList.remove(alreadyFile);
                                                                           } else {
                                                                             willBeSavedFileList.remove(willFile);
                                                                           }
@@ -512,6 +553,7 @@ class _EditPageState extends State<EditPage> {
             onPressed: () {
               alreadyLoading = false;
               numberOfImages = 0;
+              alreadyUrlList.clear();
               alreadySavedList.clear();
               willBeSavedFileList.clear();
               uploadImages.clear();
@@ -529,8 +571,7 @@ class _EditPageState extends State<EditPage> {
                     _selectedFilter,
                     _titleController.text,
                     _contentController.text,
-                  );
-                  Navigator.pop(context);
+                  ).whenComplete(() => Navigator.pop(context));
                 }
               },
               child: Text(
