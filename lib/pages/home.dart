@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:giveandtake/pages/login.dart';
 import 'package:giveandtake/pages/views/2_request_view.dart';
@@ -468,14 +471,14 @@ class PostTileMaker extends StatelessWidget {
   final bool _giveOrTake;
 
   /// Set name for Firebase Storage
-  final firebase_storage.FirebaseStorage storage =
+  final firebase_storage.FirebaseStorage _storage =
       firebase_storage.FirebaseStorage.instance;
 
   /// Download image url of each product based on id
   Future<String> downloadURL(String id) async {
     // await Future.delayed(Duration(seconds: 1));
     try {
-      return await storage
+      return await _storage
           .ref() //스토리지 참조
           .child('images')
           .child('$id\0.png') //차일드로 가져오고
@@ -560,27 +563,36 @@ class PostTileMaker extends StatelessWidget {
                 thumbnail: FutureBuilder(
                   future: downloadURL(_product.id),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
+                    // if (snapshot.connectionState == ConnectionState.waiting) {
+                    //   return Center(
+                    //       child: CircularProgressIndicator(
+                    //           color: Theme.of(context).primaryColor));
+                    // } else {
+                    if (snapshot.hasData) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        // child: Image.network(snapshot.data.toString(),
+                        //     fit: BoxFit.fitWidth),
+                        child: CachedNetworkImage(
+                          imageUrl: snapshot.data,
+                          fit: BoxFit.fitWidth,
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                        ),
+                      );
+                    } else if (snapshot.hasData == false) {
+                      return Container();
+                    } else {
                       return Center(
                           child: CircularProgressIndicator(
                               color: Theme.of(context).primaryColor));
-                    } else {
-                      if (snapshot.hasData) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.network(snapshot.data.toString(),
-                              fit: BoxFit.fitWidth),
-                        );
-                      } else if (snapshot.hasData == false) {
-                        return Container();
-                      } else {
-                        return Center(
-                            child: CircularProgressIndicator(
-                                color: Theme.of(context).primaryColor));
-                      }
                     }
+                    // }
                   },
                 ),
+                // thumbnail: CachedNetworkImage(
+                //     // placeholder: CircularProgressIndicator(),
+                //     imageUrl: 'https://picsum.photos/250?image=7'),
               );
             }
           },
