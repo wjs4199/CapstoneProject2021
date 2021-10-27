@@ -23,7 +23,6 @@ class AddPage extends StatefulWidget {
 }
 
 class _AddPageState extends State<AddPage> {
-
   ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
   /// Firebase Storage 참조 간략화
   FirebaseStorage storage = FirebaseStorage.instance;
@@ -111,9 +110,23 @@ class _AddPageState extends State<AddPage> {
 
   /// Firestore collection 참조 간략화
   CollectionReference giveProduct =
-  FirebaseFirestore.instance.collection('giveProducts');
+      FirebaseFirestore.instance.collection('giveProducts');
   CollectionReference takeProduct =
-  FirebaseFirestore.instance.collection('takeProducts');
+      FirebaseFirestore.instance.collection('takeProducts');
+
+  /// ProductID에 따라 해당하는 thumbnail image url 다운로드
+  Future<String> thumbnailURL(String id) async {
+    try {
+      return await storage
+          .ref()
+          .child('images')
+          //.child('$id.png')
+          .child('$id\0.png')
+          .getDownloadURL();
+    } on Exception {
+      return null;
+    }
+  }
 
   /// 'giveProducts' collection 에 게시글 추가시키는 함수
   Future<void> addGiveProduct(
@@ -135,12 +148,11 @@ class _AddPageState extends State<AddPage> {
       'photo': images.length,
       'user_photoURL': user.photoURL,
       'nickname': nickName,
-
-      /// for chatting
     }).then((value) async {
-      if (images.isNotEmpty) {
-        await uploadFile(value.id);
-      }
+      if (images.isNotEmpty) await uploadFile(value.id);
+      await giveProduct.doc(value.id).update({
+        'thumbnailURL': await thumbnailURL(value.id),
+      });
     }).catchError((error) => print('Error: $error'));
   }
 
@@ -166,8 +178,11 @@ class _AddPageState extends State<AddPage> {
       'nickname': nickName,
 
       /// for chatting
-    }).then((value) {
-      if (images.isNotEmpty) uploadFile(value.id);
+    }).then((value) async {
+      if (images.isNotEmpty) await uploadFile(value.id);
+      await takeProduct.doc(value.id).update({
+        'thumbnailURL': await thumbnailURL(value.id),
+      });
     }).catchError((error) => print('Error: $error'));
   }
 
@@ -202,19 +217,19 @@ class _AddPageState extends State<AddPage> {
               ),
               title: widget.giveOrTake == 'give'
                   ? Text(
-                '나눔 글쓰기',
-                style: TextStyle(
-                  fontFamily: 'NanumSquareRoundR',
-                  fontWeight: FontWeight.bold,
-                ),
-              )
+                      '나눔 글쓰기',
+                      style: TextStyle(
+                        fontFamily: 'NanumSquareRoundR',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
                   : Text(
-                '나눔요청 글쓰기',
-                style: TextStyle(
-                  fontFamily: 'NanumSquareRoundR',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+                      '나눔요청 글쓰기',
+                      style: TextStyle(
+                        fontFamily: 'NanumSquareRoundR',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
               centerTitle: true,
               actions: <Widget>[
                 IconButton(
@@ -379,7 +394,7 @@ class _AddPageState extends State<AddPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.461,
+        minWidth: MediaQuery.of(context).size.width * 0.46,
         minHeight: 50,
       ),
       selectedBorderColor: Color(0xffeb6859),
@@ -435,7 +450,7 @@ class _AddPageState extends State<AddPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.461,
+        minWidth: MediaQuery.of(context).size.width * 0.46,
         minHeight: 50,
       ),
       selectedBorderColor: Color(0xffeb6859),
@@ -505,7 +520,7 @@ class _AddPageState extends State<AddPage> {
                       backgroundColor: Colors.transparent,
                       textStyle: TextStyle(
                         color:
-                        numberOfImagesTextColor ? Colors.red : Colors.black,
+                            numberOfImagesTextColor ? Colors.red : Colors.black,
                         fontSize: 9,
                       ),
                       shape: RoundedRectangleBorder(

@@ -515,6 +515,11 @@ class PostTileMaker extends StatelessWidget {
     }
   }
 
+  // @override
+  // void initState() {
+  //   var asd;
+  // }
+
   @override
   Widget build(BuildContext context) {
     /// Firebase TimeStamp => DateFormat 변환
@@ -574,6 +579,7 @@ class PostTileMaker extends StatelessWidget {
         child: FutureBuilder(
           future: returnDate(),
           builder: (context, snapshot) {
+            var id = _product.id;
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
                   child: CircularProgressIndicator(
@@ -587,41 +593,50 @@ class PostTileMaker extends StatelessWidget {
                 publishDate: snapshot.data,
                 // category: _product.category,
                 likes: _product.likes,
-                thumbnail: FutureBuilder(
-                  future: downloadURL(_product.id),
-                  builder: (context, snapshot) {
-                    // if (snapshot.connectionState == ConnectionState.waiting) {
-                    //   return Center(
-                    //       child: CircularProgressIndicator(
-                    //           color: Theme.of(context).primaryColor));
-                    // } else {
-                    if (snapshot.hasData) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        // child: Image.network(snapshot.data.toString(),
-                        //     fit: BoxFit.fitWidth),
-                        child: Image.network(snapshot.data.toString(),
-                            fit: BoxFit.fitWidth),
-                          /*CachedNetworkImage(
-                          imageUrl: snapshot.data,
-                          fit: BoxFit.fitWidth,
+                // thumbnail: FutureBuilder(
+                //   future: downloadURL(_product.id),
+                //   builder: (context, snapshot) {
+                //     // if (snapshot.connectionState == ConnectionState.waiting) {
+                //     //   return Center(
+                //     //       child: CircularProgressIndicator(
+                //     //           color: Theme.of(context).primaryColor));
+                //     // } else {
+                //     if (snapshot.hasData) {
+                //       return ClipRRect(
+                //         borderRadius: BorderRadius.circular(8.0),
+                //         // child: Image.network(snapshot.data.toString(),
+                //         //     fit: BoxFit.fitWidth),
+                //         child: CachedNetworkImage(
+                //           imageUrl: snapshot.data,
+                //           fit: BoxFit.fitWidth,
+                //           errorWidget: (context, url, error) =>
+                //               Icon(Icons.error),
+                //         ),
+                //       );
+                //     } else if (snapshot.hasData == false) {
+                //       return Container();
+                //     } else {
+                //       return Center(
+                //           child: CircularProgressIndicator(
+                //               color: Theme.of(context).primaryColor));
+                //     }
+                //     // }
+                //   },
+                // ),
+                // thumbnail: Image.network(
+                //     'gs://give-take-535cf.appspot.com/images/$id\0.png'),
+                thumbnail: _product.thumbnail == null
+                    ? Container()
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(14.0),
+                        child: CachedNetworkImage(
+                          // placeholder: CircularProgressIndicator(),
+                          imageUrl: _product.thumbnail,
+                          fit: BoxFit.cover,
                           errorWidget: (context, url, error) =>
                               Icon(Icons.error),
-                        ),*/
-                      );
-                    } else if (snapshot.hasData == false) {
-                      return Container();
-                    } else {
-                      return Center(
-                          child: CircularProgressIndicator(
-                              color: Theme.of(context).primaryColor));
-                    }
-                    // }
-                  },
-                ),
-                // thumbnail: CachedNetworkImage(
-                //     // placeholder: CircularProgressIndicator(),
-                //     imageUrl: 'https://picsum.photos/250?image=7'),
+                        ),
+                      ),
               );
             }
           },

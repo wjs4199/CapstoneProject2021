@@ -39,6 +39,19 @@ class _ApplicationState extends State<Application> {
 
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
+  // Future<bool> _decideMainPage() async {
+  //   isLoggedIn = await googleSignIn.isSignedIn();
+  //   if (isLoggedIn) {
+  //     print('Login true');
+  //     return true;
+  //   }
+  //   else{
+  //     print('Login false');
+  //     return false;
+  //   }
+  //
+  // }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -68,7 +81,6 @@ class _ApplicationState extends State<Application> {
               '/giveadd': (context) => AddPage(giveOrTake: 'give'),
               '/takeadd': (context) => AddPage(giveOrTake: 'take'),
               '/message': (context) => MessagePage(),
-              '/map': (context) => MapPage(),
             },
 
             // 동적 경로할당
@@ -146,7 +158,6 @@ class ApplicationState extends ChangeNotifier {
     init();
   }
 
-
   void orderByFilter(String orderBy) {
     this.orderBy = orderBy;
     print('filtering ->  ' + orderBy);
@@ -189,6 +200,7 @@ class ApplicationState extends ChangeNotifier {
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
             nickname: document.data()['nickname'],
+            thumbnail: document.data()['thumbnailURL'],
           ));
         });
         notifyListeners();
@@ -217,6 +229,7 @@ class ApplicationState extends ChangeNotifier {
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
             nickname: document.data()['nickname'],
+            thumbnail: document.data()['thumbnailURL'],
           ));
         });
         notifyListeners();
@@ -247,6 +260,7 @@ class ApplicationState extends ChangeNotifier {
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
             nickname: document.data()['nickname'],
+            thumbnail: document.data()['thumbnailURL'],
           ));
         });
         notifyListeners();
@@ -274,6 +288,7 @@ class ApplicationState extends ChangeNotifier {
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
             nickname: document.data()['nickname'],
+            thumbnail: document.data()['thumbnailURL'],
           ));
         });
         notifyListeners();

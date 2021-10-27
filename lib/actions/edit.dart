@@ -14,7 +14,6 @@ import '../model/product.dart';
 import 'dart:io';
 import 'dart:ui';
 
-
 class EditPage extends StatefulWidget {
   EditPage({this.productId, this.editGiveOrTake});
 
@@ -32,11 +31,12 @@ class _EditPageState extends State<EditPage> {
   String productId;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
 
     productId = widget.productId;
   }
+
   ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
 
   /// Firebase Storage 참조 간략화
@@ -105,6 +105,20 @@ class _EditPageState extends State<EditPage> {
     }
   }
 
+  /// ProductID에 따라 해당하는 thumbnail image url 다운로드
+  Future<String> thumbnailURL(String id) async {
+    try {
+      return await storage
+          .ref()
+          .child('images')
+          //.child('$id.png')
+          .child('$id\0.png')
+          .getDownloadURL();
+    } on Exception {
+      return null;
+    }
+  }
+
   ///**************** 게시글 저장과 관련된 변수/ 함수들 ***************///
 
   /// 현재 유저의 이름 참조 간략화
@@ -130,7 +144,7 @@ class _EditPageState extends State<EditPage> {
   var _selectedFilter = '물건';
 
   int photoNum;
-  int imageLoadCount =0;
+  int imageLoadCount = 0;
 
   Future<File> fileFromImageUrl(String url, int num) async {
     var response = await http.get(Uri.parse(url));
@@ -155,16 +169,17 @@ class _EditPageState extends State<EditPage> {
     /// 이미 한번 로딩 했는지 안했는지 확인(이미 했으면 다시 로딩 안함)
     if(!alreadyLoading){
       imageUrlList = await Future.wait([
-        downloadURL(widget.productId,0),
-        downloadURL(widget.productId,1),
-        downloadURL(widget.productId,2),
-        downloadURL(widget.productId,3),
-        downloadURL(widget.productId,4),
-        downloadURL(widget.productId,5),
-        downloadURL(widget.productId,6),
-        downloadURL(widget.productId,7),
-        downloadURL(widget.productId,8),
-        downloadURL(widget.productId,9),]);
+        downloadURL(widget.productId, 0),
+        downloadURL(widget.productId, 1),
+        downloadURL(widget.productId, 2),
+        downloadURL(widget.productId, 3),
+        downloadURL(widget.productId, 4),
+        downloadURL(widget.productId, 5),
+        downloadURL(widget.productId, 6),
+        downloadURL(widget.productId, 7),
+        downloadURL(widget.productId, 8),
+        downloadURL(widget.productId, 9),
+      ]);
 
       imageUrlList = imageUrlList.where((e) => e != null).toList();
       //alreadySavedList = imageUrlList;
@@ -298,6 +313,10 @@ class _EditPageState extends State<EditPage> {
         'modified': FieldValue.serverTimestamp(),
         'photo': alreadySavedList.length + willBeSavedFileList.length,
       }).then((value) async {
+        await target
+            .doc(productId)
+            .update({'thumbnailURL': await thumbnailURL(productId)});
+
         /// storage에 올려진 사진 삭제 후 다시 업로드
         await deleteImages().whenComplete(() async {
           //await makeAlreadySavedList().then((value) async {
@@ -324,6 +343,7 @@ class _EditPageState extends State<EditPage> {
                   )
               );
             }
+
             /// 사진 로딩 후
             else {
               return Container(
@@ -490,54 +510,57 @@ class _EditPageState extends State<EditPage> {
                                                                           print('willsaved 길이 : ${willBeSavedFileList.length}\n'
                                                                               'alreadsaved 길이 : ${alreadySavedList.length}');
 
-                                                                          /// 삭제해서 선택한 사진이 10개 아래이면 다시 색깔 검정으로
-                                                                          if (numberOfImages + alreadySavedList.length >= 10) {
-                                                                            numberOfImagesTextColor = true;
-                                                                          } else {
-                                                                            numberOfImagesTextColor = false;
-                                                                          }
-                                                                        });
-                                                                      },
-                                                                      child: Icon(
-                                                                        Icons.cancel,
-                                                                        size: 18,
-                                                                        color: Color(0x00000000).withOpacity(0.5),
-                                                                      ),
-                                                                    )
-                                                                ),)
-                                                            ]),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                )
-                                              ]),
-                                              SizedBox(
-                                                height:
-                                                MediaQuery.of(context).size.height *
-                                                    (0.11) *
-                                                    0.7,
-                                                width:
-                                                MediaQuery.of(context).size.height *
-                                                    (0.11) *
-                                                    0.12,
-                                              ),
-                                            ],
-                                          ),
+                                                                                    /// 삭제해서 선택한 사진이 10개 아래이면 다시 색깔 검정으로
+                                                                                    if (numberOfImages + alreadySavedList.length >= 10) {
+                                                                                      numberOfImagesTextColor = true;
+                                                                                    } else {
+                                                                                      numberOfImagesTextColor = false;
+                                                                                    }
+                                                                                  });
+                                                                                },
+                                                                                child: Icon(
+                                                                                  Icons.cancel,
+                                                                                  size: 18,
+                                                                                  color: Color(0x00000000).withOpacity(0.5),
+                                                                                ),
+                                                                              )),
+                                                                        )
+                                                                      ]),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          )
+                                                        ]),
+                                                        SizedBox(
+                                                          height: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .height *
+                                                              (0.11) *
+                                                              0.7,
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .height *
+                                                              (0.11) *
+                                                              0.12,
+                                                        ),
+                                                      ],
+                                                    ),
 
-                                          /// 여기서 삭제버튼 구현하다 관둠...
-                                        ],
-                                      )
-                                    ],
-                                  );
-                                }),
-                          )
-                        ]),
-                      ]),
+                                                    /// 여기서 삭제버튼 구현하다 관둠...
+                                                  ],
+                                                )
+                                              ],
+                                            );
+                                          }),
+                                    )
+                            ]),
+                          ]),
                     ],
                   ));
             }
-          }
-      );
+          });
     }
 
     /// Edit 페이지 화면 구성
@@ -717,7 +740,7 @@ class _EditPageState extends State<EditPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.461,
+        minWidth: MediaQuery.of(context).size.width * 0.46,
         minHeight: 50,
       ),
       selectedBorderColor: Color(0xffeb6859),
@@ -773,7 +796,7 @@ class _EditPageState extends State<EditPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.461,
+        minWidth: MediaQuery.of(context).size.width * 0.46,
         minHeight: 50,
       ),
       selectedBorderColor: Color(0xffeb6859),
@@ -818,5 +841,4 @@ class _EditPageState extends State<EditPage> {
       ],
     );
   }
-
 }
