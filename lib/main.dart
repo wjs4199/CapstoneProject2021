@@ -158,7 +158,6 @@ class ApplicationState extends ChangeNotifier {
     init();
   }
 
-
   void orderByFilter(String orderBy) {
     this.orderBy = orderBy;
     print('filtering ->  ' + orderBy);
