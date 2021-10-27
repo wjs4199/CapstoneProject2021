@@ -4,7 +4,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:giveandtake/actions/add.dart';
 import 'package:giveandtake/pages/login.dart';
 import 'package:giveandtake/pages/views/2_request_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -26,23 +25,22 @@ class HomePage extends StatefulWidget {
   ///* ------------------------------ 수정 -------------------------------- *////
   final SharedPreferences currentUserId;
   var nickname; // main 에 정의되어도 됨
-  HomePage({Key key, @required this.currentUserId, @required this.nickname})
+  HomePage({Key key, @required this.currentUserId})
       : super(key: key); // 필요X
 
   ///* ------------------------------------------------------------------ *////
   @override
   State createState() =>
-      _HomePageState(currentUserId: currentUserId, nickname: nickname);
+      _HomePageState(currentUserId: currentUserId);
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   ///* ------------------------------ 수정 -------------------------------- *////
   /// _HomePageState 클래스 밑에 바로 build 가 보이도록,
   /// home.dart 에 정의 필요 없는것들 전부 main.dart 로
-  _HomePageState({@required this.currentUserId, @required this.nickname});
+  _HomePageState({@required this.currentUserId});
 
   final SharedPreferences currentUserId;
-  final String nickname;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -346,12 +344,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             labelStyle: TextStyle(
                 fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          AddPage(giveOrTake: 'give', nickname: nickname)));
-              //Navigator.pushNamed(context, '/giveadd');
+
+              Navigator.pushNamed(context, '/giveadd');
             },
             // closeSpeedDialOnPressed: false,
           ),
@@ -363,12 +357,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             labelStyle: TextStyle(
                 fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          AddPage(giveOrTake: 'take', nickname: nickname)));
-              //Navigator.pushNamed(context, '/takeadd');
+
+              Navigator.pushNamed(context, '/takeadd');
             },
           ),
         ],
