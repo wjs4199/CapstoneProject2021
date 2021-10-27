@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,13 +8,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:path_provider/path_provider.dart';
 
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-
-import 'package:image/image.dart' as Im;
 import '../main.dart';
 
 class AddPage extends StatefulWidget {
@@ -33,7 +28,7 @@ class _AddPageState extends State<AddPage> {
   FirebaseStorage storage = FirebaseStorage.instance;
 
   /// multiImage Picker로 선택한 사진들이 담길 리스트 (Asset타입 - 사진 띄울 때 사용됨)
-  List<Asset> images = [];
+  List<XFile> images = [];
 
   /// multiImage Picker로 선택한 사진들이 담길 리스트 (File타입 - 사진 저장할 때 사용됨)
   List<File> file = [];
@@ -44,70 +39,46 @@ class _AddPageState extends State<AddPage> {
   /// 10개의 이미지 개수 제한에 다다랐을 때 true 로 변함(글자색 바꿀 때 사용)
   bool numberOfImagesTextColor = false;
 
+  /// 이미지 픽커 간략화
+  final ImagePicker _picker = ImagePicker();
+
   /// index 만큼의 이미지를 갤러리에서 선택한 후 image 리스트에 저장시키는 함수
-  Future<void> getMultiImage(int index) async {
-    List<Asset> resultList;
-    resultList = await MultiImagePicker.pickImages(
-      maxImages: index,
-      enableCamera: true,
-      selectedAssets: images,
+  Future<void> getMultiImage() async {
+    ///이미지 받아올 때 사이즈 압축 함
+    var pickedFileList = await _picker.pickMultiImage(
+      maxWidth: 1000,
+      maxHeight: 1000,
+      imageQuality: 85,
     );
 
+    /// pick된 사진이 10개 아래이면 바로 image list에 넣고(글씨 검정)
+    /// 10개이상이면 10개까지만 잘라서 image에 넣기(글씨 빨강)
     setState(() {
-      images = resultList;
-      numberOfImages = images.length;
-      if (numberOfImages >= 10) {
-        numberOfImagesTextColor = true;
-      } else {
+      if(pickedFileList.length < 10 - numberOfImages){
+        numberOfImages += pickedFileList.length;
+        for(var i = 0 ; i<pickedFileList.length; i++){
+          images.add(pickedFileList[i]);
+        }
         numberOfImagesTextColor = false;
+      } else {
+        pickedFileList = pickedFileList.sublist(0, 10 - numberOfImages);
+        for(var i = 0 ; i< 10 - numberOfImages; i++){
+          images.add(pickedFileList[i]);
+        }
+        numberOfImages = 10;
+        numberOfImagesTextColor = true;
       }
-    });
-
-    /// 받아온 이미지를 File 타입으로 변환
-    await getImageFileFromAssets();
-  }
-
-  Future<Uint8List> testCompressFile(File file) async {
-    var result = await FlutterImageCompress.compressWithFile(
-      file.absolute.path,
-      minWidth: 1000,
-      minHeight: 1000,
-      quality: 85,
-    );
-
-    print(file.lengthSync());
-    print(result.length);
-
-    return result;
-  }
-
-  /// image 리스트에 들어있는 Asset 타입 이미지들을 File 타입으로 변환시키는 함수(storage 저장 위해)
-  Future<void> getImageFileFromAssets() async {
-    images.forEach((imageAsset) async {
-      final byteData = await imageAsset.getByteData();
-      var tempFile =
-          File('${(await getTemporaryDirectory()).path}/${imageAsset.name}');
-      final resultFile = await tempFile.writeAsBytes(
-        byteData.buffer
-            .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
-      );
-
-      var image = Im.decodeImage(await testCompressFile(resultFile));
-      var compressedImage = resultFile
-        ..writeAsBytesSync(Im.encodeJpg(image, quality: 90));
-
-      file.add(compressedImage);
     });
   }
 
   /// 이미지 storage 에 저장할 때 productID 뒤에 숫자붙여서 저장시키는 함수
   Future<void> uploadFile(String id) async {
     try {
-      for (var num = 0; num < file.length; num++) {
+      for (var num = 0; num < images.length; num++) {
         print('file 저장 시작 -> ${num + 1}');
         await storage
             .ref('images/' + id + num.toString() + '.png')
-            .putFile(file[num]);
+            .putFile(File(images[num].path));
       }
     } on Exception {
       return null;
@@ -131,18 +102,6 @@ class _AddPageState extends State<AddPage> {
   ///*** user collection 내에서 userName이 일치하는 doc의 nickname을 가져오는 부분 ****///
   /// user collection 참조 간략화
   CollectionReference users = FirebaseFirestore.instance.collection('users');
-
-  /// 유저의 닉네임을 찾아서 보여주는 함수
-  // String findNickname(AsyncSnapshot<QuerySnapshot> snapshot, String name) {
-  //   var nickName = 'null';
-  //   snapshot.data.docs.forEach((document) {
-  //     if (document['username'] == name) {
-  //       nickName = document['nickname'];
-  //     }
-  //   });
-  //   print('찾은 닉네임은 $nickName!!');
-  //   return nickName;
-  // }
 
   ///**************** 게시글 저장과 관련된 변수/ 함수들 ***************///
   /// 현재 유저의 이름 참조 간략화
@@ -186,7 +145,7 @@ class _AddPageState extends State<AddPage> {
       'modified': FieldValue.serverTimestamp(),
       'userName': name,
       'hits': 1,
-      'photo': numberOfImages,
+      'photo': images.length,
       'user_photoURL': user.photoURL,
       'nickname': nickName,
     }).then((value) async {
@@ -214,7 +173,7 @@ class _AddPageState extends State<AddPage> {
       'modified': FieldValue.serverTimestamp(),
       'userName': name,
       'hits': 1,
-      'photo': numberOfImages,
+      'photo': images.length,
       'user_photoURL': user.photoURL,
       'nickname': nickName,
 
@@ -239,20 +198,7 @@ class _AddPageState extends State<AddPage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
-  /// 카테고리 설정하는 토글버튼과 관련된 함수
-  final _filter = [
-    '카테고리',
-    '여성 의류',
-    '남성의류',
-    '음식',
-    '쿠폰',
-    '전자제품',
-    '책',
-    '학용품',
-    '재능기부',
-    '기타'
-  ];
-  var _selectedFilter = '카테고리';
+  var _selectedFilter = '물건';
 
   @override
   Widget build(BuildContext context) {
@@ -555,7 +501,7 @@ class _AddPageState extends State<AddPage> {
     return Container(
         color: Colors.transparent,
         width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height * (0.1),
+        height: MediaQuery.of(context).size.height * (0.11),
         child: Column(
           children: [
             SizedBox(
@@ -583,12 +529,7 @@ class _AddPageState extends State<AddPage> {
                     ),
                     onPressed: () {
                       setState(() {
-                        getMultiImage(10);
-                        if (numberOfImages < 10) {
-                          numberOfImagesTextColor = false;
-                        } else {
-                          numberOfImagesTextColor = true;
-                        }
+                        getMultiImage();
                       });
                     },
                     child: Column(
@@ -600,7 +541,7 @@ class _AddPageState extends State<AddPage> {
                           color: Colors.grey,
                         ),
                         Text(
-                          '$numberOfImages/10',
+                          '${images.length}/10',
                           style: TextStyle(
                             color: numberOfImagesTextColor
                                 ? Colors.red
@@ -617,45 +558,126 @@ class _AddPageState extends State<AddPage> {
               /// 업로드 된 사진들 가로 스크롤 가능
               Row(children: [
                 images.isEmpty
-                    ? Container()
+                    ? Container(
+                  height: MediaQuery.of(context).size.height * (0.11) * 0.77,
+                  width: MediaQuery.of(context).size.height * (0.35),
+                )
                     : Container(
-                        height:
-                            MediaQuery.of(context).size.height * (0.11) * 0.7,
-                        width: MediaQuery.of(context).size.height * (0.35),
-                        child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: images.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              var asset = images[index];
-                              return Stack(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      AssetThumb(
-                                        asset: asset,
-                                        height: 200,
-                                        width: 200,
+                  height: MediaQuery.of(context).size.height * (0.11) * 0.77,
+                  width: MediaQuery.of(context).size.height * (0.35),
+                  child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: images.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        var asset = images[index];
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Stack(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Stack(children: [
+                                      Container(
+                                          height: MediaQuery.of(context).size.height * (0.11) * 0.77,
+                                          width: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                height: MediaQuery.of(context).size.height * (0.11) * 0.045,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                      height: 67,
+                                                      width: 67,
+                                                      child: ClipRRect(
+                                                          borderRadius: BorderRadius.circular(5.0),
+                                                          child: Image.file(
+                                                            File(asset.path),
+                                                            fit: BoxFit.cover,
+                                                            width: 200,
+                                                          ),
+                                                      )
+                                                  )
+                                                ],
+                                              )
+                                            ],
+                                          )
                                       ),
-                                      SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                (0.11) *
-                                                0.7,
-                                        width:
-                                            MediaQuery.of(context).size.height *
-                                                (0.11) *
-                                                0.12,
-                                      ),
-                                    ],
-                                  ),
+                                      Container(
+                                        height: MediaQuery.of(context).size.height * (0.11) * 0.76,
+                                        width: MediaQuery.of(context).size.height * (0.11) * 0.73,
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              height: MediaQuery.of(context).size.height * (0.11) * 0.65,
+                                              width: MediaQuery.of(context).size.height * (0.11) * 0.73,
+                                              child: Row(
+                                                  mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                                  children: [
+                                                    Container(
+                                                      width: 53,
+                                                    ),
+                                                    Expanded(
+                                                      child: Container(
+                                                          width: 20,
+                                                          height: 20,
+                                                          child: InkWell(
+                                                            onTap: () {
+                                                              setState(() {
+                                                                images.remove(asset);
+                                                                numberOfImages--;
+                                                                /// 삭제해서 선택한 사진이 10개 아래이면 다시 색깔 검정으로
+                                                                if (numberOfImages >= 10) {
+                                                                  numberOfImagesTextColor = true;
+                                                                } else {
+                                                                  numberOfImagesTextColor = false;
+                                                                }
+                                                              });
+                                                            },
+                                                            child: Icon(
+                                                              Icons.cancel,
+                                                              size: 18,
+                                                              color: Color(0x00000000).withOpacity(0.5),
+                                                            ),
+                                                          )
+                                                      ),)
+                                                  ]),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    ]),
+                                    SizedBox(
+                                      height:
+                                      MediaQuery.of(context).size.height *
+                                          (0.11) *
+                                          0.7,
+                                      width:
+                                      MediaQuery.of(context).size.height *
+                                          (0.11) *
+                                          0.12,
+                                    ),
+                                  ],
+                                ),
 
-                                  /// 여기서 삭제버튼 구현하다 관둠...
-                                ],
-                              );
-                            }),
-                      )
-              ])
+                                /// 여기서 삭제버튼 구현하다 관둠...
+                              ],
+                            )
+                          ],
+                        );
+                      }),
+                )
+              ]),
             ]),
           ],
         ));

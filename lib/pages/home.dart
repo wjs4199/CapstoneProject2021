@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final bool messageState;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
 
@@ -418,39 +418,39 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   BottomNavigationBar buildNavBar(BuildContext context) {
 
-      return BottomNavigationBar(
-        // showSelectedLabels: true,
-        // showUnselectedLabels: false,
-        currentIndex: _selectedIndex,
-        elevation: 0,
-        backgroundColor: Theme.of(context).bottomAppBarColor.withAlpha(220),
-        selectedItemColor: Theme.of(context).primaryColor,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: TextStyle(
-            fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
-        unselectedLabelStyle: TextStyle(
-            fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.accessibility,
-              size: 30,
-            ),
-            label: '나눔',
+    return BottomNavigationBar(
+      // showSelectedLabels: true,
+      // showUnselectedLabels: false,
+      currentIndex: _selectedIndex,
+      elevation: 0,
+      backgroundColor: Theme.of(context).bottomAppBarColor.withAlpha(220),
+      selectedItemColor: Theme.of(context).primaryColor,
+      onTap: _onItemTapped,
+      type: BottomNavigationBarType.fixed,
+      selectedLabelStyle: TextStyle(
+          fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
+      unselectedLabelStyle: TextStyle(
+          fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
+      items: [
+        BottomNavigationBarItem(
+          icon: Icon(
+            Icons.accessibility,
+            size: 30,
           ),
-          BottomNavigationBarItem(
-            icon:
-                  Icon(
-                    Icons.forum,
-                    size: 30,
-                  ),
-            label: '메신저',
+          label: '나눔',
+        ),
+        BottomNavigationBarItem(
+          icon:
+          Icon(
+            Icons.forum,
+            size: 30,
+          ),
+          label: '메신저',
 
-          ),
-        ],
-      );
-    }
+        ),
+      ],
+    );
+  }
 
 
 
@@ -463,7 +463,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     await googleSignIn.disconnect();
     await googleSignIn.signOut().then((value) => Navigator.of(context)
         .pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => LoginPage()),
+        MaterialPageRoute(builder: (context) => LoginPage()),
             (Route<dynamic> route) => false));
   }
 
@@ -487,7 +487,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
-  ///* -------------------------------------------------------------------- *///
+///* -------------------------------------------------------------------- *///
 }
 
 /// PostTileMaker - 각 게시글 별 postTile Listview.builder(separated) 사용해 자동 생성
@@ -565,13 +565,13 @@ class PostTileMaker extends StatelessWidget {
             Provider.of<ApplicationState>(context, listen: false)
                 .detailPageUid(_product.id, 'giveProducts', _product.photo)
                 .then((value) => Navigator.pushNamed(
-                    context, '/detail/' + _product.id + '/giveProducts'));
+                context, '/detail/' + _product.id + '/giveProducts'));
           } else {
             editProductHits('takeProducts');
             Provider.of<ApplicationState>(context, listen: false)
                 .detailPageUid(_product.id, 'takeProducts', _product.photo)
                 .then((value) => Navigator.pushNamed(
-                    context, '/detail/' + _product.id + '/takeProducts'));
+                context, '/detail/' + _product.id + '/takeProducts'));
           }
         },
 
@@ -583,8 +583,8 @@ class PostTileMaker extends StatelessWidget {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
                   child: CircularProgressIndicator(
-                color: Theme.of(context).primaryColor,
-              ));
+                    color: Theme.of(context).primaryColor,
+                  ));
             } else {
               return CustomListItem(
                 title: _product.title,

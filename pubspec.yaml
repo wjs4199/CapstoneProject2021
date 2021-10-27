@@ -29,10 +29,7 @@ dependencies:
   flutter_local_notifications: ^9.0.1 #added by 찬식
   photo_view: ^0.12.0 #added
   intl: ^0.17.0 #added
-  multi_image_picker: ^4.7.14 #added 예은
   carousel_slider: ^4.0.0 #added 예은
-  flutter_image_compress: ^1.0.0 #added 예은
-  image: ^3.0.0 #added 예은
   flutter_screenutil: ^5.0.0+2 #added by 찬식
   flutter_speed_dial: ^4.5.0 # JM
   flutter_cache_manager: ^3.1.2 # JM

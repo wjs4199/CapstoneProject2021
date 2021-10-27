@@ -184,6 +184,61 @@ class _DetailPageState extends State<DetailPage> {
       }
     }
 
+    Future<void> deleteOneImage(int num) async {
+      try {
+        print('사진 삭제 시작!');
+        return await storage
+              .refFromURL(imageUrlList[num])
+              .delete()
+              .whenComplete(() => print('$num번째 사진 삭제 완료!'));
+      } on Exception {
+        return null;
+      }
+    }
+
+    Future<void> deleteImages() async {
+      return await Future.wait([
+        deleteOneImage(0),
+        deleteOneImage(1),
+        deleteOneImage(2),
+        deleteOneImage(3),
+        deleteOneImage(4),
+        deleteOneImage(5),
+        deleteOneImage(6),
+        deleteOneImage(7),
+        deleteOneImage(8),
+        deleteOneImage(9),]);
+    }
+
+    Future<void> makeUrlList() async {
+      imageUrlList = await Future.wait([
+        downloadURL(widget.productId,0),
+        downloadURL(widget.productId,1),
+        downloadURL(widget.productId,2),
+        downloadURL(widget.productId,3),
+        downloadURL(widget.productId,4),
+        downloadURL(widget.productId,5),
+        downloadURL(widget.productId,6),
+        downloadURL(widget.productId,7),
+        downloadURL(widget.productId,8),
+        downloadURL(widget.productId,9),]);
+
+      imageUrlList = imageUrlList.where((e) => e != null).toList();
+
+      //future안에서 for문이 안돌아서 정적 리스트에 들어가는 것을 확인하기 위해 이렇게 해둠
+      print('imageURL 리스트의 길이는  => ${imageUrlList.length}');
+      print('0 번째 imageUrlList 주소는 => ${imageUrlList[0]}');
+      print('1 번째 imageUrlList 주소는 => ${imageUrlList[1]}');
+      print('2 번째 imageUrlList 주소는 => ${imageUrlList[2]}');
+      print('3 번째 imageUrlList 주소는 => ${imageUrlList[3]}');
+      print('4 번째 imageUrlList 주소는 => ${imageUrlList[4]}');
+      print('5 번째 imageUrlList 주소는 => ${imageUrlList[5]}');
+      print('6 번째 imageUrlList 주소는 => ${imageUrlList[6]}');
+      print('7 번째 imageUrlList 주소는 => ${imageUrlList[7]}');
+      print('8 번째 imageUrlList 주소는 => ${imageUrlList[8]}');
+      print('9 번째 imageUrlList 주소는 => ${imageUrlList[9]}');
+    }
+
     /// 현재 시간
     var nowTime = DateTime(
         DateTime.now().year,
@@ -506,8 +561,10 @@ class _DetailPageState extends State<DetailPage> {
                                                     deleteProduct()
                                                         .then((value) => appState.init())
                                                         .catchError((error) => null)
-                                                        .whenComplete(
-                                                            () => Navigator.pop(context));
+                                                        .whenComplete(() {
+                                                          Navigator.pop(context);
+                                                          deleteImages();
+                                                        });
                                                   },
                                                   child: Text('네'),
                                                 ),
