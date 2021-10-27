@@ -31,7 +31,14 @@ class EditPage extends StatefulWidget {
 }
 
 class _EditPageState extends State<EditPage> {
+  String productId;
 
+  @override
+  void initState(){
+    super.initState();
+
+    productId = widget.productId;
+  }
   ///**************** Multi Image 선택 및 저장과 관련된 변수/ 함수들 ***************///
 
   /// Firebase Storage 참조 간략화
@@ -89,7 +96,6 @@ class _EditPageState extends State<EditPage> {
     for(var i = willBeSavedFileList.length; i<images.length; i++){
       var tempFile = File('${(await getTemporaryDirectory()).path}/${images[i].name}');
       willBeSavedFileList.add(tempFile);
-      print('willBeSavedFileList의 추가 후 -> ${willBeSavedFileList.length}');
     }
     /*images.forEach((imageAsset) async {
       //final byteData = await imageAsset.getByteData();
@@ -145,20 +151,7 @@ class _EditPageState extends State<EditPage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
-  /// 카테고리 설정하는 토글버튼과 관련된 함수
-  final _filter = [
-    '카테고리',
-    '여성 의류',
-    '남성의류',
-    '음식',
-    '쿠폰',
-    '전자제품',
-    '책',
-    '학용품',
-    '재능기부',
-    '기타'
-  ];
-  var _selectedFilter = '카테고리';
+  var _selectedFilter = '물건';
 
   int photoNum;
   int imageLoadCount =0;
@@ -168,11 +161,11 @@ class _EditPageState extends State<EditPage> {
   bool alreadyLoading = false;
 
   Future<File> fileFromImageUrl(String url, int num) async {
-    final response = await http.get(Uri.parse(url));
+    var response = await http.get(Uri.parse(url));
 
-    final documentDirectory = await getApplicationDocumentsDirectory();
+    var documentDirectory = await getApplicationDocumentsDirectory();
 
-    final file = File('${documentDirectory.path}/imagetest$num.png');
+    var file = File('${documentDirectory.path}/${widget.productId}$num.png');
 
     file.writeAsBytesSync(response.bodyBytes);
 
@@ -198,10 +191,11 @@ class _EditPageState extends State<EditPage> {
         downloadURL(widget.productId,9),]);
 
       imageUrlList = imageUrlList.where((e) => e != null).toList();
-      print('for 돌기전 alreadySavedList 길이는 -> ${alreadySavedList.length}\nimageurlList의 길이는 ${imageUrlList.length}}');
+      print('for 돌기전 alreadySavedList 길이는 -> ${alreadySavedList.length}\nimageurlList의 길이는 ${imageUrlList.length}');
       /// image file으로 만들어서 따로 저장해줘야함
       for(var i=0; i<imageUrlList.length; i++) {
         alreadySavedList.add(await fileFromImageUrl(imageUrlList[i],i));
+        print('alreadySavedList에 들어갈때 imageURL의 값: ${imageUrlList[i]}');
         print('for 돌면서 alreadySavedList 길이는 -> ${alreadySavedList.length}');
       }
 
@@ -216,6 +210,7 @@ class _EditPageState extends State<EditPage> {
 
   @override
   Widget build(BuildContext context) {
+
     ///*********** ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ***********///
 
     /// EditPage 호출시 받는 매개변수 참조
@@ -399,7 +394,7 @@ class _EditPageState extends State<EditPage> {
 
                         /// 업로드 된 사진들 가로 스크롤 가능
                         Row(children: [
-                          images.isEmpty
+                          alreadySavedList.isEmpty && willBeSavedFileList.isEmpty
                               ? Container(
                             height: MediaQuery.of(context).size.height * (0.11) * 0.77,
                             width: MediaQuery.of(context).size.height * (0.35),
