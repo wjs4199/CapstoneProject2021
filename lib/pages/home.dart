@@ -28,20 +28,23 @@ class HomePage extends StatefulWidget {
   ///* ------------------------------ 수정 -------------------------------- *////
   final SharedPreferences currentUserId;
   var nickname; // main 에 정의되어도 됨
-  HomePage({Key key, @required this.currentUserId}) : super(key: key); // 필요X
+  final bool messageState;
+  HomePage({Key key, @required this.currentUserId, @required this.messageState}) : super(key: key); // 필요X
 
   ///* ------------------------------------------------------------------ *////
   @override
-  State createState() => _HomePageState(currentUserId: currentUserId);
+  State createState() => _HomePageState(currentUserId: currentUserId, messageState : messageState);
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   ///* ------------------------------ 수정 -------------------------------- *////
   /// _HomePageState 클래스 밑에 바로 build 가 보이도록,
   /// home.dart 에 정의 필요 없는것들 전부 main.dart 로
-  _HomePageState({@required this.currentUserId});
+  _HomePageState({@required this.currentUserId, @required this.messageState});
+
 
   final SharedPreferences currentUserId;
+  final bool messageState;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -53,10 +56,30 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _requestPermissions();
     _scrollController = ScrollController();
     _pageController = PageController();
     _tabController = TabController(length: 2, vsync: this);
     _focusNode = FocusNode();
+  }
+
+  void _requestPermissions() {
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        MacOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
   }
 
   /// 시스템 함수에 PageView 기능 반영 처리(2)
@@ -289,7 +312,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
             onTap: () {
               handleSignOut();
-              Navigator.pushNamed(context, '/login');
             },
           ),
         ],
@@ -395,37 +417,42 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   BottomNavigationBar buildNavBar(BuildContext context) {
-    return BottomNavigationBar(
-      // showSelectedLabels: true,
-      // showUnselectedLabels: false,
-      currentIndex: _selectedIndex,
-      elevation: 0,
-      backgroundColor: Theme.of(context).bottomAppBarColor.withAlpha(220),
-      selectedItemColor: Theme.of(context).primaryColor,
-      onTap: _onItemTapped,
-      type: BottomNavigationBarType.fixed,
-      selectedLabelStyle: TextStyle(
-          fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
-      unselectedLabelStyle: TextStyle(
-          fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
-      items: [
-        BottomNavigationBarItem(
-          icon: Icon(
-            Icons.accessibility,
-            size: 30,
+
+      return BottomNavigationBar(
+        // showSelectedLabels: true,
+        // showUnselectedLabels: false,
+        currentIndex: _selectedIndex,
+        elevation: 0,
+        backgroundColor: Theme.of(context).bottomAppBarColor.withAlpha(220),
+        selectedItemColor: Theme.of(context).primaryColor,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedLabelStyle: TextStyle(
+            fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
+        unselectedLabelStyle: TextStyle(
+            fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.accessibility,
+              size: 30,
+            ),
+            label: '나눔',
           ),
-          label: '나눔',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(
-            Icons.forum,
-            size: 30,
+          BottomNavigationBarItem(
+            icon:
+                  Icon(
+                    Icons.forum,
+                    size: 30,
+                  ),
+            label: '메신저',
+
           ),
-          label: '메신저',
-        ),
-      ],
-    );
-  }
+        ],
+      );
+    }
+
+
 
   /// Drawer 관련 Scaffold Key
   final _scaffoldKey = GlobalKey<ScaffoldState>();

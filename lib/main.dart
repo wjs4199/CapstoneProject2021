@@ -44,10 +44,12 @@ class _ApplicationState extends State<Application> {
   //   if (isLoggedIn) {
   //     print('Login true');
   //     return true;
-  //   } else {
+  //   }
+  //   else{
   //     print('Login false');
   //     return false;
   //   }
+  //
   // }
 
   @override
@@ -66,7 +68,7 @@ class _ApplicationState extends State<Application> {
             ),
 
             home: SplashPage(),
-            // home: _decideMainPage() == true ? HomePage() : LoginPage(),
+            //home: _decideMainPage() == true ? HomePage() : LoginPage(),
             //initialRoute: _decideMainPage() == null ? '/home' : '/login',
             debugShowCheckedModeBanner: false,
 
@@ -155,6 +157,7 @@ class ApplicationState extends ChangeNotifier {
     this.nickname = nickname;
     init();
   }
+
 
   void orderByFilter(String orderBy) {
     this.orderBy = orderBy;
