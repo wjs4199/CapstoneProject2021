@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -61,10 +62,16 @@ class _EditPageState extends State<EditPage> {
   Future<void> getMultiImage(int index) async {
     List<Asset> resultList;
     resultList = await MultiImagePicker.pickImages(
-        maxImages: index, enableCamera: true, selectedAssets: images);
+        maxImages: index,
+        enableCamera: true,
+        selectedAssets: images
+    );
+    images = resultList;
+
+    /// 받아온 이미지를 File 타입으로 변환
+    await getImageFileFromAssets();
 
     setState(() {
-      images = resultList;
       numberOfImages = images.length;
       if (numberOfImages + alreadySavedList.length >= 10) {
         numberOfImagesTextColor = true;
@@ -72,9 +79,6 @@ class _EditPageState extends State<EditPage> {
         numberOfImagesTextColor = false;
       }
     });
-
-    /// 받아온 이미지를 File 타입으로 변환
-    await getImageFileFromAssets();
   }
 
   Future<Uint8List> testCompressFile(File file) async {
@@ -93,8 +97,12 @@ class _EditPageState extends State<EditPage> {
 
   /// image 리스트에 들어있는 Asset 타입 이미지들을 File 타입으로 변환시키는 함수(storage 저장 위해)
   Future<void> getImageFileFromAssets() async {
+    print('willBeSavedFileList.length: ${willBeSavedFileList.length}\nimages.length: ${images.length}');
     for(var i = willBeSavedFileList.length; i<images.length; i++){
+
+      print('저장할 사진 주소 $i : ${(await getTemporaryDirectory()).path}/${images[i].name}');
       var tempFile = File('${(await getTemporaryDirectory()).path}/${images[i].name}');
+
       willBeSavedFileList.add(tempFile);
     }
     /*images.forEach((imageAsset) async {
@@ -177,6 +185,7 @@ class _EditPageState extends State<EditPage> {
 
   /// 다운로드한 url 들 중 null 이 아닌 것들만을 imageUrlList 에 저장시킨는 함수
   Future<void> makeUrlList() async {
+    /// 이미 한번 로딩 했는지 안했는지 확인(이미 했으면 다시 로딩 안함)
     if(!alreadyLoading){
       imageUrlList = await Future.wait([
         downloadURL(widget.productId,0),
@@ -191,20 +200,18 @@ class _EditPageState extends State<EditPage> {
         downloadURL(widget.productId,9),]);
 
       imageUrlList = imageUrlList.where((e) => e != null).toList();
-      print('for 돌기전 alreadySavedList 길이는 -> ${alreadySavedList.length}\nimageurlList의 길이는 ${imageUrlList.length}');
+
       /// image file으로 만들어서 따로 저장해줘야함
       for(var i=0; i<imageUrlList.length; i++) {
         alreadySavedList.add(await fileFromImageUrl(imageUrlList[i],i));
-        print('alreadySavedList에 들어갈때 imageURL의 값: ${imageUrlList[i]}');
-        print('for 돌면서 alreadySavedList 길이는 -> ${alreadySavedList.length}');
       }
 
-      //이미 한번
+      /// 이미 한번 로딩하여 가져온 경우 다시 안가져오도록 true로 바꿈
       alreadyLoading = true;
       print('alreadyLoading -> $alreadyLoading');
     }
 
-    print('마지막으로 alreadySavedList 길이는 -> ${alreadySavedList.length}');
+    print('makeUrlList에서 alreadySavedList 길이는 -> ${alreadySavedList.length}');
   }
 
 
@@ -409,8 +416,8 @@ class _EditPageState extends State<EditPage> {
                                   var asset;
                                   var alreadySavedFile;
                                   var f ;
-                                  print('alreadySavedList.length -> ${alreadySavedList.length}');
-                                  print('willBeSavedFileList.length -> ${willBeSavedFileList.length}');
+                                  print('보여주기 전 alreadySavedList.length -> ${alreadySavedList.length}');
+                                  print('보여주기 전 willBeSavedFileList.length -> ${willBeSavedFileList.length}');
                                   if(index < alreadySavedList.length){
                                     alreadySavedFile = alreadySavedList[index];
                                   } else {

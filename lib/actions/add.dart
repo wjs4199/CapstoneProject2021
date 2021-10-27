@@ -58,8 +58,12 @@ class _AddPageState extends State<AddPage> {
       selectedAssets: images,
     );
 
+    images = resultList;
+
+    /// 받아온 이미지를 File 타입으로 변환
+    await getImageFileFromAssets();
+
     setState(() {
-      images = resultList;
       numberOfImages = images.length;
       if (numberOfImages >= 10) {
         numberOfImagesTextColor = true;
@@ -67,9 +71,6 @@ class _AddPageState extends State<AddPage> {
         numberOfImagesTextColor = false;
       }
     });
-
-    /// 받아온 이미지를 File 타입으로 변환
-    await getImageFileFromAssets();
   }
 
   Future<Uint8List> testCompressFile(File file) async {
