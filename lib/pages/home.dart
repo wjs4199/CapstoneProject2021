@@ -120,7 +120,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     floating: true,
                     expandedHeight: 108.0, // 118.0
                     iconTheme: IconThemeData(color: Colors.black),
-                    centerTitle: true,
+                    centerTitle: false,
                     title: Text(
                       'Pelag',
                       style: TextStyle(
@@ -572,6 +572,14 @@ class PostTileMaker extends StatelessWidget {
                     context, '/detail/' + _product.id + '/takeProducts'));
           }
         },
+
+        // FirebaseFirestore.instance
+        //     .collection('giveProducts')
+        //     .where('title', isEqualTo: '강아지 나눔')
+        //     .snapshots()
+        //     .then((QuerySnapshot ds) {
+        //   ds.documents.forEach((doc) => print(doc["content"]));
+        // });
 
         /// Custom Tile 구조로 생성 (postTile.dart 구조 참조)
         child: FutureBuilder(

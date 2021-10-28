@@ -32,7 +32,7 @@ class Product {
   final int photo;
   final String user_photoURL;
   final String nickname;
-  final String thumbnail;
+  final dynamic thumbnail;
 }
 
 class Comment {
