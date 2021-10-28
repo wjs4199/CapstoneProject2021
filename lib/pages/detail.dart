@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:giveandtake/pages/chat.dart';
+import 'package:giveandtake/pages/signup.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -231,18 +232,7 @@ class _DetailPageState extends State<DetailPage> {
 
       imageUrlList = imageUrlList.where((e) => e != null).toList();
 
-      //future안에서 for문이 안돌아서 정적 리스트에 들어가는 것을 확인하기 위해 이렇게 해둠
       print('imageURL 리스트의 길이는  => ${imageUrlList.length}');
-      print('0 번째 imageUrlList 주소는 => ${imageUrlList[0]}');
-      print('1 번째 imageUrlList 주소는 => ${imageUrlList[1]}');
-      print('2 번째 imageUrlList 주소는 => ${imageUrlList[2]}');
-      print('3 번째 imageUrlList 주소는 => ${imageUrlList[3]}');
-      print('4 번째 imageUrlList 주소는 => ${imageUrlList[4]}');
-      print('5 번째 imageUrlList 주소는 => ${imageUrlList[5]}');
-      print('6 번째 imageUrlList 주소는 => ${imageUrlList[6]}');
-      print('7 번째 imageUrlList 주소는 => ${imageUrlList[7]}');
-      print('8 번째 imageUrlList 주소는 => ${imageUrlList[8]}');
-      print('9 번째 imageUrlList 주소는 => ${imageUrlList[9]}');
     }
 
     /// 현재 시간
@@ -377,13 +367,30 @@ class _DetailPageState extends State<DetailPage> {
     CollectionReference comments = FirebaseFirestore.instance
         .collection('giveProducts/' + productId + '/comment');
 
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+    /// 유저의 닉네임을 찾아서 보여주는 함수
+    String findNickname(AsyncSnapshot<QuerySnapshot> snapshot) {
+      var nickName = 'null';
+      snapshot.data.docs.forEach((document) {
+        if (document['username'] == userName) {
+          nickName = document['nickname'];
+        }
+      });
+
+      print('찾은 닉네임은 $nickName!!');
+
+      return nickName;
+    }
+
     /// comment 추가 기능
-    Future<void> addComments(String comment) {
+    Future<void> addComments(String comment, String nickName) {
       return comments
           .add({
         'userName': FirebaseAuth.instance.currentUser.displayName,
         'comment': comment,
         'created': FieldValue.serverTimestamp(),
+        'nickName': nickName,
       })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
@@ -890,70 +897,38 @@ class _DetailPageState extends State<DetailPage> {
                                 )
                             ),
                           ),
-                          /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
-                          /*Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
-                                  child: TextField(
-                                    controller: _commentController,
-                                    decoration: const InputDecoration(
-                                      focusedBorder: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                      errorBorder: InputBorder.none,
-                                      disabledBorder: InputBorder.none,
-                                      hintText: '댓글을 입력하세요',
-                                    ),
-                                    onSubmitted: (value) {
-                                      //if (value == null || value.isEmpty) {
-                                        //return '댓글을 입력하세요';
-                                      //}
-                                      //return null;
-                                    },
-                                    onChanged: (value) {
-                                      changeTextField.add(value);
-                                    }
-                                  ),
-                                )
-                            ),*/
                           SizedBox(width: 3),
-                          IconButton(
-                            icon: const Icon(Icons.send_outlined),
-                            iconSize: 27,
-                            color: Color(0xffc32323),
-                            onPressed: () async {
-                              var currentFocus = FocusScope.of(context);
-                              currentFocus.unfocus();
-                              if (_commentFormKey.currentState.validate()) {
-                                await addComments(_commentController.text)
-                                    .then((value) => print('add comment ok!'));
-                                _commentController.clear();
-                                products = detailGiveOrTake == 'giveProducts'
-                                    ? context.read<ApplicationState>().giveProducts
-                                    : context.read<ApplicationState>().takeProducts;
-                                print('clear!');
-                              }
-                            },
-                          ),
-                          /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
-                          /*StreamBuilder(
-                            stream: changeTextField.stream,
-                            builder: (context, snapshot) {
-                              return IconButton(
-                                icon: const Icon(Icons.send_outlined),
-                                iconSize: 27,
-                                color: Color(0xffc32323),
-                                onPressed: ()  {
-                                  _commentController.clear();
-                                  currentFocus.unfocus();
-                                  addComments(snapshot.data)
-                                      .then((value) {
-                                        context.read<ApplicationState>().init();
-                                    print('add comment ok!');
-                                  });
-                                },
-                              );
-                            }
-                          ),*/
+                          StreamBuilder<QuerySnapshot>(
+                              stream: users.snapshots(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text('x');
+                                }
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Text('');
+                                }
+                                var nickName = findNickname(snapshot);
+                                return IconButton(
+                                  icon: const Icon(Icons.send_outlined),
+                                  iconSize: 27,
+                                  color: Color(0xffc32323),
+                                  onPressed: () async {
+                                    var currentFocus = FocusScope.of(context);
+                                    currentFocus.unfocus();
+                                    if (_commentFormKey.currentState.validate()) {
+                                      await addComments(_commentController.text, nickName)
+                                          .then((value) => print('add comment ok!'));
+                                      _commentController.clear();
+                                      products = detailGiveOrTake == 'giveProducts'
+                                          ? context.read<ApplicationState>().giveProducts
+                                          : context.read<ApplicationState>().takeProducts;
+                                      print('clear!');
+                                    }
+                                  },
+                                );
+                              }),
                         ],
                       ),
                     ),

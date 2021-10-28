@@ -31,6 +31,8 @@ class _CommentBookState extends State<CommentBook> {
   /// 현재 유저의 이름 간략화
   var userName = FirebaseAuth.instance.currentUser.displayName;
   var userId = FirebaseAuth.instance.currentUser.uid;
+  var userNickName = 'null';
+  var commentNickName = 'null';
 
   /// 유저의 닉네임을 찾아서 보여주는 함수
   String findNickname(AsyncSnapshot<QuerySnapshot> snapshot, String name) {
@@ -177,7 +179,6 @@ class _CommentBookState extends State<CommentBook> {
                   height: 1,
                 ));
           }
-          var count = snapshot.data.size;
           return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -209,6 +210,12 @@ class _CommentBookState extends State<CommentBook> {
                                           ConnectionState.waiting) {
                                         return Text('');
                                       }
+                                      userNickName = findNickname(snapshot, FirebaseAuth.instance.currentUser.displayName);
+                                      commentNickName = findNickname(snapshot, eachComment.userName);
+                                      print('commentNickName : $commentNickName');
+                                      print('userNickName : $userNickName');
+                                      print('eachComment.userName의 닉네임: ${findNickname(snapshot, eachComment.userName)}');
+                                      print('userName : $userName');
                                       return SizedBox(
                                         height: 30,
                                         child: Column(
@@ -216,9 +223,7 @@ class _CommentBookState extends State<CommentBook> {
                                               MainAxisAlignment.start,
                                           children: [
                                             SizedBox(height: 5),
-                                            Text(
-                                                findNickname(snapshot,
-                                                    eachComment.userName),
+                                            Text(findNickname(snapshot, eachComment.userName),
                                                 style: TextStyle(
                                                   fontSize: 15,
                                                   color: Colors.black,
@@ -229,15 +234,14 @@ class _CommentBookState extends State<CommentBook> {
                                     }),
                                 Expanded(
                                     child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
+                                        mainAxisAlignment: MainAxisAlignment.end,
                                         children: [
-                                      /// 댓글마다 대댓글, 좋아요, 삭제 기능을 담당하는 토글버튼 생성
-                                      _buildCommentToggleButtons(
-                                          context,
-                                          Provider.of<ApplicationState>(context,
-                                              listen: false),
-                                          eachComment),
+                                          /// 댓글마다 대댓글, 좋아요, 삭제 기능을 담당하는 토글버튼 생성
+                                          if(commentNickName == userNickName)
+                                            _buildCommentToggleButtons(
+                                              context,
+                                              Provider.of<ApplicationState>(context, listen: false), eachComment
+                                            ),
                                       SizedBox(width: 10),
                                     ]))
                               ],
@@ -248,11 +252,16 @@ class _CommentBookState extends State<CommentBook> {
                                 children: [
                                   SizedBox(width: 11.0),
                                   Container(
+                                    //padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.5),
                                     width: MediaQuery.of(context).size.width - 36,
                                     child: RichText(
                                         maxLines: 30,
                                         text: TextSpan(
-                                            style: TextStyle(fontSize: 16.5, color: Colors.black,),
+                                            style: TextStyle(
+                                                fontSize: 16.5,
+                                                color: Colors.black,
+                                                height: 1.05
+                                            ),
                                             children: <TextSpan>[
                                               TextSpan(text: eachComment.comment + '\n'),
                                             ])
@@ -261,7 +270,6 @@ class _CommentBookState extends State<CommentBook> {
                                   SizedBox(width: 9.0),
                                 ]
                         ),
-
                         Padding(
                           padding: const EdgeInsets.fromLTRB(11, 0, 11, 0),
                           child: Divider(thickness: 1.0),
