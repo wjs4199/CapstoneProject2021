@@ -319,10 +319,6 @@ class _EditPageState extends State<EditPage> {
         'modified': FieldValue.serverTimestamp(),
         'photo': alreadySavedList.length + willBeSavedFileList.length,
       }).then((value) async {
-        /*await target
-            .doc(productId)
-            .update({'thumbnailURL': await thumbnailURL(productId)});*/
-
         /// storage에 올려진 사진 삭제 후 다시 업로드
         await deleteImages().whenComplete(() async {
           //await makeAlreadySavedList().then((value) async {
@@ -530,8 +526,6 @@ class _EditPageState extends State<EditPage> {
                                               ),
                                                       ],
                                                     ),
-
-                                                    /// 여기서 삭제버튼 구현하다 관둠...
                                                   ],
                                                 );
                                           }),

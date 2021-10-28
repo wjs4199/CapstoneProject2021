@@ -37,8 +37,14 @@ class _DetailPageState extends State<DetailPage> {
   String detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
   int photoNum; // 저장된 photo 의 개수
 
+  /// futurebuilder 의 future: ___에 사용될 변수
+  Future<void> future;
+
   @override
   void initState() {
+
+    /// 댓글쓰는 창 클릭시 rebuild되는 것을 막기 위해서 한번만 build
+    future = makeUrlList();
     super.initState();
 
     productId = widget.productId; // product ID
@@ -385,7 +391,9 @@ class _DetailPageState extends State<DetailPage> {
 
     var currentFocus = FocusScope.of(context);
 
-    /// Add 페이지 화면 구성
+
+
+    /// Detail 페이지 화면 구성
     return Scaffold(
       body: SafeArea(
           child: Stack(
@@ -396,7 +404,7 @@ class _DetailPageState extends State<DetailPage> {
                       children: [
                         /// MultiImage를 보여주는 Carousel 위젯 부분
                         FutureBuilder(
-                          future: makeUrlList(),
+                          future: future,
                           builder: (context, snapshot) {
                             /// 시진 로딩중일 때
                             if (snapshot.connectionState == ConnectionState.waiting) {
