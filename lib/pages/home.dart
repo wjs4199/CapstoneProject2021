@@ -29,11 +29,13 @@ class HomePage extends StatefulWidget {
   final SharedPreferences currentUserId;
   var nickname; // main 에 정의되어도 됨
   final bool messageState;
-  HomePage({Key key, @required this.currentUserId, @required this.messageState}) : super(key: key); // 필요X
+  HomePage({Key key, @required this.currentUserId, @required this.messageState})
+      : super(key: key); // 필요X
 
   ///* ------------------------------------------------------------------ *////
   @override
-  State createState() => _HomePageState(currentUserId: currentUserId, messageState : messageState);
+  State createState() =>
+      _HomePageState(currentUserId: currentUserId, messageState: messageState);
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
@@ -42,12 +44,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   /// home.dart 에 정의 필요 없는것들 전부 main.dart 로
   _HomePageState({@required this.currentUserId, @required this.messageState});
 
-
   final SharedPreferences currentUserId;
   final bool messageState;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
 
@@ -66,20 +67,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void _requestPermissions() {
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>()
+            IOSFlutterLocalNotificationsPlugin>()
         ?.requestPermissions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+          alert: true,
+          badge: true,
+          sound: true,
+        );
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-        MacOSFlutterLocalNotificationsPlugin>()
+            MacOSFlutterLocalNotificationsPlugin>()
         ?.requestPermissions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+          alert: true,
+          badge: true,
+          sound: true,
+        );
   }
 
   /// 시스템 함수에 PageView 기능 반영 처리(2)
@@ -119,6 +120,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     floating: true,
                     expandedHeight: 108.0, // 118.0
                     iconTheme: IconThemeData(color: Colors.black),
+                    centerTitle: true,
                     title: Text(
                       'Pelag',
                       style: TextStyle(
@@ -205,6 +207,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     snap: true,
                     floating: true,
                     iconTheme: IconThemeData(color: Colors.black),
+                    centerTitle: true,
                     title: Text(
                       'Pelag',
                       style: TextStyle(
@@ -417,7 +420,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   BottomNavigationBar buildNavBar(BuildContext context) {
-
     return BottomNavigationBar(
       // showSelectedLabels: true,
       // showUnselectedLabels: false,
@@ -440,19 +442,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           label: '나눔',
         ),
         BottomNavigationBarItem(
-          icon:
-          Icon(
+          icon: Icon(
             Icons.forum,
             size: 30,
           ),
           label: '메신저',
-
         ),
       ],
     );
   }
-
-
 
   /// Drawer 관련 Scaffold Key
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -463,7 +461,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     await googleSignIn.disconnect();
     await googleSignIn.signOut().then((value) => Navigator.of(context)
         .pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => LoginPage()),
+            MaterialPageRoute(builder: (context) => LoginPage()),
             (Route<dynamic> route) => false));
   }
 
@@ -487,7 +485,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
-///* -------------------------------------------------------------------- *///
+  ///* -------------------------------------------------------------------- *///
 }
 
 /// PostTileMaker - 각 게시글 별 postTile Listview.builder(separated) 사용해 자동 생성
@@ -565,13 +563,13 @@ class PostTileMaker extends StatelessWidget {
             Provider.of<ApplicationState>(context, listen: false)
                 .detailPageUid(_product.id, 'giveProducts', _product.photo)
                 .then((value) => Navigator.pushNamed(
-                context, '/detail/' + _product.id + '/giveProducts'));
+                    context, '/detail/' + _product.id + '/giveProducts'));
           } else {
             editProductHits('takeProducts');
             Provider.of<ApplicationState>(context, listen: false)
                 .detailPageUid(_product.id, 'takeProducts', _product.photo)
                 .then((value) => Navigator.pushNamed(
-                context, '/detail/' + _product.id + '/takeProducts'));
+                    context, '/detail/' + _product.id + '/takeProducts'));
           }
         },
 
@@ -583,8 +581,8 @@ class PostTileMaker extends StatelessWidget {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
                   child: CircularProgressIndicator(
-                    color: Theme.of(context).primaryColor,
-                  ));
+                color: Theme.of(context).primaryColor,
+              ));
             } else {
               return CustomListItem(
                 title: _product.title,
@@ -626,7 +624,9 @@ class PostTileMaker extends StatelessWidget {
                 // thumbnail: Image.network(
                 //     'gs://give-take-535cf.appspot.com/images/$id\0.png'),
                 thumbnail: _product.thumbnail == null
-                    ? Container()
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(14.0),
+                        child: Image.asset('assets/no-thumbnail.jpg'))
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(14.0),
                         child: CachedNetworkImage(

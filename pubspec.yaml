@@ -67,6 +67,7 @@ flutter:
     - assets/idea.png
     - assets/mobile.png
     - assets/social.png
+    - assets/no-thumbnail.jpg
 
 
   fonts:

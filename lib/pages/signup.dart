@@ -25,6 +25,7 @@ class SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     var isDuplicated = false;
     var checkLoop = false;
+    var isCurrentName = false;
     var name = '';
 
     var currentUserId = FirebaseAuth.instance.currentUser.uid;
@@ -91,15 +92,20 @@ class SignUpState extends State<SignUp> {
                           for(var users in snapshot.docs){
 
                             if(textEditingController1.text == users.get('nickname')) {
-                              print('중복이 존재합니다');
-                              ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-                              isDuplicated = true;
-                              break;
+                              if(name == textEditingController1.text) {
+                                isCurrentName = true;
+                                break;
+                              } else {
+                                print('중복이 존재합니다');
+                                ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+                                isDuplicated = true;
+                                break;
+                              }
                             }
                           }
                           break;
                         };
-                        if(isDuplicated == false) {
+                        if(isDuplicated == false && isCurrentName == false) {
                           ScaffoldMessenger.of(context).showSnackBar(snackBar2);
                         }
                       },
