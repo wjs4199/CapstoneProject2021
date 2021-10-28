@@ -405,7 +405,7 @@ class _DetailPageState extends State<DetailPage> {
                 backgroundColor: Colors.white,
                 iconTheme: IconThemeData(
                   // color: Colors.black,
-                  opacity: 100,
+                  opacity: 0.9,
                 ),
                 pinned: true, // true 처리 시 스크롤을 내려도 appbar 가 작게 보임
                 floating: false, // true 처리 시 스크롤을 내릴때 appbar 가 보임
@@ -547,7 +547,7 @@ class _DetailPageState extends State<DetailPage> {
                   if (FirebaseAuth.instance.currentUser.uid == product.uid)
                     IconButton(
                         icon: Icon(
-                          Icons.create,
+                          Icons.edit_outlined,
                           semanticLabel: 'edit',
                         ),
                         onPressed: (FirebaseAuth.instance.currentUser.uid ==
@@ -560,7 +560,7 @@ class _DetailPageState extends State<DetailPage> {
                   if (FirebaseAuth.instance.currentUser.uid == product.uid)
                     IconButton(
                         icon: Icon(
-                          Icons.delete,
+                          Icons.delete_forever_outlined,
                           semanticLabel: 'delete',
                         ),
                         onPressed: (FirebaseAuth.instance.currentUser.uid ==
