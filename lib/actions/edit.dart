@@ -214,10 +214,16 @@ class _EditPageState extends State<EditPage> {
 
     print('alreadySavedList 길이는 -> ${alreadySavedList.length}');
   }*/
-
+  /// 디바이스에 따라 달라지는 화면 가로세로 크기
+  var fullWidth;
+  var fullHeight;
 
   @override
   Widget build(BuildContext context) {
+
+    /// 디바이스에 따라 달라지는 화면 가로세로 크기
+    fullWidth = MediaQuery.of(context).size.width;
+    fullHeight = MediaQuery.of(context).size.height;
 
     ///*********** ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ***********///
 
@@ -346,25 +352,24 @@ class _EditPageState extends State<EditPage> {
                   )
               );
             }
-
             /// 사진 로딩 후
             else {
               return Container(
                   color: Colors.transparent,
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height * (0.11),
+                  width: fullWidth,
+                  height: fullHeight * (0.11),
                   child: Column(
                     children: [
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.016,
+                        height: fullHeight * (0.016),
                       ),
                       Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                         SizedBox(
-                          width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                          width: fullHeight * (0.016),
                         ),
                         Container(
-                          width: MediaQuery.of(context).size.height * (0.11) * 0.7,
-                          height: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                          width: fullHeight * (0.11) - (2 * fullHeight * (0.016)), //fullHeight * (0.11) * 0.7,
+                          height: fullHeight * (0.11) - (2 * fullHeight * (0.016)),
                           child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
                                 primary: Colors.black,
@@ -404,19 +409,19 @@ class _EditPageState extends State<EditPage> {
                               )),
                         ),
                         SizedBox(
-                          width: MediaQuery.of(context).size.height * (0.11) * 0.12,
+                          width: fullHeight * (0.016),
                         ),
 
                         /// 업로드 된 사진들 가로 스크롤 가능
                         Row(children: [
                           alreadySavedList.isEmpty && willBeSavedFileList.isEmpty
                               ? Container(
-                            height: MediaQuery.of(context).size.height * (0.11) * 0.77,
-                            width: MediaQuery.of(context).size.height * (0.35),
+                            height: (fullHeight * (0.11) - (2 * fullHeight * (0.016))) * 1.1, //fullHeight * (0.11) - (2 * fullHeight * (0.016)) //fullHeight * (0.11) * 0.7,
+                            width: fullHeight * (0.11) - (2 * fullHeight * (0.016)) * 1.1,
                           )
                               : Container(
-                            height: MediaQuery.of(context).size.height * (0.11) * 0.77,
-                            width: MediaQuery.of(context).size.height * (0.35),
+                            height: (fullHeight * (0.11) - (2 * fullHeight * (0.016))) * 1.1, //x 동그라미 버튼 넣어야해서 사진들어가는 네모크기보다 조금 크게만듦
+                            width: fullWidth - (fullHeight * 0.126),
                             child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: willBeSavedFileList.length + alreadySavedList.length,
@@ -434,31 +439,28 @@ class _EditPageState extends State<EditPage> {
                                     willFile = willBeSavedFileList[index-alreadySavedList.length];
                                   }
 
-                                  return Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Stack(
+                                  return Stack(
                                         children: [
                                           Row(
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             children: [
                                               Stack(children: [
                                                 Container(
-                                                    height: MediaQuery.of(context).size.height * (0.11) * 0.77,
-                                                    width: MediaQuery.of(context).size.height * (0.11) * 0.7,
+                                                    height: (fullHeight * (0.11) - (2 * fullHeight * (0.016))) * 1.1,
+                                                    width: (fullHeight * (0.11) - (2 * fullHeight * (0.016))) * 1.1,
                                                     child: Column(
                                                       mainAxisAlignment: MainAxisAlignment.start,
                                                       children: [
                                                         SizedBox(
-                                                          height: MediaQuery.of(context).size.height * (0.11) * 0.045,
+                                                            height: fullHeight * (0.11) * 0.045,
                                                         ),
                                                         Row(
                                                           mainAxisAlignment: MainAxisAlignment.start,
                                                           crossAxisAlignment: CrossAxisAlignment.start,
                                                           children: [
                                                             Container(
-                                                                height: 67,
-                                                                width: 67,
+                                                                height: fullHeight * (0.11) - (2 * fullHeight * (0.016)),
+                                                                width: fullHeight * (0.11) - (2 * fullHeight * (0.016)),
                                                                 child: ClipRRect(
                                                                     borderRadius: BorderRadius.circular(5.0),
                                                                     child: index < alreadySavedList.length ?
@@ -479,28 +481,19 @@ class _EditPageState extends State<EditPage> {
                                                     )
                                                 ),
                                                 Container(
-                                                  height: MediaQuery.of(context).size.height * (0.11) * 0.76,
-                                                  width: MediaQuery.of(context).size.height * (0.11) * 0.73,
+                                                  height: (fullHeight * (0.11) - (2 * fullHeight * (0.016))) * 1.1,
+                                                  width: (fullHeight * (0.11) - (2 * fullHeight * (0.016))) * 1.1,
                                                   child: Column(
                                                     mainAxisAlignment: MainAxisAlignment.start,
                                                     children: [
-                                                      Container(
-                                                        height: MediaQuery.of(context).size.height * (0.11) * 0.65,
-                                                        width: MediaQuery.of(context).size.height * (0.11) * 0.73,
-                                                        child: Row(
-                                                            mainAxisAlignment:
-                                                            MainAxisAlignment.start,
-                                                            crossAxisAlignment:
-                                                            CrossAxisAlignment.start,
+                                                      Row(
+                                                            mainAxisAlignment: MainAxisAlignment.start,
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
                                                             children: [
                                                               Container(
-                                                                width: 53,
+                                                                width: fullHeight * 0.065,
                                                               ),
-                                                              Expanded(
-                                                                child: Container(
-                                                                    width: 20,
-                                                                    height: 20,
-                                                                    child: InkWell(
+                                                              InkWell(
                                                                       onTap: () {
                                                                         setState(() {
                                                                           if(index < alreadySavedList.length){
@@ -523,39 +516,24 @@ class _EditPageState extends State<EditPage> {
                                                                                 },
                                                                                 child: Icon(
                                                                                   Icons.cancel,
-                                                                                  size: 18,
+                                                                                  size: ((fullHeight * (0.11) - (2 * fullHeight * (0.016))) * 1.1)-fullHeight * 0.065,
                                                                                   color: Color(0x00000000).withOpacity(0.5),
                                                                                 ),
-                                                                              )),
                                                                         )
-                                                                      ]),
-                                                                ),
+                                                                ]),
                                                               ],
                                                             ),
                                                           )
                                                         ]),
-                                                        SizedBox(
-                                                          height: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .height *
-                                                              (0.11) *
-                                                              0.7,
-                                                          width: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .height *
-                                                              (0.11) *
-                                                              0.12,
-                                                        ),
+                                              SizedBox(
+                                                width: fullHeight * (0.016) - ((fullHeight * (0.11) - (2 * fullHeight * (0.016))) * 0.1),
+                                              ),
                                                       ],
                                                     ),
 
                                                     /// 여기서 삭제버튼 구현하다 관둠...
                                                   ],
-                                                )
-                                              ],
-                                            );
+                                                );
                                           }),
                                     )
                             ]),
@@ -743,8 +721,8 @@ class _EditPageState extends State<EditPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.46,
-        minHeight: 50,
+        minWidth: fullWidth * 0.46,
+        minHeight: fullWidth * 0.46 * 0.3,
       ),
       selectedBorderColor: Color(0xffeb6859),
       selectedColor: Color(0xffeb6859),
@@ -799,8 +777,8 @@ class _EditPageState extends State<EditPage> {
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.46,
-        minHeight: 50,
+        minWidth: fullWidth * 0.46,
+        minHeight: fullWidth * 0.46 * 0.3,
       ),
       selectedBorderColor: Color(0xffeb6859),
       selectedColor: Color(0xffeb6859),
