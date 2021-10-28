@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:giveandtake/pages/chat.dart';
-import 'package:giveandtake/pages/signup.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,7 +14,6 @@ import 'dart:async';
 import 'home.dart';
 
 class DetailPage extends StatefulWidget {
-
   DetailPage({this.productId, this.detailGiveOrTake, this.photoNum});
 
   /// route 생성 시에 사용되는 product ID
@@ -32,9 +30,8 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-
   /// detail 페이지 실행시 인자로 전달되는 변수들
-  String productId ; // product ID
+  String productId; // product ID
   String detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
   int photoNum; // 저장된 photo 의 개수
 
@@ -49,7 +46,8 @@ class _DetailPageState extends State<DetailPage> {
     super.initState();
 
     productId = widget.productId; // product ID
-    detailGiveOrTake = widget.detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
+    detailGiveOrTake =
+        widget.detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
     photoNum = widget.photoNum; // 저장된 photo 의 개수
   }
 
@@ -61,8 +59,6 @@ class _DetailPageState extends State<DetailPage> {
 
   /// appbar 아이콘의 컬러를 사진 여부에 따라 다르게 표시하기 위해 필요한 변수
   bool appbarIconColor = false;
-
-
 
   ///************************* 사진 띄우는 부분 관련 변수/ 함수들*************************///
   /// Firebase Storage 참조 간략화
@@ -81,10 +77,12 @@ class _DetailPageState extends State<DetailPage> {
   StreamController<int> changeLikeCount = StreamController<int>.broadcast();
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
-  StreamController<Icon> changeFavoriteButton = StreamController<Icon>.broadcast();
+  StreamController<Icon> changeFavoriteButton =
+      StreamController<Icon>.broadcast();
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
-  StreamController<String> changeTextField = StreamController<String>.broadcast();
+  StreamController<String> changeTextField =
+      StreamController<String>.broadcast();
 
   /// storage 에서 다운로드한 이미지 url 들이 저장될 정적 저장소
   var imageUrlList = [];
@@ -105,16 +103,17 @@ class _DetailPageState extends State<DetailPage> {
   /// 다운로드한 url 들 중 null 이 아닌 것들만을 imageUrlList 에 저장시킨는 함수
   Future<void> makeUrlList() async {
     imageUrlList = await Future.wait([
-      downloadURL(widget.productId,0),
-      downloadURL(widget.productId,1),
-      downloadURL(widget.productId,2),
-      downloadURL(widget.productId,3),
-      downloadURL(widget.productId,4),
-      downloadURL(widget.productId,5),
-      downloadURL(widget.productId,6),
-      downloadURL(widget.productId,7),
-      downloadURL(widget.productId,8),
-      downloadURL(widget.productId,9),]);
+      downloadURL(widget.productId, 0),
+      downloadURL(widget.productId, 1),
+      downloadURL(widget.productId, 2),
+      downloadURL(widget.productId, 3),
+      downloadURL(widget.productId, 4),
+      downloadURL(widget.productId, 5),
+      downloadURL(widget.productId, 6),
+      downloadURL(widget.productId, 7),
+      downloadURL(widget.productId, 8),
+      downloadURL(widget.productId, 9),
+    ]);
 
     imageUrlList = imageUrlList.where((e) => e != null).toList();
 
@@ -134,7 +133,6 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
-
     ///************ ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ************///
     /// DetailPage() 호출시 받는 매개변수 참조
     var productId = widget.productId;
@@ -145,7 +143,6 @@ class _DetailPageState extends State<DetailPage> {
     var products = detailGiveOrTake == 'giveProducts'
         ? context.read<ApplicationState>().giveProducts
         : context.read<ApplicationState>().takeProducts;
-
 
     /// 현재 유저의 아이디와 이름 간략화
     var userId = FirebaseAuth.instance.currentUser.uid;
@@ -195,9 +192,9 @@ class _DetailPageState extends State<DetailPage> {
       try {
         print('사진 삭제 시작!');
         return await storage
-              .refFromURL(imageUrlList[num])
-              .delete()
-              .whenComplete(() => print('$num번째 사진 삭제 완료!'));
+            .refFromURL(imageUrlList[num])
+            .delete()
+            .whenComplete(() => print('$num번째 사진 삭제 완료!'));
       } on Exception {
         return null;
       }
@@ -214,21 +211,23 @@ class _DetailPageState extends State<DetailPage> {
         deleteOneImage(6),
         deleteOneImage(7),
         deleteOneImage(8),
-        deleteOneImage(9),]);
+        deleteOneImage(9),
+      ]);
     }
 
     Future<void> makeUrlList() async {
       imageUrlList = await Future.wait([
-        downloadURL(widget.productId,0),
-        downloadURL(widget.productId,1),
-        downloadURL(widget.productId,2),
-        downloadURL(widget.productId,3),
-        downloadURL(widget.productId,4),
-        downloadURL(widget.productId,5),
-        downloadURL(widget.productId,6),
-        downloadURL(widget.productId,7),
-        downloadURL(widget.productId,8),
-        downloadURL(widget.productId,9),]);
+        downloadURL(widget.productId, 0),
+        downloadURL(widget.productId, 1),
+        downloadURL(widget.productId, 2),
+        downloadURL(widget.productId, 3),
+        downloadURL(widget.productId, 4),
+        downloadURL(widget.productId, 5),
+        downloadURL(widget.productId, 6),
+        downloadURL(widget.productId, 7),
+        downloadURL(widget.productId, 8),
+        downloadURL(widget.productId, 9),
+      ]);
 
       imageUrlList = imageUrlList.where((e) => e != null).toList();
 
@@ -242,8 +241,7 @@ class _DetailPageState extends State<DetailPage> {
         DateTime.now().day,
         DateTime.now().hour,
         DateTime.now().minute,
-        DateTime.now().second
-    );
+        DateTime.now().second);
 
     /// 상품에 저장된 최근에 수정된 시간
     var productTime = DateTime(
@@ -257,14 +255,17 @@ class _DetailPageState extends State<DetailPage> {
     /// 현재시간 - 게시글 마지막 수정 시간 계산하여 내보내는 위젯
     String calculateTime() {
       var time = nowTime.difference(productTime).inDays;
+
       /// 하루가 안지났을 때
-      if(time < 1) {
+      if (time < 1) {
         time = nowTime.difference(productTime).inHours;
+
         /// 한시간도 안지났을 때
-        if(time< 1){
+        if (time < 1) {
           time = nowTime.difference(productTime).inMinutes;
+
           /// 1분도 안지났을 때
-          if(time<1){
+          if (time < 1) {
             return '방금';
           } else {
             return '$time분 전';
@@ -272,26 +273,31 @@ class _DetailPageState extends State<DetailPage> {
         } else {
           return '$time시간 전';
         }
-      } /// 7일이 안지났을 때
-      else if(time < 7) {
+      }
+
+      /// 7일이 안지났을 때
+      else if (time < 7) {
         return '$time일 전';
       }
+
       /// 일주일 이상 지났고 한달 미만의 시간이 지났을 떄
-      else if(time >= 7 && time < 30) {
+      else if (time >= 7 && time < 30) {
         time = nowTime.difference(productTime).inDays;
-        if(time < 14){
+        if (time < 14) {
           return '1주 전';
-        } else if(time < 21){
+        } else if (time < 21) {
           return '2주 전';
-        } else if(time< 28){
+        } else if (time < 28) {
           return '3주 전';
-        } else if(time< 30){
+        } else if (time < 30) {
           return '한달 전';
         }
-      } /// 한달이상 지났을 때
+      }
+
+      /// 한달이상 지났을 때
       else if (time >= 30) {
         time = nowTime.difference(productTime).inDays;
-        if(time <= 60) {
+        if (time <= 60) {
           return '한달 전';
         } else if (time <= 90) {
           return '두달 전';
@@ -312,7 +318,6 @@ class _DetailPageState extends State<DetailPage> {
       return '오래 된 글';
     }
 
-
     ///************************ like 기능 구현부분 (수정필요) ************************///
 
     /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
@@ -321,17 +326,17 @@ class _DetailPageState extends State<DetailPage> {
 
     /// 현재는 하트버튼 누르면 사용자가 이미 눌렀든 말든 간에 계속 숫자 올라감 ㅋㅎ (수정필요)
     /// 현재 사용자가 이미 좋아요를 누른 경우를 분별하는 함수
-    bool isLiked( AsyncSnapshot<QuerySnapshot> snapshot){
+    bool isLiked(AsyncSnapshot<QuerySnapshot> snapshot) {
       var isLikeCheck = false;
       snapshot.data.docs.forEach((document) {
-        if (document['uid'] == userId){
+        if (document['uid'] == userId) {
           isLikeCheck = true;
         }
       });
 
-      if(isLikeCheck){
+      if (isLikeCheck) {
         print('isLiked에서 좋아요는 지금 true 상태!!');
-      } else{
+      } else {
         print('isLiked에서 좋아요는 지금 false 상태ㅠㅠ');
       }
 
@@ -349,8 +354,8 @@ class _DetailPageState extends State<DetailPage> {
     /// 좋아요 취소기능
     Future<void> deleteLike(userId) async {
       try {
-        for (var eachLike in context.read<ApplicationState>().likeList){
-          if(eachLike.uid == userId){
+        for (var eachLike in context.read<ApplicationState>().likeList) {
+          if (eachLike.uid == userId) {
             await likes
                 .doc(eachLike.id)
                 .delete()
@@ -390,7 +395,6 @@ class _DetailPageState extends State<DetailPage> {
         'userName': FirebaseAuth.instance.currentUser.displayName,
         'comment': comment,
         'created': FieldValue.serverTimestamp(),
-        'nickName': nickName,
       })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
@@ -411,7 +415,7 @@ class _DetailPageState extends State<DetailPage> {
                       children: [
                         /// MultiImage를 보여주는 Carousel 위젯 부분
                         FutureBuilder(
-                          future: future,
+                          future: makeUrlList(),
                           builder: (context, snapshot) {
                             /// 시진 로딩중일 때
                             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -897,38 +901,70 @@ class _DetailPageState extends State<DetailPage> {
                                 )
                             ),
                           ),
-                          SizedBox(width: 3),
-                          StreamBuilder<QuerySnapshot>(
-                              stream: users.snapshots(),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                                if (snapshot.hasError) {
-                                  return Text('x');
-                                }
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Text('');
-                                }
-                                var nickName = findNickname(snapshot);
-                                return IconButton(
-                                  icon: const Icon(Icons.send_outlined),
-                                  iconSize: 27,
-                                  color: Color(0xffc32323),
-                                  onPressed: () async {
-                                    var currentFocus = FocusScope.of(context);
-                                    currentFocus.unfocus();
-                                    if (_commentFormKey.currentState.validate()) {
-                                      await addComments(_commentController.text, nickName)
-                                          .then((value) => print('add comment ok!'));
-                                      _commentController.clear();
-                                      products = detailGiveOrTake == 'giveProducts'
-                                          ? context.read<ApplicationState>().giveProducts
-                                          : context.read<ApplicationState>().takeProducts;
-                                      print('clear!');
+                          /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
+                          /*Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
+                                  child: TextField(
+                                    controller: _commentController,
+                                    decoration: const InputDecoration(
+                                      focusedBorder: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      errorBorder: InputBorder.none,
+                                      disabledBorder: InputBorder.none,
+                                      hintText: '댓글을 입력하세요',
+                                    ),
+                                    onSubmitted: (value) {
+                                      //if (value == null || value.isEmpty) {
+                                        //return '댓글을 입력하세요';
+                                      //}
+                                      //return null;
+                                    },
+                                    onChanged: (value) {
+                                      changeTextField.add(value);
                                     }
-                                  },
-                                );
-                              }),
+                                  ),
+                                )
+                            ),*/
+                          SizedBox(width: 3),
+                          IconButton(
+                            icon: const Icon(Icons.send_outlined),
+                            iconSize: 27,
+                            color: Color(0xffc32323),
+                            onPressed: () async {
+                              var currentFocus = FocusScope.of(context);
+                              currentFocus.unfocus();
+                              if (_commentFormKey.currentState.validate()) {
+                                await addComments(_commentController.text)
+                                    .then((value) => print('add comment ok!'));
+                                _commentController.clear();
+                                products = detailGiveOrTake == 'giveProducts'
+                                    ? context.read<ApplicationState>().giveProducts
+                                    : context.read<ApplicationState>().takeProducts;
+                                print('clear!');
+                              }
+                            },
+                          ),
+                          /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
+                          /*StreamBuilder(
+                            stream: changeTextField.stream,
+                            builder: (context, snapshot) {
+                              return IconButton(
+                                icon: const Icon(Icons.send_outlined),
+                                iconSize: 27,
+                                color: Color(0xffc32323),
+                                onPressed: ()  {
+                                  _commentController.clear();
+                                  currentFocus.unfocus();
+                                  addComments(snapshot.data)
+                                      .then((value) {
+                                        context.read<ApplicationState>().init();
+                                    print('add comment ok!');
+                                  });
+                                },
+                              );
+                            }
+                          ),*/
                         ],
                       ),
                     ),

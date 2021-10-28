@@ -120,7 +120,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     floating: true,
                     expandedHeight: 108.0, // 118.0
                     iconTheme: IconThemeData(color: Colors.black),
-                    centerTitle: false,
+                    centerTitle: true,
                     title: Text(
                       'Pelag',
                       style: TextStyle(
