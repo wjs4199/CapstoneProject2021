@@ -186,8 +186,7 @@ class _CommentBookState extends State<CommentBook> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(10.0, 5, 0.0, 13),
+                            padding: const EdgeInsets.fromLTRB(10.0, 5, 0.0, 13),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
@@ -242,18 +241,27 @@ class _CommentBookState extends State<CommentBook> {
                                       SizedBox(width: 10),
                                     ]))
                               ],
-                            )),
+                            )
+                        ),
                         Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              SizedBox(width: 10.0),
-                              RichText(
-                                  text: TextSpan(
-                                      style: DefaultTextStyle.of(context).style,
-                                      children: <TextSpan>[
-                                    TextSpan(text: eachComment.comment + '\n'),
-                                  ])),
-                            ]),
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  SizedBox(width: 11.0),
+                                  Container(
+                                    width: MediaQuery.of(context).size.width - 36,
+                                    child: RichText(
+                                        maxLines: 30,
+                                        text: TextSpan(
+                                            style: TextStyle(fontSize: 16.5, color: Colors.black,),
+                                            children: <TextSpan>[
+                                              TextSpan(text: eachComment.comment + '\n'),
+                                            ])
+                                    ),
+                                  ),
+                                  SizedBox(width: 9.0),
+                                ]
+                        ),
+
                         Padding(
                           padding: const EdgeInsets.fromLTRB(11, 0, 11, 0),
                           child: Divider(thickness: 1.0),
