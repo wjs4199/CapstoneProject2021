@@ -47,11 +47,11 @@ class _CommentBookState extends State<CommentBook> {
   }
 
   /// Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
-  StreamController<String> commentSetStream = StreamController<String>.broadcast();
+  StreamController<String> commentSetStream =
+      StreamController<String>.broadcast();
 
   @override
   Widget build(BuildContext context) {
-
     ///******** comment 의 추가/삭제에 따라 Firebase 와 연동시키기 위해 필요한 변수/함수 ********///
 
     /// comment 가 어느 게시물 밑에 달린 것인지 알기 위해 필요한 Product ID
@@ -265,7 +265,6 @@ class _CommentBookState extends State<CommentBook> {
 }
 
 class CommentBoxPage extends StatefulWidget {
-
   CommentBoxPage({this.productId, this.detailGiveOrTake, this.photoNum});
 
   /// route 생성 시에 사용되는 product ID
@@ -281,9 +280,8 @@ class CommentBoxPage extends StatefulWidget {
 }
 
 class _CommentBoxState extends State<CommentBoxPage> {
-
   /// detail 페이지 실행시 인자로 전달되는 변수들
-  String productId ; // product ID
+  String productId; // product ID
   String detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
   int photoNum; // 저장된 photo 의 개수
 
@@ -292,7 +290,8 @@ class _CommentBoxState extends State<CommentBoxPage> {
     super.initState();
 
     productId = widget.productId; // product ID
-    detailGiveOrTake = widget.detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
+    detailGiveOrTake =
+        widget.detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
     photoNum = widget.photoNum; // 저장된 photo 의 개수
   }
 
@@ -300,20 +299,21 @@ class _CommentBoxState extends State<CommentBoxPage> {
   StreamController<bool> pushLikeButton = StreamController<bool>.broadcast();
 
   /// Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
-   StreamController<int> changeLikeCount = StreamController<int>.broadcast();
+  StreamController<int> changeLikeCount = StreamController<int>.broadcast();
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
-  StreamController<Icon> changeFavoriteButton = StreamController<Icon>.broadcast();
+  StreamController<Icon> changeFavoriteButton =
+      StreamController<Icon>.broadcast();
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
-  StreamController<String> changeTextField = StreamController<String>.broadcast();
+  StreamController<String> changeTextField =
+      StreamController<String>.broadcast();
 
   /// comment 를 적는 텍스트 상자의 상태를 control 할 때 사용
   final _commentController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-
     ///************ ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ************///
     /// DetailPage() 호출시 받는 매개변수 참조
     var productId = widget.productId;
@@ -325,11 +325,9 @@ class _CommentBoxState extends State<CommentBoxPage> {
         ? context.read<ApplicationState>().giveProducts
         : context.read<ApplicationState>().takeProducts;
 
-
     /// 현재 유저의 아이디와 이름 간략화
     var userId = FirebaseAuth.instance.currentUser.uid;
     var userName = FirebaseAuth.instance.currentUser.displayName;
-
 
     ///************************ like 기능 구현부분 (수정필요) ************************///
 
@@ -339,17 +337,17 @@ class _CommentBoxState extends State<CommentBoxPage> {
 
     /// 현재는 하트버튼 누르면 사용자가 이미 눌렀든 말든 간에 계속 숫자 올라감 ㅋㅎ (수정필요)
     /// 현재 사용자가 이미 좋아요를 누른 경우를 분별하는 함수
-    bool isLiked( AsyncSnapshot<QuerySnapshot> snapshot){
+    bool isLiked(AsyncSnapshot<QuerySnapshot> snapshot) {
       var isLikeCheck = false;
       snapshot.data.docs.forEach((document) {
-        if (document['uid'] == userId){
+        if (document['uid'] == userId) {
           isLikeCheck = true;
         }
       });
 
-      if(isLikeCheck){
+      if (isLikeCheck) {
         print('isLiked에서 좋아요는 지금 true 상태!!');
-      } else{
+      } else {
         print('isLiked에서 좋아요는 지금 false 상태ㅠㅠ');
       }
 
@@ -367,8 +365,8 @@ class _CommentBoxState extends State<CommentBoxPage> {
     /// 좋아요 취소기능
     Future<void> deleteLike(userId) async {
       try {
-        for (var eachLike in context.read<ApplicationState>().likeList){
-          if(eachLike.uid == userId){
+        for (var eachLike in context.read<ApplicationState>().likeList) {
+          if (eachLike.uid == userId) {
             await likes
                 .doc(eachLike.id)
                 .delete()
@@ -389,146 +387,162 @@ class _CommentBoxState extends State<CommentBoxPage> {
     Future<void> addComments(String comment) {
       return comments
           .add({
-        'userName': FirebaseAuth.instance.currentUser.displayName,
-        'comment': comment,
-        'created': FieldValue.serverTimestamp(),
-      })
+            'userName': FirebaseAuth.instance.currentUser.displayName,
+            'comment': comment,
+            'created': FieldValue.serverTimestamp(),
+          })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
     }
 
     var currentFocus = FocusScope.of(context);
     return Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height * 0.057,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Color(0xffe5e5e5),
-              boxShadow: [
-                BoxShadow(color: Color(0xffe5e5e5), spreadRadius: 2),
-              ],
-            ),
-            margin: EdgeInsets.fromLTRB(7.0, 7.0, 7.0, 0.0),
-            child: Row(
-              children: [
-                Container(
-                  width: 50,
-                  child: StreamBuilder<QuerySnapshot>(
-                      stream: likes.snapshots(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<QuerySnapshot> snapshot) {
-                        if (snapshot.hasError) {
-                          return Text('x');
-                        }
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Text('');
-                        }
-                        return StreamBuilder <Icon> (
-                            stream: changeFavoriteButton.stream,
-                            initialData: isLiked(snapshot)
-                                ? Icon(Icons.favorite,
-                              color: Colors.red,
-                              semanticLabel: 'like',
-                            )
-                                : Icon(Icons.favorite_border_outlined,
-                              color: Colors.red,
-                              semanticLabel: 'like',
-                            ),
-                            builder: (context, snapshot2) {
-                              /// changeFavoriteButton 스트림 컨트롤러에 새 데이터가 들어올때마다 부분적으로 빌드됨
-                              return IconButton(
-                                /// 아이콘의 snapshot2 => changeFavoriteButton 스트림으로 건네준 아이콘
-                                  icon: snapshot2.data,
-                                  onPressed: () async {
-                                    /// 이미 좋아요가 눌러져 있었을 떄
-                                    if(isLiked(snapshot)) {
-                                      await deleteLike(userId)
-                                          .catchError((error) => null)
-                                          .whenComplete(() {
-                                        products = detailGiveOrTake == 'giveProducts'
-                                            ? context.read<ApplicationState>().giveProducts
-                                            : context.read<ApplicationState>().takeProducts;
-                                        changeFavoriteButton.add(Icon(Icons.favorite_border_outlined,
-                                          color: Colors.red, semanticLabel: 'like',));
-                                        changeLikeCount.add(context.read<ApplicationState>().likeCount);
-                                      });
-                                    }
-                                    /// 좋아요가 눌러져 있지 않을 때
-                                    else {
-                                      await addLike()
-                                          .catchError((error) => null)
-                                          .whenComplete(() {
-                                        products = detailGiveOrTake == 'giveProducts'
-                                            ? context.read<ApplicationState>().giveProducts
-                                            : context.read<ApplicationState>().takeProducts;
-                                        changeFavoriteButton.add(Icon(Icons.favorite,
-                                          color: Colors.red, semanticLabel: 'like',));
-                                        changeLikeCount.add(context.read<ApplicationState>().likeCount);
-                                      });
-                                    }
-                                  }
-                              );
-                            }
-                        );
-                      }),
-                ),
-                Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
-                      child: TextField(
-                          controller: _commentController,
-                          decoration: const InputDecoration(
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            hintText: '댓글을 입력하세요',
-                          ),
-                          onSubmitted: (value) {
-                            //if (value == null || value.isEmpty) {
-                            //return '댓글을 입력하세요';
-                            //}
-                            //return null;
-                          },
-                          onChanged: (value) {
-                            changeTextField.add(value);
-                          }
-                      ),
-                    )
-                ),
-                SizedBox(width: 3),
-                StreamBuilder(
-                    stream: changeTextField.stream,
-                    builder: (context, snapshot) {
-                      return IconButton(
-                        icon: const Icon(Icons.send_outlined),
-                        iconSize: 27,
-                        color: Color(0xffc32323),
-                        onPressed: () async {
-                          _commentController.clear();
-                          currentFocus.unfocus();
-                          await addComments(snapshot.data)
-                              .then((value) {
-                            print(snapshot.data);
-                            print('add comment ok!');
-                            context.read<ApplicationState>().init();
-                          }). whenComplete(() => context.read<ApplicationState>().commentContext);
-                          //_commentController.clear();
-                          print('clear!');
-                        },
-                      );
-                    }
-                ),
-              ],
-            ),
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height * 0.057,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Color(0xffe5e5e5),
+            boxShadow: [
+              BoxShadow(color: Color(0xffe5e5e5), spreadRadius: 2),
+            ],
           ),
+          margin: EdgeInsets.fromLTRB(7.0, 7.0, 7.0, 0.0),
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                child: StreamBuilder<QuerySnapshot>(
+                    stream: likes.snapshots(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('x');
+                      }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Text('');
+                      }
+                      return StreamBuilder<Icon>(
+                          stream: changeFavoriteButton.stream,
+                          initialData: isLiked(snapshot)
+                              ? Icon(
+                                  Icons.favorite,
+                                  color: Colors.red,
+                                  semanticLabel: 'like',
+                                )
+                              : Icon(
+                                  Icons.favorite_border_outlined,
+                                  color: Colors.red,
+                                  semanticLabel: 'like',
+                                ),
+                          builder: (context, snapshot2) {
+                            /// changeFavoriteButton 스트림 컨트롤러에 새 데이터가 들어올때마다 부분적으로 빌드됨
+                            return IconButton(
 
-        ],
-      );
+                                /// 아이콘의 snapshot2 => changeFavoriteButton 스트림으로 건네준 아이콘
+                                icon: snapshot2.data,
+                                onPressed: () async {
+                                  /// 이미 좋아요가 눌러져 있었을 떄
+                                  if (isLiked(snapshot)) {
+                                    await deleteLike(userId)
+                                        .catchError((error) => null)
+                                        .whenComplete(() {
+                                      products =
+                                          detailGiveOrTake == 'giveProducts'
+                                              ? context
+                                                  .read<ApplicationState>()
+                                                  .giveProducts
+                                              : context
+                                                  .read<ApplicationState>()
+                                                  .takeProducts;
+                                      changeFavoriteButton.add(Icon(
+                                        Icons.favorite_border_outlined,
+                                        color: Colors.red,
+                                        semanticLabel: 'like',
+                                      ));
+                                      changeLikeCount.add(context
+                                          .read<ApplicationState>()
+                                          .likeCount);
+                                    });
+                                  }
+
+                                  /// 좋아요가 눌러져 있지 않을 때
+                                  else {
+                                    await addLike()
+                                        .catchError((error) => null)
+                                        .whenComplete(() {
+                                      products =
+                                          detailGiveOrTake == 'giveProducts'
+                                              ? context
+                                                  .read<ApplicationState>()
+                                                  .giveProducts
+                                              : context
+                                                  .read<ApplicationState>()
+                                                  .takeProducts;
+                                      changeFavoriteButton.add(Icon(
+                                        Icons.favorite,
+                                        color: Colors.red,
+                                        semanticLabel: 'like',
+                                      ));
+                                      changeLikeCount.add(context
+                                          .read<ApplicationState>()
+                                          .likeCount);
+                                    });
+                                  }
+                                });
+                          });
+                    }),
+              ),
+              Expanded(
+                  child: Padding(
+                padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
+                child: TextField(
+                    controller: _commentController,
+                    decoration: const InputDecoration(
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      hintText: '댓글을 입력하세요',
+                    ),
+                    onSubmitted: (value) {
+                      //if (value == null || value.isEmpty) {
+                      //return '댓글을 입력하세요';
+                      //}
+                      //return null;
+                    },
+                    onChanged: (value) {
+                      changeTextField.add(value);
+                    }),
+              )),
+              SizedBox(width: 3),
+              StreamBuilder(
+                  stream: changeTextField.stream,
+                  builder: (context, snapshot) {
+                    return IconButton(
+                      icon: const Icon(Icons.send_outlined),
+                      iconSize: 27,
+                      color: Color(0xffc32323),
+                      onPressed: () async {
+                        _commentController.clear();
+                        currentFocus.unfocus();
+                        await addComments(snapshot.data).then((value) {
+                          print(snapshot.data);
+                          print('add comment ok!');
+                          context.read<ApplicationState>().init();
+                        }).whenComplete(() =>
+                            context.read<ApplicationState>().commentContext);
+                        //_commentController.clear();
+                        print('clear!');
+                      },
+                    );
+                  }),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
-

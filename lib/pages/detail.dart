@@ -14,7 +14,6 @@ import 'dart:async';
 import 'home.dart';
 
 class DetailPage extends StatefulWidget {
-
   DetailPage({this.productId, this.detailGiveOrTake, this.photoNum});
 
   /// route 생성 시에 사용되는 product ID
@@ -31,9 +30,8 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-
   /// detail 페이지 실행시 인자로 전달되는 변수들
-  String productId ; // product ID
+  String productId; // product ID
   String detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
   int photoNum; // 저장된 photo 의 개수
 
@@ -42,7 +40,8 @@ class _DetailPageState extends State<DetailPage> {
     super.initState();
 
     productId = widget.productId; // product ID
-    detailGiveOrTake = widget.detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
+    detailGiveOrTake =
+        widget.detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
     photoNum = widget.photoNum; // 저장된 photo 의 개수
   }
 
@@ -54,8 +53,6 @@ class _DetailPageState extends State<DetailPage> {
 
   /// appbar 아이콘의 컬러를 사진 여부에 따라 다르게 표시하기 위해 필요한 변수
   bool appbarIconColor = false;
-
-
 
   ///************************* 사진 띄우는 부분 관련 변수/ 함수들*************************///
   /// Firebase Storage 참조 간략화
@@ -74,10 +71,12 @@ class _DetailPageState extends State<DetailPage> {
   StreamController<int> changeLikeCount = StreamController<int>.broadcast();
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
-  StreamController<Icon> changeFavoriteButton = StreamController<Icon>.broadcast();
+  StreamController<Icon> changeFavoriteButton =
+      StreamController<Icon>.broadcast();
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
-  StreamController<String> changeTextField = StreamController<String>.broadcast();
+  StreamController<String> changeTextField =
+      StreamController<String>.broadcast();
 
   /// storage 에서 다운로드한 이미지 url 들이 저장될 정적 저장소
   var imageUrlList = [];
@@ -98,16 +97,17 @@ class _DetailPageState extends State<DetailPage> {
   /// 다운로드한 url 들 중 null 이 아닌 것들만을 imageUrlList 에 저장시킨는 함수
   Future<void> makeUrlList() async {
     imageUrlList = await Future.wait([
-      downloadURL(widget.productId,0),
-      downloadURL(widget.productId,1),
-      downloadURL(widget.productId,2),
-      downloadURL(widget.productId,3),
-      downloadURL(widget.productId,4),
-      downloadURL(widget.productId,5),
-      downloadURL(widget.productId,6),
-      downloadURL(widget.productId,7),
-      downloadURL(widget.productId,8),
-      downloadURL(widget.productId,9),]);
+      downloadURL(widget.productId, 0),
+      downloadURL(widget.productId, 1),
+      downloadURL(widget.productId, 2),
+      downloadURL(widget.productId, 3),
+      downloadURL(widget.productId, 4),
+      downloadURL(widget.productId, 5),
+      downloadURL(widget.productId, 6),
+      downloadURL(widget.productId, 7),
+      downloadURL(widget.productId, 8),
+      downloadURL(widget.productId, 9),
+    ]);
 
     imageUrlList = imageUrlList.where((e) => e != null).toList();
 
@@ -127,7 +127,6 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
-
     ///************ ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ************///
     /// DetailPage() 호출시 받는 매개변수 참조
     var productId = widget.productId;
@@ -138,7 +137,6 @@ class _DetailPageState extends State<DetailPage> {
     var products = detailGiveOrTake == 'giveProducts'
         ? context.read<ApplicationState>().giveProducts
         : context.read<ApplicationState>().takeProducts;
-
 
     /// 현재 유저의 아이디와 이름 간략화
     var userId = FirebaseAuth.instance.currentUser.uid;
@@ -188,9 +186,9 @@ class _DetailPageState extends State<DetailPage> {
       try {
         print('사진 삭제 시작!');
         return await storage
-              .refFromURL(imageUrlList[num])
-              .delete()
-              .whenComplete(() => print('$num번째 사진 삭제 완료!'));
+            .refFromURL(imageUrlList[num])
+            .delete()
+            .whenComplete(() => print('$num번째 사진 삭제 완료!'));
       } on Exception {
         return null;
       }
@@ -207,21 +205,23 @@ class _DetailPageState extends State<DetailPage> {
         deleteOneImage(6),
         deleteOneImage(7),
         deleteOneImage(8),
-        deleteOneImage(9),]);
+        deleteOneImage(9),
+      ]);
     }
 
     Future<void> makeUrlList() async {
       imageUrlList = await Future.wait([
-        downloadURL(widget.productId,0),
-        downloadURL(widget.productId,1),
-        downloadURL(widget.productId,2),
-        downloadURL(widget.productId,3),
-        downloadURL(widget.productId,4),
-        downloadURL(widget.productId,5),
-        downloadURL(widget.productId,6),
-        downloadURL(widget.productId,7),
-        downloadURL(widget.productId,8),
-        downloadURL(widget.productId,9),]);
+        downloadURL(widget.productId, 0),
+        downloadURL(widget.productId, 1),
+        downloadURL(widget.productId, 2),
+        downloadURL(widget.productId, 3),
+        downloadURL(widget.productId, 4),
+        downloadURL(widget.productId, 5),
+        downloadURL(widget.productId, 6),
+        downloadURL(widget.productId, 7),
+        downloadURL(widget.productId, 8),
+        downloadURL(widget.productId, 9),
+      ]);
 
       imageUrlList = imageUrlList.where((e) => e != null).toList();
 
@@ -246,8 +246,7 @@ class _DetailPageState extends State<DetailPage> {
         DateTime.now().day,
         DateTime.now().hour,
         DateTime.now().minute,
-        DateTime.now().second
-    );
+        DateTime.now().second);
 
     /// 상품에 저장된 최근에 수정된 시간
     var productTime = DateTime(
@@ -261,14 +260,17 @@ class _DetailPageState extends State<DetailPage> {
     /// 현재시간 - 게시글 마지막 수정 시간 계산하여 내보내는 위젯
     String calculateTime() {
       var time = nowTime.difference(productTime).inDays;
+
       /// 하루가 안지났을 때
-      if(time < 1) {
+      if (time < 1) {
         time = nowTime.difference(productTime).inHours;
+
         /// 한시간도 안지났을 때
-        if(time< 1){
+        if (time < 1) {
           time = nowTime.difference(productTime).inMinutes;
+
           /// 1분도 안지났을 때
-          if(time<1){
+          if (time < 1) {
             return '방금';
           } else {
             return '$time분 전';
@@ -276,26 +278,31 @@ class _DetailPageState extends State<DetailPage> {
         } else {
           return '$time시간 전';
         }
-      } /// 7일이 안지났을 때
-      else if(time < 7) {
+      }
+
+      /// 7일이 안지났을 때
+      else if (time < 7) {
         return '$time일 전';
       }
+
       /// 일주일 이상 지났고 한달 미만의 시간이 지났을 떄
-      else if(time >= 7 && time < 30) {
+      else if (time >= 7 && time < 30) {
         time = nowTime.difference(productTime).inDays;
-        if(time < 14){
+        if (time < 14) {
           return '1주 전';
-        } else if(time < 21){
+        } else if (time < 21) {
           return '2주 전';
-        } else if(time< 28){
+        } else if (time < 28) {
           return '3주 전';
-        } else if(time< 30){
+        } else if (time < 30) {
           return '한달 전';
         }
-      } /// 한달이상 지났을 때
+      }
+
+      /// 한달이상 지났을 때
       else if (time >= 30) {
         time = nowTime.difference(productTime).inDays;
-        if(time <= 60) {
+        if (time <= 60) {
           return '한달 전';
         } else if (time <= 90) {
           return '두달 전';
@@ -316,7 +323,6 @@ class _DetailPageState extends State<DetailPage> {
       return '오래 된 글';
     }
 
-
     ///************************ like 기능 구현부분 (수정필요) ************************///
 
     /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
@@ -325,17 +331,17 @@ class _DetailPageState extends State<DetailPage> {
 
     /// 현재는 하트버튼 누르면 사용자가 이미 눌렀든 말든 간에 계속 숫자 올라감 ㅋㅎ (수정필요)
     /// 현재 사용자가 이미 좋아요를 누른 경우를 분별하는 함수
-    bool isLiked( AsyncSnapshot<QuerySnapshot> snapshot){
+    bool isLiked(AsyncSnapshot<QuerySnapshot> snapshot) {
       var isLikeCheck = false;
       snapshot.data.docs.forEach((document) {
-        if (document['uid'] == userId){
+        if (document['uid'] == userId) {
           isLikeCheck = true;
         }
       });
 
-      if(isLikeCheck){
+      if (isLikeCheck) {
         print('isLiked에서 좋아요는 지금 true 상태!!');
-      } else{
+      } else {
         print('isLiked에서 좋아요는 지금 false 상태ㅠㅠ');
       }
 
@@ -353,8 +359,8 @@ class _DetailPageState extends State<DetailPage> {
     /// 좋아요 취소기능
     Future<void> deleteLike(userId) async {
       try {
-        for (var eachLike in context.read<ApplicationState>().likeList){
-          if(eachLike.uid == userId){
+        for (var eachLike in context.read<ApplicationState>().likeList) {
+          if (eachLike.uid == userId) {
             await likes
                 .doc(eachLike.id)
                 .delete()
@@ -375,10 +381,10 @@ class _DetailPageState extends State<DetailPage> {
     Future<void> addComments(String comment) {
       return comments
           .add({
-        'userName': FirebaseAuth.instance.currentUser.displayName,
-        'comment': comment,
-        'created': FieldValue.serverTimestamp(),
-      })
+            'userName': FirebaseAuth.instance.currentUser.displayName,
+            'comment': comment,
+            'created': FieldValue.serverTimestamp(),
+          })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
     }
@@ -387,573 +393,664 @@ class _DetailPageState extends State<DetailPage> {
 
     /// Add 페이지 화면 구성
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
-          child: Stack(
-            children: [
-              ListView(
-                  children: [
-                    Stack(
-                      children: [
-                        /// MultiImage를 보여주는 Carousel 위젯 부분
-                        FutureBuilder(
-                          future: makeUrlList(),
-                          builder: (context, snapshot) {
-                            /// 시진 로딩중일 때
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return Column(
-                                children: [
-                                  Container(
-                                    height: MediaQuery.of(context).size.height * 0.5,
-                                    width: MediaQuery.of(context).size.width,
-                                    child: Center(child: CircularProgressIndicator()),
-                                  )
-                                ],
-                              );
-                            }
-                            /// 사진 로딩 후
-                            else {
-                              return Stack(
-                                children: [
-                                  /// imageUrlList 데이터가 있으면 CarouselSlider보여줌
-                                  if(imageUrlList.isNotEmpty)
-                                    Stack(
+        child: NestedScrollView(
+          physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics()),
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverAppBar(
+                expandedHeight: MediaQuery.of(context).size.height * 0.5,
+                backgroundColor: Colors.white,
+                iconTheme: IconThemeData(
+                  // color: Colors.black,
+                  opacity: 100,
+                ),
+                pinned: true, // true 처리 시 스크롤을 내려도 appbar 가 작게 보임
+                floating: false, // true 처리 시 스크롤을 내릴때 appbar 가 보임
+                snap: false, // true 처리 시 스크롤 살짝 내리면 appbar 가 전부 보임
+                stretch: false,
+                // onStretchTrigger: () {
+                //   // Function callback for stretch
+                //   return Future<void>.value();
+                // },
+                flexibleSpace: FlexibleSpaceBar(
+                  collapseMode: CollapseMode.pin,
+                  // stretchModes: const <StretchMode>[
+                  //   StretchMode.zoomBackground,
+                  //   StretchMode.blurBackground,
+                  //   StretchMode.fadeTitle,
+                  // ],
+                  background: FutureBuilder(
+                    future: makeUrlList(),
+                    builder: (context, snapshot) {
+                      /// 시진 로딩중일 때
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Column(
+                          children: [
+                            Container(
+                              height: MediaQuery.of(context).size.height * 0.5,
+                              width: MediaQuery.of(context).size.width,
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          ],
+                        );
+                      }
+
+                      /// 사진 로딩 후
+                      else {
+                        if (imageUrlList.isNotEmpty) {
+                          return Stack(
+                            children: [
+                              Container(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.5,
+                                width: MediaQuery.of(context).size.width,
+                                // color: Color(0xffced3d0),
+                              ),
+                              CarouselSlider(
+                                carouselController: carouselController,
+                                options: CarouselOptions(
+                                    autoPlay: false,
+                                    enlargeCenterPage: false,
+                                    viewportFraction: 1.0,
+                                    aspectRatio: 1.0,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.5,
+                                    initialPage: 0,
+                                    onPageChanged: (index, reason) {
+                                      carouselIndexChange.add(index);
+                                    }),
+                                items: imageUrlList.map<Widget>((item) {
+                                  return Image.network(
+                                    item,
+                                    fit: BoxFit.cover,
+                                  );
+                                }).toList(),
+                              ),
+
+                              /// 사진 밑의 dot Row
+                              StreamBuilder<int>(
+                                  stream: carouselIndexChange.stream,
+                                  initialData: 0,
+                                  builder: (context, snapshot) {
+                                    return Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: [
-                                        Container(
-                                          height: MediaQuery.of(context).size.height * 0.5,
-                                          width: MediaQuery.of(context).size.width,
-                                          color: Color(0xffced3d0),
+                                        SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.46,
                                         ),
-                                        CarouselSlider(
-                                          carouselController: carouselController,
-                                          options: CarouselOptions(
-                                              autoPlay: false,
-                                              enlargeCenterPage: false,
-                                              viewportFraction: 1.0,
-                                              aspectRatio: 1.0,
-                                              height: MediaQuery.of(context).size.height* 0.5,
-                                              initialPage: 0,
-                                              onPageChanged: (index, reason) {
-                                                carouselIndexChange.add(index);
-                                              }
-                                          ),
-                                          items: imageUrlList.map<Widget>((item) {
-                                            return Container(
-                                              child: Image.network(item,
-                                                  fit: BoxFit.cover,
-                                                  width: 1000),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: imageUrlList
+                                              .asMap()
+                                              .entries
+                                              .map<Widget>((entry) {
+                                            return GestureDetector(
+                                              onTap: () {
+                                                carouselController
+                                                    .animateToPage(entry.key);
+                                                print(
+                                                    'entry key -> ${entry.key}');
+                                              },
+                                              child: Container(
+                                                width: 8.0,
+                                                height: 8.0,
+                                                margin: EdgeInsets.symmetric(
+                                                    vertical: 8.0,
+                                                    horizontal: 4.0),
+                                                decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: (Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness.dark
+                                                            ? Colors.white
+                                                            : Colors.black)
+                                                        .withOpacity(
+                                                            snapshot.data ==
+                                                                    entry.key
+                                                                ? 1.0
+                                                                : 0.4)),
+                                              ),
                                             );
                                           }).toList(),
-                                        ),
-                                        /// 사진 밑의 dot Row
-                                        StreamBuilder<int>(
-                                            stream: carouselIndexChange.stream,
-                                            initialData: 0,
-                                            builder: (context, snapshot) {
-                                              return Column(
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                children: [
-                                                  SizedBox(height: MediaQuery.of(context).size.height* 0.46,),
-                                                  Row(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                                    children: imageUrlList.asMap().entries.map<Widget>((entry){
-                                                      return GestureDetector(
-                                                        onTap: () {
-                                                          carouselController.animateToPage(entry.key);
-                                                          print('entry key -> ${entry.key}');
-                                                        },
-                                                        child: Container(
-                                                          width: 12.0,
-                                                          height: 12.0,
-                                                          margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                                                          decoration: BoxDecoration(
-                                                              shape: BoxShape.circle,
-                                                              color: (Theme.of(context).brightness == Brightness.dark
-                                                                  ? Colors.white
-                                                                  : Colors.black)
-                                                                  .withOpacity(snapshot.data  == entry.key ? 1.0 : 0.4)),
-                                                        ),
-                                                      );
-                                                    }).toList(),
-                                                  )
-                                                ],
-                                              );
-                                            }),
+                                        )
                                       ],
-                                    )
-                                  /// imageUrlList 데이터가 없으면 사진란 아예 없앰
-                                  else
-                                    Container(
-                                      height: 50,
-                                      width: MediaQuery.of(context).size.width,
-                                    ),
-                                ],
-                              );
-                            }
-                          },
+                                    );
+                                  }),
+                            ],
+                          );
+                        }
+
+                        /// imageUrlList 데이터가 없으면 사진란 아예 없앰 => 기본썸네일
+                        else {
+                          return Image.asset(
+                            'assets/no-thumbnail.jpg',
+                            fit: BoxFit.cover,
+                            height: MediaQuery.of(context).size.height * 0.5,
+                            width: MediaQuery.of(context).size.width,
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ),
+                actions: <Widget>[
+                  if (FirebaseAuth.instance.currentUser.uid == product.uid)
+                    IconButton(
+                        icon: Icon(
+                          Icons.create,
+                          semanticLabel: 'edit',
                         ),
-                        AppBar(
-                          foregroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          backgroundColor: Colors.transparent,
-                          leading: IconButton(
-                            color: appbarIconColor? Color(0xffeeeeee) : Colors.black,
-                            iconSize: 35,
-                            icon: Icon(
-                              Icons.arrow_back,
-                              semanticLabel: 'back',
-                            ),
-                            onPressed: () {
-                              // add FAB누르고 detail로 넘어갔을 때 뒤로가기 하면 FAB가 누른 그대로 있어서 pop에서 이렇게 바꿈
-                              Navigator.pushAndRemoveUntil<dynamic>(
-                                context,
-                                MaterialPageRoute<dynamic>(builder: (context) => HomePage(),),
-                                    (Route<dynamic> route) => false,
-                              );
-                              //Navigator.pop(context);
-                            },
-                          ),
-                          actions: <Widget>[
-                            if (FirebaseAuth.instance.currentUser.uid == product.uid)
-                              IconButton(
-                                  iconSize: 30,
-                                  icon: Icon(
-                                    Icons.create,
-                                    semanticLabel: 'edit',
-                                    color: Color(0xffeeeeee),
-                                  ),
-                                  onPressed:
-                                  (FirebaseAuth.instance.currentUser.uid == product.uid)
-                                      ? () => Navigator.pushNamed(
-                                    context,
-                                    '/edit/' + productId + '/' + detailGiveOrTake,
-                                  )
-                                      : null),
-                            if (FirebaseAuth.instance.currentUser.uid == product.uid)
-                              IconButton(
-                                  color: Color(0xffeeeeee),
-                                  iconSize: 30,
-                                  icon: Icon(
-                                    Icons.delete,
-                                    semanticLabel: 'delete',
-                                  ),
-                                  onPressed: (FirebaseAuth.instance.currentUser.uid ==
-                                      product.uid)
-                                      ? () => showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) => CupertinoAlertDialog(
-                                        title: Text('게시글 삭제'),
-                                        content: Text(
-                                            '정말 이 게시글을 삭제하시겠습니까?'),
-                                        actions: <Widget>[
-                                          CupertinoDialogAction(
-                                            isDefaultAction: true,
+                        onPressed: (FirebaseAuth.instance.currentUser.uid ==
+                                product.uid)
+                            ? () => Navigator.pushNamed(
+                                  context,
+                                  '/edit/' + productId + '/' + detailGiveOrTake,
+                                )
+                            : null),
+                  if (FirebaseAuth.instance.currentUser.uid == product.uid)
+                    IconButton(
+                        icon: Icon(
+                          Icons.delete,
+                          semanticLabel: 'delete',
+                        ),
+                        onPressed: (FirebaseAuth.instance.currentUser.uid ==
+                                product.uid)
+                            ? () => showDialog(
+                                context: context,
+                                builder: (BuildContext context) =>
+                                    CupertinoAlertDialog(
+                                      title: Text('게시글 삭제'),
+                                      content: Text('정말 이 게시글을 삭제하시겠습니까?'),
+                                      actions: <Widget>[
+                                        CupertinoDialogAction(
+                                          isDefaultAction: true,
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text('아니오'),
+                                        ),
+                                        Consumer<ApplicationState>(
+                                          builder: (context, appState, _) =>
+                                              CupertinoDialogAction(
                                             onPressed: () {
                                               Navigator.pop(context);
+                                              deleteProduct()
+                                                  .then((value) =>
+                                                      appState.init())
+                                                  .catchError((error) => null)
+                                                  .whenComplete(() {
+                                                Navigator.pop(context);
+                                                deleteImages();
+                                              });
                                             },
-                                            child: Text('아니오'),
+                                            child: Text('네'),
                                           ),
-                                          Consumer<ApplicationState>(
-                                            builder: (context, appState, _) =>
-                                                CupertinoDialogAction(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                    deleteProduct()
-                                                        .then((value) => appState.init())
-                                                        .catchError((error) => null)
-                                                        .whenComplete(() {
-                                                          Navigator.pop(context);
-                                                          deleteImages();
-                                                        });
-                                                  },
-                                                  child: Text('네'),
-                                                ),
-                                          )
-                                        ],
-                                      ))
-                                      : null)
-                          ],
-                        ),
-                      ],
-                    ),
-                    /// 사진 밑의 게시글 내용들
-                    Row(
-                      children: [
-                        SizedBox(width: 20),
-                        Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 20.0),
-                                /// 게시자 사진, 이름 , 시간
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    /// 게시자 사진
-                                    SizedBox(
-                                      width: 42,
-                                      height: 42,
-                                      child: Image.asset('assets/userDefaultImage.png'),
-                                    ),
-                                    SizedBox(width: 10.0),
-                                    SizedBox(
+                                        )
+                                      ],
+                                    ))
+                            : null)
+                ],
+              ),
+            ];
+          },
+          body: SingleChildScrollView(
+            child: Container(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      SizedBox(width: 20),
+                      Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 20.0),
+
+                              /// 게시자 사진, 이름 , 시간
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  /// 게시자 사진
+                                  SizedBox(
+                                    width: 42,
+                                    height: 42,
+                                    child: Image.asset(
+                                        'assets/userDefaultImage.png'),
+                                  ),
+                                  SizedBox(width: 10.0),
+                                  SizedBox(
                                       height: 42,
                                       child:
-                                      /// 이름과 시간
-                                      Column(
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  SizedBox(height: 2,),
-                                                  /// 이름
-                                                  SizedBox(
-                                                    //width: 10,
-                                                    height: 18,
-                                                    child: Text(
-                                                      '${product.nickname}\n',
-                                                      style: TextStyle(
-                                                        fontFamily: 'Roboto_Bold',
-                                                        color: Colors.black,
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 15,
-                                                        height: 1,
-                                                      ),
+
+                                          /// 이름과 시간
+                                          Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                            SizedBox(
+                                              height: 2,
+                                            ),
+
+                                            /// 이름
+                                            SizedBox(
+                                              //width: 10,
+                                              height: 18,
+                                              child: Text(
+                                                '${product.nickname}\n',
+                                                style: TextStyle(
+                                                  fontFamily: 'Roboto_Bold',
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 15,
+                                                  height: 1,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              //width: 10,
+                                              height: 22,
+                                              child: TextButton(
+                                                  style: TextButton.styleFrom(
+                                                    padding: EdgeInsets.zero,
+                                                    alignment:
+                                                        Alignment.centerLeft,
+                                                    primary: Colors.grey,
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    textStyle: TextStyle(
+                                                      fontFamily: 'Roboto_Bold',
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 12.5,
+                                                      height: 1.2,
                                                     ),
                                                   ),
-                                                  SizedBox(
-                                                    //width: 10,
-                                                    height: 22,
-                                                    child: TextButton(
-                                                        style: TextButton.styleFrom(
-                                                          padding: EdgeInsets.zero,
-                                                          alignment: Alignment.centerLeft,
-                                                          primary: Colors.grey,
-                                                          backgroundColor: Colors.transparent,
-                                                          textStyle: TextStyle(
-                                                            fontFamily: 'Roboto_Bold',
-                                                            fontWeight: FontWeight.bold,
-                                                            fontSize: 12.5,
-                                                            height: 1.2,
+                                                  onPressed: () {
+                                                    if (FirebaseAuth.instance
+                                                            .currentUser.uid ==
+                                                        product.uid) {
+                                                    } else {
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              Chat(
+                                                            peerId: product.uid,
+                                                            peerAvatar: product
+                                                                .user_photoURL,
+                                                            peerName: product
+                                                                .nickname,
+                                                            myName: FirebaseAuth
+                                                                .instance
+                                                                .currentUser
+                                                                .displayName,
+                                                            myAvatar:
+                                                                FirebaseAuth
+                                                                    .instance
+                                                                    .currentUser
+                                                                    .photoURL,
                                                           ),
                                                         ),
-                                                        onPressed: () {
-
-                                                          if(FirebaseAuth.instance.currentUser.uid == product.uid) {
-
-                                                          }
-                                                          else{
-                                                            Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                builder: (context) => Chat(
-                                                                  peerId: product.uid,
-                                                                  peerAvatar: product.user_photoURL,
-                                                                  peerName : product.nickname,
-                                                                  myName: FirebaseAuth.instance.currentUser.displayName,
-                                                                  myAvatar: FirebaseAuth.instance.currentUser.photoURL,
-
-                                                                ),
-                                                              ),
-                                                            );
-                                                          }
-
-                                                        },
-                                                        child: Row(
-                                                          mainAxisAlignment: MainAxisAlignment.start,
-                                                          children: [
-                                                            Text(' 채팅하기',
-                                                              textAlign: TextAlign.left,
-                                                            ),
-                                                            Icon(Icons.chat, size: 13.5,),
-                                                          ],
-                                                        )
-                                                    ),
-                                                  )
-                                                ]
+                                                      );
+                                                    }
+                                                  },
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        ' 채팅하기',
+                                                        textAlign:
+                                                            TextAlign.left,
+                                                      ),
+                                                      Icon(
+                                                        Icons.chat,
+                                                        size: 13.5,
+                                                      ),
+                                                    ],
+                                                  )),
                                             )
-                                    )
-                                  ],
-                                ),
-                                SizedBox(height: 9.0),
-                                Divider(thickness: 1.0),
-                                SizedBox(height: 9.0),
-                                Row(
-                                  children: [
-                                    RichText(
-                                      text: TextSpan(
-                                          style: TextStyle(
-                                            fontFamily: 'Roboto_Black',
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold,
+                                          ]))
+                                ],
+                              ),
+                              SizedBox(height: 9.0),
+                              Divider(thickness: 1.0),
+                              SizedBox(height: 9.0),
+                              Row(
+                                children: [
+                                  RichText(
+                                    text: TextSpan(
+                                        style: TextStyle(
+                                          fontFamily: 'Roboto_Black',
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        children: <TextSpan>[
+                                          TextSpan(
+                                            text: '${product.title}\n',
+                                            style: TextStyle(
+                                              fontFamily: 'Roboto_Bold',
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 22,
+                                              height: 1,
+                                            ),
                                           ),
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                              text: '${product.title}\n',
-                                              style: TextStyle(
-                                                fontFamily: 'Roboto_Bold',
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 22,
-                                                height: 1,
-                                              ),
-                                            ),
-                                            TextSpan(
-                                              text: '${product.category} · ${calculateTime()}\n\n',
-                                              style: TextStyle(
-                                                fontFamily: 'Roboto_Bold',
-                                                color: Colors.grey,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                                height: 1.6,
-                                              ),
-                                            ),
-                                          ]
-                                      ),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ],
-                                ),
-                                /// 게시글 내용
-                                Text(
-                                  product.content ?? product.content,
-                                  style: TextStyle(
-                                    fontFamily: 'Roboto_Bold',
-                                    color: Colors.black,
-                                    //fontWeight: FontWeight.bold,
-                                    fontSize: 17,
-                                    height: 1.5,
-                                  ),
-                                ),
-                                StreamBuilder<QuerySnapshot>(
-                                  stream: likes.snapshots().asBroadcastStream(),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<QuerySnapshot> snapshot) {
-                                    if (snapshot.hasError) {
-                                      return Text('x',style: TextStyle(fontSize: 13, height: 1,));
-                                    }
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return Text('',style: TextStyle(fontSize: 13, height: 1,));
-                                    }
-                                    var count = snapshot.data.size;
-                                    return StreamBuilder<int>(
-                                        stream: changeLikeCount.stream.asBroadcastStream(),
-                                        initialData: count,
-                                        builder: (context, snapshot2) {
-                                          return Text(
-                                            '\n\n조회 ${product.hits}회 · 좋아요 ${snapshot2.data}회',
+                                          TextSpan(
+                                            text:
+                                                '${product.category} · ${calculateTime()}\n\n',
                                             style: TextStyle(
                                               fontFamily: 'Roboto_Bold',
                                               color: Colors.grey,
-                                              //fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                              height: 1,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              height: 1.6,
                                             ),
-                                          );
-                                        }
-                                    );
-                                  },
+                                          ),
+                                        ]),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                ],
+                              ),
+
+                              /// 게시글 내용
+                              Text(
+                                product.content ?? product.content,
+                                style: TextStyle(
+                                  fontFamily: 'Roboto_Bold',
+                                  color: Colors.black,
+                                  //fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                  height: 1.5,
                                 ),
-                                SizedBox(height: 9.0),
-                                Divider(thickness: 1.0),
-                              ]),
-                        ),
-                        SizedBox(width: 20),
-                      ],
-                    ),
-                    /// 게시물 내용 아래 댓글들
-                    Container(
-                        padding: const EdgeInsets.all(8.0),
-                        child: CommentBook(
-                          detailGiveOrTake: detailGiveOrTake,
-                          productId: productId,
-                        )
-                    ),
-                    // 고정된 댓글 창과 겹치지 않게하는 sizedbox
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.038,
-                    )
-                  ]
-              ),
-              /// 고정된 댓글 창 위젯
-              Container(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height * 0.057,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Color(0xffe5e5e5),
-                        boxShadow: [
-                          BoxShadow(color: Color(0xffe5e5e5), spreadRadius: 2),
-                        ],
-                      ),
-                      margin: EdgeInsets.fromLTRB(7.0, 7.0, 7.0, 0.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 50,
-                            child: StreamBuilder<QuerySnapshot>(
-                                stream: likes.snapshots(),
+                              ),
+                              StreamBuilder<QuerySnapshot>(
+                                stream: likes.snapshots().asBroadcastStream(),
                                 builder: (BuildContext context,
                                     AsyncSnapshot<QuerySnapshot> snapshot) {
                                   if (snapshot.hasError) {
-                                    return Text('x');
+                                    return Text('x',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          height: 1,
+                                        ));
                                   }
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {
-                                    return Text('');
+                                    return Text('',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          height: 1,
+                                        ));
                                   }
-                                  return StreamBuilder <Icon> (
-                                      stream: changeFavoriteButton.stream,
-                                      initialData: isLiked(snapshot)
-                                          ? Icon(Icons.favorite,
-                                        color: Colors.red,
-                                        semanticLabel: 'like',
-                                      )
-                                          : Icon(Icons.favorite_border_outlined,
-                                        color: Colors.red,
-                                        semanticLabel: 'like',
-                                      ),
+                                  var count = snapshot.data.size;
+                                  return StreamBuilder<int>(
+                                      stream: changeLikeCount.stream
+                                          .asBroadcastStream(),
+                                      initialData: count,
                                       builder: (context, snapshot2) {
-                                        /// changeFavoriteButton 스트림 컨트롤러에 새 데이터가 들어올때마다 부분적으로 빌드됨
-                                        return IconButton(
-                                          /// 아이콘의 snapshot2 => changeFavoriteButton 스트림으로 건네준 아이콘
-                                            icon: snapshot2.data,
-                                            onPressed: () async {
-                                              /// 이미 좋아요가 눌러져 있었을 떄
-                                              if(isLiked(snapshot)) {
-                                                await deleteLike(userId)
-                                                    .catchError((error) => null)
-                                                    .whenComplete(() {
-                                                  products = detailGiveOrTake == 'giveProducts'
-                                                      ? context.read<ApplicationState>().giveProducts
-                                                      : context.read<ApplicationState>().takeProducts;
-                                                  changeFavoriteButton.add(Icon(Icons.favorite_border_outlined,
-                                                    color: Colors.red, semanticLabel: 'like',));
-                                                  changeLikeCount.add(context.read<ApplicationState>().likeCount);
-                                                });
-                                              }
-                                              /// 좋아요가 눌러져 있지 않을 때
-                                              else {
-                                                await addLike()
-                                                    .catchError((error) => null)
-                                                    .whenComplete(() {
-                                                  products = detailGiveOrTake == 'giveProducts'
-                                                      ? context.read<ApplicationState>().giveProducts
-                                                      : context.read<ApplicationState>().takeProducts;
-                                                  changeFavoriteButton.add(Icon(Icons.favorite,
-                                                    color: Colors.red, semanticLabel: 'like',));
-                                                  changeLikeCount.add(context.read<ApplicationState>().likeCount);
-                                                });
-                                              }
-                                            }
+                                        return Text(
+                                          '\n\n조회 ${product.hits}회 · 좋아요 ${snapshot2.data}회',
+                                          style: TextStyle(
+                                            fontFamily: 'Roboto_Bold',
+                                            color: Colors.grey,
+                                            //fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                            height: 1,
+                                          ),
                                         );
-                                      }
-                                  );
-                                }),
-                          ),
-                          Form(
-                            key: _commentFormKey,
-                            child: Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
-                                  child: TextFormField(
-                                    controller: _commentController,
-                                    decoration: const InputDecoration(
-                                      focusedBorder: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                      errorBorder: InputBorder.none,
-                                      disabledBorder: InputBorder.none,
-                                      hintText: '댓글을 입력하세요',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return '댓글을 입력하세요';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                )
-                            ),
-                          ),
-                          /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
-                          /*Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
-                                  child: TextField(
-                                    controller: _commentController,
-                                    decoration: const InputDecoration(
-                                      focusedBorder: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                      errorBorder: InputBorder.none,
-                                      disabledBorder: InputBorder.none,
-                                      hintText: '댓글을 입력하세요',
-                                    ),
-                                    onSubmitted: (value) {
-                                      //if (value == null || value.isEmpty) {
-                                        //return '댓글을 입력하세요';
-                                      //}
-                                      //return null;
-                                    },
-                                    onChanged: (value) {
-                                      changeTextField.add(value);
-                                    }
-                                  ),
-                                )
-                            ),*/
-                          SizedBox(width: 3),
-                          IconButton(
-                            icon: const Icon(Icons.send_outlined),
-                            iconSize: 27,
-                            color: Color(0xffc32323),
-                            onPressed: () async {
-                              var currentFocus = FocusScope.of(context);
-                              currentFocus.unfocus();
-                              if (_commentFormKey.currentState.validate()) {
-                                await addComments(_commentController.text)
-                                    .then((value) => print('add comment ok!'));
-                                _commentController.clear();
-                                products = detailGiveOrTake == 'giveProducts'
-                                    ? context.read<ApplicationState>().giveProducts
-                                    : context.read<ApplicationState>().takeProducts;
-                                print('clear!');
-                              }
-                            },
-                          ),
-                          /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
-                          /*StreamBuilder(
-                            stream: changeTextField.stream,
-                            builder: (context, snapshot) {
-                              return IconButton(
-                                icon: const Icon(Icons.send_outlined),
-                                iconSize: 27,
-                                color: Color(0xffc32323),
-                                onPressed: ()  {
-                                  _commentController.clear();
-                                  currentFocus.unfocus();
-                                  addComments(snapshot.data)
-                                      .then((value) {
-                                        context.read<ApplicationState>().init();
-                                    print('add comment ok!');
-                                  });
+                                      });
                                 },
-                              );
-                            }
-                          ),*/
-                        ],
+                              ),
+                              SizedBox(height: 9.0),
+                              Divider(thickness: 1.0),
+                            ]),
                       ),
-                    ),
-                  ],
-                ),
+                      SizedBox(width: 20),
+                    ],
+                  ),
+
+                  /// 게시물 내용 아래 댓글들
+                  Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CommentBook(
+                        detailGiveOrTake: detailGiveOrTake,
+                        productId: productId,
+                      )),
+
+                  /// 고정된 댓글 창과 겹치지 않게하는 sizedbox
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.038,
+                  ),
+                ],
               ),
+            ),
+          ),
+        ),
+
+        /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
+        // StreamBuilder(
+        //     stream: changeTextField.stream,
+        //     builder: (context, snapshot) {
+        //       return IconButton(
+        //         icon: const Icon(Icons.send_outlined),
+        //         iconSize: 27,
+        //         color: Color(0xffc32323),
+        //         onPressed: ()  {
+        //           _commentController.clear();
+        //           currentFocus.unfocus();
+        //           addComments(snapshot.data)
+        //               .then((value) {
+        //             context.read<ApplicationState>().init();
+        //             print('add comment ok!');
+        //           });
+        //         },
+        //       );
+        //     }
+        // ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height * 0.057,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Color(0xffe5e5e5),
+            boxShadow: [
+              BoxShadow(color: Color(0xffe5e5e5), spreadRadius: 2),
             ],
-          )
+          ),
+          margin: EdgeInsets.fromLTRB(7.0, 7.0, 7.0, 0.0),
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                child: StreamBuilder<QuerySnapshot>(
+                    stream: likes.snapshots(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('x');
+                      }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Text('');
+                      }
+                      return StreamBuilder<Icon>(
+                          stream: changeFavoriteButton.stream,
+                          initialData: isLiked(snapshot)
+                              ? Icon(
+                                  Icons.favorite,
+                                  color: Theme.of(context).primaryColor,
+                                  semanticLabel: 'like',
+                                )
+                              : Icon(
+                                  Icons.favorite_border_outlined,
+                                  color: Theme.of(context).primaryColor,
+                                  semanticLabel: 'like',
+                                ),
+                          builder: (context, snapshot2) {
+                            /// changeFavoriteButton 스트림 컨트롤러에 새 데이터가 들어올때마다 부분적으로 빌드됨
+                            return IconButton(
+
+                                /// 아이콘의 snapshot2 => changeFavoriteButton 스트림으로 건네준 아이콘
+                                icon: snapshot2.data,
+                                onPressed: () async {
+                                  /// 이미 좋아요가 눌러져 있었을 떄
+                                  if (isLiked(snapshot)) {
+                                    await deleteLike(userId)
+                                        .catchError((error) => null)
+                                        .whenComplete(() {
+                                      products =
+                                          detailGiveOrTake == 'giveProducts'
+                                              ? context
+                                                  .read<ApplicationState>()
+                                                  .giveProducts
+                                              : context
+                                                  .read<ApplicationState>()
+                                                  .takeProducts;
+                                      changeFavoriteButton.add(Icon(
+                                        Icons.favorite_border_outlined,
+                                        color: Theme.of(context).primaryColor,
+                                        semanticLabel: 'like',
+                                      ));
+                                      changeLikeCount.add(context
+                                          .read<ApplicationState>()
+                                          .likeCount);
+                                    });
+                                  }
+
+                                  /// 좋아요가 눌러져 있지 않을 때
+                                  else {
+                                    await addLike()
+                                        .catchError((error) => null)
+                                        .whenComplete(() {
+                                      products =
+                                          detailGiveOrTake == 'giveProducts'
+                                              ? context
+                                                  .read<ApplicationState>()
+                                                  .giveProducts
+                                              : context
+                                                  .read<ApplicationState>()
+                                                  .takeProducts;
+                                      changeFavoriteButton.add(Icon(
+                                        Icons.favorite,
+                                        color: Theme.of(context).primaryColor,
+                                        semanticLabel: 'like',
+                                      ));
+                                      changeLikeCount.add(context
+                                          .read<ApplicationState>()
+                                          .likeCount);
+                                    });
+                                  }
+                                });
+                          });
+                    }),
+              ),
+              Form(
+                key: _commentFormKey,
+                child: Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
+                  child: TextFormField(
+                    controller: _commentController,
+                    decoration: const InputDecoration(
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      hintText: '댓글을 입력하세요',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '댓글을 입력하세요';
+                      }
+                      return null;
+                    },
+                  ),
+                )),
+              ),
+
+              /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
+              /*Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
+                                      child: TextField(
+                                        controller: _commentController,
+                                        decoration: const InputDecoration(
+                                          focusedBorder: InputBorder.none,
+                                          enabledBorder: InputBorder.none,
+                                          errorBorder: InputBorder.none,
+                                          disabledBorder: InputBorder.none,
+                                          hintText: '댓글을 입력하세요',
+                                        ),
+                                        onSubmitted: (value) {
+                                          //if (value == null || value.isEmpty) {
+                                            //return '댓글을 입력하세요';
+                                          //}
+                                          //return null;
+                                        },
+                                        onChanged: (value) {
+                                          changeTextField.add(value);
+                                        }
+                                      ),
+                                    )
+                                ),*/
+              SizedBox(width: 3),
+              IconButton(
+                icon: const Icon(Icons.send_outlined),
+                iconSize: 27,
+                color: Theme.of(context).primaryColor,
+                onPressed: () async {
+                  var currentFocus = FocusScope.of(context);
+                  currentFocus.unfocus();
+                  if (_commentFormKey.currentState.validate()) {
+                    await addComments(_commentController.text)
+                        .then((value) => print('add comment ok!'));
+                    _commentController.clear();
+                    products = detailGiveOrTake == 'giveProducts'
+                        ? context.read<ApplicationState>().giveProducts
+                        : context.read<ApplicationState>().takeProducts;
+                    print('clear!');
+                  }
+                },
+              ),
+
+              /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
+              /*StreamBuilder(
+                                stream: changeTextField.stream,
+                                builder: (context, snapshot) {
+                                  return IconButton(
+                                    icon: const Icon(Icons.send_outlined),
+                                    iconSize: 27,
+                                    color: Color(0xffc32323),
+                                    onPressed: ()  {
+                                      _commentController.clear();
+                                      currentFocus.unfocus();
+                                      addComments(snapshot.data)
+                                          .then((value) {
+                                            context.read<ApplicationState>().init();
+                                        print('add comment ok!');
+                                      });
+                                    },
+                                  );
+                                }
+                              ),*/
+            ],
+          ),
+        ),
       ),
     );
   }
