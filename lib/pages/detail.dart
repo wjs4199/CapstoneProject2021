@@ -11,7 +11,6 @@ import '../main.dart';
 import '../pages/comment.dart';
 import 'dart:async';
 
-import 'home.dart';
 
 class DetailPage extends StatefulWidget {
   DetailPage({this.productId, this.detailGiveOrTake, this.photoNum});
@@ -34,6 +33,9 @@ class _DetailPageState extends State<DetailPage> {
   String productId; // product ID
   String detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
   int photoNum; // 저장된 photo 의 개수
+  var currentUserId = FirebaseAuth.instance.currentUser.uid;
+  var name = ''; // myNickname 저장소
+  var nickname = ''; //myNickname 임시저장소
 
   @override
   void initState() {
@@ -388,6 +390,18 @@ class _DetailPageState extends State<DetailPage> {
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
     }
+    _currentNickname() async {
+      await FirebaseFirestore.instance.collection('users').doc(currentUserId)
+          .get()
+          .then((DocumentSnapshot ds) {
+        name = ds['nickname'];
+        nickname = name;
+        return name;
+      });
+    }
+
+    _currentNickname();
+
 
     var currentFocus = FocusScope.of(context);
 
@@ -693,10 +707,7 @@ class _DetailPageState extends State<DetailPage> {
                                                                 .user_photoURL,
                                                             peerName: product
                                                                 .nickname,
-                                                            myName: FirebaseAuth
-                                                                .instance
-                                                                .currentUser
-                                                                .displayName,
+                                                            myName: name,
                                                             myAvatar:
                                                                 FirebaseAuth
                                                                     .instance
