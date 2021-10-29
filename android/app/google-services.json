@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "704436127190-k0dbcori4mn33suv1c7bojq3ita16cpt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.giveandtake",
+            "certificate_hash": "6e3b00aa327486eac029f3009f8fc1ee404d79b3"
+          }
+        },
+        {
           "client_id": "704436127190-uva7l64t1qtjct9u8ar1arrcpk8qa5so.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

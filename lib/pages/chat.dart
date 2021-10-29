@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:giveandtake/model/const.dart';
 import 'package:giveandtake/components/full_photo.dart';
@@ -88,6 +90,9 @@ class ChatScreenState extends State<ChatScreen> {
   final TextEditingController textEditingController = TextEditingController();
   final ScrollController listScrollController = ScrollController();
   final FocusNode focusNode = FocusNode();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+  var _flutterLocalNotificationsPlugin;
 
   _scrollListener() {
     if (listScrollController.offset >=
@@ -98,6 +103,7 @@ class ChatScreenState extends State<ChatScreen> {
       });
     }
   }
+
 
   @override
   void initState
@@ -178,6 +184,26 @@ class ChatScreenState extends State<ChatScreen> {
       await Fluttertoast.showToast(msg: e.message ?? e.toString());
     }
   }
+  Future _showNotification() async {
+    var android = AndroidNotificationDetails(
+        'your channel id', 'your channel name',
+        channelDescription: 'your channel description',
+        importance: Importance.max,
+        priority: Priority.high);
+
+    var ios = IOSNotificationDetails();
+    var detail = NotificationDetails(android: android, iOS: ios);
+
+    await _flutterLocalNotificationsPlugin.show(
+      0,
+      '새로운 메시지가 도착했습니다',
+      '메신저 텝을 눌러주세요',
+      detail,
+      payload: 'Hello Flutter',
+    );
+  }
+
+
   ///message 보내는 부분
   void onSendMessage(String content, int type) async {
     /// 보내는 메시지 type: 0 = text, 1 = image(이모티콘, local에 있는 gif_추후에 추가), 2 = sticker

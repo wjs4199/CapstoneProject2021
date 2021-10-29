@@ -16,7 +16,7 @@ class Items {
       'image': 'assets/social.png',
     },
     {
-      'title': 'Why no Change the World',
+      'title': 'Why not Change the World',
       'text': 'Why not Change the World',
       'image': 'assets/mobile.png',
     }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:giveandtake/model/welcome_item.dart';
+import 'package:giveandtake/model/manual_content.dart';
 import 'package:giveandtake/pages/home.dart';
 
 
