@@ -85,10 +85,12 @@ class _CommentBookState extends State<CommentBook> {
     }
 
     /// ToggleButtons 내의 대댓글, 좋아요, 삭제 버튼의 상태를 표시하기 위해 필요한 리스트 변수
-    var _selections = List<bool>.generate(3, (_) => false);
+    //var _selections = List<bool>.generate(3, (_) => false);
+    var _selectionsForUser = List<bool>.generate(2, (_) => false);
+    var _selectionsForOthers = List<bool>.generate(2, (_) => false);
 
     /// ToggleButtons 위젯(대댓글, 좋아요, 삭제)
-    ToggleButtons _buildCommentToggleButtons(
+    ToggleButtons _buildCommentToggleButtonsForUser(
         BuildContext context, ApplicationState appState, Comment comment) {
       return ToggleButtons(
         color: Colors.black.withOpacity(0.60),
@@ -99,10 +101,10 @@ class _CommentBookState extends State<CommentBook> {
         selectedBorderColor: Colors.cyan,
         selectedColor: Colors.cyan,
         borderRadius: BorderRadius.circular(4.0),
-        isSelected: _selections,
+        isSelected: _selectionsForUser,
         onPressed: (int index) {
           setState(() {
-            if (index == 2) {
+            if (index == 1) {
               print('push delete button!');
               print(FirebaseAuth.instance.currentUser.displayName);
               print(userName);
@@ -145,12 +147,12 @@ class _CommentBookState extends State<CommentBook> {
           });
         },
         children: [
-          Icon(
+          /*Icon(
             Icons.chat,
             size: 15,
-          ),
+          ),*/
           Icon(
-            Icons.thumb_up,
+            Icons.mode_edit,
             size: 15,
           ),
           Icon(
@@ -161,16 +163,82 @@ class _CommentBookState extends State<CommentBook> {
       );
     }
 
-    Widget returnCommentToggle(String commentNickName, String userNickName, Comment eachComment) {
-      if(commentNickName == userNickName){
-        print('commentNickName -> $commentNickName , userNickName -> $userNickName');
-        return _buildCommentToggleButtons(
-            context,
-            Provider.of<ApplicationState>(context, listen: false), eachComment
-        );
-      }
-      return null;
+    /// ToggleButtons 위젯(대댓글, 좋아요, 삭제)
+    ToggleButtons _buildCommentToggleButtonsForOthers(
+        BuildContext context, ApplicationState appState, Comment comment) {
+      return ToggleButtons(
+        color: Colors.black.withOpacity(0.60),
+        constraints: BoxConstraints(
+          minWidth: 25,
+          minHeight: 25,
+        ),
+        selectedBorderColor: Colors.cyan,
+        selectedColor: Colors.cyan,
+        borderRadius: BorderRadius.circular(4.0),
+        isSelected: _selectionsForOthers,
+        onPressed: (int index) {
+          setState(() {
+            /*if (index == 0) {
+              print('push delete button!');
+              print(FirebaseAuth.instance.currentUser.displayName);
+              print(userName);
+
+              /// 사용자가 올린 댓글만 삭제 가능하도록 사용자 이름과 댓글 기록자의 이름을 비교(닉네임 비교로 수정 필요)
+
+              if (comment.userName == userName) {
+                print('same userName');
+
+                /// 정말 삭제할 것인지 사용자에게 질문하는 알림창을 띄우는 위젯
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) => CupertinoAlertDialog(
+                      title: Text('Deleting Comment'),
+                      content: Text(
+                          'Are you sure that you want to delete this comment?'),
+                      actions: <Widget>[
+                        CupertinoDialogAction(
+                          isDefaultAction: true,
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('No'),
+                        ),
+                        CupertinoDialogAction(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            deleteComments(comment)
+                                .then((value) => appState.init())
+                                .catchError((error) => null);
+                          },
+                          child: Text('Yes'),
+                        ),
+                      ],
+                    ));
+              } else {
+                null;
+              }
+            }*/
+          });
+        },
+        children: [
+          Icon(
+            Icons.chat,
+            size: 15,
+          ),
+          Icon(
+            Icons.more_horiz,
+            size: 15,
+          ),
+          /*Icon(
+            Icons.delete,
+            size: 15,
+          ),*/
+        ],
+      );
     }
+
+    /// comment 를 적는 텍스트 상자의 상태를 control 할 때 사용
+    final _commentController = TextEditingController();
 
     /// comments 나열된 화면 구성
     return StreamBuilder<QuerySnapshot>(
@@ -190,6 +258,7 @@ class _CommentBookState extends State<CommentBook> {
                   height: 1,
                 ));
           }
+          var commentEdit = false;
           return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -245,19 +314,57 @@ class _CommentBookState extends State<CommentBook> {
                                         children: [
                                           /// 댓글마다 대댓글, 좋아요, 삭제 기능을 담당하는 토글버튼 생성
                                           if(userName == eachComment.userName)
-                                            _buildCommentToggleButtons(
+                                            _buildCommentToggleButtonsForUser(
                                               context,
                                               Provider.of<ApplicationState>(context, listen: false), eachComment
+                                            )
+                                          else
+                                            _buildCommentToggleButtonsForOthers(
+                                                context,
+                                                Provider.of<ApplicationState>(context, listen: false), eachComment
                                             ),
                                       SizedBox(width: 10),
                                     ]))
                               ],
                             )
                         ),
+                        ///comment 내용
                         Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   SizedBox(width: 11.0),
+                                  if(commentEdit)
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          //padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.5),
+                                          width: MediaQuery.of(context).size.width - 36,
+                                          child: TextFormField(
+                                            autofocus: true,
+                                            keyboardType: TextInputType.multiline,
+                                            maxLines: 30,
+                                            initialValue: eachComment.comment,
+                                            controller: _commentController,
+                                            decoration: const InputDecoration(
+                                              focusedBorder: InputBorder.none,
+                                              enabledBorder: InputBorder.none,
+                                              errorBorder: InputBorder.none,
+                                              disabledBorder: InputBorder.none,
+                                            ),
+                                            /*validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return '댓글을 입력하세요';
+                                          }
+                                          return null;
+                                        },*/
+
+                                          ),
+                                        ),
+
+                                      ],
+                                    ),
+
                                   Container(
                                     //padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.5),
                                     width: MediaQuery.of(context).size.width - 36,
