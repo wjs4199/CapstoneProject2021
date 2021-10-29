@@ -309,7 +309,7 @@ class ApplicationState extends ChangeNotifier {
             comment: document.data()['comment'],
             created: document.data()['time'],
             id: document.id,
-            nickname: document.data()['nickname'],
+            nickName: document.data()['nickname'],
 
             ///edited
             //   isDeleted: document.data()['idDeleted'],

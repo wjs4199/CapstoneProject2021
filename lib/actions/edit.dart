@@ -141,7 +141,9 @@ class _EditPageState extends State<EditPage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
-  var _selectedFilter = '물건';
+  var _selectedFilter = 'null';
+
+  //var _selectionsOfGive = [true, false];
 
   int photoNum;
   int imageLoadCount = 0;
@@ -182,11 +184,6 @@ class _EditPageState extends State<EditPage> {
       ]);
 
       imageUrlList = imageUrlList.where((e) => e != null).toList();
-      //alreadySavedList = imageUrlList;
-
-      /*if(alreadyUrlList.length == 10) {
-        numberOfImagesTextColor = true;
-      }*/
       /// image file으로 만들어서 따로 저장해줘야함
       for(var i=0; i<imageUrlList.length; i++) {
         alreadySavedList.add(await fileFromImageUrl(imageUrlList[i],i));
@@ -205,15 +202,6 @@ class _EditPageState extends State<EditPage> {
     print('makeUrlList에서 alreadySavedList 길이는 -> ${alreadySavedList.length}');
   }
 
-  /// edit한 게시글을 저장할 때 원래 저장되어 있던 이미지들의 url String 을 File 타입으로 바꿔주는 함수
-  /// (처음에 url 다운로드 할 때부터 File 타입으로 바꾸는 것으로 시도해보았으나 변환 시간이 오래 걸려서 이 방법으로 대체)
-  /*Future<void> makeAlreadySavedList() async {
-    for(var i=0; i<alreadyUrlList.length; i++) {
-      alreadySavedList.add(await fileFromImageUrl(alreadyUrlList[i],i));
-    }
-
-    print('alreadySavedList 길이는 -> ${alreadySavedList.length}');
-  }*/
   /// 디바이스에 따라 달라지는 화면 가로세로 크기
   var fullWidth;
   var fullHeight;
@@ -265,6 +253,15 @@ class _EditPageState extends State<EditPage> {
     photoNum = product.photo;
 
     ///********************* 변경한 내용대로 게시물을 업데이트 *********************///
+
+    ///게시글 수정할 때 initial값을 게시글의 기존 내용으로 설정
+    _titleController.text = product.title;
+    _contentController.text = product.content;
+
+    /// ToggleButtons 으로 기존 게시글 내에 저장됐던 카테고리를 표시하기 위해 필요한 리스트 변수
+    //_selectedFilter = _selectedFilter=='null' ? product.category : _selectedFilter;
+
+    //_selectionsOfGive = _selectedFilter == '물건' ? [true, false] : [false, true];
 
     Future<void> deleteOneImage(int num) async {
       try {
@@ -319,10 +316,6 @@ class _EditPageState extends State<EditPage> {
         'modified': FieldValue.serverTimestamp(),
         'photo': alreadySavedList.length + willBeSavedFileList.length,
       }).then((value) async {
-        /*await target
-            .doc(productId)
-            .update({'thumbnailURL': await thumbnailURL(productId)});*/
-
         /// storage에 올려진 사진 삭제 후 다시 업로드
         await deleteImages().whenComplete(() async {
           //await makeAlreadySavedList().then((value) async {
@@ -530,8 +523,6 @@ class _EditPageState extends State<EditPage> {
                                               ),
                                                       ],
                                                     ),
-
-                                                    /// 여기서 삭제버튼 구현하다 관둠...
                                                   ],
                                                 );
                                           }),
@@ -612,6 +603,7 @@ class _EditPageState extends State<EditPage> {
                                   children: [
                                     Expanded(
                                       child: TextFormField(
+                                        //initialValue: _titleController.text,
                                         controller: _titleController,
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
@@ -635,8 +627,8 @@ class _EditPageState extends State<EditPage> {
                                         autocorrect: false,
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            _titleController.text =
-                                                product.title;
+                                              _titleController.text =
+                                                  product.title;
                                           }
                                           return null;
                                         },
@@ -654,9 +646,9 @@ class _EditPageState extends State<EditPage> {
                               Row(
                                 children: [
                                   if (widget.editGiveOrTake == 'giveProducts')
-                                    _buildGiveCategoryToggleButtons()
+                                    _buildGiveCategoryToggleButtons(product.category)
                                   else
-                                    _buildTakeCategoryToggleButtons()
+                                    _buildTakeCategoryToggleButtons(product.category)
                                 ],
                               ),
                               Divider(thickness: 1),
@@ -688,8 +680,10 @@ class _EditPageState extends State<EditPage> {
                                       ),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
-                                          _contentController.text =
-                                              product.content;
+                                          setState(() {
+                                            _contentController.text =
+                                                product.content;
+                                          });
                                         }
                                         return null;
                                       },
@@ -713,11 +707,15 @@ class _EditPageState extends State<EditPage> {
     });
   }
 
-  /// 나눔페이지의 add페이지 내에서 ToggleButtons 내의 물건, 재능 버튼의 상태를 표시하기 위해 필요한 리스트 변수
-  final _selectionsOfGive = List<bool>.generate(2, (_) => false);
+  var _selectionsOfGive = [false, false];
 
   /// 나눔페이지의 add페이지 내에서의 ToggleButtons 위젯(물건, 재능)
-  ToggleButtons _buildGiveCategoryToggleButtons() {
+  ToggleButtons _buildGiveCategoryToggleButtons(String category) {
+    if(_selectionsOfGive == [false, false] && category == '물건'){
+      _selectionsOfGive = [true, false];
+    } else if (_selectionsOfGive == [false, false] && category == '재능'){
+      _selectionsOfGive = [false, true];
+    }
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(
@@ -773,7 +771,17 @@ class _EditPageState extends State<EditPage> {
   final _selectionsOfTake = List<bool>.generate(2, (_) => false);
 
   /// 나눔요청 페이지의 add페이지 내에서의 ToggleButtons 위젯(물건, 재능)
-  ToggleButtons _buildTakeCategoryToggleButtons() {
+  ToggleButtons _buildTakeCategoryToggleButtons(String category) {
+    if(_selectionsOfGive == [false, false] && category == '물건'){
+      setState(() {
+        _selectionsOfGive = [true, false];
+      });
+    } else if (_selectionsOfGive == [false, false] && category == '재능'){
+      setState(() {
+        _selectionsOfGive = [true, false];
+      });
+
+    }
     return ToggleButtons(
       color: Colors.black.withOpacity(0.60),
       constraints: BoxConstraints(

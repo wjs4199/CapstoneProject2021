@@ -37,8 +37,14 @@ class _DetailPageState extends State<DetailPage> {
   var name = ''; // myNickname 저장소
   var nickname = ''; //myNickname 임시저장소
 
+  /// futurebuilder 의 future: ___에 사용될 변수
+  Future<void> future;
+
   @override
   void initState() {
+
+    /// 댓글쓰는 창 클릭시 rebuild되는 것을 막기 위해서 한번만 build
+    future = makeUrlList();
     super.initState();
 
     productId = widget.productId; // product ID
@@ -74,11 +80,11 @@ class _DetailPageState extends State<DetailPage> {
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
   StreamController<Icon> changeFavoriteButton =
-      StreamController<Icon>.broadcast();
+  StreamController<Icon>.broadcast();
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
   StreamController<String> changeTextField =
-      StreamController<String>.broadcast();
+  StreamController<String>.broadcast();
 
   /// storage 에서 다운로드한 이미지 url 들이 저장될 정적 저장소
   var imageUrlList = [];
@@ -113,18 +119,7 @@ class _DetailPageState extends State<DetailPage> {
 
     imageUrlList = imageUrlList.where((e) => e != null).toList();
 
-    //future안에서 for문이 안돌아서 정적 리스트에 들어가는 것을 확인하기 위해 이렇게 해둠
     print('imageURL 리스트의 길이는  => ${imageUrlList.length}');
-    print('0 번째 imageUrlList 주소는 => ${imageUrlList[0]}');
-    print('1 번째 imageUrlList 주소는 => ${imageUrlList[1]}');
-    print('2 번째 imageUrlList 주소는 => ${imageUrlList[2]}');
-    print('3 번째 imageUrlList 주소는 => ${imageUrlList[3]}');
-    print('4 번째 imageUrlList 주소는 => ${imageUrlList[4]}');
-    print('5 번째 imageUrlList 주소는 => ${imageUrlList[5]}');
-    print('6 번째 imageUrlList 주소는 => ${imageUrlList[6]}');
-    print('7 번째 imageUrlList 주소는 => ${imageUrlList[7]}');
-    print('8 번째 imageUrlList 주소는 => ${imageUrlList[8]}');
-    print('9 번째 imageUrlList 주소는 => ${imageUrlList[9]}');
   }
 
   @override
@@ -227,18 +222,7 @@ class _DetailPageState extends State<DetailPage> {
 
       imageUrlList = imageUrlList.where((e) => e != null).toList();
 
-      //future안에서 for문이 안돌아서 정적 리스트에 들어가는 것을 확인하기 위해 이렇게 해둠
       print('imageURL 리스트의 길이는  => ${imageUrlList.length}');
-      print('0 번째 imageUrlList 주소는 => ${imageUrlList[0]}');
-      print('1 번째 imageUrlList 주소는 => ${imageUrlList[1]}');
-      print('2 번째 imageUrlList 주소는 => ${imageUrlList[2]}');
-      print('3 번째 imageUrlList 주소는 => ${imageUrlList[3]}');
-      print('4 번째 imageUrlList 주소는 => ${imageUrlList[4]}');
-      print('5 번째 imageUrlList 주소는 => ${imageUrlList[5]}');
-      print('6 번째 imageUrlList 주소는 => ${imageUrlList[6]}');
-      print('7 번째 imageUrlList 주소는 => ${imageUrlList[7]}');
-      print('8 번째 imageUrlList 주소는 => ${imageUrlList[8]}');
-      print('9 번째 imageUrlList 주소는 => ${imageUrlList[9]}');
     }
 
     /// 현재 시간
@@ -325,7 +309,25 @@ class _DetailPageState extends State<DetailPage> {
       return '오래 된 글';
     }
 
-    ///************************ like 기능 구현부분 (수정필요) ************************///
+    ///************************ nickName 참조 위해 필요한 부분 ************************///
+
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+    /// 유저의 닉네임을 찾아서 보여주는 함수
+    String findNickname(AsyncSnapshot<QuerySnapshot> snapshot) {
+      var nickName = 'null';
+      snapshot.data.docs.forEach((document) {
+        if (document['username'] == userName) {
+          nickName = document['nickname'];
+        }
+      });
+
+      print('찾은 닉네임은 $nickName!!');
+
+      return nickName;
+    }
+
+
+    ///************************ like 기능 구현부분 ************************///
 
     /// giveProducts 또는 takeProducts 중 어디에 속한 게시물인지에 따라 참조할 path 결정
     CollectionReference likes = FirebaseFirestore.instance
@@ -380,13 +382,15 @@ class _DetailPageState extends State<DetailPage> {
         .collection('giveProducts/' + productId + '/comment');
 
     /// comment 추가 기능
-    Future<void> addComments(String comment) {
+    Future<void> addComments(String comment, String nickName) {
       return comments
           .add({
-            'userName': FirebaseAuth.instance.currentUser.displayName,
-            'comment': comment,
-            'created': FieldValue.serverTimestamp(),
-          })
+        'userName': FirebaseAuth.instance.currentUser.displayName,
+        'comment': comment,
+        'created': FieldValue.serverTimestamp(),
+        // 빼야할지도!
+        'nickName' : nickName,
+      })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
     }
@@ -437,7 +441,7 @@ class _DetailPageState extends State<DetailPage> {
                   //   StretchMode.fadeTitle,
                   // ],
                   background: FutureBuilder(
-                    future: makeUrlList(),
+                    future: future,
                     builder: (context, snapshot) {
                       /// 시진 로딩중일 때
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -459,7 +463,7 @@ class _DetailPageState extends State<DetailPage> {
                             children: [
                               Container(
                                 height:
-                                    MediaQuery.of(context).size.height * 0.5,
+                                MediaQuery.of(context).size.height * 0.5,
                                 width: MediaQuery.of(context).size.width,
                                 // color: Color(0xffced3d0),
                               ),
@@ -491,19 +495,19 @@ class _DetailPageState extends State<DetailPage> {
                                   builder: (context, snapshot) {
                                     return Column(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      MainAxisAlignment.start,
                                       children: [
                                         SizedBox(
                                           height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
+                                              .size
+                                              .height *
                                               0.46,
                                         ),
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          MainAxisAlignment.center,
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.end,
+                                          CrossAxisAlignment.end,
                                           children: imageUrlList
                                               .asMap()
                                               .entries
@@ -524,15 +528,15 @@ class _DetailPageState extends State<DetailPage> {
                                                 decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
                                                     color: (Theme.of(context)
-                                                                    .brightness ==
-                                                                Brightness.dark
-                                                            ? Colors.white
-                                                            : Colors.black)
+                                                        .brightness ==
+                                                        Brightness.dark
+                                                        ? Colors.white
+                                                        : Colors.black)
                                                         .withOpacity(
-                                                            snapshot.data ==
-                                                                    entry.key
-                                                                ? 1.0
-                                                                : 0.4)),
+                                                        snapshot.data ==
+                                                            entry.key
+                                                            ? 1.0
+                                                            : 0.4)),
                                               ),
                                             );
                                           }).toList(),
@@ -567,9 +571,9 @@ class _DetailPageState extends State<DetailPage> {
                         onPressed: (FirebaseAuth.instance.currentUser.uid ==
                                 product.uid)
                             ? () => Navigator.pushNamed(
-                                  context,
-                                  '/edit/' + productId + '/' + detailGiveOrTake,
-                                )
+                          context,
+                          '/edit/' + productId + '/' + detailGiveOrTake,
+                        )
                             : null),
                   if (FirebaseAuth.instance.currentUser.uid == product.uid)
                     IconButton(
@@ -578,29 +582,29 @@ class _DetailPageState extends State<DetailPage> {
                           semanticLabel: 'delete',
                         ),
                         onPressed: (FirebaseAuth.instance.currentUser.uid ==
-                                product.uid)
+                            product.uid)
                             ? () => showDialog(
-                                context: context,
-                                builder: (BuildContext context) =>
-                                    CupertinoAlertDialog(
-                                      title: Text('게시글 삭제'),
-                                      content: Text('정말 이 게시글을 삭제하시겠습니까?'),
-                                      actions: <Widget>[
-                                        CupertinoDialogAction(
-                                          isDefaultAction: true,
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: Text('아니오'),
-                                        ),
-                                        Consumer<ApplicationState>(
-                                          builder: (context, appState, _) =>
-                                              CupertinoDialogAction(
+                            context: context,
+                            builder: (BuildContext context) =>
+                                CupertinoAlertDialog(
+                                  title: Text('게시글 삭제'),
+                                  content: Text('정말 이 게시글을 삭제하시겠습니까?'),
+                                  actions: <Widget>[
+                                    CupertinoDialogAction(
+                                      isDefaultAction: true,
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('아니오'),
+                                    ),
+                                    Consumer<ApplicationState>(
+                                      builder: (context, appState, _) =>
+                                          CupertinoDialogAction(
                                             onPressed: () {
                                               Navigator.pop(context);
                                               deleteProduct()
                                                   .then((value) =>
-                                                      appState.init())
+                                                  appState.init())
                                                   .catchError((error) => null)
                                                   .whenComplete(() {
                                                 Navigator.pop(context);
@@ -609,9 +613,9 @@ class _DetailPageState extends State<DetailPage> {
                                             },
                                             child: Text('네'),
                                           ),
-                                        )
-                                      ],
-                                    ))
+                                    )
+                                  ],
+                                ))
                             : null)
                 ],
               ),
@@ -647,13 +651,13 @@ class _DetailPageState extends State<DetailPage> {
                                       height: 42,
                                       child:
 
-                                          /// 이름과 시간
-                                          Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
+                                      /// 이름과 시간
+                                      Column(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
                                             SizedBox(
                                               height: 2,
                                             ),
@@ -680,21 +684,21 @@ class _DetailPageState extends State<DetailPage> {
                                                   style: TextButton.styleFrom(
                                                     padding: EdgeInsets.zero,
                                                     alignment:
-                                                        Alignment.centerLeft,
+                                                    Alignment.centerLeft,
                                                     primary: Colors.grey,
                                                     backgroundColor:
-                                                        Colors.transparent,
+                                                    Colors.transparent,
                                                     textStyle: TextStyle(
                                                       fontFamily: 'Roboto_Bold',
                                                       fontWeight:
-                                                          FontWeight.bold,
+                                                      FontWeight.bold,
                                                       fontSize: 12.5,
                                                       height: 1.2,
                                                     ),
                                                   ),
                                                   onPressed: () {
                                                     if (FirebaseAuth.instance
-                                                            .currentUser.uid ==
+                                                        .currentUser.uid ==
                                                         product.uid) {
                                                     } else {
                                                       Navigator.push(
@@ -713,19 +717,19 @@ class _DetailPageState extends State<DetailPage> {
                                                                     .instance
                                                                     .currentUser
                                                                     .photoURL,
-                                                          ),
+                                                              ),
                                                         ),
                                                       );
                                                     }
                                                   },
                                                   child: Row(
                                                     mainAxisAlignment:
-                                                        MainAxisAlignment.start,
+                                                    MainAxisAlignment.start,
                                                     children: [
                                                       Text(
                                                         ' 채팅하기',
                                                         textAlign:
-                                                            TextAlign.left,
+                                                        TextAlign.left,
                                                       ),
                                                       Icon(
                                                         Icons.chat,
@@ -762,7 +766,7 @@ class _DetailPageState extends State<DetailPage> {
                                           ),
                                           TextSpan(
                                             text:
-                                                '${product.category} · ${calculateTime()}\n\n',
+                                            '${product.category} · ${calculateTime()}\n\n',
                                             style: TextStyle(
                                               fontFamily: 'Roboto_Bold',
                                               color: Colors.grey,
@@ -903,20 +907,20 @@ class _DetailPageState extends State<DetailPage> {
                           stream: changeFavoriteButton.stream,
                           initialData: isLiked(snapshot)
                               ? Icon(
-                                  Icons.favorite,
-                                  color: Theme.of(context).primaryColor,
-                                  semanticLabel: 'like',
-                                )
+                            Icons.favorite,
+                            color: Theme.of(context).primaryColor,
+                            semanticLabel: 'like',
+                          )
                               : Icon(
-                                  Icons.favorite_border_outlined,
-                                  color: Theme.of(context).primaryColor,
-                                  semanticLabel: 'like',
-                                ),
+                            Icons.favorite_border_outlined,
+                            color: Theme.of(context).primaryColor,
+                            semanticLabel: 'like',
+                          ),
                           builder: (context, snapshot2) {
                             /// changeFavoriteButton 스트림 컨트롤러에 새 데이터가 들어올때마다 부분적으로 빌드됨
                             return IconButton(
 
-                                /// 아이콘의 snapshot2 => changeFavoriteButton 스트림으로 건네준 아이콘
+                              /// 아이콘의 snapshot2 => changeFavoriteButton 스트림으로 건네준 아이콘
                                 icon: snapshot2.data,
                                 onPressed: () async {
                                   /// 이미 좋아요가 눌러져 있었을 떄
@@ -925,13 +929,13 @@ class _DetailPageState extends State<DetailPage> {
                                         .catchError((error) => null)
                                         .whenComplete(() {
                                       products =
-                                          detailGiveOrTake == 'giveProducts'
-                                              ? context
-                                                  .read<ApplicationState>()
-                                                  .giveProducts
-                                              : context
-                                                  .read<ApplicationState>()
-                                                  .takeProducts;
+                                      detailGiveOrTake == 'giveProducts'
+                                          ? context
+                                          .read<ApplicationState>()
+                                          .giveProducts
+                                          : context
+                                          .read<ApplicationState>()
+                                          .takeProducts;
                                       changeFavoriteButton.add(Icon(
                                         Icons.favorite_border_outlined,
                                         color: Theme.of(context).primaryColor,
@@ -949,13 +953,13 @@ class _DetailPageState extends State<DetailPage> {
                                         .catchError((error) => null)
                                         .whenComplete(() {
                                       products =
-                                          detailGiveOrTake == 'giveProducts'
-                                              ? context
-                                                  .read<ApplicationState>()
-                                                  .giveProducts
-                                              : context
-                                                  .read<ApplicationState>()
-                                                  .takeProducts;
+                                      detailGiveOrTake == 'giveProducts'
+                                          ? context
+                                          .read<ApplicationState>()
+                                          .giveProducts
+                                          : context
+                                          .read<ApplicationState>()
+                                          .takeProducts;
                                       changeFavoriteButton.add(Icon(
                                         Icons.favorite,
                                         color: Theme.of(context).primaryColor,
@@ -974,51 +978,25 @@ class _DetailPageState extends State<DetailPage> {
                 key: _commentFormKey,
                 child: Expanded(
                     child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
-                  child: TextFormField(
-                    controller: _commentController,
-                    decoration: const InputDecoration(
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      errorBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      hintText: '댓글을 입력하세요',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '댓글을 입력하세요';
-                      }
-                      return null;
-                    },
-                  ),
-                )),
+                      padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
+                      child: TextFormField(
+                        controller: _commentController,
+                        decoration: const InputDecoration(
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          hintText: '댓글을 입력하세요',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return '댓글을 입력하세요';
+                          }
+                          return null;
+                        },
+                      ),
+                    )),
               ),
-
-              /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
-              /*Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
-                                      child: TextField(
-                                        controller: _commentController,
-                                        decoration: const InputDecoration(
-                                          focusedBorder: InputBorder.none,
-                                          enabledBorder: InputBorder.none,
-                                          errorBorder: InputBorder.none,
-                                          disabledBorder: InputBorder.none,
-                                          hintText: '댓글을 입력하세요',
-                                        ),
-                                        onSubmitted: (value) {
-                                          //if (value == null || value.isEmpty) {
-                                            //return '댓글을 입력하세요';
-                                          //}
-                                          //return null;
-                                        },
-                                        onChanged: (value) {
-                                          changeTextField.add(value);
-                                        }
-                                      ),
-                                    )
-                                ),*/
               SizedBox(width: 3),
               IconButton(
                 icon: const Icon(Icons.send_outlined),
@@ -1028,7 +1006,8 @@ class _DetailPageState extends State<DetailPage> {
                   var currentFocus = FocusScope.of(context);
                   currentFocus.unfocus();
                   if (_commentFormKey.currentState.validate()) {
-                    await addComments(_commentController.text)
+                    //빼야할수도!
+                    await addComments(_commentController.text, product.nickname)
                         .then((value) => print('add comment ok!'));
                     _commentController.clear();
                     products = detailGiveOrTake == 'giveProducts'
@@ -1038,27 +1017,6 @@ class _DetailPageState extends State<DetailPage> {
                   }
                 },
               ),
-
-              /// 댓글달때 전체 페이지 rebuild 되는 것 때문에 다른방식으로 시도해본 흔적...ㅎ
-              /*StreamBuilder(
-                                stream: changeTextField.stream,
-                                builder: (context, snapshot) {
-                                  return IconButton(
-                                    icon: const Icon(Icons.send_outlined),
-                                    iconSize: 27,
-                                    color: Color(0xffc32323),
-                                    onPressed: ()  {
-                                      _commentController.clear();
-                                      currentFocus.unfocus();
-                                      addComments(snapshot.data)
-                                          .then((value) {
-                                            context.read<ApplicationState>().init();
-                                        print('add comment ok!');
-                                      });
-                                    },
-                                  );
-                                }
-                              ),*/
             ],
           ),
         ),
