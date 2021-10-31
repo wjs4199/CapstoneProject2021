@@ -29,10 +29,12 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
+  _DetailPageState({this.chatRoomDocId});
   /// detail 페이지 실행시 인자로 전달되는 변수들
   String productId; // product ID
   String detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
   int photoNum; // 저장된 photo 의 개수
+  String chatRoomDocId;
   var currentUserId = FirebaseAuth.instance.currentUser.uid;
   var name = ''; // myNickname 저장소
   var nickname = ''; //myNickname 임시저장소
@@ -308,24 +310,6 @@ class _DetailPageState extends State<DetailPage> {
       }
       return '오래 된 글';
     }
-
-    ///************************ nickName 참조 위해 필요한 부분 ************************///
-
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
-    /// 유저의 닉네임을 찾아서 보여주는 함수
-    String findNickname(AsyncSnapshot<QuerySnapshot> snapshot) {
-      var nickName = 'null';
-      snapshot.data.docs.forEach((document) {
-        if (document['username'] == userName) {
-          nickName = document['nickname'];
-        }
-      });
-
-      print('찾은 닉네임은 $nickName!!');
-
-      return nickName;
-    }
-
 
     ///************************ like 기능 구현부분 ************************///
 
@@ -701,6 +685,13 @@ class _DetailPageState extends State<DetailPage> {
                                                         .currentUser.uid ==
                                                         product.uid) {
                                                     } else {
+                                                      print(chatRoomDocId);
+                                                      FirebaseFirestore.instance.collection('chatRoom').doc(chatRoomDocId).update(
+                                                          {
+                                                            'isRead' : true
+                                                          }
+                                                      ).catchError((error) => print('error: $error'));
+
                                                       Navigator.push(
                                                         context,
                                                         MaterialPageRoute(
@@ -711,7 +702,7 @@ class _DetailPageState extends State<DetailPage> {
                                                                 .user_photoURL,
                                                             peerName: product
                                                                 .nickname,
-                                                            myName: name,
+                                                            myName: name, ///editted
                                                             myAvatar:
                                                                 FirebaseAuth
                                                                     .instance

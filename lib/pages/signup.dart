@@ -97,32 +97,32 @@ class SignUpState extends State<SignUp> {
                         isDuplicated = false;
 
                         //닉네임을 빈칸으로 입력하고 중복체크를 눌렀을 경우
-                          if(textEditingController1.text == "") {
-                            isInvalid = true;
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            ScaffoldMessenger.of(context).showSnackBar(snackBar4);
-                          }
-                          else {
-                            isInvalid = false;
+                        if(textEditingController1.text == "") {
+                          isInvalid = true;
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+                        }
+                        else {
+                          isInvalid = false;
                           await for (var snapshot in FirebaseFirestore.instance.collection('users').snapshots())
-                        {
-                          for(var users in snapshot.docs){
+                          {
+                            for(var users in snapshot.docs){
 
-                            if(textEditingController1.text == users.get('nickname')) {
-                              if(name == textEditingController1.text) {
-                                isCurrentName = true;
-                                break;
-                              } else {
-                                print('중복이 존재합니다');
-                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                                ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-                                isDuplicated = true;
-                                break;
+                              if(textEditingController1.text == users.get('nickname')) {
+                                if(name == textEditingController1.text) {
+                                  isCurrentName = true;
+                                  break;
+                                } else {
+                                  print('중복이 존재합니다');
+                                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+                                  isDuplicated = true;
+                                  break;
+                                }
                               }
                             }
-                          }
-                          break;
-                        };
+                            break;
+                          };
                         }
                         if(isDuplicated == false && isCurrentName == false && isInvalid == false) {
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -157,42 +157,42 @@ class SignUpState extends State<SignUp> {
                         else {
                           //닉네임이 현재 닉네임과 같거나 빈칸인 채로 시작하기를 눌렀을 경우
                           if(name == textEditingController1.text || textEditingController1.text == "") {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => HomePage()));
-                        }
-                        //중복체크를 하지 않았을 경우
-                        else if(isDuplicated || checkLoop == false)
-                        {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar3);
-                        }
-                        //정상적으로 바꿀 닉네임을 입력하고 중복체크도 완료했을 경우
-                        else {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => HomePage()));
+                          }
+                          //중복체크를 하지 않았을 경우
+                          else if(isDuplicated || checkLoop == false)
+                          {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+                          }
+                          //정상적으로 바꿀 닉네임을 입력하고 중복체크도 완료했을 경우
+                          else {
                             _currentNickname();
 
                             if(_formKey.currentState.validate()) {
-                            await FirebaseFirestore.instance.collection('users')
-                                .doc(FirebaseAuth.instance.currentUser.uid) /// document ID 를 uid 로 설정하는 부분
-                                .set({
-                              'username': FirebaseAuth.instance.currentUser
-                                  .displayName,
-                              'photoUrl': FirebaseAuth.instance.currentUser
-                                  .photoURL,
-                              'id': FirebaseAuth.instance.currentUser.uid,
-                              'createdAt': FieldValue.serverTimestamp(),
-                              'nickname': textEditingController1.text,
-                            }).then((value) {
-                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => HomePage()));
-                            }).catchError((error) => print('Error: $error'));
+                              await FirebaseFirestore.instance.collection('users')
+                                  .doc(FirebaseAuth.instance.currentUser.uid) /// document ID 를 uid 로 설정하는 부분
+                                  .set({
+                                'username': FirebaseAuth.instance.currentUser
+                                    .displayName,
+                                'photoUrl': FirebaseAuth.instance.currentUser
+                                    .photoURL,
+                                'id': FirebaseAuth.instance.currentUser.uid,
+                                'createdAt': FieldValue.serverTimestamp(),
+                                'nickname': textEditingController1.text,
+                              }).then((value) {
+                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => HomePage()));
+                              }).catchError((error) => print('Error: $error'));
+                            }
                           }
-                        }
                         }
                       },
                       style: ElevatedButton.styleFrom(
