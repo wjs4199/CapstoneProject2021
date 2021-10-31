@@ -8,9 +8,11 @@ import 'home.dart';
 TextEditingController textEditingController1 = TextEditingController();
 var nickname = '';
 
+
 class SignUp extends StatefulWidget {
   @override
   SignUpState createState() => SignUpState();
+
 }
 
 class SignUpState extends State<SignUp> {
@@ -26,25 +28,28 @@ class SignUpState extends State<SignUp> {
     var isDuplicated = false;
     var checkLoop = false;
     var isCurrentName = false;
+    var isInvalid = false;
     var name = '';
-
     var currentUserId = FirebaseAuth.instance.currentUser.uid;
 
     final snackBar1 = SnackBar(content: Text('중복이 존재합니다'));
     final snackBar2 = SnackBar(content: Text('사용해도 좋습니다'));
     final snackBar3 = SnackBar(content: Text('중복체크를 해주세요'));
+    final snackBar4 = SnackBar(content: Text('닉네임을 한글자 이상 입력해주세요'));
 
-    _currentNickname() async {
+
+    Future<String> _currentNickname() async {
       await FirebaseFirestore.instance.collection('users').doc(currentUserId)
           .get()
           .then((DocumentSnapshot ds) {
         name = ds['nickname'];
         nickname = name;
-        return name;
       });
+      return name;
     }
 
     _currentNickname();
+    //print("nickname = " + nickname);
 
     return Scaffold(
       body: Form(
@@ -53,9 +58,12 @@ class SignUpState extends State<SignUp> {
           padding: const EdgeInsets.only(top: 200.0),
           child: Column(
             children: [
-
+              Text(
+                "현재 닉네임: " + nickname,
+                style: TextStyle(color: Colors.black54, letterSpacing: 1.0),
+              ),
               Padding(
-                padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 20),
                 child: TextFormField(
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -65,7 +73,7 @@ class SignUpState extends State<SignUp> {
                   },
                   controller: textEditingController1,
                   decoration: InputDecoration(
-                    hintText: ('Nickname'),
+                    hintText: ("변경할 닉네임"),
                     fillColor: Colors.white30,
                     filled: true,
                   ),
@@ -87,7 +95,16 @@ class SignUpState extends State<SignUp> {
                       onPressed: ()   async {
                         checkLoop = true;
                         isDuplicated = false;
-                        await for (var snapshot in FirebaseFirestore.instance.collection('users').snapshots())
+
+                        //닉네임을 빈칸으로 입력하고 중복체크를 눌렀을 경우
+                          if(textEditingController1.text == "") {
+                            isInvalid = true;
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+                          }
+                          else {
+                            isInvalid = false;
+                          await for (var snapshot in FirebaseFirestore.instance.collection('users').snapshots())
                         {
                           for(var users in snapshot.docs){
 
@@ -97,6 +114,7 @@ class SignUpState extends State<SignUp> {
                                 break;
                               } else {
                                 print('중복이 존재합니다');
+                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                 ScaffoldMessenger.of(context).showSnackBar(snackBar1);
                                 isDuplicated = true;
                                 break;
@@ -105,7 +123,9 @@ class SignUpState extends State<SignUp> {
                           }
                           break;
                         };
-                        if(isDuplicated == false && isCurrentName == false) {
+                        }
+                        if(isDuplicated == false && isCurrentName == false && isInvalid == false) {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           ScaffoldMessenger.of(context).showSnackBar(snackBar2);
                         }
                       },
@@ -128,21 +148,32 @@ class SignUpState extends State<SignUp> {
                     ElevatedButton(
                       onPressed: () async {
                         /// 중복체크를 하지 않거나, 중복이 있음에도 불구하고 시작하기 누르면 그냥 로그인 되는 현상 해결
-
-                        if(name == textEditingController1.text) {
+                        //닉네임을 처음 설정하는데 빈칸을 입력했을 경우
+                        if((name == null || name == "") && textEditingController1.text == "") {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+                        }
+                        //닉네임을 처음 설정하는게 아니거나 빈칸을 입력하지 않았을 경우
+                        else {
+                          //닉네임이 현재 닉네임과 같거나 빈칸인 채로 시작하기를 눌렀을 경우
+                          if(name == textEditingController1.text || textEditingController1.text == "") {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           await Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => HomePage()));
                         }
+                        //중복체크를 하지 않았을 경우
                         else if(isDuplicated || checkLoop == false)
                         {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           ScaffoldMessenger.of(context).showSnackBar(snackBar3);
-
                         }
+                        //정상적으로 바꿀 닉네임을 입력하고 중복체크도 완료했을 경우
                         else {
-                          if(_formKey.currentState.validate()) {
+                            _currentNickname();
 
+                            if(_formKey.currentState.validate()) {
                             await FirebaseFirestore.instance.collection('users')
                                 .doc(FirebaseAuth.instance.currentUser.uid) /// document ID 를 uid 로 설정하는 부분
                                 .set({
@@ -154,12 +185,14 @@ class SignUpState extends State<SignUp> {
                               'createdAt': FieldValue.serverTimestamp(),
                               'nickname': textEditingController1.text,
                             }).then((value) {
+                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => HomePage()));
                             }).catchError((error) => print('Error: $error'));
                           }
+                        }
                         }
                       },
                       style: ElevatedButton.styleFrom(
