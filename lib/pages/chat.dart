@@ -79,13 +79,13 @@ class ChatScreenState extends State<ChatScreen> {
   List<QueryDocumentSnapshot> listMessage = List.from([]);
   int _limit = 20;
   final int _limitIncrement = 20;
-  String groupChatId = "";
+  String groupChatId= '';
   SharedPreferences prefs;
 
   File imageFile;
   bool isLoading = false;
   bool isShowSticker = false;
-  String imageUrl = "";
+  String imageUrl = '';
 
   final TextEditingController textEditingController = TextEditingController();
   final ScrollController listScrollController = ScrollController();
@@ -136,7 +136,6 @@ class ChatScreenState extends State<ChatScreen> {
         .collection('UserName')
         .doc(id)
         .update({'chattingWith': peerId});
-
  */
     setState(() {});
   }
@@ -184,24 +183,6 @@ class ChatScreenState extends State<ChatScreen> {
       await Fluttertoast.showToast(msg: e.message ?? e.toString());
     }
   }
-  Future _showNotification() async {
-    var android = AndroidNotificationDetails(
-        'your channel id', 'your channel name',
-        channelDescription: 'your channel description',
-        importance: Importance.max,
-        priority: Priority.high);
-
-    var ios = IOSNotificationDetails();
-    var detail = NotificationDetails(android: android, iOS: ios);
-
-    await _flutterLocalNotificationsPlugin.show(
-      0,
-      '새로운 메시지가 도착했습니다',
-      '메신저 텝을 눌러주세요',
-      detail,
-      payload: 'Hello Flutter',
-    );
-  }
 
 
   ///message 보내는 부분
@@ -224,6 +205,8 @@ class ChatScreenState extends State<ChatScreen> {
             'peerNickname' : peerName,
             'myNickname' : myName,
             'myAvatar' : myAvatar,
+            'isRead' : false,
+            'isShowedNotification': false,
           },
         );
       });
@@ -544,7 +527,7 @@ class ChatScreenState extends State<ChatScreen> {
               ),
 
               /// Time
-             isLastMessageLeft(index) ?
+              isLastMessageLeft(index) ?
               Container(
                 margin:
                 EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
@@ -559,7 +542,7 @@ class ChatScreenState extends State<ChatScreen> {
                 ),
 
               )
-                 : Container()
+                  : Container()
 
             ],
           ),
@@ -602,6 +585,14 @@ class ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    if(groupChatId.isNotEmpty) {
+      FirebaseFirestore.instance.collection('chatRoom').doc(groupChatId).update(
+        {
+          'isRead' : true
+        }
+    ).catchError((error) => print('error: $error'));
+    }
     return WillPopScope(
       onWillPop: onBackPress,
       child: Stack(

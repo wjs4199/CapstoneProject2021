@@ -17,13 +17,6 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 bool isLoading = false;
 int _limit = 20;
 var _flutterLocalNotificationsPlugin;
-var _messageState = false;
-
-
-Future<void> _cancelAllNotifications() async {
-  await flutterLocalNotificationsPlugin.cancelAll();
-}
-
 
 Future _showNotification() async {
   var android = AndroidNotificationDetails(
@@ -94,7 +87,6 @@ class _MessagePageState extends State<MessagePage> {
 
 
   }
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -142,7 +134,6 @@ class _MessagePageState extends State<MessagePage> {
   }
 
   Widget buildItem(BuildContext context, DocumentSnapshot document) {
-
     if (document != null && document.id.contains(FirebaseAuth.instance.currentUser.uid)) {
         if (document.get('idFrom') == FirebaseAuth.instance.currentUser.uid)
           ///내가 보내는 입장이면
@@ -151,14 +142,13 @@ class _MessagePageState extends State<MessagePage> {
           return _buildSenderScreen(context, document);
         } else {
 
-          if(_messageState == false) {
-            _showNotification();
-          }
-          // print(_messageState);
-          _messageState = true;
-          // print(_messageState);
-
-          return _buildReceiverScreen(context, document);
+         // if(_messageState == false) {
+           // _showNotification();
+          //}
+       //   _buildIcon(document.id);
+        //  print(check);
+        //  print(isRead);
+          return _buildReceiverScreen(context, document, isRead);
         }
     } else {
       return SizedBox.shrink();
@@ -286,7 +276,10 @@ class _MessagePageState extends State<MessagePage> {
   }
 
   Container _buildReceiverScreen(
-      BuildContext context, DocumentSnapshot document) {
+      BuildContext context, DocumentSnapshot document, bool isRead) {
+    _buildIcon(document.id);
+    //print(isRead);
+    //print(check);
     return Container(
       margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
 
@@ -320,13 +313,14 @@ class _MessagePageState extends State<MessagePage> {
         ),
 
         /// 각 사용자에 대한 list 를 만드는 row
-        child: Row(
+        child:
+
+        Row(
           children: <Widget>[
             Material(
               borderRadius: BorderRadius.all(Radius.circular(25.0)),
               clipBehavior: Clip.hardEdge,
               child: document.get('myAvatar').isNotEmpty
-
               /// empty 가 아니면 photoURL 을 가져온다
                   ? Image.network(
                 document.get('myAvatar'),
@@ -390,27 +384,55 @@ class _MessagePageState extends State<MessagePage> {
                           style: TextStyle(color: primaryColor),
                         ),
                       )
-
                      */
                   ],
                 ),
               ),
             ),
-            Icon(
-              Icons.add_alert,
-              color: Colors.deepOrangeAccent,
-            ),
+        isRead? Icon(null) : Icon(Icons.message),
           ],
         ),
       ),
     );
   }
-
-
-
-
-
 }
+var isRead = true;
+var check;
+var isShowed;
+_buildIcon(String documentId){
+  FirebaseFirestore.instance.collection('chatRoom').doc(documentId)
+      .get()
+      .then((DocumentSnapshot ds) {
+    check = ds['isRead'];
+    isRead = check;
+    isShowed = ds['isShowedNotification'];
+    if(isRead){
+
+    }
+    else{
+      print(isShowed);
+    if(isShowed == false) {
+      _showNotification()
+          .then((value) =>
+          FirebaseFirestore.instance.collection('chatRoom').doc(documentId).update(
+              {
+                'isShowedNotification' : true
+              }
+          ).catchError((error) => print('error: $error')),
+
+      );
+
+    }
+    }
+  });
+}
+
+
+
+
+
+
+
 /*
 Widget MsgView(BuildContext context, ApplicationState appState) {
   return CustomScrollView(
