@@ -386,7 +386,7 @@ class _CommentBookState extends State<CommentBook> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SizedBox(width: 11.0),
+                                  SizedBox(width: 10.0),
                                   if(commentEdit)
                                     Column(
                                       mainAxisAlignment: MainAxisAlignment.start,
@@ -401,6 +401,7 @@ class _CommentBookState extends State<CommentBook> {
                                             initialValue: eachComment.comment,
                                             controller: _commentController,
                                             decoration: const InputDecoration(
+
                                               focusedBorder: InputBorder.none,
                                               enabledBorder: InputBorder.none,
                                               errorBorder: InputBorder.none,
@@ -413,10 +414,10 @@ class _CommentBookState extends State<CommentBook> {
                                     ),
 
                                   Container(
-                                    //padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.5),
-                                    width: MediaQuery.of(context).size.width - 36,
+                                    //padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.3, 0),
+                                    width: MediaQuery.of(context).size.width - 35,
                                     child: RichText(
-                                        maxLines: 30,
+                                        maxLines: 20,
                                         text: TextSpan(
                                             style: TextStyle(
                                                 fontSize: 16.5,
@@ -429,7 +430,7 @@ class _CommentBookState extends State<CommentBook> {
                                             ])
                                     ),
                                   ),
-                                  SizedBox(width: 9.0),
+                                  SizedBox(width: 5.0),
                                 ]
                         ),
                         /// 날짜
