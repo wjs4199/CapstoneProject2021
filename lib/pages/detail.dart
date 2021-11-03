@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:giveandtake/pages/chat.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -125,6 +126,8 @@ class _DetailPageState extends State<DetailPage> {
 
     print('imageURL 리스트의 길이는  => ${imageUrlList.length}');
   }
+
+  var _isEnable = true;
 
   @override
   Widget build(BuildContext context) {
@@ -393,8 +396,6 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     _currentNickname();
-
-    var _isEnable = true;
 
     CollectionReference users = FirebaseFirestore.instance.collection('users');
 
@@ -1016,10 +1017,14 @@ class _DetailPageState extends State<DetailPage> {
                             child: Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
-                                  child: TextField(
-                                    //enabled: _isEnable,
-                                    focusNode: FocusNode(),
-                                    enableInteractiveSelection: _isEnable,
+                                  child: TextFormField(
+                                    style: TextStyle(
+                                      fontFamily: 'NanumSquareRoundR',
+                                    ),
+                                    inputFormatters: [
+                                      LengthLimitingTextInputFormatter(400), //글자 수 제한 400자
+                                    ],
+                                    enableInteractiveSelection: true,
                                     maxLines: null,
                                     keyboardType: TextInputType.multiline,
                                     controller: _commentController,
@@ -1029,25 +1034,10 @@ class _DetailPageState extends State<DetailPage> {
                                       errorBorder: InputBorder.none,
                                       disabledBorder: InputBorder.none,
                                       hintText: '댓글을 입력하세요',
+                                      hintStyle: TextStyle(
+                                        fontFamily: 'NanumSquareRoundR',
+                                      )
                                     ),
-                                    /*validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return '댓글을 입력하세요';
-                                      }
-                                      return null;
-                                      // 15줄 이상 입력했을 시
-                                    },*/
-                                    onChanged: (val) {
-                                      if(_commentController.text.length > 250) {
-                                        setState(() {
-                                          _isEnable = false;
-                                        });
-                                      } else if(_commentController.text.length == 250){
-                                        setState(() {
-                                          _isEnable = true;
-                                        });
-                                      }
-                                    },
                                   ),
                                 )),
                           ),
@@ -1061,7 +1051,6 @@ class _DetailPageState extends State<DetailPage> {
                               var currentFocus = FocusScope.of(context);
                               currentFocus.unfocus();
                               if (_commentFormKey.currentState.validate()) {
-                                //빼야할수도!
                                 await addComments(_commentController.text, product.uid)
                                     .then((value) => print('add comment ok!'));
                                 _commentController.clear();
