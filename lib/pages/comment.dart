@@ -35,21 +35,21 @@ class _CommentBookState extends State<CommentBook> {
   var userNickName = 'null';
 
   /// 유저의 학번을 찾아서 보여주는 함수
-  String findStudentNumber(AsyncSnapshot<QuerySnapshot> snapshot, String nickName) {
-    var studentNum = '00';
+  String findStudentNumber(AsyncSnapshot<QuerySnapshot> snapshot, String uid) {
+    var email = '00';
     snapshot.data.docs.forEach((document) {
-      if (document['nickname'] == nickName) {
-        studentNum = document['email'];
+      if (document['id'] == uid) {
+        email = document['email'];
       }
     });
-    return studentNum;
+    return email;
   }
 
   /// 유저의 닉네임을 찾아서 보여주는 함수
-  String findNickname(AsyncSnapshot<QuerySnapshot> snapshot, String name) {
+  String findNickname(AsyncSnapshot<QuerySnapshot> snapshot, String userId) {
     var nickName = 'null';
     snapshot.data.docs.forEach((document) {
-      if (document['username'] == name) {
+      if (document['id'] == userId) {
         nickName = document['nickname'];
       }
     });
@@ -93,10 +93,7 @@ class _CommentBookState extends State<CommentBook> {
       }
     }
 
-    /// ToggleButtons 내의 대댓글, 좋아요, 삭제 버튼의 상태를 표시하기 위해 필요한 리스트 변수
-    var _selectionsForUser = List<bool>.generate(2, (_) => false);
-    var _selectionsForOthers = List<bool>.generate(1, (_) => false);
-
+    /// 사용자의 댓글에 달리는 삭제 버튼
     InkWell _CommentDeleteButtonsForUser(
         BuildContext context, ApplicationState appState, Comment comment) {
       return InkWell(
@@ -145,15 +142,16 @@ class _CommentBookState extends State<CommentBook> {
       );
     }
 
+    /// 사용자의 댓글을 제외한 댓글들에 달리는 채팅하기 버튼
     InkWell _CommentChatButtonsForOthers(
         BuildContext context, ApplicationState appState, Comment comment) {
       return InkWell(
         child: Container(
-          padding: const EdgeInsets.all(2.0),
+          padding: const EdgeInsets.all(3.0),
           decoration: BoxDecoration(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withOpacity(0.1),
             borderRadius: BorderRadius.circular(5),
-            border: Border.all(color: Colors.grey.withOpacity(0.6)),
+            border: Border.all(color: Colors.grey.withOpacity(0.1)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,81 +179,11 @@ class _CommentBookState extends State<CommentBook> {
       );
     }
 
-    /// ToggleButtons 위젯(대댓글, 좋아요, 삭제)
-    ToggleButtons _buildCommentToggleButtonsForUser(
-        BuildContext context, ApplicationState appState, Comment comment) {
-      return ToggleButtons(
-        color: Colors.black.withOpacity(0.60),
-        constraints: BoxConstraints(
-          minWidth: 25,
-          minHeight: 25,
-        ),
-        selectedBorderColor: Colors.cyan,
-        selectedColor: Colors.cyan,
-        borderRadius: BorderRadius.circular(4.0),
-        isSelected: _selectionsForUser,
-        onPressed: (int index) {
-          setState(() {
-            if (index == 1) {
-              print('push delete button!');
-              print(FirebaseAuth.instance.currentUser.displayName);
-              print(userName);
-
-              /// 사용자가 올린 댓글만 삭제 가능하도록 사용자 이름과 댓글 기록자의 이름을 비교(닉네임 비교로 수정 필요)
-
-              if (comment.userName == userName) {
-                print('same userName');
-
-                /// 정말 삭제할 것인지 사용자에게 질문하는 알림창을 띄우는 위젯
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) => CupertinoAlertDialog(
-                          title: Text('Deleting Comment'),
-                          content: Text(
-                              'Are you sure that you want to delete this comment?'),
-                          actions: <Widget>[
-                            CupertinoDialogAction(
-                              isDefaultAction: true,
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text('No'),
-                            ),
-                            CupertinoDialogAction(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                deleteComments(comment)
-                                    .then((value) => appState.init())
-                                    .catchError((error) => null);
-                              },
-                              child: Text('Yes'),
-                            ),
-                          ],
-                        ));
-              } else {
-                null;
-              }
-            }
-          });
-        },
-        children: [
-          /*Icon(
-            Icons.chat,
-            size: 15,
-          ),
-          Icon(
-            Icons.mode_edit,
-            size: 15,
-          ),*/
-          Icon(
-            Icons.delete,
-            size: 15,
-          ),
-        ],
-      );
-    }
 
     /// ToggleButtons 위젯(대댓글, 좋아요, 삭제)
+
+    /*
+     var _selectionsForOthers = List<bool>.generate(1, (_) => false);
     ToggleButtons _buildCommentToggleButtonsForOthers(
         BuildContext context, ApplicationState appState, Comment comment) {
       return ToggleButtons(
@@ -327,7 +255,7 @@ class _CommentBookState extends State<CommentBook> {
           ),*/
         ],
       );
-    }
+    }*/
 
 
     /// ********************************** 시간 계산하는 함수들 ********************************///
@@ -343,93 +271,6 @@ class _CommentBookState extends State<CommentBook> {
 
     /// comment 를 적는 텍스트 상자의 상태를 control 할 때 사용
     final _commentController = TextEditingController();
-
-
-    /// 현재 시간
-    var nowTime = DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
-        DateTime.now().hour,
-        DateTime.now().minute,
-        DateTime.now().second);
-
-    /// 상품에 저장된 최근에 수정된 시간
-    DateTime commentTime(Timestamp time) {
-      return DateTime(
-          time.toDate().year,
-          time.toDate().month,
-          time.toDate().day,
-          time.toDate().hour,
-          time.toDate().minute,
-          time.toDate().second);
-    }
-
-    /// 현재시간 - 게시글 마지막 수정 시간 계산하여 내보내는 위젯
-    String calculateTime(DateTime commentTime) {
-      var time = nowTime.difference(commentTime).inDays;
-
-      /// 하루가 안지났을 때
-      if (time < 1) {
-        time = nowTime.difference(commentTime).inHours;
-
-        /// 한시간도 안지났을 때
-        if (time < 1) {
-          time = nowTime.difference(commentTime).inMinutes;
-
-          /// 1분도 안지났을 때
-          if (time < 1) {
-            return '방금';
-          } else {
-            return '$time분 전';
-          }
-        } else {
-          return '$time시간 전';
-        }
-      }
-
-      /// 7일이 안지났을 때
-      else if (time < 7) {
-        return '$time일 전';
-      }
-
-      /// 일주일 이상 지났고 한달 미만의 시간이 지났을 떄
-      else if (time >= 7 && time < 30) {
-        time = nowTime.difference(commentTime).inDays;
-        if (time < 14) {
-          return '1주 전';
-        } else if (time < 21) {
-          return '2주 전';
-        } else if (time < 28) {
-          return '3주 전';
-        } else if (time < 30) {
-          return '한달 전';
-        }
-      }
-
-      /// 한달이상 지났을 때
-      else if (time >= 30) {
-        time = nowTime.difference(commentTime).inDays;
-        if (time <= 60) {
-          return '한달 전';
-        } else if (time <= 90) {
-          return '두달 전';
-        } else if (time <= 120) {
-          return '세달 전';
-        } else if (time <= 150) {
-          return '네달 전';
-        } else if (time <= 150) {
-          return '다섯달 전';
-        } else if (time <= 180) {
-          return '반년 전';
-        } else {
-          return '오래 된 글';
-        }
-      } else {
-        return '오래 된 글';
-      }
-      return '오래 된 글';
-    }
 
     /// comments 나열된 화면 구성
     return StreamBuilder<QuerySnapshot>(
@@ -471,7 +312,7 @@ class _CommentBookState extends State<CommentBook> {
                                 ConnectionState.waiting) {
                                 return Text('');
                                 }
-                                userNickName = findNickname(snapshot2,userName);
+                                userNickName = findNickname(snapshot2, userId);
                                 return Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment : CrossAxisAlignment.start,
@@ -482,67 +323,61 @@ class _CommentBookState extends State<CommentBook> {
                                   height: 35,
                                   child: Image.asset(
                                       'assets/userDefaultImage.png'),
-                                ),
-                                SizedBox(width: 8.5),
-                                /// 닉네임
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(height: 1),
-                                    Text(eachComment.nickName,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'NanumSquareRoundR',
-                                        )),
-                                    SizedBox(height: 4),
-                                    FutureBuilder(
-                                      future: returnDate(eachComment.created),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState == ConnectionState.waiting) {
-                                          return Text('    ');
-                                        }
-                                        else {
-                                          //print('${findStudentNumber(snapshot2, eachComment.nickName)}학번');
-                                          return Text( findStudentNumber(snapshot2, eachComment.nickName).substring(1,3) + '학번',
-                                                style: TextStyle(
-                                                  color: Colors.black.withOpacity(0.3),
-                                                  fontSize: 11,
-                                                  fontFamily: 'NanumSquareRoundR',
-                                                ),
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                ///토글버튼
-                                Expanded(
-                                    child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          /// 댓글마다 대댓글, 좋아요, 삭제 기능을 담당하는 버튼 생성
-                                          if(userNickName == eachComment.nickName)
-                                            /*_buildCommentToggleButtonsForUser(
-                                              context,
-                                              Provider.of<ApplicationState>(context, listen: false), eachComment
-                                            )*/
-                                            _CommentDeleteButtonsForUser(context,
-                                                Provider.of<ApplicationState>(context, listen: false), eachComment)
-                                          else
-                                            /*_buildCommentToggleButtonsForOthers(
-                                              context,
-                                              Provider.of<ApplicationState>(context, listen: false), eachComment
-                                              ),*/
-                                           _CommentChatButtonsForOthers(
-                                                context,
-                                                Provider.of<ApplicationState>(context, listen: false), eachComment
-                                           ),
-                                      //SizedBox(width: 10),
-                                    ]))
+                                  ),
+                                  SizedBox(width: 8.5),
+                                  /// 닉네임
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(height: 1),
+                                      Text(findNickname(snapshot2, eachComment.uid),
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'NanumSquareRoundR',
+                                          )),
+                                      SizedBox(height: 4),
+                                      FutureBuilder(
+                                        future: returnDate(eachComment.created),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState == ConnectionState.waiting) {
+                                            return Text('    ');
+                                          }
+                                          else {
+                                            //print('${findStudentNumber(snapshot2, eachComment.nickName)}학번');
+                                            return Text( findStudentNumber(snapshot2, eachComment.uid).substring(1,3) + '학번',
+                                                  style: TextStyle(
+                                                    color: Colors.black.withOpacity(0.3),
+                                                    fontSize: 11,
+                                                    fontFamily: 'NanumSquareRoundR',
+                                                  ),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  ///토글버튼
+                                  Expanded(
+                                      child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            /// 댓글마다 대댓글, 좋아요, 삭제 기능을 담당하는 버튼 생성
+                                            if(userNickName == findNickname(snapshot2, eachComment.uid))
+                                              _CommentDeleteButtonsForUser(context,
+                                                  Provider.of<ApplicationState>(context, listen: false), eachComment)
+                                            else
+                                             _CommentChatButtonsForOthers(
+                                                  context,
+                                                  Provider.of<ApplicationState>(context, listen: false), eachComment
+                                             ),
+                                        //SizedBox(width: 10),
+                                      ]
+                                      )
+                                  )
                               ],
                             );})
                         ),
