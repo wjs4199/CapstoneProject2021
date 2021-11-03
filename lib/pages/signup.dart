@@ -184,6 +184,7 @@ class SignUpState extends State<SignUp> {
                                 'id': FirebaseAuth.instance.currentUser.uid,
                                 'createdAt': FieldValue.serverTimestamp(),
                                 'nickname': textEditingController1.text,
+                                'email' : FirebaseAuth.instance.currentUser.email,
                               }).then((value) {
                                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                 Navigator.push(

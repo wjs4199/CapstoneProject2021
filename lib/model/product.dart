@@ -71,6 +71,7 @@ class Users {
     @required this.nickname,
     @required this.photoUrl,
     @required this.username,
+    @required this.email,
   });
 
   final String createdAt;
@@ -78,4 +79,5 @@ class Users {
   final String nickname;
   final String photoUrl;
   final String username;
+  final String email;
 }
