@@ -170,6 +170,8 @@ class _DetailPageState extends State<DetailPage> {
       );
     }
 
+    var nickName = 'null';
+
     ///************************ 게시글 삭제 및  지난 시간 계산 함수들 ************************///
     /// 게시물 자체 삭제 기능 (왼쪽 상단 휴지통 버튼)
     Future<void> deleteProduct() async {
@@ -368,14 +370,14 @@ class _DetailPageState extends State<DetailPage> {
         .collection('giveProducts/' + productId + '/comment');
 
     /// comment 추가 기능
-    Future<void> addComments(String comment, String nickName) {
+    Future<void> addComments(String comment, String uid) {
       return comments
           .add({
         'userName': FirebaseAuth.instance.currentUser.displayName,
         'comment': comment,
         'created': FieldValue.serverTimestamp(),
         // 빼야할지도!
-        'nickName' : nickName,
+        'uid' : uid,
       })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
@@ -397,14 +399,101 @@ class _DetailPageState extends State<DetailPage> {
     CollectionReference users = FirebaseFirestore.instance.collection('users');
 
     /// 유저의 학번을 찾아서 보여주는 함수
-    String findStudentNumber(AsyncSnapshot<QuerySnapshot> snapshot, String nickName) {
-      var studentNum = '00';
+    String findStudentNumber(AsyncSnapshot<QuerySnapshot> snapshot, String uid) {
+      var email = '00';
       snapshot.data.docs.forEach((document) {
-        if (document['nickname'] == nickName) {
-          studentNum = document['email'];
+        if (document['id'] == uid) {
+          email = document['email'];
         }
       });
-      return studentNum;
+      return email;
+    }
+
+    /// 유저의 닉네임을 찾아서 보여주는 함수
+    String findNickname(AsyncSnapshot<QuerySnapshot> snapshot, String userId) {
+      var nickName = 'null';
+      snapshot.data.docs.forEach((document) {
+        if (document['id'] == userId) {
+          nickName = document['nickname'];
+        }
+      });
+      return nickName;
+    }
+
+
+    /// 게시자 이름 옆의 채팅하기 버튼
+    InkWell _CommentChatButtonsForOthers(
+        BuildContext context, ApplicationState appState) {
+      return InkWell(
+        child: StreamBuilder<QuerySnapshot>(
+          stream: users.snapshots(),
+          builder: (BuildContext context,
+          AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+          return Text('x');
+          }
+          if (snapshot.connectionState ==
+          ConnectionState.waiting) {
+          return Text('');
+          }
+          nickName = findNickname(snapshot, product.uid);
+          return Container(
+              padding: const EdgeInsets.all(6.0),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey.withOpacity(0.1)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(height: 10,),
+                  Text('채팅하기  ',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontFamily: 'NanumSquareRoundR',
+                      height: 1.2,
+                    ),
+                  ),
+                  Image.asset(
+                    'assets/chat_grey.jpg',
+                    //'assets/chat.jpg',
+                    width: 17,
+                    height: 17,
+                  )
+                ],
+              ),
+            );
+          }),
+        onTap: () {
+            print(chatRoomDocId);
+            FirebaseFirestore.instance.collection('chatRoom').doc(chatRoomDocId).update(
+                {
+                  'isRead' : true
+                }
+            ).catchError((error) => print('error: $error'));
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    Chat(
+                      peerId: product.uid,
+                      peerAvatar: product
+                          .user_photoURL,
+                      peerName: nickName,
+                      myName: name, ///editted
+                      myAvatar:
+                      FirebaseAuth
+                          .instance
+                          .currentUser
+                          .photoURL,
+                    ),
+              ),
+            );
+        },
+      );
     }
 
     /// Add 페이지 화면 구성
@@ -634,7 +723,7 @@ class _DetailPageState extends State<DetailPage> {
                                       children: [
                                         SizedBox(height: 20.0),
 
-                                        /// 게시자 사진, 이름 , 시간
+                                        /// 게시자 사진, 이름, 학번
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -647,7 +736,7 @@ class _DetailPageState extends State<DetailPage> {
                                                   'assets/userDefaultImage.png'),
                                             ),
                                             SizedBox(width: 10.0),
-                                    StreamBuilder<QuerySnapshot>(
+                                            StreamBuilder<QuerySnapshot>(
                                                     stream: users.snapshots(),
                                                     builder: (BuildContext context,
                                                     AsyncSnapshot<QuerySnapshot> snapshot2) {
@@ -670,7 +759,7 @@ class _DetailPageState extends State<DetailPage> {
                                                       ),
                                                       /// 이름
                                                       Text(
-                                                          '${product.nickname}',
+                                                          '${findNickname(snapshot2, product.uid)}',
                                                           style: TextStyle(
                                                             fontFamily: 'NanumSquareRoundR',
                                                             color: Colors.black,
@@ -679,7 +768,8 @@ class _DetailPageState extends State<DetailPage> {
                                                           ),
                                                         ),
                                                       SizedBox(height: 3),
-                                                      Text( findStudentNumber(snapshot2, product.nickname).substring(1,3) + '학번',
+                                                      /// 학번
+                                                      Text( findStudentNumber(snapshot2, product.uid).substring(1,3) + '학번',
                                                           style: TextStyle(
                                                             color: Colors.black.withOpacity(0.4),
                                                             fontSize: 13,
@@ -688,76 +778,19 @@ class _DetailPageState extends State<DetailPage> {
                                                         )
                                                     ]
                                                     );
-                                                    })
+                                                    }),
+                                            if(userName != product.userName)
+                                              Expanded(
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                    children: [
+                                                    _CommentChatButtonsForOthers(
+                                                        context, Provider.of<ApplicationState>(context, listen: false),
+                                                    ),
+                                                    ]
+                                                  )
 
-                                                      /*SizedBox(
-                                                        //width: 10,
-                                                        height: 22,
-                                                        child: TextButton(
-                                                            style: TextButton.styleFrom(
-                                                              padding: EdgeInsets.zero,
-                                                              alignment:
-                                                              Alignment.centerLeft,
-                                                              primary: Colors.grey,
-                                                              backgroundColor:
-                                                              Colors.transparent,
-                                                              textStyle: TextStyle(
-                                                                fontFamily: 'Roboto_Bold',
-                                                                fontWeight:
-                                                                FontWeight.bold,
-                                                                fontSize: 12.5,
-                                                                height: 1.2,
-                                                              ),
-                                                            ),
-                                                            onPressed: () {
-                                                              if (FirebaseAuth.instance
-                                                                  .currentUser.uid ==
-                                                                  product.uid) {
-                                                              } else {
-                                                                print(chatRoomDocId);
-                                                                FirebaseFirestore.instance.collection('chatRoom').doc(chatRoomDocId).update(
-                                                                    {
-                                                                      'isRead' : true
-                                                                    }
-                                                                ).catchError((error) => print('error: $error'));
-
-                                                                Navigator.push(
-                                                                  context,
-                                                                  MaterialPageRoute(
-                                                                    builder: (context) =>
-                                                                        Chat(
-                                                                          peerId: product.uid,
-                                                                          peerAvatar: product
-                                                                              .user_photoURL,
-                                                                          peerName: product
-                                                                              .nickname,
-                                                                          myName: name, ///editted
-                                                                          myAvatar:
-                                                                          FirebaseAuth
-                                                                              .instance
-                                                                              .currentUser
-                                                                              .photoURL,
-                                                                        ),
-                                                                  ),
-                                                                );
-                                                              }
-                                                            },
-                                                            child: Row(
-                                                              mainAxisAlignment:
-                                                              MainAxisAlignment.start,
-                                                              children: [
-                                                                Text(
-                                                                  '채팅하기',
-                                                                  textAlign:
-                                                                  TextAlign.left,
-                                                                ),
-                                                                Icon(
-                                                                  Icons.chat,
-                                                                  size: 13.5,
-                                                                ),
-                                                              ],
-                                                            )),
-                                                      )*/
+                                              ),
                                           ],
                                         ),
                                         SizedBox(height: 9.0),
@@ -983,8 +1016,10 @@ class _DetailPageState extends State<DetailPage> {
                             child: Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
-                                  child: TextFormField(
-                                    enabled: _isEnable,
+                                  child: TextField(
+                                    //enabled: _isEnable,
+                                    focusNode: FocusNode(),
+                                    enableInteractiveSelection: _isEnable,
                                     maxLines: null,
                                     keyboardType: TextInputType.multiline,
                                     controller: _commentController,
@@ -995,16 +1030,22 @@ class _DetailPageState extends State<DetailPage> {
                                       disabledBorder: InputBorder.none,
                                       hintText: '댓글을 입력하세요',
                                     ),
-                                    validator: (value) {
+                                    /*validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return '댓글을 입력하세요';
                                       }
                                       return null;
                                       // 15줄 이상 입력했을 시
-                                    },
+                                    },*/
                                     onChanged: (val) {
                                       if(_commentController.text.length > 250) {
-                                        _isEnable = false;
+                                        setState(() {
+                                          _isEnable = false;
+                                        });
+                                      } else if(_commentController.text.length == 250){
+                                        setState(() {
+                                          _isEnable = true;
+                                        });
                                       }
                                     },
                                   ),
@@ -1021,7 +1062,7 @@ class _DetailPageState extends State<DetailPage> {
                               currentFocus.unfocus();
                               if (_commentFormKey.currentState.validate()) {
                                 //빼야할수도!
-                                await addComments(_commentController.text, product.nickname)
+                                await addComments(_commentController.text, product.uid)
                                     .then((value) => print('add comment ok!'));
                                 _commentController.clear();
                                 products = detailGiveOrTake == 'giveProducts'
