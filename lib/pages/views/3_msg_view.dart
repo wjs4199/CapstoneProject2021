@@ -43,6 +43,9 @@ class MessagePage extends StatefulWidget {
 }
 
 class _MessagePageState extends State<MessagePage> {
+  var isRead;
+  var check;
+  var isShowed;
   @override
   void initState() {
     super.initState();
@@ -73,20 +76,10 @@ class _MessagePageState extends State<MessagePage> {
 
 
  */
-
-  // await Navigator.pushNamed(context, '/message');
-    /*
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MessagePage(),
-      ),
-    );
-
-     */
-
-
   }
+
+
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -138,17 +131,9 @@ class _MessagePageState extends State<MessagePage> {
         if (document.get('idFrom') == FirebaseAuth.instance.currentUser.uid)
           ///내가 보내는 입장이면
         {
-
           return _buildSenderScreen(context, document);
         } else {
-
-         // if(_messageState == false) {
-           // _showNotification();
-          //}
-       //   _buildIcon(document.id);
-        //  print(check);
-        //  print(isRead);
-          return _buildReceiverScreen(context, document, isRead);
+          return _buildReceiverScreen(context, document);
         }
     } else {
       return SizedBox.shrink();
@@ -167,6 +152,7 @@ class _MessagePageState extends State<MessagePage> {
       child: TextButton(
         /// 각 사용자들의 list 를 누르면 채팅창으로 넘어간다
         onPressed: () {
+
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -250,21 +236,10 @@ class _MessagePageState extends State<MessagePage> {
                       child: Text(
                         '${document.get('peerNickname')}',
                         maxLines: 1,
-                        style: TextStyle(color: primaryColor),
+                        style: TextStyle(color: primaryColor, fontSize: 17),
                       ),
                     ),
-                    /*
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                        child: Text(
-                          'About me: ${userChat.aboutMe}',
-                          maxLines: 1,
-                          style: TextStyle(color: primaryColor),
-                        ),
-                      )
 
-                     */
                   ],
                 ),
               ),
@@ -276,17 +251,26 @@ class _MessagePageState extends State<MessagePage> {
   }
 
   Container _buildReceiverScreen(
-      BuildContext context, DocumentSnapshot document, bool isRead) {
-    _buildIcon(document.id);
-    //print(isRead);
-    //print(check);
-    return Container(
+      BuildContext context, DocumentSnapshot document) {
+    //var iss = _buildIcon(document.id);
+
+    _isShowedNoti(document.id);
+      return Container(
       margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
 
       /// 메신저 탭에서 각각 사용자들 list 를 클릭할 수 있게 만들어 놓은 text button
       child: TextButton(
         /// 각 사용자들의 list 를 누르면 채팅창으로 넘어간다
         onPressed: () {
+          if(document.id.isNotEmpty) {
+            FirebaseFirestore.instance.collection('chatRoom').doc(document.id).update(
+                {
+                  'isRead' : ''
+                }
+            ).catchError((error) => print('error: $error'));
+          }
+
+
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -314,7 +298,6 @@ class _MessagePageState extends State<MessagePage> {
 
         /// 각 사용자에 대한 list 를 만드는 row
         child:
-
         Row(
           children: <Widget>[
             Material(
@@ -371,7 +354,7 @@ class _MessagePageState extends State<MessagePage> {
                       child: Text(
                         '${document.get('myNickname')}',
                         maxLines: 1,
-                        style: TextStyle(color: primaryColor),
+                        style: TextStyle(color: primaryColor, fontSize: 17),
                       ),
                     ),
                     /*
@@ -389,43 +372,70 @@ class _MessagePageState extends State<MessagePage> {
                 ),
               ),
             ),
-        isRead? Icon(null) : Icon(Icons.message),
+            //if(read != null)
+
+            Text(
+            '${document.get('isRead')}',
+             style: TextStyle(
+            fontSize: 15.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.blueAccent
+            ),
+            ),
+
+
+/*
+
+            AnimatedTextKit(animatedTexts: [
+              WavyAnimatedText(
+                '${document.get('isRead')}',
+                textStyle: const TextStyle(
+                  fontSize: 15.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent
+                ), //colors: [Colors.blueAccent, Colors.red, Colors.amberAccent, Colors.greenAccent],
+                //speed: const Duration(milliseconds: 2000),
+              ),
+            ],
+
+            ),
+            */
+
+
           ],
         ),
       ),
     );
+
+
   }
+
+  _isShowedNoti(String documentId) async {
+
+    await FirebaseFirestore.instance.collection('chatRoom').doc(documentId)
+        .get()
+        .then((DocumentSnapshot ds) {
+      isShowed = ds['isShowedNotification'];
+    });
+
+      if(isShowed == false) {
+           await _showNotification()
+            .then((value) =>
+            FirebaseFirestore.instance.collection('chatRoom').doc(documentId).update(
+                {
+                  'isShowedNotification' : true
+                }
+            ).catchError((error) => print('error: $error')),
+
+        );
+
+      }
+
+    }
+
+
 }
-var isRead = true;
-var check;
-var isShowed;
-_buildIcon(String documentId){
-  FirebaseFirestore.instance.collection('chatRoom').doc(documentId)
-      .get()
-      .then((DocumentSnapshot ds) {
-    check = ds['isRead'];
-    isRead = check;
-    isShowed = ds['isShowedNotification'];
-    if(isRead){
 
-    }
-    else{
-      print(isShowed);
-    if(isShowed == false) {
-      _showNotification()
-          .then((value) =>
-          FirebaseFirestore.instance.collection('chatRoom').doc(documentId).update(
-              {
-                'isShowedNotification' : true
-              }
-          ).catchError((error) => print('error: $error')),
-
-      );
-
-    }
-    }
-  });
-}
 
 
 

@@ -205,7 +205,7 @@ class ChatScreenState extends State<ChatScreen> {
             'peerNickname' : peerName,
             'myNickname' : myName,
             'myAvatar' : myAvatar,
-            'isRead' : false,
+            'isRead' : 'new',
             'isShowedNotification': false,
           },
         );
@@ -586,13 +586,6 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
 
-    if(groupChatId.isNotEmpty) {
-      FirebaseFirestore.instance.collection('chatRoom').doc(groupChatId).update(
-        {
-          'isRead' : true
-        }
-    ).catchError((error) => print('error: $error'));
-    }
     return WillPopScope(
       onWillPop: onBackPress,
       child: Stack(

@@ -34,6 +34,7 @@ dependencies:
   flutter_speed_dial: ^4.5.0 # JM
   flutter_cache_manager: ^3.1.2 # JM
   cached_network_image: ^3.1.0 # JM
+  animated_text_kit: ^4.2.1 #찬식
 
 
 dev_dependencies:
@@ -68,6 +69,9 @@ flutter:
     - assets/no-thumbnail.jpg
     - assets/chat.jpg
     - assets/chat_grey.jpg
+    - assets/logo_size.jpg
+    - assets/logo_size_invert.jpg
+    - assets/logo2.png
 
 
   fonts:

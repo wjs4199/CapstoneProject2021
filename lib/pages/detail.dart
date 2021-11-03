@@ -468,12 +468,6 @@ class _DetailPageState extends State<DetailPage> {
             );
           }),
         onTap: () {
-            print(chatRoomDocId);
-            FirebaseFirestore.instance.collection('chatRoom').doc(chatRoomDocId).update(
-                {
-                  'isRead' : true
-                }
-            ).catchError((error) => print('error: $error'));
 
             Navigator.push(
               context,

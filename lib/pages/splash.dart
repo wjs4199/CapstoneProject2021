@@ -47,9 +47,9 @@ class _SplashPageState extends State<SplashPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
-              "assets/hgu.png",
-              width: 100,
-              height: 100,
+              'assets/logo2.png',
+              width: 120,
+              height: 120,
             ),
             SizedBox(height: 20),
             Container(
