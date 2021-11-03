@@ -33,7 +33,9 @@ class Chat extends StatelessWidget {
         title: Text(
           'CHAT',
           style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+
         ),
+        backgroundColor: Theme.of(context).primaryColor,
         centerTitle: true,
       ),
       body: ChatScreen(

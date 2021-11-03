@@ -6,7 +6,9 @@ import 'home.dart';
 
 
 TextEditingController textEditingController1 = TextEditingController();
+var name = '';
 var nickname = '';
+var currentUserId = FirebaseAuth.instance.currentUser.uid;
 
 
 class SignUp extends StatefulWidget {
@@ -18,10 +20,8 @@ class SignUp extends StatefulWidget {
 class SignUpState extends State<SignUp> {
 
   final _formKey = GlobalKey<FormState>();
-
   CollectionReference users =
   FirebaseFirestore.instance.collection('users');
-
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +29,11 @@ class SignUpState extends State<SignUp> {
     var checkLoop = false;
     var isCurrentName = false;
     var isInvalid = false;
-    var name = '';
-    var currentUserId = FirebaseAuth.instance.currentUser.uid;
 
     final snackBar1 = SnackBar(content: Text('중복이 존재합니다'));
     final snackBar2 = SnackBar(content: Text('사용해도 좋습니다'));
     final snackBar3 = SnackBar(content: Text('중복체크를 해주세요'));
     final snackBar4 = SnackBar(content: Text('닉네임을 한글자 이상 입력해주세요'));
-
 
     Future<String> _currentNickname() async {
       await FirebaseFirestore.instance.collection('users').doc(currentUserId)
@@ -48,8 +45,10 @@ class SignUpState extends State<SignUp> {
       return name;
     }
 
-    _currentNickname();
+
+   _currentNickname();
     //print("nickname = " + nickname);
+
 
     return Scaffold(
       body: Form(
@@ -59,7 +58,7 @@ class SignUpState extends State<SignUp> {
           child: Column(
             children: [
               Text(
-                "현재 닉네임: " + nickname,
+                '현재 닉네임: ' + nickname,
                 style: TextStyle(color: Colors.black54, letterSpacing: 1.0),
               ),
               Padding(
@@ -73,7 +72,7 @@ class SignUpState extends State<SignUp> {
                   },
                   controller: textEditingController1,
                   decoration: InputDecoration(
-                    hintText: ("변경할 닉네임"),
+                    hintText: ('변경할 닉네임'),
                     fillColor: Colors.white30,
                     filled: true,
                   ),
