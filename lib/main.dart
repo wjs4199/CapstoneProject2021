@@ -307,9 +307,9 @@ class ApplicationState extends ChangeNotifier {
           _commentContext.add(Comment(
             userName: document.data()['userName'],
             comment: document.data()['comment'],
-            created: document.data()['time'],
+            created: document.data()['created'],
             id: document.id,
-            nickName: document.data()['nickname'],
+            nickName: document.data()['nickName'],
 
             ///edited
             //   isDeleted: document.data()['idDeleted'],
@@ -348,6 +348,7 @@ class ApplicationState extends ChangeNotifier {
           nickname: document.data()['nickname'],
           photoUrl: document.data()['photoUrl'],
           username: document.data()['username'],
+          email : document.data()['email'],
         ));
       });
       notifyListeners();

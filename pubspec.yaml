@@ -47,9 +47,7 @@ flutter:
   assets:
     - assets/hgu.png
     - assets/logo.png
-    - assets/userDefault.png
     - assets/userDefaultImage.png
-    - assets/defaultPhoto.png
     - assets/sample.jpg
     - images/img_not_available.jpeg
     - images/mimi1.gif
@@ -68,6 +66,8 @@ flutter:
     - assets/mobile.png
     - assets/social.png
     - assets/no-thumbnail.jpg
+    - assets/chat.jpg
+    - assets/chat_grey.jpg
 
 
   fonts:
@@ -90,3 +90,7 @@ flutter:
     - family: Roboto_Bold
       fonts:
         - asset: fonts/Roboto-Bold.ttf
+
+    - family: Roboto_Regular
+      fonts:
+        - asset: fonts/Roboto-Regular.ttf

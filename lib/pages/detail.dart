@@ -58,6 +58,8 @@ class _DetailPageState extends State<DetailPage> {
   /// comment 적는 텍스트 칸이 빈칸인지 아닌지 분별할 때 사용됨
   final _commentFormKey = GlobalKey<FormState>(debugLabel: '_CommentState');
 
+  String _text = " ";
+
   /// comment 를 적는 텍스트 상자의 상태를 control 할 때 사용
   final _commentController = TextEditingController();
 
@@ -390,8 +392,20 @@ class _DetailPageState extends State<DetailPage> {
 
     _currentNickname();
 
+    var _isEnable = true;
 
-    var currentFocus = FocusScope.of(context);
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+    /// 유저의 학번을 찾아서 보여주는 함수
+    String findStudentNumber(AsyncSnapshot<QuerySnapshot> snapshot, String nickName) {
+      var studentNum = '00';
+      snapshot.data.docs.forEach((document) {
+        if (document['nickname'] == nickName) {
+          studentNum = document['email'];
+        }
+      });
+      return studentNum;
+    }
 
     /// Add 페이지 화면 구성
     return Scaffold(
@@ -633,12 +647,19 @@ class _DetailPageState extends State<DetailPage> {
                                                   'assets/userDefaultImage.png'),
                                             ),
                                             SizedBox(width: 10.0),
-                                            SizedBox(
-                                                height: 42,
-                                                child:
-
-                                                /// 이름과 시간
-                                                Column(
+                                    StreamBuilder<QuerySnapshot>(
+                                                    stream: users.snapshots(),
+                                                    builder: (BuildContext context,
+                                                    AsyncSnapshot<QuerySnapshot> snapshot2) {
+                                                    if (snapshot2.hasError) {
+                                                    return Text('x');
+                                                    }
+                                                    if (snapshot2.connectionState ==
+                                                    ConnectionState.waiting) {
+                                                    return Text('');
+                                                    }
+                                                    /// 이름과 학번
+                                                    return Column(
                                                     mainAxisAlignment:
                                                     MainAxisAlignment.start,
                                                     crossAxisAlignment:
@@ -647,23 +668,29 @@ class _DetailPageState extends State<DetailPage> {
                                                       SizedBox(
                                                         height: 2,
                                                       ),
-
                                                       /// 이름
-                                                      SizedBox(
-                                                        //width: 10,
-                                                        height: 18,
-                                                        child: Text(
-                                                          '${product.nickname}\n',
+                                                      Text(
+                                                          '${product.nickname}',
                                                           style: TextStyle(
-                                                            fontFamily: 'Roboto_Bold',
+                                                            fontFamily: 'NanumSquareRoundR',
                                                             color: Colors.black,
                                                             fontWeight: FontWeight.bold,
-                                                            fontSize: 15,
-                                                            height: 1,
+                                                            fontSize: 16,
                                                           ),
                                                         ),
-                                                      ),
-                                                      SizedBox(
+                                                      SizedBox(height: 3),
+                                                      Text( findStudentNumber(snapshot2, product.nickname).substring(1,3) + '학번',
+                                                          style: TextStyle(
+                                                            color: Colors.black.withOpacity(0.4),
+                                                            fontSize: 13,
+                                                            fontFamily: 'NanumSquareRoundR',
+                                                          ),
+                                                        )
+                                                    ]
+                                                    );
+                                                    })
+
+                                                      /*SizedBox(
                                                         //width: 10,
                                                         height: 22,
                                                         child: TextButton(
@@ -720,7 +747,7 @@ class _DetailPageState extends State<DetailPage> {
                                                               MainAxisAlignment.start,
                                                               children: [
                                                                 Text(
-                                                                  ' 채팅하기',
+                                                                  '채팅하기',
                                                                   textAlign:
                                                                   TextAlign.left,
                                                                 ),
@@ -730,8 +757,7 @@ class _DetailPageState extends State<DetailPage> {
                                                                 ),
                                                               ],
                                                             )),
-                                                      )
-                                                    ]))
+                                                      )*/
                                           ],
                                         ),
                                         SizedBox(height: 9.0),
@@ -742,7 +768,7 @@ class _DetailPageState extends State<DetailPage> {
                                             RichText(
                                               text: TextSpan(
                                                   style: TextStyle(
-                                                    fontFamily: 'Roboto_Black',
+                                                    fontFamily: 'NanumSquareRoundR',
                                                     color: Colors.black,
                                                     fontWeight: FontWeight.bold,
                                                   ),
@@ -750,7 +776,7 @@ class _DetailPageState extends State<DetailPage> {
                                                     TextSpan(
                                                       text: '${product.title}\n',
                                                       style: TextStyle(
-                                                        fontFamily: 'Roboto_Bold',
+                                                        fontFamily: 'NanumSquareRoundR',
                                                         color: Colors.black,
                                                         fontWeight: FontWeight.bold,
                                                         fontSize: 22,
@@ -778,7 +804,7 @@ class _DetailPageState extends State<DetailPage> {
                                         Text(
                                           product.content ?? product.content,
                                           style: TextStyle(
-                                            fontFamily: 'Roboto_Bold',
+                                            fontFamily: 'NanumSquareRoundR',
                                             color: Colors.black,
                                             //fontWeight: FontWeight.bold,
                                             fontSize: 17,
@@ -813,7 +839,7 @@ class _DetailPageState extends State<DetailPage> {
                                                   return Text(
                                                     '\n\n조회 ${product.hits}회 · 좋아요 ${snapshot2.data}회',
                                                     style: TextStyle(
-                                                      fontFamily: 'Roboto_Bold',
+                                                      fontFamily: 'NanumSquareRoundR',
                                                       color: Colors.grey,
                                                       //fontWeight: FontWeight.bold,
                                                       fontSize: 13,
@@ -833,7 +859,7 @@ class _DetailPageState extends State<DetailPage> {
 
                             /// 게시물 내용 아래 댓글들
                             Container(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.fromLTRB(8.0, 4, 8 , 8),
                                 child: CommentBook(
                                   detailGiveOrTake: detailGiveOrTake,
                                   productId: productId,
@@ -841,7 +867,7 @@ class _DetailPageState extends State<DetailPage> {
 
                             /// 고정된 댓글 창과 겹치지 않게하는 sizedbox
                             SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.038,
+                              height: MediaQuery.of(context).size.height * 0.044,
                             ),
                           ],
                         ),
@@ -856,7 +882,7 @@ class _DetailPageState extends State<DetailPage> {
                   children: [
                     Container(
                       width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height * 0.057,
+                      //height: MediaQuery.of(context).size.height * 0.157,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: Color(0xffe5e5e5),
@@ -867,6 +893,7 @@ class _DetailPageState extends State<DetailPage> {
                       margin: EdgeInsets.fromLTRB(7.0, 7.0, 7.0, 1.0),
                       child: Row(
                         children: [
+                          // 하트 아이콘
                           Container(
                             width: 50,
                             child: StreamBuilder<QuerySnapshot>(
@@ -950,12 +977,16 @@ class _DetailPageState extends State<DetailPage> {
                                       });
                                 }),
                           ),
+                          // 입력부분
                           Form(
                             key: _commentFormKey,
                             child: Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
                                   child: TextFormField(
+                                    enabled: _isEnable,
+                                    maxLines: null,
+                                    keyboardType: TextInputType.multiline,
                                     controller: _commentController,
                                     decoration: const InputDecoration(
                                       focusedBorder: InputBorder.none,
@@ -969,11 +1000,18 @@ class _DetailPageState extends State<DetailPage> {
                                         return '댓글을 입력하세요';
                                       }
                                       return null;
+                                      // 15줄 이상 입력했을 시
+                                    },
+                                    onChanged: (val) {
+                                      if(_commentController.text.length > 250) {
+                                        _isEnable = false;
+                                      }
                                     },
                                   ),
                                 )),
                           ),
                           SizedBox(width: 3),
+                          // 댓글 저장 아이콘
                           IconButton(
                             icon: const Icon(Icons.send_outlined),
                             iconSize: 27,
@@ -1002,150 +1040,6 @@ class _DetailPageState extends State<DetailPage> {
           ],
         )
       ),
-      /*bottomNavigationBar: SafeArea(
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height * 0.057,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: Color(0xffe5e5e5),
-            boxShadow: [
-              BoxShadow(color: Color(0xffe5e5e5), spreadRadius: 2),
-            ],
-          ),
-          margin: EdgeInsets.fromLTRB(7.0, 7.0, 7.0, 0.0),
-          child: Row(
-            children: [
-              Container(
-                width: 50,
-                child: StreamBuilder<QuerySnapshot>(
-                    stream: likes.snapshots(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      if (snapshot.hasError) {
-                        return Text('x');
-                      }
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Text('');
-                      }
-                      return StreamBuilder<Icon>(
-                          stream: changeFavoriteButton.stream,
-                          initialData: isLiked(snapshot)
-                              ? Icon(
-                            Icons.favorite,
-                            color: Theme.of(context).primaryColor,
-                            semanticLabel: 'like',
-                          )
-                              : Icon(
-                            Icons.favorite_border_outlined,
-                            color: Theme.of(context).primaryColor,
-                            semanticLabel: 'like',
-                          ),
-                          builder: (context, snapshot2) {
-                            /// changeFavoriteButton 스트림 컨트롤러에 새 데이터가 들어올때마다 부분적으로 빌드됨
-                            return IconButton(
-
-                              /// 아이콘의 snapshot2 => changeFavoriteButton 스트림으로 건네준 아이콘
-                                icon: snapshot2.data,
-                                onPressed: () async {
-                                  /// 이미 좋아요가 눌러져 있었을 떄
-                                  if (isLiked(snapshot)) {
-                                    await deleteLike(userId)
-                                        .catchError((error) => null)
-                                        .whenComplete(() {
-                                      products =
-                                      detailGiveOrTake == 'giveProducts'
-                                          ? context
-                                          .read<ApplicationState>()
-                                          .giveProducts
-                                          : context
-                                          .read<ApplicationState>()
-                                          .takeProducts;
-                                      changeFavoriteButton.add(Icon(
-                                        Icons.favorite_border_outlined,
-                                        color: Theme.of(context).primaryColor,
-                                        semanticLabel: 'like',
-                                      ));
-                                      changeLikeCount.add(context
-                                          .read<ApplicationState>()
-                                          .likeCount);
-                                    });
-                                  }
-
-                                  /// 좋아요가 눌러져 있지 않을 때
-                                  else {
-                                    await addLike()
-                                        .catchError((error) => null)
-                                        .whenComplete(() {
-                                      products =
-                                      detailGiveOrTake == 'giveProducts'
-                                          ? context
-                                          .read<ApplicationState>()
-                                          .giveProducts
-                                          : context
-                                          .read<ApplicationState>()
-                                          .takeProducts;
-                                      changeFavoriteButton.add(Icon(
-                                        Icons.favorite,
-                                        color: Theme.of(context).primaryColor,
-                                        semanticLabel: 'like',
-                                      ));
-                                      changeLikeCount.add(context
-                                          .read<ApplicationState>()
-                                          .likeCount);
-                                    });
-                                  }
-                                });
-                          });
-                    }),
-              ),
-              Form(
-                key: _commentFormKey,
-                child: Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
-                      child: TextFormField(
-                        controller: _commentController,
-                        decoration: const InputDecoration(
-                          focusedBorder: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          errorBorder: InputBorder.none,
-                          disabledBorder: InputBorder.none,
-                          hintText: '댓글을 입력하세요',
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return '댓글을 입력하세요';
-                          }
-                          return null;
-                        },
-                      ),
-                    )),
-              ),
-              SizedBox(width: 3),
-              IconButton(
-                icon: const Icon(Icons.send_outlined),
-                iconSize: 27,
-                color: Theme.of(context).primaryColor,
-                onPressed: () async {
-                  var currentFocus = FocusScope.of(context);
-                  currentFocus.unfocus();
-                  if (_commentFormKey.currentState.validate()) {
-                    //빼야할수도!
-                    await addComments(_commentController.text, product.nickname)
-                        .then((value) => print('add comment ok!'));
-                    _commentController.clear();
-                    products = detailGiveOrTake == 'giveProducts'
-                        ? context.read<ApplicationState>().giveProducts
-                        : context.read<ApplicationState>().takeProducts;
-                    print('clear!');
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-      ),*/
     );
   }
 }

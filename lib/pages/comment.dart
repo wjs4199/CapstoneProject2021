@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -32,7 +33,17 @@ class _CommentBookState extends State<CommentBook> {
   var userName = FirebaseAuth.instance.currentUser.displayName;
   var userId = FirebaseAuth.instance.currentUser.uid;
   var userNickName = 'null';
-  var commentNickName = 'null';
+
+  /// 유저의 학번을 찾아서 보여주는 함수
+  String findStudentNumber(AsyncSnapshot<QuerySnapshot> snapshot, String nickName) {
+    var studentNum = '00';
+    snapshot.data.docs.forEach((document) {
+      if (document['nickname'] == nickName) {
+        studentNum = document['email'];
+      }
+    });
+    return studentNum;
+  }
 
   /// 유저의 닉네임을 찾아서 보여주는 함수
   String findNickname(AsyncSnapshot<QuerySnapshot> snapshot, String name) {
@@ -42,15 +53,13 @@ class _CommentBookState extends State<CommentBook> {
         nickName = document['nickname'];
       }
     });
-
-    print('찾은 닉네임은 $nickName!!');
-
     return nickName;
   }
 
   /// Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
   StreamController<String> commentSetStream =
       StreamController<String>.broadcast();
+
 
   @override
   Widget build(BuildContext context) {
@@ -85,9 +94,92 @@ class _CommentBookState extends State<CommentBook> {
     }
 
     /// ToggleButtons 내의 대댓글, 좋아요, 삭제 버튼의 상태를 표시하기 위해 필요한 리스트 변수
-    //var _selections = List<bool>.generate(3, (_) => false);
     var _selectionsForUser = List<bool>.generate(2, (_) => false);
-    var _selectionsForOthers = List<bool>.generate(2, (_) => false);
+    var _selectionsForOthers = List<bool>.generate(1, (_) => false);
+
+    InkWell _CommentDeleteButtonsForUser(
+        BuildContext context, ApplicationState appState, Comment comment) {
+      return InkWell(
+        child: Icon(
+          Icons.clear_rounded,
+          size: 16,
+          color: Colors.black.withOpacity(0.2),
+        ),
+        onTap: () {
+          setState(() {
+            print('push delete button!');
+            print(FirebaseAuth.instance.currentUser.displayName);
+            print(userName);
+
+            /// 사용자가 올린 댓글만 삭제 가능하도록 사용자 이름과 댓글 기록자의 이름을 비교(닉네임 비교로 수정 필요)
+            print('same userName');
+
+            /// 정말 삭제할 것인지 사용자에게 질문하는 알림창을 띄우는 위젯
+            showDialog(
+                context: context,
+                builder: (BuildContext context) => CupertinoAlertDialog(
+                  title: Text('Deleting Comment'),
+                  content: Text(
+                      'Are you sure that you want to delete this comment?'),
+                  actions: <Widget>[
+                    CupertinoDialogAction(
+                      isDefaultAction: true,
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('No'),
+                    ),
+                    CupertinoDialogAction(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        deleteComments(comment)
+                            .then((value) => appState.init())
+                            .catchError((error) => null);
+                      },
+                      child: Text('Yes'),
+                    ),
+                  ],
+                ));
+          });
+        },
+      );
+    }
+
+    InkWell _CommentChatButtonsForOthers(
+        BuildContext context, ApplicationState appState, Comment comment) {
+      return InkWell(
+        child: Container(
+          padding: const EdgeInsets.all(2.0),
+          decoration: BoxDecoration(
+            color: Colors.grey.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(5),
+            border: Border.all(color: Colors.grey.withOpacity(0.6)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text('채팅하기 ',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontFamily: 'NanumSquareRoundR',
+                  height: 1.2,
+                ),
+              ),
+              Image.asset(
+                'assets/chat_grey.jpg',
+                //'assets/chat.jpg',
+                width: 13,
+                height: 13,
+              )
+            ],
+          ),
+        ),
+        onTap: () {
+         //
+        },
+      );
+    }
 
     /// ToggleButtons 위젯(대댓글, 좋아요, 삭제)
     ToggleButtons _buildCommentToggleButtonsForUser(
@@ -150,11 +242,11 @@ class _CommentBookState extends State<CommentBook> {
           /*Icon(
             Icons.chat,
             size: 15,
-          ),*/
+          ),
           Icon(
             Icons.mode_edit,
             size: 15,
-          ),
+          ),*/
           Icon(
             Icons.delete,
             size: 15,
@@ -225,11 +317,11 @@ class _CommentBookState extends State<CommentBook> {
             Icons.chat,
             size: 15,
           ),
-          Icon(
+      /*Icon(
             Icons.more_horiz,
             size: 15,
           ),
-          /*Icon(
+          Icon(
             Icons.delete,
             size: 15,
           ),*/
@@ -237,8 +329,107 @@ class _CommentBookState extends State<CommentBook> {
       );
     }
 
+
+    /// ********************************** 시간 계산하는 함수들 ********************************///
+
+    Future<String> returnDate(Timestamp time) async {
+      //await Future.delayed(Duration(seconds: 1));
+      try {
+        return DateFormat('MM/dd HH:mm').format(time.toDate());
+      } on Exception {
+        return null;
+      }
+    }
+
     /// comment 를 적는 텍스트 상자의 상태를 control 할 때 사용
     final _commentController = TextEditingController();
+
+
+    /// 현재 시간
+    var nowTime = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+        DateTime.now().hour,
+        DateTime.now().minute,
+        DateTime.now().second);
+
+    /// 상품에 저장된 최근에 수정된 시간
+    DateTime commentTime(Timestamp time) {
+      return DateTime(
+          time.toDate().year,
+          time.toDate().month,
+          time.toDate().day,
+          time.toDate().hour,
+          time.toDate().minute,
+          time.toDate().second);
+    }
+
+    /// 현재시간 - 게시글 마지막 수정 시간 계산하여 내보내는 위젯
+    String calculateTime(DateTime commentTime) {
+      var time = nowTime.difference(commentTime).inDays;
+
+      /// 하루가 안지났을 때
+      if (time < 1) {
+        time = nowTime.difference(commentTime).inHours;
+
+        /// 한시간도 안지났을 때
+        if (time < 1) {
+          time = nowTime.difference(commentTime).inMinutes;
+
+          /// 1분도 안지났을 때
+          if (time < 1) {
+            return '방금';
+          } else {
+            return '$time분 전';
+          }
+        } else {
+          return '$time시간 전';
+        }
+      }
+
+      /// 7일이 안지났을 때
+      else if (time < 7) {
+        return '$time일 전';
+      }
+
+      /// 일주일 이상 지났고 한달 미만의 시간이 지났을 떄
+      else if (time >= 7 && time < 30) {
+        time = nowTime.difference(commentTime).inDays;
+        if (time < 14) {
+          return '1주 전';
+        } else if (time < 21) {
+          return '2주 전';
+        } else if (time < 28) {
+          return '3주 전';
+        } else if (time < 30) {
+          return '한달 전';
+        }
+      }
+
+      /// 한달이상 지났을 때
+      else if (time >= 30) {
+        time = nowTime.difference(commentTime).inDays;
+        if (time <= 60) {
+          return '한달 전';
+        } else if (time <= 90) {
+          return '두달 전';
+        } else if (time <= 120) {
+          return '세달 전';
+        } else if (time <= 150) {
+          return '네달 전';
+        } else if (time <= 150) {
+          return '다섯달 전';
+        } else if (time <= 180) {
+          return '반년 전';
+        } else {
+          return '오래 된 글';
+        }
+      } else {
+        return '오래 된 글';
+      }
+      return '오래 된 글';
+    }
 
     /// comments 나열된 화면 구성
     return StreamBuilder<QuerySnapshot>(
@@ -266,71 +457,99 @@ class _CommentBookState extends State<CommentBook> {
                   Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        ///사진, 이름, 토글버튼
                         Padding(
-                            padding: const EdgeInsets.fromLTRB(10.0, 5, 0.0, 13),
-                            child: Row(
+                            padding: const EdgeInsets.fromLTRB(10.0, 3, 10.0, 10),
+                            child: StreamBuilder<QuerySnapshot>(
+                                stream: users.snapshots(),
+                                builder: (BuildContext context,
+                                AsyncSnapshot<QuerySnapshot> snapshot2) {
+                                if (snapshot2.hasError) {
+                                return Text('x');
+                                }
+                                if (snapshot2.connectionState ==
+                                ConnectionState.waiting) {
+                                return Text('');
+                                }
+                                userNickName = findNickname(snapshot2,userName);
+                                return Row(
                               mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment : CrossAxisAlignment.start,
                               children: [
                                 /// 사용자의 구글 이메일 프로필 사진으로 바꾸는 작업 필요
                                 SizedBox(
-                                  width: 30,
-                                  height: 30,
+                                  width: 35,
+                                  height: 35,
                                   child: Image.asset(
                                       'assets/userDefaultImage.png'),
                                 ),
                                 SizedBox(width: 8.5),
-                                StreamBuilder<QuerySnapshot>(
-                                    stream: users.snapshots(),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                                      if (snapshot.hasError) {
-                                        return Text('x');
-                                      }
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return Text('');
-                                      }
-                                      //userNickName = findNickname(snapshot, FirebaseAuth.instance.currentUser.displayName);
-                                      //commentNickName = findNickname(snapshot, eachComment.userName);
-                                      return SizedBox(
-                                        height: 30,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            SizedBox(height: 5),
-                                            Text(findNickname(snapshot, eachComment.userName),
+                                /// 닉네임
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 1),
+                                    Text(eachComment.nickName,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'NanumSquareRoundR',
+                                        )),
+                                    SizedBox(height: 4),
+                                    FutureBuilder(
+                                      future: returnDate(eachComment.created),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                          return Text('    ');
+                                        }
+                                        else {
+                                          //print('${findStudentNumber(snapshot2, eachComment.nickName)}학번');
+                                          return Text( findStudentNumber(snapshot2, eachComment.nickName).substring(1,3) + '학번',
                                                 style: TextStyle(
-                                                  fontSize: 15,
-                                                  color: Colors.black,
-                                                )),
-                                          ],
-                                        ),
-                                      );
-                                    }),
+                                                  color: Colors.black.withOpacity(0.3),
+                                                  fontSize: 11,
+                                                  fontFamily: 'NanumSquareRoundR',
+                                                ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                ///토글버튼
                                 Expanded(
                                     child: Row(
                                         mainAxisAlignment: MainAxisAlignment.end,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          /// 댓글마다 대댓글, 좋아요, 삭제 기능을 담당하는 토글버튼 생성
-                                          if(userName == eachComment.userName)
-                                            _buildCommentToggleButtonsForUser(
+                                          /// 댓글마다 대댓글, 좋아요, 삭제 기능을 담당하는 버튼 생성
+                                          if(userNickName == eachComment.nickName)
+                                            /*_buildCommentToggleButtonsForUser(
                                               context,
                                               Provider.of<ApplicationState>(context, listen: false), eachComment
-                                            )
+                                            )*/
+                                            _CommentDeleteButtonsForUser(context,
+                                                Provider.of<ApplicationState>(context, listen: false), eachComment)
                                           else
-                                            _buildCommentToggleButtonsForOthers(
+                                            /*_buildCommentToggleButtonsForOthers(
+                                              context,
+                                              Provider.of<ApplicationState>(context, listen: false), eachComment
+                                              ),*/
+                                           _CommentChatButtonsForOthers(
                                                 context,
                                                 Provider.of<ApplicationState>(context, listen: false), eachComment
-                                            ),
-                                      SizedBox(width: 10),
+                                           ),
+                                      //SizedBox(width: 10),
                                     ]))
                               ],
-                            )
+                            );})
                         ),
-                        ///comment 내용
+                        /// comment 내용
                         Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   SizedBox(width: 11.0),
                                   if(commentEdit)
@@ -352,13 +571,6 @@ class _CommentBookState extends State<CommentBook> {
                                               errorBorder: InputBorder.none,
                                               disabledBorder: InputBorder.none,
                                             ),
-                                            /*validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return '댓글을 입력하세요';
-                                          }
-                                          return null;
-                                        },*/
-
                                           ),
                                         ),
 
@@ -374,7 +586,8 @@ class _CommentBookState extends State<CommentBook> {
                                             style: TextStyle(
                                                 fontSize: 16.5,
                                                 color: Colors.black,
-                                                height: 1.05
+                                                height: 1.05,
+                                                fontFamily: 'NanumSquareRoundR',
                                             ),
                                             children: <TextSpan>[
                                               TextSpan(text: eachComment.comment + '\n'),
@@ -384,8 +597,65 @@ class _CommentBookState extends State<CommentBook> {
                                   SizedBox(width: 9.0),
                                 ]
                         ),
+                        /// 날짜
+                        FutureBuilder(
+                          future: returnDate(eachComment.created),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Column(
+                                children: [
+                                  Container(
+                                    child: Text('    '),
+                                  )
+                                ],
+                              );
+                            }
+                            else {
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  StreamBuilder<QuerySnapshot>(
+                                    stream: users.snapshots(),
+                                    builder: (BuildContext context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot2) {
+                                      if (snapshot2.hasError) {
+                                        return Text('x');
+                                      }
+                                      if (snapshot2.connectionState == ConnectionState.waiting) {
+                                      return Text('');
+                                      }
+                                      return Expanded(
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text( snapshot.data == null ? 'null': snapshot.data + ' ',
+                                              style: TextStyle(
+                                                color: Colors.black.withOpacity(0.4),
+                                                fontSize: 11,
+                                                fontFamily: 'NanumSquareRoundR',
+                                              ),),
+                                            /*if( findNickname(snapshot2,userName) != eachComment.nickName)
+                                              _CommentChatButtonsForOthers(
+                                                  context,
+                                                  Provider.of<ApplicationState>(context, listen: false), eachComment
+                                              ),*/
+                                          ],
+                                        ),
+                                      );
+                                    }),
+                                  SizedBox(
+                                    width: 10,
+                                  )
+                                ],
+                              );
+                            }
+                          },
+                        ),
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(11, 0, 11, 0),
+                          padding: const EdgeInsets.fromLTRB(11, 2, 11, 0),
                           child: Divider(thickness: 1.0),
                         ),
                       ])
