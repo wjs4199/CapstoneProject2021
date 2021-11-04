@@ -70,6 +70,7 @@ class _DetailPageState extends State<DetailPage> {
   /// futurebuilder 의 future: ___에 사용될 변수
   Future<void> future;
 
+  /// 나눔 상
   @override
   void initState() {
     /// 댓글쓰는 창 클릭시 rebuild되는 것을 막기 위해서 한번만 build
@@ -148,14 +149,19 @@ class _DetailPageState extends State<DetailPage> {
     ]);
 
     imageUrlList = imageUrlList.where((e) => e != null).toList();
-
-    print('imageURL 리스트의 길이는  => ${imageUrlList.length}');
   }
 
   /// 드롭다운 버튼 위해 필요
   var initialFilterCheck = false;
   var _selectedFilter = '진행 중';
   var _filter =['진행 중', '예약 중', '나눔 완료'];
+
+  Color stateCheck(String complete, Color originColor) {
+    if(complete == '나눔 완료' || complete == '나눔받기 완료'){
+      return Colors.black.withOpacity(0.2);
+    }
+    return originColor;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -340,12 +346,6 @@ class _DetailPageState extends State<DetailPage> {
         }
       });
 
-      if (isLikeCheck) {
-        print('isLiked에서 좋아요는 지금 true 상태!!');
-      } else {
-        print('isLiked에서 좋아요는 지금 false 상태ㅠㅠ');
-      }
-
       return isLikeCheck;
     }
 
@@ -495,12 +495,13 @@ class _DetailPageState extends State<DetailPage> {
                                     builder: (context, appState, _) =>
                                         CupertinoDialogAction(
                                           onPressed: () async {
-                                            setState(() {
-                                              _selectedFilter = value;
-                                            });
                                             // 색바꾸기
                                             // editComplete 함수 내에서 pop 함
-                                            await editComplete(value);
+                                            await editComplete(value).whenComplete(() {
+                                              setState(() {
+                                                _selectedFilter = value;
+                                              });
+                                            });
                                           },
                                           child: Text('네'),
                                         ),
@@ -548,17 +549,23 @@ class _DetailPageState extends State<DetailPage> {
                   SizedBox(height: 10,),
                   Text('채팅하기  ',
                     style: TextStyle(
+                      color: stateCheck(product.complete, Colors.black),
                       fontSize: 15,
                       fontFamily: 'NanumSquareRoundR',
                       height: 1.2,
                     ),
                   ),
-                  Image.asset(
-                    'assets/chat_grey.jpg',
-                    //'assets/chat.jpg',
-                    width: 17,
-                    height: 17,
+                  Stack(
+                    children: [
+                      Image.asset(
+                        'assets/chat_grey.jpg',
+                        //'assets/chat.jpg',
+                        width: 17,
+                        height: 17,
+                      ),
+                    ],
                   )
+
                 ],
               ),
             );
@@ -860,7 +867,7 @@ class _DetailPageState extends State<DetailPage> {
                                                           '${FindInUsers.findNickname(snapshot2, product.uid)}',
                                                           style: TextStyle(
                                                             fontFamily: 'NanumSquareRoundR',
-                                                            color: Colors.black,
+                                                            color: stateCheck(product.complete, Colors.black),
                                                             fontWeight: FontWeight.bold,
                                                             fontSize: 16,
                                                           ),
@@ -869,7 +876,7 @@ class _DetailPageState extends State<DetailPage> {
                                                       /// 학번
                                                       Text( FindInUsers.findStudentNumber(snapshot2, product.uid).substring(1,3) + '학번',
                                                           style: TextStyle(
-                                                            color: Colors.black.withOpacity(0.4),
+                                                            color: stateCheck(product.complete, Colors.black.withOpacity(0.4)),
                                                             fontSize: 13,
                                                             fontFamily: 'NanumSquareRoundR',
                                                           ),
@@ -894,7 +901,7 @@ class _DetailPageState extends State<DetailPage> {
                                                   child: Row(
                                                       mainAxisAlignment: MainAxisAlignment.end,
                                                       children: [
-                                                        _buildDropdownButtonForComplete(product.complete, detailGiveOrTake),
+                                                        _buildDropdownButtonForComplete(product.complete, widget.detailGiveOrTake),
                                                       ]
                                                   )
                                               ),
@@ -909,7 +916,7 @@ class _DetailPageState extends State<DetailPage> {
                                               text: TextSpan(
                                                   style: TextStyle(
                                                     fontFamily: 'NanumSquareRoundR',
-                                                    color: Colors.black,
+                                                    color: stateCheck(product.complete, Colors.black),
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                   children: <TextSpan>[
@@ -917,7 +924,7 @@ class _DetailPageState extends State<DetailPage> {
                                                       text: '${product.title}\n',
                                                       style: TextStyle(
                                                         fontFamily: 'NanumSquareRoundR',
-                                                        color: Colors.black,
+                                                        color: stateCheck(product.complete, Colors.black),
                                                         fontWeight: FontWeight.bold,
                                                         fontSize: 22,
                                                         height: 1,
@@ -928,7 +935,7 @@ class _DetailPageState extends State<DetailPage> {
                                                       '${product.category} · ${calculateTime()}\n\n',
                                                       style: TextStyle(
                                                         fontFamily: 'Roboto_Bold',
-                                                        color: Colors.grey,
+                                                        color: stateCheck(product.complete, Colors.grey),
                                                         fontWeight: FontWeight.bold,
                                                         fontSize: 16,
                                                         height: 1.6,
@@ -945,7 +952,7 @@ class _DetailPageState extends State<DetailPage> {
                                           product.content ?? product.content,
                                           style: TextStyle(
                                             fontFamily: 'NanumSquareRoundR',
-                                            color: Colors.black,
+                                            color: stateCheck(product.complete, Colors.black),
                                             //fontWeight: FontWeight.bold,
                                             fontSize: 17,
                                             height: 1.5,
@@ -980,7 +987,7 @@ class _DetailPageState extends State<DetailPage> {
                                                     '\n\n조회 ${product.hits}회 · 좋아요 ${snapshot2.data}회',
                                                     style: TextStyle(
                                                       fontFamily: 'NanumSquareRoundR',
-                                                      color: Colors.grey,
+                                                      color: stateCheck(product.complete, Colors.grey),
                                                       //fontWeight: FontWeight.bold,
                                                       fontSize: 13,
                                                       height: 1,
@@ -990,6 +997,25 @@ class _DetailPageState extends State<DetailPage> {
                                           },
                                         ),
                                         SizedBox(height: 9.0),
+                                        if(product.complete.substring(0,2) != '진행')
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(11, 8, 11, 8),
+                                            margin: EdgeInsets.fromLTRB(0,8,8,8),
+                                            decoration: ShapeDecoration(
+                                                color: Colors.grey.withOpacity(0.4),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:BorderRadius.all(Radius.circular(10.0)),)),
+                                            child: Text(
+                                              product.complete != '예약 중' ? '${product.complete}됨': '${product.complete}',
+                                              style: TextStyle(
+                                                fontFamily: 'NanumSquareRoundR',
+                                                color: Colors.black.withOpacity(0.7),
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                height: 1,
+                                              ),
+                                            ),
+                                          ),
                                         Divider(thickness: 1.0),
                                       ]),
                                 ),
@@ -1051,12 +1077,12 @@ class _DetailPageState extends State<DetailPage> {
                                       initialData: isLiked(snapshot)
                                           ? Icon(
                                         Icons.favorite,
-                                        color: Theme.of(context).primaryColor,
+                                        color: stateCheck(product.complete, Theme.of(context).primaryColor,),
                                         semanticLabel: 'like',
                                       )
                                           : Icon(
                                         Icons.favorite_border_outlined,
-                                        color: Theme.of(context).primaryColor,
+                                        color:stateCheck(product.complete, Theme.of(context).primaryColor,),
                                         semanticLabel: 'like',
                                       ),
                                       builder: (context, snapshot2) {
@@ -1081,7 +1107,7 @@ class _DetailPageState extends State<DetailPage> {
                                                       .takeProducts;
                                                   changeFavoriteButton.add(Icon(
                                                     Icons.favorite_border_outlined,
-                                                    color: Theme.of(context).primaryColor,
+                                                    color: stateCheck(product.complete, Theme.of(context).primaryColor,),
                                                     semanticLabel: 'like',
                                                   ));
                                                   changeLikeCount.add(context
@@ -1105,7 +1131,7 @@ class _DetailPageState extends State<DetailPage> {
                                                       .takeProducts;
                                                   changeFavoriteButton.add(Icon(
                                                     Icons.favorite,
-                                                    color: Theme.of(context).primaryColor,
+                                                    color: stateCheck(product.complete, Theme.of(context).primaryColor,),
                                                     semanticLabel: 'like',
                                                   ));
                                                   changeLikeCount.add(context
@@ -1130,16 +1156,17 @@ class _DetailPageState extends State<DetailPage> {
                                     inputFormatters: [
                                       LengthLimitingTextInputFormatter(400), //글자 수 제한 400자
                                     ],
+                                    enabled: product.complete.substring(0,2) != '나눔' ? true : false,
                                     enableInteractiveSelection: true,
                                     maxLines: null,
                                     keyboardType: TextInputType.multiline,
                                     controller: _commentController,
-                                    decoration: const InputDecoration(
+                                    decoration: InputDecoration(
                                       focusedBorder: InputBorder.none,
                                       enabledBorder: InputBorder.none,
                                       errorBorder: InputBorder.none,
                                       disabledBorder: InputBorder.none,
-                                      hintText: '댓글을 입력하세요',
+                                      hintText: product.complete.substring(0,2) != '나눔' ? '댓글을 입력하세요' : '완료 처리된 게시글입니다',
                                       hintStyle: TextStyle(
                                         fontFamily: 'NanumSquareRoundR',
                                       )
@@ -1152,7 +1179,7 @@ class _DetailPageState extends State<DetailPage> {
                           IconButton(
                             icon: const Icon(Icons.send_outlined),
                             iconSize: 27,
-                            color: Theme.of(context).primaryColor,
+                            color: stateCheck(product.complete, Theme.of(context).primaryColor,),
                             onPressed: () async {
                               var currentFocus = FocusScope.of(context);
                               currentFocus.unfocus();
