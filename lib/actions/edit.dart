@@ -318,7 +318,6 @@ class _EditPageState extends State<EditPage> {
       }).then((value) async {
         /// storage에 올려진 사진 삭제 후 다시 업로드
         await deleteImages().whenComplete(() async {
-          //await makeAlreadySavedList().then((value) async {
             uploadImages = alreadySavedList + willBeSavedFileList;
             if (uploadImages.isNotEmpty) await uploadFile(productId);
             await target

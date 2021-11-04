@@ -13,6 +13,33 @@ import '../pages/comment.dart';
 import 'dart:async';
 
 
+/// uid 를 이용하여 닉네임을 찾아 호출하고, 이메일을 호출하기 위해 필요한 클래스
+class FindInUsers {
+  /// User 컬랙션 참조
+  static CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+  static String findNickname(AsyncSnapshot<QuerySnapshot> snapshot, String userId) {
+    var nickName = 'null';
+    snapshot.data.docs.forEach((document) {
+      if (document['id'] == userId) {
+        nickName = document['nickname'];
+      }
+    });
+    return nickName;
+  }
+
+  /// 유저의 학번을 찾아서 보여주는 함수
+  static String findStudentNumber(AsyncSnapshot<QuerySnapshot> snapshot, String userId) {
+    var email = '2??00000@handong.edu';
+    snapshot.data.docs.forEach((document) {
+      if (document['id'] == userId) {
+        email = document['email'];
+      }
+    });
+    return email;
+  }
+}
+
 class DetailPage extends StatefulWidget {
   DetailPage({this.productId, this.detailGiveOrTake, this.photoNum});
 
@@ -45,9 +72,9 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void initState() {
-
     /// 댓글쓰는 창 클릭시 rebuild되는 것을 막기 위해서 한번만 build
     future = makeUrlList();
+
     super.initState();
 
     productId = widget.productId; // product ID
@@ -58,8 +85,6 @@ class _DetailPageState extends State<DetailPage> {
 
   /// comment 적는 텍스트 칸이 빈칸인지 아닌지 분별할 때 사용됨
   final _commentFormKey = GlobalKey<FormState>(debugLabel: '_CommentState');
-
-  String _text = " ";
 
   /// comment 를 적는 텍스트 상자의 상태를 control 할 때 사용
   final _commentController = TextEditingController();
@@ -127,7 +152,10 @@ class _DetailPageState extends State<DetailPage> {
     print('imageURL 리스트의 길이는  => ${imageUrlList.length}');
   }
 
-  var _isEnable = true;
+  /// 드롭다운 버튼 위해 필요
+  var initialFilterCheck = false;
+  var _selectedFilter = '진행 중';
+  var _filter =['진행 중', '예약 중', '나눔 완료'];
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +165,6 @@ class _DetailPageState extends State<DetailPage> {
     var detailGiveOrTake = widget.detailGiveOrTake;
 
     /// detailGiveOrTake 가 담고 있는 collection 이름에 따라 그 collection 담긴 내용 가져오기
-    // 시작하자마자 이부분에서 build가 2번 되길래 watch에서 read로 바꿈
     var products = detailGiveOrTake == 'giveProducts'
         ? context.read<ApplicationState>().giveProducts
         : context.read<ApplicationState>().takeProducts;
@@ -172,8 +199,6 @@ class _DetailPageState extends State<DetailPage> {
         body: CircularProgressIndicator(),
       );
     }
-
-    var nickName = 'null';
 
     ///************************ 게시글 삭제 및  지난 시간 계산 함수들 ************************///
     /// 게시물 자체 삭제 기능 (왼쪽 상단 휴지통 버튼)
@@ -213,25 +238,6 @@ class _DetailPageState extends State<DetailPage> {
         deleteOneImage(8),
         deleteOneImage(9),
       ]);
-    }
-
-    Future<void> makeUrlList() async {
-      imageUrlList = await Future.wait([
-        downloadURL(widget.productId, 0),
-        downloadURL(widget.productId, 1),
-        downloadURL(widget.productId, 2),
-        downloadURL(widget.productId, 3),
-        downloadURL(widget.productId, 4),
-        downloadURL(widget.productId, 5),
-        downloadURL(widget.productId, 6),
-        downloadURL(widget.productId, 7),
-        downloadURL(widget.productId, 8),
-        downloadURL(widget.productId, 9),
-      ]);
-
-      imageUrlList = imageUrlList.where((e) => e != null).toList();
-
-      print('imageURL 리스트의 길이는  => ${imageUrlList.length}');
     }
 
     /// 현재 시간
@@ -397,37 +403,127 @@ class _DetailPageState extends State<DetailPage> {
 
     _currentNickname();
 
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
+    ///****************************** 상태변경 기능 부분 ******************************///
+    /// giveProducts 또는 takeProducts 중 어디 컬랙션에 속한 게시물인지에 따라 참조할 path 결정
+    CollectionReference target =
+    FirebaseFirestore.instance.collection(detailGiveOrTake);
 
-    /// 유저의 학번을 찾아서 보여주는 함수
-    String findStudentNumber(AsyncSnapshot<QuerySnapshot> snapshot, String uid) {
-      var email = '00';
-      snapshot.data.docs.forEach((document) {
-        if (document['id'] == uid) {
-          email = document['email'];
-        }
-      });
-      return email;
+    /// complete 필드 값을 드롭다운 버튼 변경한대로 바꾸는 함수
+    Future<void> editComplete(String complete) {
+      return target.doc(productId).update({
+        'complete': complete,
+      }).whenComplete(() async {
+        Navigator.pop(context);
+      }).catchError((error) => print('Error: $error'));
     }
 
-    /// 유저의 닉네임을 찾아서 보여주는 함수
-    String findNickname(AsyncSnapshot<QuerySnapshot> snapshot, String userId) {
-      var nickName = 'null';
-      snapshot.data.docs.forEach((document) {
-        if (document['id'] == userId) {
-          nickName = document['nickname'];
-        }
-      });
-      return nickName;
+    /// 게시자 이름 옆의 완료/예약/진행중 표시하는 드롭다운 버튼 (자기가 올린 게시물일 경우에 보여짐)
+    Container _buildDropdownButtonForComplete(
+        String complete, String detailGiveOrTake){
+      if(!initialFilterCheck){
+        _selectedFilter = complete;
+      }
+      if(detailGiveOrTake == 'giveProducts') {
+        _filter = ['진행 중', '예약 중', '나눔 완료'];
+      } else {
+        _filter = ['진행 중', '예약 중', '나눔받기 완료'];
+      }
+      return Container(
+          decoration: ShapeDecoration(
+              color: Colors.grey.withOpacity(0.1),
+              shape: RoundedRectangleBorder(
+                borderRadius:BorderRadius.all(Radius.circular(15.0)),)),
+          child: DropdownButtonHideUnderline(
+              child: Container(
+                margin: EdgeInsets.only( left: 15.0, right: 15.0),
+                child: DropdownButton<String>(
+                  //dropdownColor: Colors.grey.,
+                  value: _selectedFilter,
+                  items: _filter.map(
+                        (value) {
+                      return DropdownMenuItem(
+                        value: value,
+                        child: Text(
+                          value,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'NanumSquareRoundR',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    },
+                  ).toList(),
+                  onChanged: (value) {
+                    initialFilterCheck = true;
+                    if (value != _selectedFilter) {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) =>
+                              CupertinoAlertDialog(
+                                title: Text('상태 변경',
+                                    style: TextStyle(
+                                      fontFamily: 'NanumSquareRoundR',
+                                      height: 1.5,
+                                    )
+                                ),
+                                content: value.substring(0,2) == '나눔'
+                                    ? Text('정말 $value 처리 하시겠습니까?',
+                                    style: TextStyle(
+                                      fontFamily: 'NanumSquareRoundR',
+                                      height: 1.5,
+                                      fontSize: 14,
+                                    )
+                                )
+                                    : Text('정말 $value으로 변경하시겠습니까?',
+                                    style: TextStyle(
+                                      fontFamily: 'NanumSquareRoundR',
+                                      height: 1.5,
+                                      fontSize: 14,
+                                    )
+                                ),
+                                actions: <Widget>[
+                                  CupertinoDialogAction(
+                                    isDefaultAction: true,
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text('아니오'),
+                                  ),
+                                  Consumer<ApplicationState>(
+                                    builder: (context, appState, _) =>
+                                        CupertinoDialogAction(
+                                          onPressed: () async {
+                                            setState(() {
+                                              _selectedFilter = value;
+                                            });
+                                            // 색바꾸기
+                                            // editComplete 함수 내에서 pop 함
+                                            await editComplete(value);
+                                          },
+                                          child: Text('네'),
+                                        ),
+                                  )
+                                ],
+                              ));
+                    }
+                  },
+                ),
+              )
+          ));
     }
 
 
-    /// 게시자 이름 옆의 채팅하기 버튼
+    /// _CommentChatButtonsForOthers(채팅하기 버튼)에서 사용자의 닉네임을 담을 변수 선언
+    String nickName;
+
+    /// 게시자 이름 옆의 채팅하기 버튼 (자기가 올린 게시물이 아닐 경우에 보여짐)
     InkWell _CommentChatButtonsForOthers(
         BuildContext context, ApplicationState appState) {
       return InkWell(
         child: StreamBuilder<QuerySnapshot>(
-          stream: users.snapshots(),
+          stream: FindInUsers.users.snapshots(),
           builder: (BuildContext context,
           AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
@@ -437,7 +533,7 @@ class _DetailPageState extends State<DetailPage> {
           ConnectionState.waiting) {
           return Text('');
           }
-          nickName = findNickname(snapshot, product.uid);
+          nickName = FindInUsers.findNickname(snapshot, product.uid);
           return Container(
               padding: const EdgeInsets.all(6.0),
               decoration: BoxDecoration(
@@ -496,6 +592,7 @@ class _DetailPageState extends State<DetailPage> {
         },
       );
     }
+
 
     /// Add 페이지 화면 구성
     return Scaffold(
@@ -738,7 +835,7 @@ class _DetailPageState extends State<DetailPage> {
                                             ),
                                             SizedBox(width: 10.0),
                                             StreamBuilder<QuerySnapshot>(
-                                                    stream: users.snapshots(),
+                                                    stream: FindInUsers.users.snapshots(),
                                                     builder: (BuildContext context,
                                                     AsyncSnapshot<QuerySnapshot> snapshot2) {
                                                     if (snapshot2.hasError) {
@@ -760,7 +857,7 @@ class _DetailPageState extends State<DetailPage> {
                                                       ),
                                                       /// 이름
                                                       Text(
-                                                          '${findNickname(snapshot2, product.uid)}',
+                                                          '${FindInUsers.findNickname(snapshot2, product.uid)}',
                                                           style: TextStyle(
                                                             fontFamily: 'NanumSquareRoundR',
                                                             color: Colors.black,
@@ -770,7 +867,7 @@ class _DetailPageState extends State<DetailPage> {
                                                         ),
                                                       SizedBox(height: 3),
                                                       /// 학번
-                                                      Text( findStudentNumber(snapshot2, product.uid).substring(1,3) + '학번',
+                                                      Text( FindInUsers.findStudentNumber(snapshot2, product.uid).substring(1,3) + '학번',
                                                           style: TextStyle(
                                                             color: Colors.black.withOpacity(0.4),
                                                             fontSize: 13,
@@ -791,6 +888,15 @@ class _DetailPageState extends State<DetailPage> {
                                                     ]
                                                   )
 
+                                              )
+                                            else
+                                              Expanded(
+                                                  child: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.end,
+                                                      children: [
+                                                        _buildDropdownButtonForComplete(product.complete, detailGiveOrTake),
+                                                      ]
+                                                  )
                                               ),
                                           ],
                                         ),
