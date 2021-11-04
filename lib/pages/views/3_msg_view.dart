@@ -50,7 +50,7 @@ class _MessagePageState extends State<MessagePage> {
   void initState() {
     super.initState();
     var initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('logo2');
     //ios 알림 설정 : 소리, 뱃지 등
     var initializationSettingsIOS = IOSInitializationSettings();
 

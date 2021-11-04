@@ -67,7 +67,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
 
     var initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+    AndroidInitializationSettings('logo2');
     //ios 알림 설정 : 소리, 뱃지 등
     var initializationSettingsIOS = IOSInitializationSettings();
 
@@ -368,7 +368,7 @@ _isShowedNoti() async {
             },
           ),
           ListTile(
-            title: Text('My Page'),
+            title: Text('My Page //  Coming soon'),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(Icons.account_circle),
             onTap: () {},
@@ -517,21 +517,23 @@ _isShowedNoti() async {
           fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
       items: [
         BottomNavigationBarItem(
-          icon: Icon(
+          icon:
+
+          Icon(
             Icons.accessibility,
             size: 30,
           ),
           label: '나눔',
         ),
         BottomNavigationBarItem(
-          icon: Icon(
-            Icons.forum,
-            size: 30,
-          ),
-          label: '메신저',
+          label: '메신저',icon:  Icon(Icons.forum, size: 30,)
+
+
         ),
       ],
     );
+
+
   }
 
   /// Drawer 관련 Scaffold Key

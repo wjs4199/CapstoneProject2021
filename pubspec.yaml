@@ -73,7 +73,6 @@ flutter:
     - assets/logo_size_invert.jpg
     - assets/logo2.png
 
-
   fonts:
     - family: Pacifico
       fonts:
