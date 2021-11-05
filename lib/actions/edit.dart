@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -206,8 +207,17 @@ class _EditPageState extends State<EditPage> {
   var fullWidth;
   var fullHeight;
 
+  /// loading 띄울지 말지 여부를 담고 있음
+  var loading = false;
+
+
   @override
   Widget build(BuildContext context) {
+    // 그냥 본래 기기 상의 뒤로가기 버튼 눌렀을 때의 처리 필요
+    /*WillPopScope (
+    onWillPop: () async {
+      return shouldPop;
+    },*/
 
     /// 디바이스에 따라 달라지는 화면 가로세로 크기
     fullWidth = MediaQuery.of(context).size.width;
@@ -559,14 +569,29 @@ class _EditPageState extends State<EditPage> {
           centerTitle: true,
           actions: <Widget>[
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_formKey.currentState.validate()) {
-                  editProduct(
+                  setState(() {
+                    return LoadingScreen();
+                  });
+                  await editProduct(
                     _selectedFilter,
                     _titleController.text,
                     _contentController.text,
-                  ).whenComplete(() => Navigator.pop(context));
+                  ).whenComplete(() async {
+                      appState.orderByFilter('All');
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      loading = false;
+                  } );
                 }
+                alreadyLoading = false;
+                numberOfImages = 0;
+                alreadyUrlList.clear();
+                alreadySavedList.clear();
+                willBeSavedFileList.clear();
+                uploadImages.clear();
+                photoNum =0;
               },
               child: Text(
                 '저장',
@@ -830,3 +855,17 @@ class _EditPageState extends State<EditPage> {
     );
   }
 }
+
+class LoadingScreen extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) {
+    return  Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      color: Colors.white.withOpacity(0.5),
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+}
+

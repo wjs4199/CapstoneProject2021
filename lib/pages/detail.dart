@@ -469,14 +469,14 @@ class _DetailPageState extends State<DetailPage> {
                                     )
                                 ),
                                 content: value.substring(0,2) == '나눔'
-                                    ? Text('정말 $value 처리 하시겠습니까?',
+                                    ? Text('$value 로 상태를 변경하시겠습니까?',
                                     style: TextStyle(
                                       fontFamily: 'NanumSquareRoundR',
                                       height: 1.5,
                                       fontSize: 14,
                                     )
                                 )
-                                    : Text('정말 $value으로 변경하시겠습니까?',
+                                    : Text('$value으로 상태를 변경하시겠습니까?',
                                     style: TextStyle(
                                       fontFamily: 'NanumSquareRoundR',
                                       height: 1.5,
@@ -536,10 +536,10 @@ class _DetailPageState extends State<DetailPage> {
           }
           nickName = FindInUsers.findNickname(snapshot, product.uid);
           return Container(
-              padding: const EdgeInsets.all(6.0),
+              padding: EdgeInsets.fromLTRB( 11.0, 8, 11.0, 8),
               decoration: BoxDecoration(
                 color: Colors.grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(15),
                 border: Border.all(color: Colors.grey.withOpacity(0.1)),
               ),
               child: Row(
@@ -553,6 +553,7 @@ class _DetailPageState extends State<DetailPage> {
                       fontSize: 15,
                       fontFamily: 'NanumSquareRoundR',
                       height: 1.2,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   Stack(
@@ -571,6 +572,8 @@ class _DetailPageState extends State<DetailPage> {
             );
           }),
         onTap: () {
+          /// 나눔 완료가 아닐 시에만 채팅하기 버튼 가능
+          if(product.complete.substring(0,2) != '나눔') {
             print(chatRoomDocId);
             FirebaseFirestore.instance.collection('chatRoom').doc(chatRoomDocId).update(
                 {
@@ -596,6 +599,8 @@ class _DetailPageState extends State<DetailPage> {
                     ),
               ),
             );
+          }
+
         },
       );
     }
@@ -889,7 +894,7 @@ class _DetailPageState extends State<DetailPage> {
                                                   child: Row(
                                                     mainAxisAlignment: MainAxisAlignment.end,
                                                     children: [
-                                                    _CommentChatButtonsForOthers(
+                                                      _CommentChatButtonsForOthers(
                                                         context, Provider.of<ApplicationState>(context, listen: false),
                                                     ),
                                                     ]
@@ -1002,14 +1007,15 @@ class _DetailPageState extends State<DetailPage> {
                                             padding: EdgeInsets.fromLTRB(11, 8, 11, 8),
                                             margin: EdgeInsets.fromLTRB(0,8,8,8),
                                             decoration: ShapeDecoration(
-                                                color: Colors.grey.withOpacity(0.4),
+                                                color: product.complete != '예약 중' ? Colors.black.withOpacity(0.4): Colors.red.withOpacity(0.4),
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:BorderRadius.all(Radius.circular(10.0)),)),
                                             child: Text(
+                                              /// 예약중이거나 완료되었을 때 표시됨
                                               product.complete != '예약 중' ? '${product.complete}됨': '${product.complete}',
                                               style: TextStyle(
                                                 fontFamily: 'NanumSquareRoundR',
-                                                color: Colors.black.withOpacity(0.7),
+                                                color: product.complete != '예약 중' ? Colors.black.withOpacity(0.7): Colors.red,//Theme.of(context).primaryColor.withOpacity(0.7),
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 18,
                                                 height: 1,
