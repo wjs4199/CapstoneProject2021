@@ -574,13 +574,6 @@ class _DetailPageState extends State<DetailPage> {
         onTap: () {
           /// 나눔 완료가 아닐 시에만 채팅하기 버튼 가능
           if(product.complete.substring(0,2) != '나눔') {
-            print(chatRoomDocId);
-            FirebaseFirestore.instance.collection('chatRoom').doc(chatRoomDocId).update(
-                {
-                  'isRead' : true
-                }
-            ).catchError((error) => print('error: $error'));
-
             Navigator.push(
               context,
               MaterialPageRoute(
