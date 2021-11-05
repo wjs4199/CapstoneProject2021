@@ -17,6 +17,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
+
 import '../main.dart';
 import '../model/product.dart';
 import '../components/postTile.dart';
@@ -53,6 +54,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
 
+  var _flutterLocalNotificationsPlugin;
   /// bool isLoading = false; handleSign을 위한 변수
   /// 시스템 함수에 PageView 기능 반영 처리(1) +@
   @override
@@ -63,7 +65,86 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _pageController = PageController();
     _tabController = TabController(length: 2, vsync: this);
     _focusNode = FocusNode();
+
+
+    var initializationSettingsAndroid =
+    AndroidInitializationSettings('logo2');
+    //ios 알림 설정 : 소리, 뱃지 등
+    var initializationSettingsIOS = IOSInitializationSettings();
+
+    var initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+
+    _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    //onSelectNotification의 경우 알림을 눌렀을때 어플에서 실행되는 행동을 설정
+    _flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: onSelectNotification);
+
+
+
   }
+
+  Future onSelectNotification(String payload) async {
+    print('payload : $payload');
+/*
+    await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text('Well done'),
+          content: Text('Payload: $payload'),
+        ));
+        //.then((value) => _cancelAllNotifications());
+
+
+ */
+  }
+
+
+
+  Future _showNotification() async {
+    var android = AndroidNotificationDetails(
+        'your channel id', 'your channel name',
+        channelDescription: 'your channel description',
+        importance: Importance.max,
+        priority: Priority.high);
+
+    var ios = IOSNotificationDetails();
+    var detail = NotificationDetails(android: android, iOS: ios);
+
+    await _flutterLocalNotificationsPlugin.show(
+      0,
+      '새로운 메시지가 도착했습니다',
+      '메신저 텝을 눌러주세요',
+      detail,
+      payload: 'Hello Flutter',
+    );
+  }
+
+
+
+
+
+
+_isShowedNoti() async {
+  await for (var snapshot in FirebaseFirestore.instance.collection('chatRoom').snapshots())
+  {
+    for(var isShowed in snapshot.docs){
+      if(isShowed.get('isShowedNotification') == false && isShowed.get('idTo') == FirebaseAuth.instance.currentUser.uid) {
+        await _showNotification()
+            .then((value) =>
+          FirebaseFirestore.instance.collection('chatRoom').doc(isShowed.id).update(
+              {
+                'isShowedNotification' : true
+              }
+          ).catchError((error) => print('error: $error')),);
+      }
+      }
+  };
+
+}
+
+
+
 
   void _requestPermissions() {
     flutterLocalNotificationsPlugin
@@ -96,6 +177,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    _isShowedNoti();
     return Scaffold(
       backgroundColor: Colors.white,
       key: _scaffoldKey,
@@ -287,7 +369,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             },
           ),
           ListTile(
-            title: Text('My Page'),
+            title: Text('My Page //  Coming soon'),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(Icons.account_circle),
             onTap: () {},
@@ -436,21 +518,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
       items: [
         BottomNavigationBarItem(
-          icon: Icon(
+          icon:
+
+          Icon(
             Icons.accessibility,
             size: 30,
           ),
           label: '나눔',
         ),
         BottomNavigationBarItem(
-          icon: Icon(
-            Icons.forum,
-            size: 30,
-          ),
-          label: '메신저',
+          label: '메신저',icon:  Icon(Icons.forum, size: 30,)
+
+
         ),
       ],
     );
+
+
   }
 
   /// Drawer 관련 Scaffold Key

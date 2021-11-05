@@ -9,8 +9,8 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <application
-        android:label="giveandtake"
-        android:icon="@mipmap/ic_launcher">
+        android:label="PLEG"
+        android:icon="@mipmap/logo">
 
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBqfwc93kegyK9GwlB1yDLLs_rJP7-8OOc"/>
