@@ -339,7 +339,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       'pelag',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 34,
+                        fontSize: 36,
                         fontFamily: 'MinimoLight',
                         // fontWeight: FontWeight.bold,
                       ),
