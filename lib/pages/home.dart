@@ -333,17 +333,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: Text(
-                  '-Drawer-\n프로필, 레밸 등 배치',
+                  'pelag',
                   style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
+                    color: Colors.black,
+                    fontSize: 34,
+                    fontFamily: 'MinimoLight',
+                    // fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ),
           ),
           ListTile(
-            title: Text('Home'),
+            title: Text(
+              'home',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'MinimoLight',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(
               Icons.home,
@@ -354,13 +364,29 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             },
           ),
           ListTile(
-            title: Text('My Page //  Coming soon'),
+            title: Text(
+              'my page // coming soon',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'MinimoLight',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(Icons.account_circle),
             onTap: () {},
           ),
           ListTile(
-            title: Text('Change Nickname'),
+            title: Text(
+              'change nickname',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'MinimoLight',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(Icons.change_circle),
             onTap: () {
@@ -368,7 +394,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             },
           ),
           ListTile(
-            title: Text('Manual'),
+            title: Text(
+              'manual',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'MinimoLight',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(Icons.book),
             onTap: () {
@@ -376,7 +410,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             },
           ),
           ListTile(
-            title: Text('Sign Out'),
+            title: Text(
+              'sign out',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'MinimoLight',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(
               Icons.logout,
