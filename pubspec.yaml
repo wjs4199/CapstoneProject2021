@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   firebase_core : ^1.7.0
-  cloud_firestore: ^2.2.0
+  cloud_firestore: ^3.1.0
   firebase_auth: ^3.0.1
   firebase_storage: ^10.0.5
   google_fonts: ^2.0.0
@@ -46,8 +46,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/hgu.png
-    - assets/logo.png
     - assets/userDefaultImage.png
     - assets/sample.jpg
     - images/img_not_available.jpeg
@@ -69,14 +67,13 @@ flutter:
     - assets/no-thumbnail.jpg
     - assets/chat.jpg
     - assets/chat_grey.jpg
-    - assets/logo_size.jpg
-    - assets/logo_size_invert.jpg
+    - assets/logo.jpg
     - assets/logo2.png
 
   fonts:
-    - family: Pacifico
+    - family: MinimoLight
       fonts:
-        - asset: fonts/Pacifico-Regular.ttf
+        - asset: fonts/Minimo-Light.otf
 
     - family: Source Sans Pro
       fonts:

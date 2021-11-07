@@ -59,6 +59,7 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage>  with RouteAware {
   _DetailPageState({this.chatRoomDocId});
+
   /// detail 페이지 실행시 인자로 전달되는 변수들
   String productId; // product ID
   String detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
@@ -136,11 +137,11 @@ class _DetailPageState extends State<DetailPage>  with RouteAware {
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
   StreamController<Icon> changeFavoriteButton =
-  StreamController<Icon>.broadcast();
+      StreamController<Icon>.broadcast();
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
   StreamController<String> changeTextField =
-  StreamController<String>.broadcast();
+      StreamController<String>.broadcast();
 
   /// storage 에서 다운로드한 이미지 url 들이 저장될 정적 저장소
   var imageUrlList = [];
@@ -410,17 +411,20 @@ class _DetailPageState extends State<DetailPage>  with RouteAware {
     Future<void> addComments(String comment, String uid) {
       return comments
           .add({
-        'userName': FirebaseAuth.instance.currentUser.displayName,
-        'comment': comment,
-        'created': FieldValue.serverTimestamp(),
-        // 빼야할지도!
-        'uid' : uid,
-      })
+            'userName': FirebaseAuth.instance.currentUser.displayName,
+            'comment': comment,
+            'created': FieldValue.serverTimestamp(),
+            // 빼야할지도!
+            'uid': uid,
+          })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
     }
+
     _currentNickname() async {
-      await FirebaseFirestore.instance.collection('users').doc(currentUserId)
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserId)
           .get()
           .then((DocumentSnapshot ds) {
         name = ds['nickname'];
@@ -631,179 +635,188 @@ class _DetailPageState extends State<DetailPage>  with RouteAware {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Stack(
-          children: [
-            NestedScrollView(
-                physics: const BouncingScrollPhysics(
-                    parent: AlwaysScrollableScrollPhysics()),
-                headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                  return <Widget>[
-                    SliverAppBar(
-                      expandedHeight: MediaQuery.of(context).size.height * 0.5,
-                      backgroundColor: Colors.white,
-                      iconTheme: IconThemeData(
-                        // color: Colors.black,
-                        opacity: 0.9,
-                      ),
-                      pinned: true, // true 처리 시 스크롤을 내려도 appbar 가 작게 보임
-                      floating: false, // true 처리 시 스크롤을 내릴때 appbar 가 보임
-                      snap: false, // true 처리 시 스크롤 살짝 내리면 appbar 가 전부 보임
-                      stretch: false,
-                      // onStretchTrigger: () {
-                      //   // Function callback for stretch
-                      //   return Future<void>.value();
-                      // },
-                      flexibleSpace: FlexibleSpaceBar(
-                        collapseMode: CollapseMode.pin,
-                        // stretchModes: const <StretchMode>[
-                        //   StretchMode.zoomBackground,
-                        //   StretchMode.blurBackground,
-                        //   StretchMode.fadeTitle,
-                        // ],
-                        background: FutureBuilder(
-                          future: future,
-                          builder: (context, snapshot) {
-                            /// 시진 로딩중일 때
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return Column(
-                                children: [
-                                  Container(
-                                    height: MediaQuery.of(context).size.height * 0.5,
-                                    width: MediaQuery.of(context).size.width,
-                                    child: Center(child: CircularProgressIndicator()),
-                                  )
-                                ],
-                              );
-                            }
+          child: Stack(
+        children: [
+          NestedScrollView(
+            physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics()),
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverAppBar(
+                  expandedHeight: MediaQuery.of(context).size.height * 0.5,
+                  backgroundColor: Colors.white,
+                  iconTheme: IconThemeData(
+                    // color: Colors.black,
+                    opacity: 0.9,
+                  ),
+                  pinned: true, // true 처리 시 스크롤을 내려도 appbar 가 작게 보임
+                  floating: false, // true 처리 시 스크롤을 내릴때 appbar 가 보임
+                  snap: false, // true 처리 시 스크롤 살짝 내리면 appbar 가 전부 보임
+                  stretch: false,
+                  // onStretchTrigger: () {
+                  //   // Function callback for stretch
+                  //   return Future<void>.value();
+                  // },
+                  flexibleSpace: FlexibleSpaceBar(
+                    collapseMode: CollapseMode.pin,
+                    // stretchModes: const <StretchMode>[
+                    //   StretchMode.zoomBackground,
+                    //   StretchMode.blurBackground,
+                    //   StretchMode.fadeTitle,
+                    // ],
+                    background: FutureBuilder(
+                      future: future,
+                      builder: (context, snapshot) {
+                        /// 시진 로딩중일 때
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Column(
+                            children: [
+                              Container(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.5,
+                                width: MediaQuery.of(context).size.width,
+                                child:
+                                    Center(child: CircularProgressIndicator()),
+                              )
+                            ],
+                          );
+                        }
 
-                            /// 사진 로딩 후
-                            else {
-                              if (imageUrlList.isNotEmpty) {
-                                return Stack(
-                                  children: [
-                                    Container(
-                                      height:
+                        /// 사진 로딩 후
+                        else {
+                          if (imageUrlList.isNotEmpty) {
+                            return Stack(
+                              children: [
+                                Container(
+                                  height:
                                       MediaQuery.of(context).size.height * 0.5,
-                                      width: MediaQuery.of(context).size.width,
-                                      // color: Color(0xffced3d0),
-                                    ),
-                                    CarouselSlider(
-                                      carouselController: carouselController,
-                                      options: CarouselOptions(
-                                          autoPlay: false,
-                                          enlargeCenterPage: false,
-                                          viewportFraction: 1.0,
-                                          aspectRatio: 1.0,
-                                          height: MediaQuery.of(context).size.height *
+                                  width: MediaQuery.of(context).size.width,
+                                  // color: Color(0xffced3d0),
+                                ),
+                                CarouselSlider(
+                                  carouselController: carouselController,
+                                  options: CarouselOptions(
+                                      autoPlay: false,
+                                      enlargeCenterPage: false,
+                                      viewportFraction: 1.0,
+                                      aspectRatio: 1.0,
+                                      height:
+                                          MediaQuery.of(context).size.height *
                                               0.5,
-                                          initialPage: 0,
-                                          onPageChanged: (index, reason) {
-                                            carouselIndexChange.add(index);
-                                          }),
-                                      items: imageUrlList.map<Widget>((item) {
-                                        return Image.network(
-                                          item,
-                                          fit: BoxFit.cover,
-                                        );
-                                      }).toList(),
-                                    ),
+                                      initialPage: 0,
+                                      onPageChanged: (index, reason) {
+                                        carouselIndexChange.add(index);
+                                      }),
+                                  items: imageUrlList.map<Widget>((item) {
+                                    return Image.network(
+                                      item,
+                                      fit: BoxFit.cover,
+                                    );
+                                  }).toList(),
+                                ),
 
-                                    /// 사진 밑의 dot Row
-                                    StreamBuilder<int>(
-                                        stream: carouselIndexChange.stream,
-                                        initialData: 0,
-                                        builder: (context, snapshot) {
-                                          return Column(
-                                            mainAxisAlignment:
+                                /// 사진 밑의 dot Row
+                                StreamBuilder<int>(
+                                    stream: carouselIndexChange.stream,
+                                    initialData: 0,
+                                    builder: (context, snapshot) {
+                                      return Column(
+                                        mainAxisAlignment:
                                             MainAxisAlignment.start,
-                                            children: [
-                                              SizedBox(
-                                                height: MediaQuery.of(context)
+                                        children: [
+                                          SizedBox(
+                                            height: MediaQuery.of(context)
                                                     .size
                                                     .height *
-                                                    0.46,
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
+                                                0.46,
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
                                                 MainAxisAlignment.center,
-                                                crossAxisAlignment:
+                                            crossAxisAlignment:
                                                 CrossAxisAlignment.end,
-                                                children: imageUrlList
-                                                    .asMap()
-                                                    .entries
-                                                    .map<Widget>((entry) {
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      carouselController
-                                                          .animateToPage(entry.key);
-                                                      print(
-                                                          'entry key -> ${entry.key}');
-                                                    },
-                                                    child: Container(
-                                                      width: 8.0,
-                                                      height: 8.0,
-                                                      margin: EdgeInsets.symmetric(
-                                                          vertical: 8.0,
-                                                          horizontal: 4.0),
-                                                      decoration: BoxDecoration(
-                                                          shape: BoxShape.circle,
-                                                          color: (Theme.of(context)
-                                                              .brightness ==
-                                                              Brightness.dark
+                                            children: imageUrlList
+                                                .asMap()
+                                                .entries
+                                                .map<Widget>((entry) {
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  carouselController
+                                                      .animateToPage(entry.key);
+                                                  print(
+                                                      'entry key -> ${entry.key}');
+                                                },
+                                                child: Container(
+                                                  width: 8.0,
+                                                  height: 8.0,
+                                                  margin: EdgeInsets.symmetric(
+                                                      vertical: 8.0,
+                                                      horizontal: 4.0),
+                                                  decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: (Theme.of(context)
+                                                                      .brightness ==
+                                                                  Brightness
+                                                                      .dark
                                                               ? Colors.white
                                                               : Colors.black)
-                                                              .withOpacity(
+                                                          .withOpacity(
                                                               snapshot.data ==
-                                                                  entry.key
+                                                                      entry.key
                                                                   ? 1.0
                                                                   : 0.4)),
-                                                    ),
-                                                  );
-                                                }).toList(),
-                                              )
-                                            ],
-                                          );
-                                        }),
-                                  ],
-                                );
-                              }
+                                                ),
+                                              );
+                                            }).toList(),
+                                          )
+                                        ],
+                                      );
+                                    }),
+                              ],
+                            );
+                          }
 
-                              /// imageUrlList 데이터가 없으면 사진란 아예 없앰 => 기본썸네일
-                              else {
-                                return Image.asset(
-                                  'assets/no-thumbnail.jpg',
-                                  fit: BoxFit.cover,
-                                  height: MediaQuery.of(context).size.height * 0.5,
-                                  width: MediaQuery.of(context).size.width,
-                                );
-                              }
-                            }
-                          },
-                        ),
-                      ),
-                      actions: <Widget>[
-                        if (FirebaseAuth.instance.currentUser.uid == product.uid)
-                          IconButton(
-                              icon: Icon(
-                                Icons.edit_outlined,
-                                semanticLabel: 'edit',
-                              ),
-                              onPressed: (FirebaseAuth.instance.currentUser.uid ==
+                          /// imageUrlList 데이터가 없으면 사진란 아예 없앰 => 기본썸네일
+                          else {
+                            return Image.asset(
+                              'assets/no-thumbnail.jpg',
+                              fit: BoxFit.cover,
+                              height: MediaQuery.of(context).size.height * 0.5,
+                              width: MediaQuery.of(context).size.width,
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                  actions: <Widget>[
+                    if (FirebaseAuth.instance.currentUser.uid == product.uid)
+                      IconButton(
+                          icon: Icon(
+                            Icons.edit_outlined,
+                            semanticLabel: 'edit',
+                          ),
+                          onPressed: (FirebaseAuth.instance.currentUser.uid ==
                                   product.uid)
-                                  ? () => Navigator.pushNamed(
-                                context,
-                                '/edit/' + productId + '/' + detailGiveOrTake,
-                              )
-                                  : null),
-                        if (FirebaseAuth.instance.currentUser.uid == product.uid)
-                          IconButton(
-                              icon: Icon(
-                                Icons.delete_forever_outlined,
-                                semanticLabel: 'delete',
-                              ),
-                              onPressed: (FirebaseAuth.instance.currentUser.uid ==
+                              ? () => Navigator.pushNamed(
+                                    context,
+                                    '/edit/' +
+                                        productId +
+                                        '/' +
+                                        detailGiveOrTake,
+                                  )
+                              : null),
+                    if (FirebaseAuth.instance.currentUser.uid == product.uid)
+                      IconButton(
+                          icon: Icon(
+                            Icons.delete_forever_outlined,
+                            semanticLabel: 'delete',
+                          ),
+                          onPressed: (FirebaseAuth.instance.currentUser.uid ==
                                   product.uid)
-                                  ? () => showDialog(
+                              ? () => showDialog(
                                   context: context,
                                   builder: (BuildContext context) =>
                                       CupertinoAlertDialog(
@@ -820,39 +833,39 @@ class _DetailPageState extends State<DetailPage>  with RouteAware {
                                           Consumer<ApplicationState>(
                                             builder: (context, appState, _) =>
                                                 CupertinoDialogAction(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                    deleteProduct()
-                                                        .then((value) =>
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                deleteProduct()
+                                                    .then((value) =>
                                                         appState.init())
-                                                        .catchError((error) => null)
-                                                        .whenComplete(() {
-                                                      Navigator.pop(context);
-                                                      deleteImages();
-                                                    });
-                                                  },
-                                                  child: Text('네'),
-                                                ),
+                                                    .catchError((error) => null)
+                                                    .whenComplete(() {
+                                                  Navigator.pop(context);
+                                                  deleteImages();
+                                                });
+                                              },
+                                              child: Text('네'),
+                                            ),
                                           )
                                         ],
                                       ))
-                                  : null)
-                      ],
-                    ),
-                  ];
-                },
-                body: SingleChildScrollView(
-                      child: Container(
-                        child: Column(
-                          children: [
-                            Row(
+                              : null)
+                  ],
+                ),
+              ];
+            },
+            body: SingleChildScrollView(
+              child: Container(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(width: 20),
-                                Expanded(
-                                  child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(height: 20.0),
+                                SizedBox(height: 20.0),
 
                                         /// 게시자 사진, 이름, 학번
                                         Row(
@@ -1050,13 +1063,13 @@ class _DetailPageState extends State<DetailPage>  with RouteAware {
                               ],
                             ),
 
-                            /// 게시물 내용 아래 댓글들
-                            Container(
-                                padding: const EdgeInsets.fromLTRB(8.0, 4, 8 , 8),
-                                child: CommentBook(
-                                  detailGiveOrTake: detailGiveOrTake,
-                                  productId: productId,
-                                )),
+                    /// 게시물 내용 아래 댓글들
+                    Container(
+                        padding: const EdgeInsets.fromLTRB(8.0, 4, 8, 8),
+                        child: CommentBook(
+                          detailGiveOrTake: detailGiveOrTake,
+                          productId: productId,
+                        )),
 
                             /// 고정된 댓글 창과 겹치지 않게하는 sizedbox
                             SizedBox(

@@ -17,7 +17,6 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
-
 import '../main.dart';
 import '../model/product.dart';
 import '../components/postTile.dart';
@@ -55,6 +54,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final ScrollController listScrollController = ScrollController();
 
   var _flutterLocalNotificationsPlugin;
+
   /// bool isLoading = false; handleSign을 위한 변수
   /// 시스템 함수에 PageView 기능 반영 처리(1) +@
   @override
@@ -66,9 +66,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _tabController = TabController(length: 2, vsync: this);
     _focusNode = FocusNode();
 
-
-    var initializationSettingsAndroid =
-    AndroidInitializationSettings('logo2');
+    var initializationSettingsAndroid = AndroidInitializationSettings('logo2');
     //ios 알림 설정 : 소리, 뱃지 등
     var initializationSettingsIOS = IOSInitializationSettings();
 
@@ -79,9 +77,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     //onSelectNotification의 경우 알림을 눌렀을때 어플에서 실행되는 행동을 설정
     _flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
-
-
-
   }
 
   Future onSelectNotification(String payload) async {
@@ -98,8 +93,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
  */
   }
-
-
 
   Future _showNotification() async {
     var android = AndroidNotificationDetails(
@@ -120,31 +113,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-
-
-
-
-
-_isShowedNoti() async {
-  await for (var snapshot in FirebaseFirestore.instance.collection('chatRoom').snapshots())
-  {
-    for(var isShowed in snapshot.docs){
-      if(isShowed.get('isShowedNotification') == false && isShowed.get('idTo') == FirebaseAuth.instance.currentUser.uid) {
-        await _showNotification()
-            .then((value) =>
-          FirebaseFirestore.instance.collection('chatRoom').doc(isShowed.id).update(
-              {
-                'isShowedNotification' : true
-              }
-          ).catchError((error) => print('error: $error')),);
+  _isShowedNoti() async {
+    await for (var snapshot
+        in FirebaseFirestore.instance.collection('chatRoom').snapshots()) {
+      for (var isShowed in snapshot.docs) {
+        if (isShowed.get('isShowedNotification') == false &&
+            isShowed.get('idTo') == FirebaseAuth.instance.currentUser.uid) {
+          await _showNotification().then(
+            (value) => FirebaseFirestore.instance
+                .collection('chatRoom')
+                .doc(isShowed.id)
+                .update({'isShowedNotification': true}).catchError(
+                    (error) => print('error: $error')),
+          );
+        }
       }
-      }
-  };
-
-}
-
-
-
+    }
+    ;
+  }
 
   void _requestPermissions() {
     flutterLocalNotificationsPlugin
@@ -205,12 +191,12 @@ _isShowedNoti() async {
                     iconTheme: IconThemeData(color: Colors.black),
                     centerTitle: true,
                     title: Text(
-                      'Pelag',
+                      'pelag',
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 28,
-                        fontFamily: 'NanumSquareRoundR',
-                        fontWeight: FontWeight.bold,
+                        fontSize: 34,
+                        fontFamily: 'MinimoLight',
+                        // fontWeight: FontWeight.bold,
                       ),
                     ),
                     // flexibleSpace: FlexibleSpaceBar(
@@ -292,12 +278,12 @@ _isShowedNoti() async {
                     iconTheme: IconThemeData(color: Colors.black),
                     centerTitle: true,
                     title: Text(
-                      'Pelag',
+                      'pelag',
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 28,
-                        fontFamily: 'NanumSquareRoundR',
-                        fontWeight: FontWeight.bold,
+                        fontSize: 34,
+                        fontFamily: 'MinimoLight',
+                        // fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -346,19 +332,43 @@ _isShowedNoti() async {
             child: Padding(
               padding: const EdgeInsets.all(15.0),
               child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  '-Drawer-\n프로필, 레밸 등 배치',
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                  ),
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'pelag',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 36,
+                        fontFamily: 'MinimoLight',
+                        // fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '\na community-based sharing platform',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontFamily: 'MinimoLight',
+                        // fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
           ListTile(
-            title: Text('Home'),
+            title: Text(
+              'home',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'MinimoLight',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(
               Icons.home,
@@ -369,13 +379,29 @@ _isShowedNoti() async {
             },
           ),
           ListTile(
-            title: Text('My Page //  Coming soon'),
+            title: Text(
+              'my page // coming soon',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'MinimoLight',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(Icons.account_circle),
             onTap: () {},
           ),
           ListTile(
-            title: Text('Change Nickname'),
+            title: Text(
+              'change nickname',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'MinimoLight',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(Icons.change_circle),
             onTap: () {
@@ -383,7 +409,15 @@ _isShowedNoti() async {
             },
           ),
           ListTile(
-            title: Text('Manual'),
+            title: Text(
+              'manual',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'MinimoLight',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(Icons.book),
             onTap: () {
@@ -391,7 +425,15 @@ _isShowedNoti() async {
             },
           ),
           ListTile(
-            title: Text('Sign Out'),
+            title: Text(
+              'sign out',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'MinimoLight',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             // - The Menu Icons should be placed in the leading position
             leading: Icon(
               Icons.logout,
@@ -518,23 +560,20 @@ _isShowedNoti() async {
           fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
       items: [
         BottomNavigationBarItem(
-          icon:
-
-          Icon(
+          icon: Icon(
             Icons.accessibility,
             size: 30,
           ),
           label: '나눔',
         ),
         BottomNavigationBarItem(
-          label: '메신저',icon:  Icon(Icons.forum, size: 30,)
-
-
-        ),
+            label: '메신저',
+            icon: Icon(
+              Icons.forum,
+              size: 30,
+            )),
       ],
     );
-
-
   }
 
   /// Drawer 관련 Scaffold Key
