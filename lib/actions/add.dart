@@ -261,8 +261,8 @@ class _AddPageState extends State<AddPage> {
                             _selectedFilter,
                           );
                         }
-                        Navigator.pop(context);
                         appState.orderByFilter('All');
+                        Navigator.pop(context);
                       }
                     }),
               ],

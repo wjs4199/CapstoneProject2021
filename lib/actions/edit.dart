@@ -12,6 +12,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../main.dart';
 import '../model/product.dart';
+import '../pages/detail.dart';
 import 'dart:io';
 import 'dart:ui';
 
@@ -569,21 +570,17 @@ class _EditPageState extends State<EditPage> {
           centerTitle: true,
           actions: <Widget>[
             TextButton(
-              onPressed: () async {
+              onPressed: ()  async {
                 if (_formKey.currentState.validate()) {
-                  setState(() {
-                    return LoadingScreen();
-                  });
                   await editProduct(
                     _selectedFilter,
                     _titleController.text,
                     _contentController.text,
                   ).whenComplete(() async {
-                      appState.orderByFilter('All');
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                      loading = false;
-                  } );
+                    appState.orderByFilter('All');
+                    Navigator.pop(context);
+                  });
+                  //Navigator.pop(context);
                 }
                 alreadyLoading = false;
                 numberOfImages = 0;

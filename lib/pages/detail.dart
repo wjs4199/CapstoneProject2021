@@ -12,7 +12,6 @@ import '../main.dart';
 import '../pages/comment.dart';
 import 'dart:async';
 
-
 /// uid 를 이용하여 닉네임을 찾아 호출하고, 이메일을 호출하기 위해 필요한 클래스
 class FindInUsers {
   /// User 컬랙션 참조
@@ -41,7 +40,9 @@ class FindInUsers {
 }
 
 class DetailPage extends StatefulWidget {
-  DetailPage({this.productId, this.detailGiveOrTake, this.photoNum});
+  const DetailPage({Key key, this.productId, this.detailGiveOrTake, this.photoNum}) : super(key: key);
+
+  //DetailPage({this.productId, this.detailGiveOrTake, this.photoNum});
 
   /// route 생성 시에 사용되는 product ID
   final String productId;
@@ -56,7 +57,7 @@ class DetailPage extends StatefulWidget {
   _DetailPageState createState() => _DetailPageState();
 }
 
-class _DetailPageState extends State<DetailPage> {
+class _DetailPageState extends State<DetailPage>  with RouteAware {
   _DetailPageState({this.chatRoomDocId});
   /// detail 페이지 실행시 인자로 전달되는 변수들
   String productId; // product ID
@@ -70,7 +71,6 @@ class _DetailPageState extends State<DetailPage> {
   /// futurebuilder 의 future: ___에 사용될 변수
   Future<void> future;
 
-  /// 나눔 상
   @override
   void initState() {
     /// 댓글쓰는 창 클릭시 rebuild되는 것을 막기 위해서 한번만 build
@@ -82,6 +82,31 @@ class _DetailPageState extends State<DetailPage> {
     detailGiveOrTake =
         widget.detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
     photoNum = widget.photoNum; // 저장된 photo 의 개수
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context));
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPush() {
+    // Route was pushed onto navigator and is now topmost route.
+  }
+
+  @override
+  void didPopNext() {
+    print("pop됐따!");
+    setState(() {
+      //
+    });
   }
 
   /// comment 적는 텍스트 칸이 빈칸인지 아닌지 분별할 때 사용됨
@@ -165,6 +190,8 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
+
+
     ///************ ProductID와 맞는 게시물 내용을 Firebase 에서 찾아내는 부분 ************///
     /// DetailPage() 호출시 받는 매개변수 참조
     var productId = widget.productId;
@@ -172,7 +199,7 @@ class _DetailPageState extends State<DetailPage> {
 
     /// detailGiveOrTake 가 담고 있는 collection 이름에 따라 그 collection 담긴 내용 가져오기
     var products = detailGiveOrTake == 'giveProducts'
-        ? context.read<ApplicationState>().giveProducts
+        ? context.watch<ApplicationState>().giveProducts
         : context.read<ApplicationState>().takeProducts;
 
     /// 현재 유저의 아이디와 이름 간략화
@@ -181,6 +208,7 @@ class _DetailPageState extends State<DetailPage> {
 
     /// 컬랙션(products) 내에서 productId가 같은 제품을 찾아냈을 때 그 내용을 담을 변수
     Product product;
+    int productNum;
 
     /// 컬랙션(products) 내에서 productId가 같은 제품을 찾아냈는지 여부 표시 (찾아냈을 때 true)
     var productFound = false;
@@ -1183,7 +1211,7 @@ class _DetailPageState extends State<DetailPage> {
                               var currentFocus = FocusScope.of(context);
                               currentFocus.unfocus();
                               if (_commentFormKey.currentState.validate()) {
-                                await addComments(_commentController.text, product.uid)
+                                await addComments(_commentController.text, userId)
                                     .then((value) => print('add comment ok!'));
                                 _commentController.clear();
                                 products = detailGiveOrTake == 'giveProducts'

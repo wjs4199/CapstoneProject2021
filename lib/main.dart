@@ -18,21 +18,30 @@ import 'actions/add.dart';
 import 'actions/edit.dart';
 import 'pages/splash.dart';
 
+
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ApplicationState(),
-      builder: (context, _) => Application(),
-    ),
-  );
+      MaterialApp(
+        home: ChangeNotifierProvider(
+          create: (context) => ApplicationState(),
+          builder: (context, _) => Application(),
+        ),
+        navigatorObservers: <RouteObserver<ModalRoute<void>>>[ routeObserver ],
+      ));
 }
 
 class Application extends StatefulWidget {
+
+
   @override
   _ApplicationState createState() => _ApplicationState();
 }
 
 class _ApplicationState extends State<Application> {
+
+
   SharedPreferences prefs;
   bool isLoading = false;
   bool isLoggedIn = false;
