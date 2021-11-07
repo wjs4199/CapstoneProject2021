@@ -18,6 +18,7 @@ import 'actions/add.dart';
 import 'actions/edit.dart';
 import 'pages/splash.dart';
 
+
 void main() {
   runApp(
     ChangeNotifierProvider(
@@ -26,13 +27,16 @@ void main() {
     ),
   );
 }
-
 class Application extends StatefulWidget {
+
+
   @override
   _ApplicationState createState() => _ApplicationState();
 }
 
 class _ApplicationState extends State<Application> {
+
+
   SharedPreferences prefs;
   bool isLoading = false;
   bool isLoggedIn = false;
@@ -86,9 +90,6 @@ class _ApplicationState extends State<Application> {
             // 동적 경로할당
             onGenerateRoute: (RouteSettings settings) {
               final pathElements = settings.name.split('/');
-              //detail 페이지로 이동시키는 동적 경로할당
-              // give페이지의 detail페이지에서 필요로한다는 뜻인거 같음
-              // give&take 통합할 거니까 detail 페이지에서 부를 경우만 나타내면 될듯
               if (pathElements[1] == 'detail' &&
                   pathElements[3] == 'giveProducts') {
                 return MaterialPageRoute(
@@ -140,9 +141,6 @@ class ApplicationState extends ChangeNotifier {
   String detailGiveOrTake;
   int photo;
 
-  // comment와 like를 collection안에 어떤 구조로 넣을 것인가?
-  // 원래 하던대로 상품 uid통해 찾으려면 이미 init한 상품 리스트들을 돌면서
-  // datail페이지에 필요한 내용을 찾아내는 형식으로 해야할까?
   Future<void> detailPageUid(
       String uid, String detailGiveOrTake, int photo) async {
     this.uid = uid;
@@ -199,8 +197,8 @@ class ApplicationState extends ChangeNotifier {
             hits: document.data()['hits'],
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
-            nickname: document.data()['nickname'],
             thumbnail: document.data()['thumbnailURL'],
+            complete: document.data()['complete'],
           ));
         });
         notifyListeners();
@@ -228,8 +226,8 @@ class ApplicationState extends ChangeNotifier {
             hits: document.data()['hits'],
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
-            nickname: document.data()['nickname'],
             thumbnail: document.data()['thumbnailURL'],
+            complete: document.data()['complete'],
           ));
         });
         notifyListeners();
@@ -259,8 +257,8 @@ class ApplicationState extends ChangeNotifier {
             hits: document.data()['hits'],
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
-            nickname: document.data()['nickname'],
             thumbnail: document.data()['thumbnailURL'],
+            complete: document.data()['complete'],
           ));
         });
         notifyListeners();
@@ -287,8 +285,8 @@ class ApplicationState extends ChangeNotifier {
             hits: document.data()['hits'],
             photo: document.data()['photo'],
             user_photoURL: document.data()['user_photoURL'],
-            nickname: document.data()['nickname'],
             thumbnail: document.data()['thumbnailURL'],
+            complete: document.data()['complete'],
           ));
         });
         notifyListeners();
@@ -321,7 +319,7 @@ class ApplicationState extends ChangeNotifier {
       ///************************* likeList 가져오는 부분 *************************///
       FirebaseFirestore.instance
           .collection(detailGiveOrTake + '/' + uid + '/like')
-          .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
+          .snapshots()
           .listen((snapshot) {
         _likeList = [];
         snapshot.docs.forEach((document) {

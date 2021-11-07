@@ -22,6 +22,7 @@ import '../model/product.dart';
 import '../components/postTile.dart';
 import 'views/1_nanum_view.dart';
 import 'views/3_msg_view.dart';
+import 'detail.dart';
 
 // Home
 class HomePage extends StatefulWidget {
@@ -665,18 +666,6 @@ class PostTileMaker extends StatelessWidget {
       });
     }
 
-    /// findNickname add.dart 에 정의되어 있는데 왜 여기 또있는지?
-    // String findNickname(AsyncSnapshot<QuerySnapshot> snapshot, String name) {
-    //   var nickName = 'null';
-    //   snapshot.data.docs.forEach((document) {
-    //     if (document['username'] == name) {
-    //       nickName = document['nickname'];
-    //     }
-    //   });
-    //   print('찾은 닉네임은 $nickName!!');
-    //   return nickName;
-    // }
-
     ///*** user collection 내에서 userName이 일치하는 doc의 nickname을 가져오는 부분 ****///
 
     return InkWell(
@@ -712,53 +701,68 @@ class PostTileMaker extends StatelessWidget {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
                   child: CircularProgressIndicator(
-                color: Theme.of(context).primaryColor,
-              ));
+                    color: Theme
+                        .of(context)
+                        .primaryColor,
+                  ));
             } else {
-              return CustomListItem(
-                title: _product.title,
-                subtitle: _product.content,
-                author: _product.nickname,
-                publishDate: snapshot.data,
-                // category: _product.category,
-                likes: _product.likes,
-                // thumbnail: FutureBuilder(
-                //   future: downloadURL(_product.id),
-                //   builder: (context, snapshot) {
-                //     // if (snapshot.connectionState == ConnectionState.waiting) {
-                //     //   return Center(
-                //     //       child: CircularProgressIndicator(
-                //     //           color: Theme.of(context).primaryColor));
-                //     // } else {
-                //     if (snapshot.hasData) {
-                //       return ClipRRect(
-                //         borderRadius: BorderRadius.circular(8.0),
-                //         // child: Image.network(snapshot.data.toString(),
-                //         //     fit: BoxFit.fitWidth),
-                //         child: CachedNetworkImage(
-                //           imageUrl: snapshot.data,
-                //           fit: BoxFit.fitWidth,
-                //           errorWidget: (context, url, error) =>
-                //               Icon(Icons.error),
-                //         ),
-                //       );
-                //     } else if (snapshot.hasData == false) {
-                //       return Container();
-                //     } else {
-                //       return Center(
-                //           child: CircularProgressIndicator(
-                //               color: Theme.of(context).primaryColor));
-                //     }
-                //     // }
-                //   },
-                // ),
-                // thumbnail: Image.network(
-                //     'gs://give-take-535cf.appspot.com/images/$id\0.png'),
-                thumbnail: _product.thumbnail == null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(14.0),
-                        child: Image.asset('assets/no-thumbnail.jpg'))
-                    : ClipRRect(
+              return StreamBuilder<QuerySnapshot>(
+                  stream: FindInUsers.users.snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot2) {
+                    if (snapshot2.hasError) {
+                      return Text('x');
+                    }
+                    if (snapshot2.connectionState ==
+                        ConnectionState.waiting) {
+                      return Text('');
+                    }
+
+                    /// 이름과 학번
+                    return CustomListItem(
+                      title: _product.title,
+                      subtitle: _product.content,
+                      author: FindInUsers.findNickname(snapshot2, _product.uid),
+                      publishDate: snapshot.data,
+                      // category: _product.category,
+                      likes: _product.likes,
+                      // thumbnail: FutureBuilder(
+                      //   future: downloadURL(_product.id),
+                      //   builder: (context, snapshot) {
+                      //     // if (snapshot.connectionState == ConnectionState.waiting) {
+                      //     //   return Center(
+                      //     //       child: CircularProgressIndicator(
+                      //     //           color: Theme.of(context).primaryColor));
+                      //     // } else {
+                      //     if (snapshot.hasData) {
+                      //       return ClipRRect(
+                      //         borderRadius: BorderRadius.circular(8.0),
+                      //         // child: Image.network(snapshot.data.toString(),
+                      //         //     fit: BoxFit.fitWidth),
+                      //         child: CachedNetworkImage(
+                      //           imageUrl: snapshot.data,
+                      //           fit: BoxFit.fitWidth,
+                      //           errorWidget: (context, url, error) =>
+                      //               Icon(Icons.error),
+                      //         ),
+                      //       );
+                      //     } else if (snapshot.hasData == false) {
+                      //       return Container();
+                      //     } else {
+                      //       return Center(
+                      //           child: CircularProgressIndicator(
+                      //               color: Theme.of(context).primaryColor));
+                      //     }
+                      //     // }
+                      //   },
+                      // ),
+                      // thumbnail: Image.network(
+                      //     'gs://give-take-535cf.appspot.com/images/$id\0.png'),
+                      thumbnail: _product.thumbnail == null
+                          ? ClipRRect(
+                          borderRadius: BorderRadius.circular(14.0),
+                          child: Image.asset('assets/no-thumbnail.jpg'))
+                          : ClipRRect(
                         borderRadius: BorderRadius.circular(14.0),
                         child: CachedNetworkImage(
                           // placeholder: CircularProgressIndicator(),
@@ -768,9 +772,9 @@ class PostTileMaker extends StatelessWidget {
                               Icon(Icons.error),
                         ),
                       ),
-              );
+                    );
+                  });
             }
-          },
-        ));
+          }));
   }
 }

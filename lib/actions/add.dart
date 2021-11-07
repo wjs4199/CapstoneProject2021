@@ -148,7 +148,7 @@ class _AddPageState extends State<AddPage> {
       'hits': 1,
       'photo': images.length,
       'user_photoURL': user.photoURL,
-      'nickname': nickName,
+      'complete' : '진행 중',
     }).then((value) async {
       if (images.isNotEmpty) await uploadFile(value.id);
       await giveProduct.doc(value.id).update({
@@ -176,8 +176,7 @@ class _AddPageState extends State<AddPage> {
       'hits': 1,
       'photo': images.length,
       'user_photoURL': user.photoURL,
-      'nickname': nickName,
-
+      'complete' : '진행 중',
       /// for chatting
     }).then((value) async {
       if (images.isNotEmpty) await uploadFile(value.id);
@@ -262,8 +261,8 @@ class _AddPageState extends State<AddPage> {
                             _selectedFilter,
                           );
                         }
-                        Navigator.pop(context);
                         appState.orderByFilter('All');
+                        Navigator.pop(context);
                       }
                     }),
               ],
