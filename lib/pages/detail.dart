@@ -12,7 +12,6 @@ import '../main.dart';
 import '../pages/comment.dart';
 import 'dart:async';
 
-
 class DetailPage extends StatefulWidget {
   DetailPage({this.productId, this.detailGiveOrTake, this.photoNum});
 
@@ -31,6 +30,7 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   _DetailPageState({this.chatRoomDocId});
+
   /// detail 페이지 실행시 인자로 전달되는 변수들
   String productId; // product ID
   String detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
@@ -45,11 +45,9 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void initState() {
-
     /// 댓글쓰는 창 클릭시 rebuild되는 것을 막기 위해서 한번만 build
     future = makeUrlList();
     super.initState();
-
     productId = widget.productId; // product ID
     detailGiveOrTake =
         widget.detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
@@ -85,11 +83,11 @@ class _DetailPageState extends State<DetailPage> {
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
   StreamController<Icon> changeFavoriteButton =
-  StreamController<Icon>.broadcast();
+      StreamController<Icon>.broadcast();
 
   // Carousel 하단의 Dot list 를 Carousel 페이지에 따라 업데이트 시키기 위해 필요한 stream
   StreamController<String> changeTextField =
-  StreamController<String>.broadcast();
+      StreamController<String>.broadcast();
 
   /// storage 에서 다운로드한 이미지 url 들이 저장될 정적 저장소
   var imageUrlList = [];
@@ -376,17 +374,20 @@ class _DetailPageState extends State<DetailPage> {
     Future<void> addComments(String comment, String uid) {
       return comments
           .add({
-        'userName': FirebaseAuth.instance.currentUser.displayName,
-        'comment': comment,
-        'created': FieldValue.serverTimestamp(),
-        // 빼야할지도!
-        'uid' : uid,
-      })
+            'userName': FirebaseAuth.instance.currentUser.displayName,
+            'comment': comment,
+            'created': FieldValue.serverTimestamp(),
+            // 빼야할지도!
+            'uid': uid,
+          })
           .then((value) => print('add comment!'))
           .catchError((error) => print('Failed to add a comment: $error'));
     }
+
     _currentNickname() async {
-      await FirebaseFirestore.instance.collection('users').doc(currentUserId)
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserId)
           .get()
           .then((DocumentSnapshot ds) {
         name = ds['nickname'];
@@ -400,7 +401,8 @@ class _DetailPageState extends State<DetailPage> {
     CollectionReference users = FirebaseFirestore.instance.collection('users');
 
     /// 유저의 학번을 찾아서 보여주는 함수
-    String findStudentNumber(AsyncSnapshot<QuerySnapshot> snapshot, String uid) {
+    String findStudentNumber(
+        AsyncSnapshot<QuerySnapshot> snapshot, String uid) {
       var email = '00';
       snapshot.data.docs.forEach((document) {
         if (document['id'] == uid) {
@@ -421,72 +423,68 @@ class _DetailPageState extends State<DetailPage> {
       return nickName;
     }
 
-
     /// 게시자 이름 옆의 채팅하기 버튼
     InkWell _CommentChatButtonsForOthers(
         BuildContext context, ApplicationState appState) {
       return InkWell(
         child: StreamBuilder<QuerySnapshot>(
-          stream: users.snapshots(),
-          builder: (BuildContext context,
-          AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) {
-          return Text('x');
-          }
-          if (snapshot.connectionState ==
-          ConnectionState.waiting) {
-          return Text('');
-          }
-          nickName = findNickname(snapshot, product.uid);
-          return Container(
-              padding: const EdgeInsets.all(6.0),
-              decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey.withOpacity(0.1)),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(height: 10,),
-                  Text('채팅하기  ',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontFamily: 'NanumSquareRoundR',
-                      height: 1.2,
+            stream: users.snapshots(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return Text('x');
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Text('');
+              }
+              nickName = findNickname(snapshot, product.uid);
+              return Container(
+                padding: const EdgeInsets.all(6.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.withOpacity(0.1)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 10,
                     ),
-                  ),
-                  Image.asset(
-                    'assets/chat_grey.jpg',
-                    //'assets/chat.jpg',
-                    width: 17,
-                    height: 17,
-                  )
-                ],
-              ),
-            );
-          }),
+                    Text(
+                      '채팅하기  ',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontFamily: 'NanumSquareRoundR',
+                        height: 1.2,
+                      ),
+                    ),
+                    Image.asset(
+                      'assets/chat_grey.jpg',
+                      //'assets/chat.jpg',
+                      width: 17,
+                      height: 17,
+                    )
+                  ],
+                ),
+              );
+            }),
         onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Chat(
+                peerId: product.uid,
+                peerAvatar: product.user_photoURL,
+                peerName: nickName,
+                myName: name,
 
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    Chat(
-                      peerId: product.uid,
-                      peerAvatar: product
-                          .user_photoURL,
-                      peerName: nickName,
-                      myName: name, ///editted
-                      myAvatar:
-                      FirebaseAuth
-                          .instance
-                          .currentUser
-                          .photoURL,
-                    ),
+                ///editted
+                myAvatar: FirebaseAuth.instance.currentUser.photoURL,
               ),
-            );
+            ),
+          );
         },
       );
     }
@@ -495,179 +493,188 @@ class _DetailPageState extends State<DetailPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Stack(
-          children: [
-            NestedScrollView(
-                physics: const BouncingScrollPhysics(
-                    parent: AlwaysScrollableScrollPhysics()),
-                headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                  return <Widget>[
-                    SliverAppBar(
-                      expandedHeight: MediaQuery.of(context).size.height * 0.5,
-                      backgroundColor: Colors.white,
-                      iconTheme: IconThemeData(
-                        // color: Colors.black,
-                        opacity: 0.9,
-                      ),
-                      pinned: true, // true 처리 시 스크롤을 내려도 appbar 가 작게 보임
-                      floating: false, // true 처리 시 스크롤을 내릴때 appbar 가 보임
-                      snap: false, // true 처리 시 스크롤 살짝 내리면 appbar 가 전부 보임
-                      stretch: false,
-                      // onStretchTrigger: () {
-                      //   // Function callback for stretch
-                      //   return Future<void>.value();
-                      // },
-                      flexibleSpace: FlexibleSpaceBar(
-                        collapseMode: CollapseMode.pin,
-                        // stretchModes: const <StretchMode>[
-                        //   StretchMode.zoomBackground,
-                        //   StretchMode.blurBackground,
-                        //   StretchMode.fadeTitle,
-                        // ],
-                        background: FutureBuilder(
-                          future: future,
-                          builder: (context, snapshot) {
-                            /// 시진 로딩중일 때
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return Column(
-                                children: [
-                                  Container(
-                                    height: MediaQuery.of(context).size.height * 0.5,
-                                    width: MediaQuery.of(context).size.width,
-                                    child: Center(child: CircularProgressIndicator()),
-                                  )
-                                ],
-                              );
-                            }
+          child: Stack(
+        children: [
+          NestedScrollView(
+            physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics()),
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverAppBar(
+                  expandedHeight: MediaQuery.of(context).size.height * 0.5,
+                  backgroundColor: Colors.white,
+                  iconTheme: IconThemeData(
+                    // color: Colors.black,
+                    opacity: 0.9,
+                  ),
+                  pinned: true, // true 처리 시 스크롤을 내려도 appbar 가 작게 보임
+                  floating: false, // true 처리 시 스크롤을 내릴때 appbar 가 보임
+                  snap: false, // true 처리 시 스크롤 살짝 내리면 appbar 가 전부 보임
+                  stretch: false,
+                  // onStretchTrigger: () {
+                  //   // Function callback for stretch
+                  //   return Future<void>.value();
+                  // },
+                  flexibleSpace: FlexibleSpaceBar(
+                    collapseMode: CollapseMode.pin,
+                    // stretchModes: const <StretchMode>[
+                    //   StretchMode.zoomBackground,
+                    //   StretchMode.blurBackground,
+                    //   StretchMode.fadeTitle,
+                    // ],
+                    background: FutureBuilder(
+                      future: future,
+                      builder: (context, snapshot) {
+                        /// 시진 로딩중일 때
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Column(
+                            children: [
+                              Container(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.5,
+                                width: MediaQuery.of(context).size.width,
+                                child:
+                                    Center(child: CircularProgressIndicator()),
+                              )
+                            ],
+                          );
+                        }
 
-                            /// 사진 로딩 후
-                            else {
-                              if (imageUrlList.isNotEmpty) {
-                                return Stack(
-                                  children: [
-                                    Container(
-                                      height:
+                        /// 사진 로딩 후
+                        else {
+                          if (imageUrlList.isNotEmpty) {
+                            return Stack(
+                              children: [
+                                Container(
+                                  height:
                                       MediaQuery.of(context).size.height * 0.5,
-                                      width: MediaQuery.of(context).size.width,
-                                      // color: Color(0xffced3d0),
-                                    ),
-                                    CarouselSlider(
-                                      carouselController: carouselController,
-                                      options: CarouselOptions(
-                                          autoPlay: false,
-                                          enlargeCenterPage: false,
-                                          viewportFraction: 1.0,
-                                          aspectRatio: 1.0,
-                                          height: MediaQuery.of(context).size.height *
+                                  width: MediaQuery.of(context).size.width,
+                                  // color: Color(0xffced3d0),
+                                ),
+                                CarouselSlider(
+                                  carouselController: carouselController,
+                                  options: CarouselOptions(
+                                      autoPlay: false,
+                                      enlargeCenterPage: false,
+                                      viewportFraction: 1.0,
+                                      aspectRatio: 1.0,
+                                      height:
+                                          MediaQuery.of(context).size.height *
                                               0.5,
-                                          initialPage: 0,
-                                          onPageChanged: (index, reason) {
-                                            carouselIndexChange.add(index);
-                                          }),
-                                      items: imageUrlList.map<Widget>((item) {
-                                        return Image.network(
-                                          item,
-                                          fit: BoxFit.cover,
-                                        );
-                                      }).toList(),
-                                    ),
+                                      initialPage: 0,
+                                      onPageChanged: (index, reason) {
+                                        carouselIndexChange.add(index);
+                                      }),
+                                  items: imageUrlList.map<Widget>((item) {
+                                    return Image.network(
+                                      item,
+                                      fit: BoxFit.cover,
+                                    );
+                                  }).toList(),
+                                ),
 
-                                    /// 사진 밑의 dot Row
-                                    StreamBuilder<int>(
-                                        stream: carouselIndexChange.stream,
-                                        initialData: 0,
-                                        builder: (context, snapshot) {
-                                          return Column(
-                                            mainAxisAlignment:
+                                /// 사진 밑의 dot Row
+                                StreamBuilder<int>(
+                                    stream: carouselIndexChange.stream,
+                                    initialData: 0,
+                                    builder: (context, snapshot) {
+                                      return Column(
+                                        mainAxisAlignment:
                                             MainAxisAlignment.start,
-                                            children: [
-                                              SizedBox(
-                                                height: MediaQuery.of(context)
+                                        children: [
+                                          SizedBox(
+                                            height: MediaQuery.of(context)
                                                     .size
                                                     .height *
-                                                    0.46,
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
+                                                0.46,
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
                                                 MainAxisAlignment.center,
-                                                crossAxisAlignment:
+                                            crossAxisAlignment:
                                                 CrossAxisAlignment.end,
-                                                children: imageUrlList
-                                                    .asMap()
-                                                    .entries
-                                                    .map<Widget>((entry) {
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      carouselController
-                                                          .animateToPage(entry.key);
-                                                      print(
-                                                          'entry key -> ${entry.key}');
-                                                    },
-                                                    child: Container(
-                                                      width: 8.0,
-                                                      height: 8.0,
-                                                      margin: EdgeInsets.symmetric(
-                                                          vertical: 8.0,
-                                                          horizontal: 4.0),
-                                                      decoration: BoxDecoration(
-                                                          shape: BoxShape.circle,
-                                                          color: (Theme.of(context)
-                                                              .brightness ==
-                                                              Brightness.dark
+                                            children: imageUrlList
+                                                .asMap()
+                                                .entries
+                                                .map<Widget>((entry) {
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  carouselController
+                                                      .animateToPage(entry.key);
+                                                  print(
+                                                      'entry key -> ${entry.key}');
+                                                },
+                                                child: Container(
+                                                  width: 8.0,
+                                                  height: 8.0,
+                                                  margin: EdgeInsets.symmetric(
+                                                      vertical: 8.0,
+                                                      horizontal: 4.0),
+                                                  decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: (Theme.of(context)
+                                                                      .brightness ==
+                                                                  Brightness
+                                                                      .dark
                                                               ? Colors.white
                                                               : Colors.black)
-                                                              .withOpacity(
+                                                          .withOpacity(
                                                               snapshot.data ==
-                                                                  entry.key
+                                                                      entry.key
                                                                   ? 1.0
                                                                   : 0.4)),
-                                                    ),
-                                                  );
-                                                }).toList(),
-                                              )
-                                            ],
-                                          );
-                                        }),
-                                  ],
-                                );
-                              }
+                                                ),
+                                              );
+                                            }).toList(),
+                                          )
+                                        ],
+                                      );
+                                    }),
+                              ],
+                            );
+                          }
 
-                              /// imageUrlList 데이터가 없으면 사진란 아예 없앰 => 기본썸네일
-                              else {
-                                return Image.asset(
-                                  'assets/no-thumbnail.jpg',
-                                  fit: BoxFit.cover,
-                                  height: MediaQuery.of(context).size.height * 0.5,
-                                  width: MediaQuery.of(context).size.width,
-                                );
-                              }
-                            }
-                          },
-                        ),
-                      ),
-                      actions: <Widget>[
-                        if (FirebaseAuth.instance.currentUser.uid == product.uid)
-                          IconButton(
-                              icon: Icon(
-                                Icons.edit_outlined,
-                                semanticLabel: 'edit',
-                              ),
-                              onPressed: (FirebaseAuth.instance.currentUser.uid ==
+                          /// imageUrlList 데이터가 없으면 사진란 아예 없앰 => 기본썸네일
+                          else {
+                            return Image.asset(
+                              'assets/no-thumbnail.jpg',
+                              fit: BoxFit.cover,
+                              height: MediaQuery.of(context).size.height * 0.5,
+                              width: MediaQuery.of(context).size.width,
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                  actions: <Widget>[
+                    if (FirebaseAuth.instance.currentUser.uid == product.uid)
+                      IconButton(
+                          icon: Icon(
+                            Icons.edit_outlined,
+                            semanticLabel: 'edit',
+                          ),
+                          onPressed: (FirebaseAuth.instance.currentUser.uid ==
                                   product.uid)
-                                  ? () => Navigator.pushNamed(
-                                context,
-                                '/edit/' + productId + '/' + detailGiveOrTake,
-                              )
-                                  : null),
-                        if (FirebaseAuth.instance.currentUser.uid == product.uid)
-                          IconButton(
-                              icon: Icon(
-                                Icons.delete_forever_outlined,
-                                semanticLabel: 'delete',
-                              ),
-                              onPressed: (FirebaseAuth.instance.currentUser.uid ==
+                              ? () => Navigator.pushNamed(
+                                    context,
+                                    '/edit/' +
+                                        productId +
+                                        '/' +
+                                        detailGiveOrTake,
+                                  )
+                              : null),
+                    if (FirebaseAuth.instance.currentUser.uid == product.uid)
+                      IconButton(
+                          icon: Icon(
+                            Icons.delete_forever_outlined,
+                            semanticLabel: 'delete',
+                          ),
+                          onPressed: (FirebaseAuth.instance.currentUser.uid ==
                                   product.uid)
-                                  ? () => showDialog(
+                              ? () => showDialog(
                                   context: context,
                                   builder: (BuildContext context) =>
                                       CupertinoAlertDialog(
@@ -684,386 +691,410 @@ class _DetailPageState extends State<DetailPage> {
                                           Consumer<ApplicationState>(
                                             builder: (context, appState, _) =>
                                                 CupertinoDialogAction(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                    deleteProduct()
-                                                        .then((value) =>
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                deleteProduct()
+                                                    .then((value) =>
                                                         appState.init())
-                                                        .catchError((error) => null)
-                                                        .whenComplete(() {
-                                                      Navigator.pop(context);
-                                                      deleteImages();
-                                                    });
-                                                  },
-                                                  child: Text('네'),
-                                                ),
+                                                    .catchError((error) => null)
+                                                    .whenComplete(() {
+                                                  Navigator.pop(context);
+                                                  deleteImages();
+                                                });
+                                              },
+                                              child: Text('네'),
+                                            ),
                                           )
                                         ],
                                       ))
-                                  : null)
-                      ],
-                    ),
-                  ];
-                },
-                body: SingleChildScrollView(
-                      child: Container(
-                        child: Column(
-                          children: [
-                            Row(
+                              : null)
+                  ],
+                ),
+              ];
+            },
+            body: SingleChildScrollView(
+              child: Container(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(width: 20),
-                                Expanded(
-                                  child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(height: 20.0),
+                                SizedBox(height: 20.0),
 
-                                        /// 게시자 사진, 이름, 학번
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            /// 게시자 사진
-                                            SizedBox(
-                                              width: 42,
-                                              height: 42,
-                                              child: Image.asset(
-                                                  'assets/userDefaultImage.png'),
-                                            ),
-                                            SizedBox(width: 10.0),
-                                            StreamBuilder<QuerySnapshot>(
-                                                    stream: users.snapshots(),
-                                                    builder: (BuildContext context,
-                                                    AsyncSnapshot<QuerySnapshot> snapshot2) {
-                                                    if (snapshot2.hasError) {
-                                                    return Text('x');
-                                                    }
-                                                    if (snapshot2.connectionState ==
-                                                    ConnectionState.waiting) {
-                                                    return Text('');
-                                                    }
-                                                    /// 이름과 학번
-                                                    return Column(
-                                                    mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                    crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                    children: [
-                                                      SizedBox(
-                                                        height: 2,
-                                                      ),
-                                                      /// 이름
-                                                      Text(
-                                                          '${findNickname(snapshot2, product.uid)}',
-                                                          style: TextStyle(
-                                                            fontFamily: 'NanumSquareRoundR',
-                                                            color: Colors.black,
-                                                            fontWeight: FontWeight.bold,
-                                                            fontSize: 16,
-                                                          ),
-                                                        ),
-                                                      SizedBox(height: 3),
-                                                      /// 학번
-                                                      Text( findStudentNumber(snapshot2, product.uid).substring(1,3) + '학번',
-                                                          style: TextStyle(
-                                                            color: Colors.black.withOpacity(0.4),
-                                                            fontSize: 13,
-                                                            fontFamily: 'NanumSquareRoundR',
-                                                          ),
-                                                        )
-                                                    ]
-                                                    );
-                                                    }),
-                                            if(userName != product.userName)
-                                              Expanded(
-                                                  child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment.end,
-                                                    children: [
-                                                    _CommentChatButtonsForOthers(
-                                                        context, Provider.of<ApplicationState>(context, listen: false),
-                                                    ),
-                                                    ]
-                                                  )
+                                /// 게시자 사진, 이름, 학번
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    /// 게시자 사진
+                                    SizedBox(
+                                      width: 42,
+                                      height: 42,
+                                      child: Image.asset(
+                                          'assets/userDefaultImage.png'),
+                                    ),
+                                    SizedBox(width: 10.0),
+                                    StreamBuilder<QuerySnapshot>(
+                                        stream: users.snapshots(),
+                                        builder: (BuildContext context,
+                                            AsyncSnapshot<QuerySnapshot>
+                                                snapshot2) {
+                                          if (snapshot2.hasError) {
+                                            return Text('x');
+                                          }
+                                          if (snapshot2.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return Text('');
+                                          }
 
-                                              ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 9.0),
-                                        Divider(thickness: 1.0),
-                                        SizedBox(height: 9.0),
-                                        Row(
-                                          children: [
-                                            RichText(
-                                              text: TextSpan(
+                                          /// 이름과 학번
+                                          return Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(
+                                                  height: 2,
+                                                ),
+
+                                                /// 이름
+                                                Text(
+                                                  '${findNickname(snapshot2, product.uid)}',
                                                   style: TextStyle(
-                                                    fontFamily: 'NanumSquareRoundR',
+                                                    fontFamily:
+                                                        'NanumSquareRoundR',
                                                     color: Colors.black,
                                                     fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
                                                   ),
-                                                  children: <TextSpan>[
-                                                    TextSpan(
-                                                      text: '${product.title}\n',
-                                                      style: TextStyle(
-                                                        fontFamily: 'NanumSquareRoundR',
-                                                        color: Colors.black,
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 22,
-                                                        height: 1,
-                                                      ),
-                                                    ),
-                                                    TextSpan(
-                                                      text:
-                                                      '${product.category} · ${calculateTime()}\n\n',
-                                                      style: TextStyle(
-                                                        fontFamily: 'Roboto_Bold',
-                                                        color: Colors.grey,
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 16,
-                                                        height: 1.6,
-                                                      ),
-                                                    ),
-                                                  ]),
-                                              textAlign: TextAlign.start,
-                                            ),
-                                          ],
-                                        ),
+                                                ),
+                                                SizedBox(height: 3),
 
-                                        /// 게시글 내용
-                                        Text(
-                                          product.content ?? product.content,
+                                                /// 학번
+                                                Text(
+                                                  findStudentNumber(snapshot2,
+                                                              product.uid)
+                                                          .substring(1, 3) +
+                                                      '학번',
+                                                  style: TextStyle(
+                                                    color: Colors.black
+                                                        .withOpacity(0.4),
+                                                    fontSize: 13,
+                                                    fontFamily:
+                                                        'NanumSquareRoundR',
+                                                  ),
+                                                )
+                                              ]);
+                                        }),
+                                    if (userName != product.userName)
+                                      Expanded(
+                                          child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                            _CommentChatButtonsForOthers(
+                                              context,
+                                              Provider.of<ApplicationState>(
+                                                  context,
+                                                  listen: false),
+                                            ),
+                                          ])),
+                                  ],
+                                ),
+                                SizedBox(height: 9.0),
+                                Divider(thickness: 1.0),
+                                SizedBox(height: 9.0),
+                                Row(
+                                  children: [
+                                    RichText(
+                                      text: TextSpan(
                                           style: TextStyle(
                                             fontFamily: 'NanumSquareRoundR',
                                             color: Colors.black,
-                                            //fontWeight: FontWeight.bold,
-                                            fontSize: 17,
-                                            height: 1.5,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                        ),
-                                        StreamBuilder<QuerySnapshot>(
-                                          stream: likes.snapshots().asBroadcastStream(),
-                                          builder: (BuildContext context,
-                                              AsyncSnapshot<QuerySnapshot> snapshot) {
-                                            if (snapshot.hasError) {
-                                              return Text('x',
-                                                  style: TextStyle(
-                                                    fontSize: 13,
-                                                    height: 1,
-                                                  ));
-                                            }
-                                            if (snapshot.connectionState ==
-                                                ConnectionState.waiting) {
-                                              return Text('',
-                                                  style: TextStyle(
-                                                    fontSize: 13,
-                                                    height: 1,
-                                                  ));
-                                            }
-                                            var count = snapshot.data.size;
-                                            return StreamBuilder<int>(
-                                                stream: changeLikeCount.stream
-                                                    .asBroadcastStream(),
-                                                initialData: count,
-                                                builder: (context, snapshot2) {
-                                                  return Text(
-                                                    '\n\n조회 ${product.hits}회 · 좋아요 ${snapshot2.data}회',
-                                                    style: TextStyle(
-                                                      fontFamily: 'NanumSquareRoundR',
-                                                      color: Colors.grey,
-                                                      //fontWeight: FontWeight.bold,
-                                                      fontSize: 13,
-                                                      height: 1,
-                                                    ),
-                                                  );
-                                                });
-                                          },
-                                        ),
-                                        SizedBox(height: 9.0),
-                                        Divider(thickness: 1.0),
-                                      ]),
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text: '${product.title}\n',
+                                              style: TextStyle(
+                                                fontFamily: 'NanumSquareRoundR',
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 22,
+                                                height: 1,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text:
+                                                  '${product.category} · ${calculateTime()}\n\n',
+                                              style: TextStyle(
+                                                fontFamily: 'Roboto_Bold',
+                                                color: Colors.grey,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                height: 1.6,
+                                              ),
+                                            ),
+                                          ]),
+                                      textAlign: TextAlign.start,
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(width: 20),
-                              ],
-                            ),
 
-                            /// 게시물 내용 아래 댓글들
-                            Container(
-                                padding: const EdgeInsets.fromLTRB(8.0, 4, 8 , 8),
-                                child: CommentBook(
-                                  detailGiveOrTake: detailGiveOrTake,
-                                  productId: productId,
-                                )),
-
-                            /// 고정된 댓글 창과 겹치지 않게하는 sizedbox
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.044,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-            ),
-            Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      //height: MediaQuery.of(context).size.height * 0.157,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Color(0xffe5e5e5),
-                        boxShadow: [
-                          BoxShadow(color: Color(0xffe5e5e5), spreadRadius: 2),
-                        ],
-                      ),
-                      margin: EdgeInsets.fromLTRB(7.0, 7.0, 7.0, 1.0),
-                      child: Row(
-                        children: [
-                          // 하트 아이콘
-                          Container(
-                            width: 50,
-                            child: StreamBuilder<QuerySnapshot>(
-                                stream: likes.snapshots(),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                                  if (snapshot.hasError) {
-                                    return Text('x');
-                                  }
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
-                                    return Text('');
-                                  }
-                                  return StreamBuilder<Icon>(
-                                      stream: changeFavoriteButton.stream,
-                                      initialData: isLiked(snapshot)
-                                          ? Icon(
-                                        Icons.favorite,
-                                        color: Theme.of(context).primaryColor,
-                                        semanticLabel: 'like',
-                                      )
-                                          : Icon(
-                                        Icons.favorite_border_outlined,
-                                        color: Theme.of(context).primaryColor,
-                                        semanticLabel: 'like',
-                                      ),
-                                      builder: (context, snapshot2) {
-                                        /// changeFavoriteButton 스트림 컨트롤러에 새 데이터가 들어올때마다 부분적으로 빌드됨
-                                        return IconButton(
-
-                                          /// 아이콘의 snapshot2 => changeFavoriteButton 스트림으로 건네준 아이콘
-                                            icon: snapshot2.data,
-                                            onPressed: () async {
-                                              /// 이미 좋아요가 눌러져 있었을 떄
-                                              if (isLiked(snapshot)) {
-                                                await deleteLike(userId)
-                                                    .catchError((error) => null)
-                                                    .whenComplete(() {
-                                                  products =
-                                                  detailGiveOrTake == 'giveProducts'
-                                                      ? context
-                                                      .read<ApplicationState>()
-                                                      .giveProducts
-                                                      : context
-                                                      .read<ApplicationState>()
-                                                      .takeProducts;
-                                                  changeFavoriteButton.add(Icon(
-                                                    Icons.favorite_border_outlined,
-                                                    color: Theme.of(context).primaryColor,
-                                                    semanticLabel: 'like',
-                                                  ));
-                                                  changeLikeCount.add(context
-                                                      .read<ApplicationState>()
-                                                      .likeCount);
-                                                });
-                                              }
-
-                                              /// 좋아요가 눌러져 있지 않을 때
-                                              else {
-                                                await addLike()
-                                                    .catchError((error) => null)
-                                                    .whenComplete(() {
-                                                  products =
-                                                  detailGiveOrTake == 'giveProducts'
-                                                      ? context
-                                                      .read<ApplicationState>()
-                                                      .giveProducts
-                                                      : context
-                                                      .read<ApplicationState>()
-                                                      .takeProducts;
-                                                  changeFavoriteButton.add(Icon(
-                                                    Icons.favorite,
-                                                    color: Theme.of(context).primaryColor,
-                                                    semanticLabel: 'like',
-                                                  ));
-                                                  changeLikeCount.add(context
-                                                      .read<ApplicationState>()
-                                                      .likeCount);
-                                                });
-                                              }
-                                            });
-                                      });
-                                }),
-                          ),
-                          // 입력부분
-                          Form(
-                            key: _commentFormKey,
-                            child: Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
-                                  child: TextFormField(
-                                    style: TextStyle(
-                                      fontFamily: 'NanumSquareRoundR',
-                                    ),
-                                    inputFormatters: [
-                                      LengthLimitingTextInputFormatter(400), //글자 수 제한 400자
-                                    ],
-                                    enableInteractiveSelection: true,
-                                    maxLines: null,
-                                    keyboardType: TextInputType.multiline,
-                                    controller: _commentController,
-                                    decoration: const InputDecoration(
-                                      focusedBorder: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                      errorBorder: InputBorder.none,
-                                      disabledBorder: InputBorder.none,
-                                      hintText: '댓글을 입력하세요',
-                                      hintStyle: TextStyle(
-                                        fontFamily: 'NanumSquareRoundR',
-                                      )
-                                    ),
+                                /// 게시글 내용
+                                Text(
+                                  product.content ?? product.content,
+                                  style: TextStyle(
+                                    fontFamily: 'NanumSquareRoundR',
+                                    color: Colors.black,
+                                    //fontWeight: FontWeight.bold,
+                                    fontSize: 17,
+                                    height: 1.5,
                                   ),
-                                )),
-                          ),
-                          SizedBox(width: 3),
-                          // 댓글 저장 아이콘
-                          IconButton(
-                            icon: const Icon(Icons.send_outlined),
-                            iconSize: 27,
-                            color: Theme.of(context).primaryColor,
-                            onPressed: () async {
-                              var currentFocus = FocusScope.of(context);
-                              currentFocus.unfocus();
-                              if (_commentFormKey.currentState.validate()) {
-                                await addComments(_commentController.text, product.uid)
-                                    .then((value) => print('add comment ok!'));
-                                _commentController.clear();
-                                products = detailGiveOrTake == 'giveProducts'
-                                    ? context.read<ApplicationState>().giveProducts
-                                    : context.read<ApplicationState>().takeProducts;
-                                print('clear!');
-                              }
-                            },
-                          ),
-                        ],
-                      ),
+                                ),
+                                StreamBuilder<QuerySnapshot>(
+                                  stream: likes.snapshots().asBroadcastStream(),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    if (snapshot.hasError) {
+                                      return Text('x',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            height: 1,
+                                          ));
+                                    }
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return Text('',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            height: 1,
+                                          ));
+                                    }
+                                    var count = snapshot.data.size;
+                                    return StreamBuilder<int>(
+                                        stream: changeLikeCount.stream
+                                            .asBroadcastStream(),
+                                        initialData: count,
+                                        builder: (context, snapshot2) {
+                                          return Text(
+                                            '\n\n조회 ${product.hits}회 · 좋아요 ${snapshot2.data}회',
+                                            style: TextStyle(
+                                              fontFamily: 'NanumSquareRoundR',
+                                              color: Colors.grey,
+                                              //fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                              height: 1,
+                                            ),
+                                          );
+                                        });
+                                  },
+                                ),
+                                SizedBox(height: 9.0),
+                                Divider(thickness: 1.0),
+                              ]),
+                        ),
+                        SizedBox(width: 20),
+                      ],
+                    ),
+
+                    /// 게시물 내용 아래 댓글들
+                    Container(
+                        padding: const EdgeInsets.fromLTRB(8.0, 4, 8, 8),
+                        child: CommentBook(
+                          detailGiveOrTake: detailGiveOrTake,
+                          productId: productId,
+                        )),
+
+                    /// 고정된 댓글 창과 겹치지 않게하는 sizedbox
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.044,
                     ),
                   ],
-                )
+                ),
+              ),
             ),
-          ],
-        )
-      ),
+          ),
+          Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    //height: MediaQuery.of(context).size.height * 0.157,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Color(0xffe5e5e5),
+                      boxShadow: [
+                        BoxShadow(color: Color(0xffe5e5e5), spreadRadius: 2),
+                      ],
+                    ),
+                    margin: EdgeInsets.fromLTRB(7.0, 7.0, 7.0, 1.0),
+                    child: Row(
+                      children: [
+                        // 하트 아이콘
+                        Container(
+                          width: 50,
+                          child: StreamBuilder<QuerySnapshot>(
+                              stream: likes.snapshots(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text('x');
+                                }
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Text('');
+                                }
+                                return StreamBuilder<Icon>(
+                                    stream: changeFavoriteButton.stream,
+                                    initialData: isLiked(snapshot)
+                                        ? Icon(
+                                            Icons.favorite,
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            semanticLabel: 'like',
+                                          )
+                                        : Icon(
+                                            Icons.favorite_border_outlined,
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            semanticLabel: 'like',
+                                          ),
+                                    builder: (context, snapshot2) {
+                                      /// changeFavoriteButton 스트림 컨트롤러에 새 데이터가 들어올때마다 부분적으로 빌드됨
+                                      return IconButton(
+
+                                          /// 아이콘의 snapshot2 => changeFavoriteButton 스트림으로 건네준 아이콘
+                                          icon: snapshot2.data,
+                                          onPressed: () async {
+                                            /// 이미 좋아요가 눌러져 있었을 떄
+                                            if (isLiked(snapshot)) {
+                                              await deleteLike(userId)
+                                                  .catchError((error) => null)
+                                                  .whenComplete(() {
+                                                products = detailGiveOrTake ==
+                                                        'giveProducts'
+                                                    ? context
+                                                        .read<
+                                                            ApplicationState>()
+                                                        .giveProducts
+                                                    : context
+                                                        .read<
+                                                            ApplicationState>()
+                                                        .takeProducts;
+                                                changeFavoriteButton.add(Icon(
+                                                  Icons
+                                                      .favorite_border_outlined,
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
+                                                  semanticLabel: 'like',
+                                                ));
+                                                changeLikeCount.add(context
+                                                    .read<ApplicationState>()
+                                                    .likeCount);
+                                              });
+                                            }
+
+                                            /// 좋아요가 눌러져 있지 않을 때
+                                            else {
+                                              await addLike()
+                                                  .catchError((error) => null)
+                                                  .whenComplete(() {
+                                                products = detailGiveOrTake ==
+                                                        'giveProducts'
+                                                    ? context
+                                                        .read<
+                                                            ApplicationState>()
+                                                        .giveProducts
+                                                    : context
+                                                        .read<
+                                                            ApplicationState>()
+                                                        .takeProducts;
+                                                changeFavoriteButton.add(Icon(
+                                                  Icons.favorite,
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
+                                                  semanticLabel: 'like',
+                                                ));
+                                                changeLikeCount.add(context
+                                                    .read<ApplicationState>()
+                                                    .likeCount);
+                                              });
+                                            }
+                                          });
+                                    });
+                              }),
+                        ),
+                        // 입력부분
+                        Form(
+                          key: _commentFormKey,
+                          child: Expanded(
+                              child: Padding(
+                            padding: const EdgeInsets.fromLTRB(10.0, 1, 10, 5),
+                            child: TextFormField(
+                              style: TextStyle(
+                                fontFamily: 'NanumSquareRoundR',
+                              ),
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(
+                                    400), //글자 수 제한 400자
+                              ],
+                              enableInteractiveSelection: true,
+                              maxLines: null,
+                              keyboardType: TextInputType.multiline,
+                              controller: _commentController,
+                              decoration: const InputDecoration(
+                                  focusedBorder: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  errorBorder: InputBorder.none,
+                                  disabledBorder: InputBorder.none,
+                                  hintText: '댓글을 입력하세요',
+                                  hintStyle: TextStyle(
+                                    fontFamily: 'NanumSquareRoundR',
+                                  )),
+                            ),
+                          )),
+                        ),
+                        SizedBox(width: 3),
+                        // 댓글 저장 아이콘
+                        IconButton(
+                          icon: const Icon(Icons.send_outlined),
+                          iconSize: 27,
+                          color: Theme.of(context).primaryColor,
+                          onPressed: () async {
+                            var currentFocus = FocusScope.of(context);
+                            currentFocus.unfocus();
+                            if (_commentFormKey.currentState.validate()) {
+                              await addComments(
+                                      _commentController.text, product.uid)
+                                  .then((value) => print('add comment ok!'));
+                              _commentController.clear();
+                              products = detailGiveOrTake == 'giveProducts'
+                                  ? context
+                                      .read<ApplicationState>()
+                                      .giveProducts
+                                  : context
+                                      .read<ApplicationState>()
+                                      .takeProducts;
+                              print('clear!');
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )),
+        ],
+      )),
     );
   }
 }

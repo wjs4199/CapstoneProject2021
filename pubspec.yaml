@@ -67,12 +67,13 @@ flutter:
     - assets/no-thumbnail.jpg
     - assets/chat.jpg
     - assets/chat_grey.jpg
+    - assets/logo.jpg
     - assets/logo2.png
 
   fonts:
-    - family: Pacifico
+    - family: MinimoLight
       fonts:
-        - asset: fonts/Pacifico-Regular.ttf
+        - asset: fonts/Minimo-Light.otf
 
     - family: Source Sans Pro
       fonts:

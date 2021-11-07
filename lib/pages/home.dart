@@ -17,7 +17,6 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
-
 import '../main.dart';
 import '../model/product.dart';
 import '../components/postTile.dart';
@@ -54,6 +53,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final ScrollController listScrollController = ScrollController();
 
   var _flutterLocalNotificationsPlugin;
+
   /// bool isLoading = false; handleSign을 위한 변수
   /// 시스템 함수에 PageView 기능 반영 처리(1) +@
   @override
@@ -65,9 +65,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _tabController = TabController(length: 2, vsync: this);
     _focusNode = FocusNode();
 
-
-    var initializationSettingsAndroid =
-    AndroidInitializationSettings('logo2');
+    var initializationSettingsAndroid = AndroidInitializationSettings('logo2');
     //ios 알림 설정 : 소리, 뱃지 등
     var initializationSettingsIOS = IOSInitializationSettings();
 
@@ -78,9 +76,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     //onSelectNotification의 경우 알림을 눌렀을때 어플에서 실행되는 행동을 설정
     _flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
-
-
-
   }
 
   Future onSelectNotification(String payload) async {
@@ -97,8 +92,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
  */
   }
-
-
 
   Future _showNotification() async {
     var android = AndroidNotificationDetails(
@@ -119,31 +112,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-
-
-
-
-
-_isShowedNoti() async {
-  await for (var snapshot in FirebaseFirestore.instance.collection('chatRoom').snapshots())
-  {
-    for(var isShowed in snapshot.docs){
-      if(isShowed.get('isShowedNotification') == false && isShowed.get('idTo') == FirebaseAuth.instance.currentUser.uid) {
-        await _showNotification()
-            .then((value) =>
-          FirebaseFirestore.instance.collection('chatRoom').doc(isShowed.id).update(
-              {
-                'isShowedNotification' : true
-              }
-          ).catchError((error) => print('error: $error')),);
+  _isShowedNoti() async {
+    await for (var snapshot
+        in FirebaseFirestore.instance.collection('chatRoom').snapshots()) {
+      for (var isShowed in snapshot.docs) {
+        if (isShowed.get('isShowedNotification') == false &&
+            isShowed.get('idTo') == FirebaseAuth.instance.currentUser.uid) {
+          await _showNotification().then(
+            (value) => FirebaseFirestore.instance
+                .collection('chatRoom')
+                .doc(isShowed.id)
+                .update({'isShowedNotification': true}).catchError(
+                    (error) => print('error: $error')),
+          );
+        }
       }
-      }
-  };
-
-}
-
-
-
+    }
+    ;
+  }
 
   void _requestPermissions() {
     flutterLocalNotificationsPlugin
@@ -204,12 +190,12 @@ _isShowedNoti() async {
                     iconTheme: IconThemeData(color: Colors.black),
                     centerTitle: true,
                     title: Text(
-                      'Pelag',
+                      'pelag',
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 28,
-                        fontFamily: 'NanumSquareRoundR',
-                        fontWeight: FontWeight.bold,
+                        fontSize: 34,
+                        fontFamily: 'MinimoLight',
+                        // fontWeight: FontWeight.bold,
                       ),
                     ),
                     // flexibleSpace: FlexibleSpaceBar(
@@ -291,12 +277,12 @@ _isShowedNoti() async {
                     iconTheme: IconThemeData(color: Colors.black),
                     centerTitle: true,
                     title: Text(
-                      'Pelag',
+                      'pelag',
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 28,
-                        fontFamily: 'NanumSquareRoundR',
-                        fontWeight: FontWeight.bold,
+                        fontSize: 34,
+                        fontFamily: 'MinimoLight',
+                        // fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -517,23 +503,20 @@ _isShowedNoti() async {
           fontFamily: 'NanumSquareRoundR', fontWeight: FontWeight.bold),
       items: [
         BottomNavigationBarItem(
-          icon:
-
-          Icon(
+          icon: Icon(
             Icons.accessibility,
             size: 30,
           ),
           label: '나눔',
         ),
         BottomNavigationBarItem(
-          label: '메신저',icon:  Icon(Icons.forum, size: 30,)
-
-
-        ),
+            label: '메신저',
+            icon: Icon(
+              Icons.forum,
+              size: 30,
+            )),
       ],
     );
-
-
   }
 
   /// Drawer 관련 Scaffold Key
