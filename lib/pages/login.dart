@@ -178,12 +178,16 @@ class _LoginPageState extends State<LoginPage> {
             Column(
               children: <Widget>[
                 Container(
-                    height: 50,
-                    child: Image.asset('assets/hgu.png', fit: BoxFit.fill)),
-                Text('MAD Final Project'),
+                    height: 150,
+                    child: Image.asset('assets/logo2.png',
+
+                       fit: BoxFit.fitHeight
+                    )),
+                Text('따뜻한 나눔')
+
               ],
             ),
-            SizedBox(height: 140.0),
+            SizedBox(height: 70.0),
             SizedBox(
               height: 50.0,
               child: ElevatedButton.icon(
