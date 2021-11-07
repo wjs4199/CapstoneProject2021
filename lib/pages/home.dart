@@ -331,15 +331,29 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.all(15.0),
               child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  'pelag',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 34,
-                    fontFamily: 'MinimoLight',
-                    // fontWeight: FontWeight.bold,
-                  ),
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'pelag',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 34,
+                        fontFamily: 'MinimoLight',
+                        // fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '\na community-based sharing platform',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontFamily: 'MinimoLight',
+                        // fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
