@@ -57,7 +57,7 @@ class DetailPage extends StatefulWidget {
   _DetailPageState createState() => _DetailPageState();
 }
 
-class _DetailPageState extends State<DetailPage>  with RouteAware {
+class _DetailPageState extends State<DetailPage> {
   _DetailPageState({this.chatRoomDocId});
 
   /// detail 페이지 실행시 인자로 전달되는 변수들
@@ -83,31 +83,6 @@ class _DetailPageState extends State<DetailPage>  with RouteAware {
     detailGiveOrTake =
         widget.detailGiveOrTake; // giveProducts / takeProducts 중 어디 해당되는지
     photoNum = widget.photoNum; // 저장된 photo 의 개수
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    routeObserver.subscribe(this, ModalRoute.of(context));
-  }
-
-  @override
-  void dispose() {
-    routeObserver.unsubscribe(this);
-    super.dispose();
-  }
-
-  @override
-  void didPush() {
-    // Route was pushed onto navigator and is now topmost route.
-  }
-
-  @override
-  void didPopNext() {
-    print("pop됐따!");
-    setState(() {
-      //
-    });
   }
 
   /// comment 적는 텍스트 칸이 빈칸인지 아닌지 분별할 때 사용됨
@@ -1049,7 +1024,7 @@ class _DetailPageState extends State<DetailPage>  with RouteAware {
                                               product.complete != '예약 중' ? '${product.complete}됨': '${product.complete}',
                                               style: TextStyle(
                                                 fontFamily: 'NanumSquareRoundR',
-                                                color: product.complete != '예약 중' ? Colors.black.withOpacity(0.7): Colors.red,//Theme.of(context).primaryColor.withOpacity(0.7),
+                                                color: product.complete != '예약 중' ? Colors.black.withOpacity(0.7): Colors.red,//Color(0xfffc7174).withOpacity(0.7),
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 18,
                                                 height: 1,
@@ -1117,12 +1092,12 @@ class _DetailPageState extends State<DetailPage>  with RouteAware {
                                       initialData: isLiked(snapshot)
                                           ? Icon(
                                         Icons.favorite,
-                                        color: stateCheck(product.complete, Theme.of(context).primaryColor,),
+                                        color: stateCheck(product.complete, Color(0xfffc7174),),
                                         semanticLabel: 'like',
                                       )
                                           : Icon(
                                         Icons.favorite_border_outlined,
-                                        color:stateCheck(product.complete, Theme.of(context).primaryColor,),
+                                        color:stateCheck(product.complete, Color(0xfffc7174)),
                                         semanticLabel: 'like',
                                       ),
                                       builder: (context, snapshot2) {
@@ -1147,7 +1122,7 @@ class _DetailPageState extends State<DetailPage>  with RouteAware {
                                                       .takeProducts;
                                                   changeFavoriteButton.add(Icon(
                                                     Icons.favorite_border_outlined,
-                                                    color: stateCheck(product.complete, Theme.of(context).primaryColor,),
+                                                    color: stateCheck(product.complete,Color(0xfffc7174),),
                                                     semanticLabel: 'like',
                                                   ));
                                                   changeLikeCount.add(context
@@ -1171,7 +1146,7 @@ class _DetailPageState extends State<DetailPage>  with RouteAware {
                                                       .takeProducts;
                                                   changeFavoriteButton.add(Icon(
                                                     Icons.favorite,
-                                                    color: stateCheck(product.complete, Theme.of(context).primaryColor,),
+                                                    color: stateCheck(product.complete, Color(0xfffc7174),),
                                                     semanticLabel: 'like',
                                                   ));
                                                   changeLikeCount.add(context
@@ -1219,7 +1194,7 @@ class _DetailPageState extends State<DetailPage>  with RouteAware {
                           IconButton(
                             icon: const Icon(Icons.send_outlined),
                             iconSize: 27,
-                            color: stateCheck(product.complete, Theme.of(context).primaryColor,),
+                            color: stateCheck(product.complete, Color(0xfffc7174),),
                             onPressed: () async {
                               var currentFocus = FocusScope.of(context);
                               currentFocus.unfocus();

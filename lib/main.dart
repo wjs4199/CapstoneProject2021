@@ -19,19 +19,14 @@ import 'actions/edit.dart';
 import 'pages/splash.dart';
 
 
-final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
-
 void main() {
   runApp(
-      MaterialApp(
-        home: ChangeNotifierProvider(
-          create: (context) => ApplicationState(),
-          builder: (context, _) => Application(),
-        ),
-        navigatorObservers: <RouteObserver<ModalRoute<void>>>[ routeObserver ],
-      ));
+    ChangeNotifierProvider(
+      create: (context) => ApplicationState(),
+      builder: (context, _) => Application(),
+    ),
+  );
 }
-
 class Application extends StatefulWidget {
 
 

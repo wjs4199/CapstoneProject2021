@@ -143,7 +143,7 @@ class _EditPageState extends State<EditPage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
-  var _selectedFilter = 'null';
+  var _selectedFilter = '물건';
 
   //var _selectionsOfGive = [true, false];
 
@@ -211,6 +211,11 @@ class _EditPageState extends State<EditPage> {
   /// loading 띄울지 말지 여부를 담고 있음
   var loading = false;
 
+  /// 나눔요청 페이지의 add페이지 내에서 ToggleButtons 내의 물건, 재능 버튼의 상태를 표시하기 위해 필요한 리스트 변수
+  var selectionsOfTake = [true,false];
+  var selectionsOfGive = [true,false];
+  var firstSelection = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -250,6 +255,15 @@ class _EditPageState extends State<EditPage> {
         print(product.userName);
         print(product.uid);
       }
+    }
+
+    if(firstSelection == false) {
+      if(product.category == '재능') {
+        _selectedFilter = '재능';
+        selectionsOfGive = [false, true];
+        selectionsOfTake = [false, true];
+      }
+      firstSelection = true;
     }
 
     /// productId와 일치하는 게시물이 없을 경우 로딩 표시
@@ -545,6 +559,127 @@ class _EditPageState extends State<EditPage> {
           });
     }
 
+
+    ///단체 후원 카테고리 추가할 가능성이 있어서 give / take 다른 위젯으로 만들어놓음 (현재 ui는 같은 상태)
+    ///
+    /// 나눔요청 페이지의 add페이지 내에서의 ToggleButtons 위젯(물건, 재능)
+    ToggleButtons _buildTakeCategoryToggleButtons(String category) {
+      if(firstSelection == false) {
+        if(category == '물건') {
+          setState(() {
+            selectionsOfTake = [true,false];
+            firstSelection = true;
+          });
+        } else {
+          setState(() {
+            selectionsOfTake = [false,true];
+            firstSelection = true;
+          });
+        }
+      }
+
+      return ToggleButtons(
+        color: Colors.black.withOpacity(0.60),
+        constraints: BoxConstraints(
+          minWidth: fullWidth * 0.46,
+          minHeight: fullWidth * 0.46 * 0.3,
+        ),
+        selectedBorderColor: Color(0xffeb6859),
+        selectedColor: Color(0xffeb6859),
+        fillColor: Color(0xffeb6859).withOpacity(0.10),
+        borderRadius: BorderRadius.circular(4.0),
+        isSelected: selectionsOfTake,
+        onPressed: (int index) {
+          setState(() {
+            if (index == 0) {
+              print('물건 선택!');
+              _selectedFilter = '물건';
+              selectionsOfTake[0] = true;
+              selectionsOfTake[1] = false;
+            } else {
+              print('재능 선택!');
+              _selectedFilter = '재능';
+              selectionsOfTake[0] = false;
+              selectionsOfTake[1] = true;
+            }
+          });
+        },
+        children: [
+          Text(
+            '물건',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'NanumSquareRoundR',
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+          Text(
+            '재능',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'NanumSquareRoundR',
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          )
+        ],
+      );
+    }
+
+    /// 나눔페이지의 add페이지 내에서의 ToggleButtons 위젯(물건, 재능)
+    ToggleButtons _buildGiveCategoryToggleButtons(String category) {
+
+        return ToggleButtons(
+          color: Colors.black.withOpacity(0.60),
+          constraints: BoxConstraints(
+            minWidth: fullWidth * 0.46,
+            minHeight: fullWidth * 0.46 * 0.3,
+          ),
+          selectedBorderColor: Color(0xffeb6859),
+          selectedColor: Color(0xffeb6859),
+          fillColor: Color(0xffeb6859).withOpacity(0.10),
+          borderRadius: BorderRadius.circular(4.0),
+          isSelected: selectionsOfGive,
+          onPressed: (int index) {
+            setState(() {
+              if (index == 0) {
+                print('물건 선택!');
+                _selectedFilter = '물건';
+                selectionsOfGive[0] = true;
+                selectionsOfGive[1] = false;
+              } else {
+                print('재능 선택!');
+                _selectedFilter = '재능';
+                selectionsOfGive[0] = false;
+                selectionsOfGive[1] = true;
+              }
+            });
+          },
+          children: [
+            Text(
+              '물건',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'NanumSquareRoundR',
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            Text(
+              '재능',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'NanumSquareRoundR',
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            )
+          ],
+        );
+      }
+
+
     /// Edit 페이지 화면 구성
     return Consumer<ApplicationState>(builder: (context, appState, _) {
       return Scaffold(
@@ -579,8 +714,8 @@ class _EditPageState extends State<EditPage> {
                   ).whenComplete(() async {
                     appState.orderByFilter('All');
                     Navigator.pop(context);
+                    Navigator.pop(context);
                   });
-                  //Navigator.pop(context);
                 }
                 alreadyLoading = false;
                 numberOfImages = 0;
@@ -726,130 +861,6 @@ class _EditPageState extends State<EditPage> {
         ),
       );
     });
-  }
-
-  var _selectionsOfGive = [false, false];
-
-  /// 나눔페이지의 add페이지 내에서의 ToggleButtons 위젯(물건, 재능)
-  ToggleButtons _buildGiveCategoryToggleButtons(String category) {
-    if(_selectionsOfGive == [false, false] && category == '물건'){
-      _selectionsOfGive = [true, false];
-    } else if (_selectionsOfGive == [false, false] && category == '재능'){
-      _selectionsOfGive = [false, true];
-    }
-    return ToggleButtons(
-      color: Colors.black.withOpacity(0.60),
-      constraints: BoxConstraints(
-        minWidth: fullWidth * 0.46,
-        minHeight: fullWidth * 0.46 * 0.3,
-      ),
-      selectedBorderColor: Color(0xffeb6859),
-      selectedColor: Color(0xffeb6859),
-      fillColor: Color(0xffeb6859).withOpacity(0.10),
-      borderRadius: BorderRadius.circular(4.0),
-      isSelected: _selectionsOfGive,
-      onPressed: (int index) {
-        setState(() {
-          if (index == 0) {
-            print('물건 선택!');
-            _selectedFilter = '물건';
-            _selectionsOfGive[0] = true;
-            _selectionsOfGive[1] = false;
-          } else {
-            print('재능 선택!');
-            _selectedFilter = '재능';
-            _selectionsOfGive[0] = false;
-            _selectionsOfGive[1] = true;
-          }
-        });
-      },
-      children: [
-        Text(
-          '물건',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'NanumSquareRoundR',
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        Text(
-          '재능',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'NanumSquareRoundR',
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        )
-      ],
-    );
-  }
-
-  ///단체 후원 카테고리 추가할 가능성이 있어서 give / take 다른 위젯으로 만들어놓음 (현재 ui는 같은 상태)
-  ///
-  /// 나눔요청 페이지의 add페이지 내에서 ToggleButtons 내의 물건, 재능 버튼의 상태를 표시하기 위해 필요한 리스트 변수
-  final _selectionsOfTake = List<bool>.generate(2, (_) => false);
-
-  /// 나눔요청 페이지의 add페이지 내에서의 ToggleButtons 위젯(물건, 재능)
-  ToggleButtons _buildTakeCategoryToggleButtons(String category) {
-    if(_selectionsOfGive == [false, false] && category == '물건'){
-      setState(() {
-        _selectionsOfGive = [true, false];
-      });
-    } else if (_selectionsOfGive == [false, false] && category == '재능'){
-      setState(() {
-        _selectionsOfGive = [true, false];
-      });
-
-    }
-    return ToggleButtons(
-      color: Colors.black.withOpacity(0.60),
-      constraints: BoxConstraints(
-        minWidth: fullWidth * 0.46,
-        minHeight: fullWidth * 0.46 * 0.3,
-      ),
-      selectedBorderColor: Color(0xffeb6859),
-      selectedColor: Color(0xffeb6859),
-      fillColor: Color(0xffeb6859).withOpacity(0.10),
-      borderRadius: BorderRadius.circular(4.0),
-      isSelected: _selectionsOfTake,
-      onPressed: (int index) {
-        setState(() {
-          if (index == 0) {
-            print('물건 선택!');
-            _selectedFilter = '물건';
-            _selectionsOfTake[0] = true;
-            _selectionsOfTake[1] = false;
-          } else {
-            print('재능 선택!');
-            _selectedFilter = '재능';
-            _selectionsOfTake[0] = false;
-            _selectionsOfTake[1] = true;
-          }
-        });
-      },
-      children: [
-        Text(
-          '물건',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'NanumSquareRoundR',
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        Text(
-          '재능',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'NanumSquareRoundR',
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        )
-      ],
-    );
   }
 }
 
