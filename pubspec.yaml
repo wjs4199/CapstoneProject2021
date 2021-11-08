@@ -68,7 +68,7 @@ flutter:
     - assets/chat.jpg
     - assets/chat_grey.jpg
     - assets/logo.jpg
-    - assets/logo2.png
+    - assets/logo_transparent.png
 
   fonts:
     - family: MinimoLight

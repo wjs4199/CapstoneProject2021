@@ -170,7 +170,6 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: 24.0),
@@ -180,11 +179,11 @@ class _LoginPageState extends State<LoginPage> {
               children: <Widget>[
                 Container(
                     height: 150,
-                    child: Image.asset('assets/logo.jpg',
-
+                    child: Image.asset('assets/logo_transparent.png',
                        fit: BoxFit.fitHeight
                     )),
-                Text('따뜻한 나눔')
+                SizedBox(height: 10.0),
+                Text('a community-based sharing platform')
 
               ],
             ),
