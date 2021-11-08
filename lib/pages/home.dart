@@ -114,11 +114,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   _isShowedNoti() async {
-    await for (var snapshot
-        in FirebaseFirestore.instance.collection('chatRoom').snapshots()) {
+    await for (var snapshot in FirebaseFirestore.instance.collection('chatRoom').snapshots()) {
       for (var isShowed in snapshot.docs) {
-        if (isShowed.get('isShowedNotification') == false &&
-            isShowed.get('idTo') == FirebaseAuth.instance.currentUser.uid) {
+        if (isShowed.get('isShowedNotification') == false && isShowed.get('idTo') == FirebaseAuth.instance.currentUser.uid) {
           await _showNotification().then(
             (value) => FirebaseFirestore.instance
                 .collection('chatRoom')

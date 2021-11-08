@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <application
         android:label="Pelag"
-        android:icon="@mipmap/logo">
+        android:icon="@mipmap/ic_launcher">
 
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBqfwc93kegyK9GwlB1yDLLs_rJP7-8OOc"/>

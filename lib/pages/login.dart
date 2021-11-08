@@ -179,11 +179,11 @@ class _LoginPageState extends State<LoginPage> {
               children: <Widget>[
                 Container(
                     height: 150,
-                    child: Image.asset('assets/logo2.png',
-
+                    child: Image.asset('assets/logo_transparent.png',
                        fit: BoxFit.fitHeight
                     )),
-                Text('따뜻한 나눔')
+                SizedBox(height: 10.0),
+                Text('a community-based sharing platform')
 
               ],
             ),
