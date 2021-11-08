@@ -7,6 +7,74 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:704436127190:android:e641acb697cc5c188f5077",
+        "android_client_info": {
+          "package_name": "com.capstone.pelag"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "704436127190-2m8v9ba8q11s3p2uk4ivu9897rbmd328.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.capstone.pelag",
+            "certificate_hash": "0039b634062cc5aeda8f5e01d881bc5442d5d12f"
+          }
+        },
+        {
+          "client_id": "704436127190-fb2ca27orns9rgmv48p111uhdpdh73s7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.capstone.pelag",
+            "certificate_hash": "45ee6d6d9dbaf571910cb35eac7cba31dd2438b8"
+          }
+        },
+        {
+          "client_id": "704436127190-kbpet1c0q97ckr0pskot0698piabk3i8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.capstone.pelag",
+            "certificate_hash": "6e3b00aa327486eac029f3009f8fc1ee404d79b3"
+          }
+        },
+        {
+          "client_id": "704436127190-tjk92rmm6o1bglmqgtkbctlo5q9rucpp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.capstone.pelag",
+            "certificate_hash": "d2b2e187452aa59c193bc787ac0fa8f6b78867d1"
+          }
+        },
+        {
+          "client_id": "704436127190-oa1pieb5c0b03j6grr21mfd21790cvis.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADwzPeakkKRvqEb9JpepEqzNt5qWfAoeI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "704436127190-oa1pieb5c0b03j6grr21mfd21790cvis.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "704436127190-e97dk3prtsk0q0fi5tljf5a9el83g7bm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.giveandtake"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:704436127190:android:4075e70f5d84f3288f5077",
         "android_client_info": {
           "package_name": "com.example.giveandtake"
