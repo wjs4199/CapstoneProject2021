@@ -379,8 +379,10 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     /// 'comments' Collection 참조
-    CollectionReference comments = FirebaseFirestore.instance
-        .collection('giveProducts/' + productId + '/comment');
+    CollectionReference comments = detailGiveOrTake == 'giveProducts' ? FirebaseFirestore.instance
+        .collection('giveProducts/' + productId + '/comment')
+    : FirebaseFirestore.instance
+        .collection('takeProducts/' + productId + '/comment');
 
     /// comment 추가 기능
     Future<void> addComments(String comment, String uid) {
