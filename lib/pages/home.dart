@@ -328,7 +328,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               color: Color(0xfffc7174),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(15.0),
+              padding: const EdgeInsets.all(13.0),
               child: Align(
                 alignment: Alignment.center,
                 child: Column(
@@ -345,6 +345,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                     Text(
                       '\na community-based sharing platform',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontFamily: 'MinimoLight',
+                        // fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '\nContact Us: chlckstlr0428@gmail.com',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -376,7 +385,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Navigator.pushNamed(context, '/home');
             },
           ),
-          ListTile(
+          /**ListTile(
             title: Text(
               'my page // coming soon',
               style: TextStyle(
@@ -389,7 +398,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             // - The Menu Icons should be placed in the leading position
             leading: Icon(Icons.account_circle),
             onTap: () {},
-          ),
+          ),*/
           ListTile(
             title: Text(
               'change nickname',
