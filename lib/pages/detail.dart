@@ -379,8 +379,10 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     /// 'comments' Collection 참조
-    CollectionReference comments = FirebaseFirestore.instance
-        .collection('giveProducts/' + productId + '/comment');
+    CollectionReference comments = detailGiveOrTake == 'giveProducts' ? FirebaseFirestore.instance
+        .collection('giveProducts/' + productId + '/comment')
+    : FirebaseFirestore.instance
+        .collection('takeProducts/' + productId + '/comment');
 
     /// comment 추가 기능
     Future<void> addComments(String comment, String uid) {
@@ -816,7 +818,10 @@ class _DetailPageState extends State<DetailPage> {
                                                     .catchError((error) => null)
                                                     .whenComplete(() {
                                                   Navigator.pop(context);
-                                                  deleteImages();
+                                                  if(product.photo!=0){
+                                                    deleteImages();
+                                                  }
+
                                                 });
                                               },
                                               child: Text('네'),
@@ -926,38 +931,43 @@ class _DetailPageState extends State<DetailPage> {
                                         SizedBox(height: 9.0),
                                         Row(
                                           children: [
-                                            RichText(
-                                              text: TextSpan(
-                                                  style: TextStyle(
-                                                    fontFamily: 'NanumSquareRoundR',
-                                                    color: stateCheck(product.complete, Colors.black),
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                  children: <TextSpan>[
-                                                    TextSpan(
-                                                      text: '${product.title}\n',
-                                                      style: TextStyle(
-                                                        fontFamily: 'NanumSquareRoundR',
-                                                        color: stateCheck(product.complete, Colors.black),
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 22,
-                                                        height: 1,
-                                                      ),
+                                            Flexible(
+                                              child: RichText(
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines:4,
+                                                text: TextSpan(
+                                                    style: TextStyle(
+                                                      fontFamily: 'NanumSquareRoundR',
+                                                      color: stateCheck(product.complete, Colors.black),
+                                                      fontWeight: FontWeight.bold,
                                                     ),
-                                                    TextSpan(
-                                                      text:
-                                                      '${product.category} · ${calculateTime()}\n\n',
-                                                      style: TextStyle(
-                                                        fontFamily: 'Roboto_Bold',
-                                                        color: stateCheck(product.complete, Colors.grey),
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 16,
-                                                        height: 1.6,
+                                                    children: <TextSpan>[
+                                                      TextSpan(
+                                                        text: '${product.title}\n',
+                                                        style: TextStyle(
+                                                          fontFamily: 'NanumSquareRoundR',
+                                                          color: stateCheck(product.complete, Colors.black),
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: 22,
+                                                          height: 1.5,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ]),
-                                              textAlign: TextAlign.start,
-                                            ),
+                                                      TextSpan(
+                                                        text:
+                                                        '${product.category} · ${calculateTime()}\n\n',
+                                                        style: TextStyle(
+                                                          fontFamily: 'Roboto_Bold',
+                                                          color: stateCheck(product.complete, Colors.grey),
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: 16,
+                                                          height: 1.6,
+                                                        ),
+                                                      ),
+                                                    ]),
+                                                textAlign: TextAlign.start,
+                                              ),
+                                            )
                                           ],
                                         ),
 

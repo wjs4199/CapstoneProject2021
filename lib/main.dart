@@ -297,7 +297,7 @@ class ApplicationState extends ChangeNotifier {
     if (uid != 'null') {
       FirebaseFirestore.instance
           .collection(detailGiveOrTake + '/' + uid + '/comment')
-          .orderBy('created', descending: true)
+          .orderBy('created', descending: false)
           .snapshots() //파이어베이스에 저장되어있는 애들 데려오는 거 같음
           .listen((snapshot) {
         _commentContext = [];

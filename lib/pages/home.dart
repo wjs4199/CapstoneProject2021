@@ -338,7 +338,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       'pelag',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 36,
+                        fontSize: 30,
                         fontFamily: 'MinimoLight',
                         // fontWeight: FontWeight.bold,
                       ),
@@ -347,7 +347,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       '\na community-based sharing platform',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 15,
+                        fontSize: 14,
                         fontFamily: 'MinimoLight',
                         // fontWeight: FontWeight.bold,
                       ),
@@ -356,7 +356,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       '\nContact Us: chlckstlr0428@gmail.com',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 14,
+                        fontSize: 12,
                         fontFamily: 'MinimoLight',
                         // fontWeight: FontWeight.bold,
                       ),
@@ -401,7 +401,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),*/
           ListTile(
             title: Text(
-              'change nickname',
+              'change profile',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 16,
