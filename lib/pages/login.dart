@@ -150,19 +150,19 @@ class _LoginPageState extends State<LoginPage> {
                 Icon(Icons.add_alert, color: Colors.amberAccent),
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
-                  child: Text('주의사항'),
+                  child: Text('Welcome!'),
                 ),
               ],
             ),
             content: SingleChildScrollView(
-                child: Text('반드시 한동대학교 구글 계정으로 로그인하셔야 합니다!')),
+                child: Text('저희 앱을 이용해주셔서 감사합니다:)')),//반드시 한동대학교 구글 계정으로 로그인하셔야 합니다!')),
             actions: <Widget>[
               TextButton(
                 onPressed: () async {
                   Navigator.pop(context);
                   await handleSignIn();
                 },
-                child: Text('한동 구글 계정으로 로그인하기'),
+                child: Text('로그인하기'),//한동 구글 계정으로
               ),
             ],
           );
@@ -200,7 +200,8 @@ class _LoginPageState extends State<LoginPage> {
                   // ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
                   /// 한동대 계정으로 로그인해야한다는 경고(구글 스토어 출시 시 발생한 앱 거부 때문에 주석처리함)
-                  //_showDialog();
+                  _showDialog();
+
 
                   //await handleSignIn();
                 },

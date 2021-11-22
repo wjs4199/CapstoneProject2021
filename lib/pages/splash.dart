@@ -34,8 +34,8 @@ class _SplashPageState extends State<SplashPage> {
       return;
     }
     await Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
     );
   }
 
