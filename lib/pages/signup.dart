@@ -7,7 +7,7 @@ import 'home.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-
+import 'detail.dart';
 TextEditingController textEditingController1 = TextEditingController();
 var name = '';
 var nickname = '';
@@ -21,6 +21,22 @@ class SignUp extends StatefulWidget {
 }
 
 class SignUpState extends State<SignUp> {
+
+  /// futurebuilder 의 future: ___에 사용될 변수
+  Future<File> future;
+  String userImageUrl;
+  /// futurebuilder내에서 한번 저장된 유저 이미지를 가져오고 나면 true로 변함
+  bool userImageLoadCheck = false;
+  /// 새로운 이미지로 사진부분이 바뀌었음을 표시
+  bool newImage = false;
+
+  @override
+  void initState() {
+
+    future = fileFromImageUrl();
+
+    super.initState();
+  }
 
   final _formKey = GlobalKey<FormState>();
   CollectionReference users =
@@ -39,7 +55,7 @@ class SignUpState extends State<SignUp> {
   File pickedImage;
 
   /// 다운로드 받은 사용자 이미지 URL
-  String userImageUrl;
+  String userUrl;
 
   /// index 만큼의 이미지를 갤러리에서 선택한 후 image 리스트에 저장시키는 함수
   Future<void> getImage() async {
@@ -52,6 +68,7 @@ class SignUpState extends State<SignUp> {
 
     setState(() {
       pickedImage = File(pickedFile.path);
+      newImage = true;
     });
   }
 
@@ -106,19 +123,24 @@ class SignUpState extends State<SignUp> {
     }
   }
 
-  Future<File> fileFromImageUrl(String url) async {
-    if(await downloadURL(userId) == null) {
+  Future<File> fileFromImageUrl() async {
+    userUrl = await downloadURL(userId);
+    try {
+      if(userUrl != null) {
+        var response = await http.get(Uri.parse(userUrl));
+
+        var documentDirectory = await getApplicationDocumentsDirectory();
+
+        var file = File('${documentDirectory.path}/$userId.png');
+
+        file.writeAsBytesSync(response.bodyBytes);
+
+        return file;
+      }
+    } on Exception {
       return null;
     }
-    var response = await http.get(Uri.parse(await downloadURL(userId)));
-
-    var documentDirectory = await getApplicationDocumentsDirectory();
-
-    var file = File('${documentDirectory.path}/$userId.png');
-
-    file.writeAsBytesSync(response.bodyBytes);
-
-    return file;
+    return null;
   }
 
 
@@ -134,7 +156,7 @@ class SignUpState extends State<SignUp> {
     final snackBar3 = SnackBar(content: Text('중복체크를 해주세요'));
     final snackBar4 = SnackBar(content: Text('닉네임을 한글자 이상 입력해주세요'));
 
-    Future<String> _currentNickname() async {
+   /* Future<String> _currentNickname() async {
       await FirebaseFirestore.instance.collection('users').doc(currentUserId)
           .get()
           .then((DocumentSnapshot ds) {
@@ -146,31 +168,26 @@ class SignUpState extends State<SignUp> {
 
 
    _currentNickname();
-    //print("nickname = " + nickname);
+    //print("nickname = " + nickname);*/
 
-    thumbnailURL(userId);
+    //thumbnailURL(userId);
 
-    Future<void> editUserImage() {
-      return deleteOneImage().then((value) async {
-        /// storage에 올려진 사진 삭제 후 다시 업로드
-        if(userImageUrl != null) {
-          await deleteOneImage().whenComplete(() async {
-            if (pickedImage != null) {
-              await uploadUserImage(userId)
-                  .whenComplete(() => print('유저 사진 업로드 완료'));
-            }
-          });
-        } else {
-          if (pickedImage != null) {
-            await uploadUserImage(userId)
-                .whenComplete(() => print('유저 사진 업로드 완료'));
-          }
-        }
 
-      }).catchError((error) => print('Error: $error'));
+    Future<void> editUserImage() async {
+      print('editUserImage 함수에 들어옴2!');
+      if(userImageUrl != null) {
+      await deleteOneImage().whenComplete(() async {
+        await uploadUserImage(userId)
+            .whenComplete(() => print('삭제하고 유저 사진 업로드 완료'));
+      });
+      } else {
+        await uploadUserImage(userId)
+            .whenComplete(() => print('유저 사진 업로드 완료'));
+      }
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset : false,
       body: Form(
         key: _formKey,
         child: Padding(
@@ -179,8 +196,8 @@ class SignUpState extends State<SignUp> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
             FutureBuilder(
-              future:
-                fileFromImageUrl(userImageUrl),
+              future: future,
+                //fileFromImageUrl(),
               builder: (context, snapshot) {
               /// 시진 로딩중일 때
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -194,8 +211,12 @@ class SignUpState extends State<SignUp> {
               }
               /// 사진 로딩 후
               else {
-                //userImageUrl = snapshot.data[i];
-                pickedImage ?? snapshot.data;
+                //userUrl = downloadURL(userId);
+                print('userImageload -> $userImageLoadCheck');
+                if(!userImageLoadCheck){
+                 pickedImage = snapshot.data;
+                 userImageLoadCheck = true;
+                }
                 return Stack(
                   children: [
                     SizedBox(
@@ -221,7 +242,7 @@ class SignUpState extends State<SignUp> {
                               onTap: () {
                                 getImage();
                                 setState(() {
-                                  //editUserImage();
+                                  //사진 부분 다시 그리기
                                 });
                               },
                             ),
@@ -235,13 +256,27 @@ class SignUpState extends State<SignUp> {
                 }
               }),
               SizedBox( height: 10,),
-              Text(
-                nickname,
-                style: TextStyle(color: Colors.black54,
-                    letterSpacing: 1.0,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'NanumSquareRoundR',),
-              ),
+              StreamBuilder<QuerySnapshot>(
+                stream: FindInUsers.users.snapshots(),
+                builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('x');
+                  }
+                  if (snapshot.connectionState ==
+                    ConnectionState.waiting) {
+                    return Text('');
+                  }
+                  nickname = FindInUsers.findNickname(snapshot, userId);
+                  return Text(
+                    nickname ?? '',
+                    style: TextStyle(color: Colors.black54,
+                      letterSpacing: 1.0,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'NanumSquareRoundR',
+                    ),
+                  );
+              }),
               Padding(
                 padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 20),
                 child: TextFormField(
@@ -269,6 +304,7 @@ class SignUpState extends State<SignUp> {
                 height: 20,
               ),
 
+              ///중복확인 버튼
               Padding(
                 padding: const EdgeInsets.only(top: 24.0, right: 32.0),
                 child: Row(
@@ -276,8 +312,10 @@ class SignUpState extends State<SignUp> {
                   children: [
                     ElevatedButton(
                       onPressed: ()   async {
+                        FocusScope.of(context).unfocus();
                         checkLoop = true;
                         isDuplicated = false;
+                        print(' 중복 isDuplicated: $isDuplicated, isCurrentName: $isCurrentName, isInvalid: $isInvalid, checkLoop: $checkLoop');
 
                         //닉네임을 빈칸으로 입력하고 중복체크를 눌렀을 경우
                         if(textEditingController1.text == "") {
@@ -332,19 +370,47 @@ class SignUpState extends State<SignUp> {
                       width: 20,
                     ),
 
+                    /// 시작하기 버튼
                     ElevatedButton(
                       onPressed: () async {
-                        /// 중복체크를 하지 않거나, 중복이 있음에도 불구하고 시작하기 누르면 그냥 로그인 되는 현상 해결
-                        //닉네임을 처음 설정하는데 빈칸을 입력했을 경우
-                        if((name == null || name == "") && textEditingController1.text == "") {
+                        FocusScope.of(context).unfocus();
+                        print(' 시작 isDuplicated: $isDuplicated, isCurrentName: $isCurrentName, isInvalid: $isInvalid, checkLoop: $checkLoop');
+
+                        /// 닉네임을 처음 설정하는데 빈칸을 입력했을 경우
+                        if(name == null) {
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+                        }
+                        /// 아무것도 입력하지 않았을 떄
+                        else if(name == "" && textEditingController1.text == ""){
+                          if(newImage){
+                            print('닉네임 새로 입력 안한 상태로 저장! 사진도 바뀜!');
+                            await editUserImage();
+                          }
+                          await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => HomePage()));
+                          textEditingController1.clear();
                         }
                         //닉네임을 처음 설정하는게 아니거나 빈칸을 입력하지 않았을 경우
                         else {
                           //닉네임이 현재 닉네임과 같거나 빈칸인 채로 시작하기를 눌렀을 경우
                           if(name == textEditingController1.text || textEditingController1.text == "") {
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            userImageLoadCheck = false;
+                            if(pickedImage != null && newImage) {
+                              /// 바뀐 유저 이미지 저장하기
+                              userImageLoadCheck = false;
+                              print('editUserImage 함수에 들어옴!');
+                              await editUserImage().whenComplete(() {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => HomePage()));
+                                textEditingController1.clear();
+                              }).catchError((error) => print('Error: $error'));
+                            }
                             await Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -358,7 +424,7 @@ class SignUpState extends State<SignUp> {
                           }
                           //정상적으로 바꿀 닉네임을 입력하고 중복체크도 완료했을 경우
                           else {
-                            _currentNickname();
+                            //await _currentNickname();
 
                             if(_formKey.currentState.validate()) {
                               await FirebaseFirestore.instance.collection('users')
@@ -374,16 +440,24 @@ class SignUpState extends State<SignUp> {
                                 'email' : FirebaseAuth.instance.currentUser.email,
                               }).then((value) async {
                                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                                await editUserImage().whenComplete(() {
-                                  Navigator.push(
+                              });
+                            }
+                            if(pickedImage != null) {
+                              /// 바뀐 유저 이미지 저장하기
+                              userImageLoadCheck = false;
+                              print('editUserImage 함수에 들어옴!');
+                              await editUserImage().whenComplete(() {
+                                Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => HomePage()));
-                                  }).catchError((error) => print('Error: $error'));
-                                });
+                                        builder: (context) => HomePage()));
+                                textEditingController1.clear();
+                              }).catchError((error) => print('Error: $error'));
                             }
                           }
+
                         }
+
                       },
                       style: ElevatedButton.styleFrom(
                           primary: Colors.grey,
@@ -394,7 +468,7 @@ class SignUpState extends State<SignUp> {
                             fontFamily: 'NanumSquareRoundR',
                           )),
                       child: Text(
-                        '시작하기',
+                        '저장하기',
                         style: TextStyle(
                           fontFamily: 'NanumSquareRoundR',
                         ),
