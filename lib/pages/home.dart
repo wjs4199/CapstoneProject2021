@@ -401,7 +401,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),*/
           ListTile(
             title: Text(
-              'change nickname',
+              'change profile',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 16,
