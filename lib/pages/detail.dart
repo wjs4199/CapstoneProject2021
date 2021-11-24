@@ -18,7 +18,7 @@ class FindInUsers {
   static CollectionReference users = FirebaseFirestore.instance.collection('users');
 
   static String findNickname(AsyncSnapshot<QuerySnapshot> snapshot, String userId) {
-    var nickName = 'null';
+    var nickName = ' ';
     snapshot.data.docs.forEach((document) {
       if (document['id'] == userId) {
         nickName = document['nickname'];

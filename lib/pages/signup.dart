@@ -267,9 +267,9 @@ class SignUpState extends State<SignUp> {
                     ConnectionState.waiting) {
                     return Text('');
                   }
-                  nickname = FindInUsers.findNickname(snapshot, userId);
+                  nickname = FindInUsers.findNickname(snapshot, userId) ?? " ";
                   return Text(
-                    nickname ?? '',
+                    nickname  == null?  '' : nickname,
                     style: TextStyle(color: Colors.black54,
                       letterSpacing: 1.0,
                       fontWeight: FontWeight.bold,
