@@ -312,7 +312,7 @@ class SignUpState extends State<SignUp> {
                   children: [
                     ElevatedButton(
                       onPressed: ()   async {
-                        FocusScope.of(context).unfocus();
+                        FocusManager.instance.primaryFocus.unfocus();
                         checkLoop = true;
                         isDuplicated = false;
                         print(' 중복 isDuplicated: $isDuplicated, isCurrentName: $isCurrentName, isInvalid: $isInvalid, checkLoop: $checkLoop');
@@ -373,7 +373,7 @@ class SignUpState extends State<SignUp> {
                     /// 시작하기 버튼
                     ElevatedButton(
                       onPressed: () async {
-                        FocusScope.of(context).unfocus();
+                        FocusManager.instance.primaryFocus.unfocus();
                         print(' 시작 isDuplicated: $isDuplicated, isCurrentName: $isCurrentName, isInvalid: $isInvalid, checkLoop: $checkLoop');
 
                         /// 닉네임을 처음 설정하는데 빈칸을 입력했을 경우
