@@ -200,8 +200,9 @@ class _LoginPageState extends State<LoginPage> {
                   // ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
                   /// 한동대 계정으로 로그인해야한다는 경고(구글 스토어 출시 시 발생한 앱 거부 때문에 주석처리함)
-                  _showDialog();
-
+                  //_showDialog();
+                  //Navigator.pop(context);
+                  await handleSignIn();
 
                   //await handleSignIn();
                 },

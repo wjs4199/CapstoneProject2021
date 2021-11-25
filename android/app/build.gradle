@@ -44,7 +44,7 @@ android {
         applicationId "com.capstone.pelag"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 3//flutterVersionCode.toInteger()
+        versionCode 4//flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
 
